@@ -1,0 +1,126 @@
+.game-hud {
+  --u: min(9vh, 72px);
+  --gold: #e6c577;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  color: #ece4d0;
+  user-select: none;
+  touch-action: none;
+
+  button, .joystick { pointer-events: auto; touch-action: none; }
+
+  /* Insignia del jugador (arriba izquierda) */
+  .player-badge {
+    position: absolute; top: 8px; left: 8px;
+    display: flex; align-items: center; gap: 8px;
+    padding: 4px 12px 4px 4px;
+    background: linear-gradient(180deg, rgba(30,24,14,.85), rgba(10,8,5,.85));
+    border: 1px solid #5a4a28; border-radius: 999px;
+    .lvl {
+      width: calc(var(--u) * .62); height: calc(var(--u) * .62); border-radius: 50%;
+      display: grid; place-items: center; font-weight: 800;
+      background: radial-gradient(circle at 30% 30%, #f0d28a, #8a6a24); color: #1a1305;
+    }
+    .meta { display: flex; flex-direction: column; font-size: 12px; line-height: 1.2; b { font-size: 13px; } span { color: #b7ae98; } }
+  }
+
+  /* Minimapa (arriba derecha) */
+  .minimap {
+    position: absolute; top: 8px; right: 8px;
+    border: 2px solid #5a4a28; border-radius: 10px; overflow: hidden;
+    background: #0b0a07; opacity: .92;
+    canvas { display: block; width: calc(var(--u) * 2.1); height: calc(var(--u) * 2.1); image-rendering: pixelated; }
+    .coords { position: absolute; bottom: 2px; right: 6px; font-size: 11px; color: #d8cfb6; text-shadow: 0 1px 2px #000; }
+  }
+
+  /* Menú lateral */
+  .side-menu {
+    position: absolute; right: 8px; top: calc(var(--u) * 2.5);
+    display: flex; flex-direction: column; gap: 6px;
+    button {
+      width: calc(var(--u) * 1.1); height: calc(var(--u) * .95);
+      border-radius: 12px; padding: 0;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      background: linear-gradient(180deg, rgba(40,32,18,.9), rgba(12,9,5,.92));
+      border: 1px solid #5a4a28; color: #ece4d0;
+      i { font-style: normal; font-size: calc(var(--u) * .36); line-height: 1; }
+      b { font-size: 8px; font-weight: 600; margin-top: 2px; color: #cdbf9a; white-space: nowrap; letter-spacing: -.2px; }
+    }
+  }
+
+  /* Joystick (abajo izquierda) */
+  .joystick {
+    position: absolute; left: calc(var(--u) * 1.0); bottom: calc(var(--u) * 1.0);
+    width: calc(var(--u) * 2.1); height: calc(var(--u) * 2.1); border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,.05), rgba(0,0,0,.35));
+    border: 2px solid rgba(230,197,119,.35);
+    display: grid; place-items: center;
+    .knob {
+      width: calc(var(--u) * .95); height: calc(var(--u) * .95); border-radius: 50%;
+      background: radial-gradient(circle at 35% 30%, rgba(240,210,138,.9), rgba(138,106,36,.85));
+      border: 1px solid #e6c577; box-shadow: 0 4px 14px rgba(0,0,0,.6);
+      transition: transform .04s linear; pointer-events: none;
+    }
+  }
+
+  /* Ataque + habilidades en arco (abajo derecha) */
+  .actions {
+    position: absolute; right: calc(var(--u) * .6); bottom: calc(var(--u) * .6);
+    width: calc(var(--u) * 3.6); height: calc(var(--u) * 3.6);
+    button { position: absolute; border-radius: 50%; padding: 0; display: grid; place-items: center; }
+    .attack {
+      right: 0; bottom: 0; width: calc(var(--u) * 1.55); height: calc(var(--u) * 1.55);
+      background: radial-gradient(circle at 35% 30%, #f6dc9a, #a97c25); border: 2px solid #f0d28a;
+      font-size: calc(var(--u) * .7); color: #1a1305; box-shadow: 0 4px 16px rgba(0,0,0,.6);
+      i { font-style: normal; }
+      &:active { transform: scale(.94); }
+    }
+    .skill {
+      width: calc(var(--u) * 1.05); height: calc(var(--u) * 1.05);
+      background: radial-gradient(circle at 35% 30%, #3a2f19, #14100a); border: 2px solid #8a6a24;
+      color: #ece4d0; box-shadow: 0 3px 10px rgba(0,0,0,.6);
+      i { font-style: normal; font-size: calc(var(--u) * .46); line-height: 1; }
+      b { position: absolute; bottom: -14px; font-size: 9px; font-weight: 600; color: #cdbf9a; text-shadow: 0 1px 2px #000; }
+      &.empty { opacity: .45; border-style: dashed; }
+      &:active:not(.empty) { transform: scale(.92); }
+    }
+    /* arco alrededor del ataque */
+    .s1 { right: calc(var(--u) * 1.75); bottom: calc(var(--u) * .1); }
+    .s2 { right: calc(var(--u) * 1.4); bottom: calc(var(--u) * 1.45); }
+    .s3 { right: calc(var(--u) * .45); bottom: calc(var(--u) * 2.05); }
+    .s4 { right: calc(var(--u) * 2.45); bottom: calc(var(--u) * 1.4); }
+  }
+
+  /* Orbes y atajos (abajo centro) */
+  .orbs {
+    position: absolute; left: 50%; bottom: calc(var(--u) * .28); transform: translateX(-50%);
+    display: flex; align-items: flex-end; gap: calc(var(--u) * .1);
+    .orb {
+      position: relative; width: calc(var(--u) * 1.5); height: calc(var(--u) * 1.5); border-radius: 50%;
+      overflow: hidden; border: 3px solid #3a2f19; background: #0a0806; box-shadow: 0 0 0 2px #8a6a24, 0 4px 14px rgba(0,0,0,.7);
+      .liquid { position: absolute; left: 0; right: 0; bottom: 0; transition: height .25s ease; }
+      &.hp .liquid { background: linear-gradient(180deg, #ff5a5a, #8e0f0f); }
+      &.mp .liquid { background: linear-gradient(180deg, #5aa0ff, #0d2f8e); }
+      .val { position: absolute; inset: 0; display: grid; place-items: center; font-weight: 800; font-size: calc(var(--u) * .3); text-shadow: 0 1px 3px #000; }
+    }
+    .quickslots { display: flex; gap: 4px; margin-bottom: calc(var(--u) * .05); }
+    .slot {
+      position: relative; width: calc(var(--u) * .78); height: calc(var(--u) * .78);
+      background: linear-gradient(180deg, #1c160c, #0b0805); border: 1px solid #5a4a28; border-radius: 10px;
+      display: grid; place-items: center; pointer-events: auto;
+      .hk { position: absolute; top: 1px; left: 4px; font-size: 10px; color: var(--gold); font-weight: 700; }
+      .cnt { position: absolute; bottom: 1px; right: 4px; font-size: 11px; font-weight: 700; text-shadow: 0 1px 2px #000; }
+      img { width: 70%; height: 70%; object-fit: contain; }
+    }
+  }
+
+  /* Barra de experiencia (abajo, fina) */
+  .exp-strip {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 7px; background: rgba(0,0,0,.65);
+    .fill { height: 100%; background: linear-gradient(90deg, #2f9e44, #8be27a); }
+    span { position: absolute; left: 50%; bottom: 8px; transform: translateX(-50%); font-size: 10px; color: #d8cfb6; text-shadow: 0 1px 2px #000; display: none; }
+  }
+}
