@@ -41,6 +41,10 @@ propio en una VM de Oracle Cloud Always Free (Ubuntu 24.04, 1 GB de RAM, IP publ
 1c. **Escala de la interfaz** ajustable (fuente, ventanas, joystick) y zoom de camara. Ventanas de MU a tamano tocable.
 1d. **Ayudas de combate**: pociones automaticas con umbral y MU Helper (auto-ataque, buffs, recoger botin). Es "mejora",
     va detras de opciones, como exige la guia del fork.
+1e. **Estrategia de descarga.** Dato del propietario: Mu Magdalena baja ~377 MB al iniciar, todo por adelantado. Nuestro cliente
+    baja por demanda: "core" 56 MB comprimido (154 MB en disco) mas ~7-10 MB por mapa; todo junto serian ~423 MB. Se mantiene la
+    descarga por demanda (carga rapida confirmada). Opcional mas adelante: boton "descargar todo para jugar sin esperas" con
+    barra de progreso (MB y archivos), como Magdalena, y cache para que solo ocurra la primera vez.
     Verificacion: emulacion movil en Playwright (Pixel 7 horizontal), capturas, y el propietario prueba en su celular
     despues de cada despliegue y reporta; ese ciclo es el que decide si una fase se da por buena.
     Pendiente de observar: la interfaz de Mu Magdalena con cuenta (ver preguntas abiertas).
@@ -53,6 +57,9 @@ propio en una VM de Oracle Cloud Always Free (Ubuntu 24.04, 1 GB de RAM, IP publ
     (lo hace el propietario o la otra sesion). Con HTTPS se habilitan tambien PWA, bloqueo de orientacion fiable y la app.
 2c. **Dominio corto de Vercel** (`algo.vercel.app`) que redirige al sitio de juego. Vercel no puede hacer de puente
     WebSocket hacia el servidor ni conviene alojar alli los assets de Webzen; por eso el juego se sirve desde la VM.
+2e. **Archivos precomprimidos (`.gz`) en la VM.** Hoy la VM comprime al vuelo cada archivo que se pide (el paquete se envio sin
+    los `.gz` para ahorrar 186 MB de subida); con la VM de 1 GB y poca CPU, varios jugadores nuevos a la vez la ahogarian. Generar
+    los `.gz` una sola vez en la VM (como hacia el script anterior) o enviarlos en el paquete, antes de abrir al publico.
 2d. Dejar solo nuestro mundo en el cliente (sin consultas a servidores de terceros) y respaldos de la base de datos.
 
 ### Fase 3. Calidad de juego por clase (prioridad del propietario)
