@@ -79,6 +79,27 @@ Se verifica en cada entregable con una prueba de PC y una de celular.
     despues de cada despliegue y reporta; ese ciclo es el que decide si una fase se da por buena.
     Interfaz de Mu Magdalena ya observada con cuenta de prueba del propietario: ver seccion 3b.
 
+### 1f. Lista de defectos reportados por el propietario (capturas del celular, 2026-11-10)
+Estado: [hecho] ya publicado, [investigado] causa estudiada pero sin arreglo, [pendiente].
+1. [hecho] Personajes pequenos: la camara abre un paso mas cerca en celular y se puede hacer zoom con pellizco (antes solo existia Ctrl+rueda).
+2. [hecho] Items del suelo sin nombre: en celular los nombres de los drops estan activos desde el inicio (en PC se activan con ALT).
+3. [hecho] Al tocar un item del suelo salia el cuadro completo con todos sus datos: en celular ahora solo el nombre, como el original; el cuadro completo
+   queda para el inventario. Se puede volver a activar en Opciones.
+4. [hecho] El registro de chat tapaba el joystick: en celular empieza a la derecha del joystick y desvanece las lineas viejas.
+5. [investigado] Fondo celeste de los items en inventario y tienda: el color del codigo es el del original (`glColor4f(0.3, 0.5, 0.5, 0.6)`, citado en
+   `inventory/style.less`) y en mi emulacion se ve verde-azulado oscuro (58,89,89), no el celeste claro de la captura. Sospecha: algo del navegador
+   o de la GPU del telefono (la barra de la captura parece Samsung Internet). Pendiente: probar el mismo telefono con Chrome y comparar.
+6. [investigado] Personaje, mob y drops "transparentes", todo "opaco": no se reproduce en emulacion por software; misma sospecha que el punto 5.
+   Medido: brillo medio nuestro 34% frente a 22% de Mu Magdalena en Noria (en emulacion nuestro es mas claro).
+7. [investigado] Tiron junto a un NPC (el personaje intenta ocupar su lugar y vuelve atras): el servidor OpenMU rechaza un paso y "tira del cliente
+   hacia atras" (`RejectWalkAndResynchronizeClient`) por camino bloqueado, exceso de velocidad o posicion de inicio desfasada. Descartado: diferencia
+   de casillas entre cliente y servidor (en Lorencia 1 de 65 536). Pendiente: reproducirlo contra OpenMU local con registro del servidor.
+8. [pendiente] Seleccion de personajes: personajes pequenos y ambiente oscuro; Magdalena acerca el personaje elegido y lo muestra grande.
+9. [pendiente] Interfaz que tapa la vision: botones del menu duplicados (arriba derecha y en la barra), tres ranuras de habilidad vacias y
+   "Activar" a la derecha, ventanas abiertas encima de los botones del menu. Magdalena usa un solo boton de menu, aviso de chat colapsado y
+   el 3D casi libre.
+10. [pendiente] Comparaciones lado a lado con Magdalena que faltan: hablar con un NPC, matar monstruos, caida de drops, menus y estadisticas.
+
 ### 3b. Referencia de diseno movil (Mu Magdalena, observada el 2026-11-10 en un celular de 915x412 px CSS)
 Su cliente tambien es un derivado de la misma base (Babylon.js) con interfaz HTML encima del 3D. Lo que hay que copiar en espiritu:
 - **Entrada.** Se abre tambien en vertical; en algun momento pide girar a horizontal para continuar ("Gira tu telefono").

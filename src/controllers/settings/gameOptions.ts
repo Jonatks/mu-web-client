@@ -1,5 +1,6 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 import { LocalStorage } from '../../core/localStorage';
+import { isMobileDevice } from '../interface/mobile';
 import {
   FIDELITY_DEFAULT,
   FIDELITY_MAX,
@@ -688,7 +689,8 @@ const DEFAULTS: GameOptions = {
   firstPersonBob: true,
   autoReconnect: true,
   lootFilter: false,
-  dropTooltips: true,
+  // Touch has no hover: a tap would open the whole tooltip, so a phone starts with the name only (the original's).
+  dropTooltips: !isMobileDevice(),
   lootJewels: true,
   lootExcellent: true,
   lootAncient: true,
