@@ -46,10 +46,17 @@ Se verifica en cada entregable con una prueba de PC y una de celular.
     Hecho cuando: en Android/Chrome el juego ocupa toda la pantalla tras tocar START, y vuelve a pedirla si se sale.
     ENTREGABLE 1a: abrir la IP en el celular, en vertical aparece "gira tu celular"; en horizontal, al tocar START, pantalla completa.
     ESTADO 1a: hecha y publicada el 2026-11-10 (pruebas: celular vertical, celular horizontal y PC); falta la prueba del propietario en su celular.
+    1a.2 PANTALLA INSTANTANEA (pedida por el propietario, hecha): `index.html` trae una pantalla estatica ("MU", rueda, "Cargando..." y,
+    solo en celular vertical, "Gira tu celular") que se ve antes de que llegue el JavaScript y se retira al arrancar la app.
+    Motivo: con una conexion lenta o un primer arranque se veia solo negro. Nota: al teclear la IP sin `http://` el navegador prueba
+    HTTPS primero y el puerto 443 esta cerrado, asi que puede esperar varios segundos; se resuelve con la fase 2b.
 1b. **HUD tactil v1** sobre lo que ya trae el cliente (`versions/shared/ui/hud/mobile_controls/`), siguiendo la seccion 3b.
     Criterio del propietario: fieles al juego original en las ventanas y los iconos, pocas licencias; el objetivo es un juego
     pulido y muy fluido en celular. Lo nuevo es lo que rodea al juego (joystick, menu en tiles, boton contextual de NPC).
     ENTREGABLE 1b: se puede caminar con el joystick, atacar, usar habilidades y pociones, hablar con un NPC y abrir el menu, todo con el pulgar.
+    ESTADO 1b: parte 1 hecha (joystick de 8 direcciones, 120 px, abajo a la izquierda; camina por el mismo codigo que W-A-S-D y solo
+    existe en celular). Ya traia el cliente: boton de mover, 5 botones de menu y selector de habilidades con los sprites originales.
+    Faltan: boton contextual "Hablar - NPC", pociones rapidas, menu de comandos en tiles, y la opcion de mostrar/ocultar el joystick.
 1c. **Escala de la interfaz** ajustable (fuente, ventanas, joystick) y zoom de camara. Ventanas de MU a tamano tocable.
     ENTREGABLE 1c: ajustes con deslizadores; las ventanas del juego se ven y se tocan comodas en el celular.
 1d. **Ayudas de combate**: pociones automaticas con umbral y MU Helper (auto-ataque, buffs, recoger botin). Es "mejora",
@@ -121,6 +128,9 @@ clases DK, DW, Elf, DL (y las que el servidor habilite) x seleccion, HUD, invent
 (Command solo para Dark Lord), habilidades por clase, combate (muerte, botin, experiencia), tienda, bobeda, comercio,
 party, chat. Se automatiza con las cuentas GM de pruebas. Cada diferencia encontrada se registra y se corrige.
 Despues: suelo de Lorencia mas claro que el original (iluminacion) y otros detalles visuales.
+Fidelidad visual en celular (reportada por el propietario el 2026-11-10): texturas, resplandores y brillos se ven "opacos y en algunos
+casos transparentes". Pendiente de investigar con capturas del celular y del cliente original: mezcla alfa y formatos de textura en GPU
+movil, texturas faltantes, iluminacion y los efectos con brillo aditivo.
 ENTREGABLE fase 3: por cada lote de clases, un informe (que se comparo y que se corrigio, con capturas lado a lado) y la correccion
 desplegada para jugar con esa clase en el celular.
 

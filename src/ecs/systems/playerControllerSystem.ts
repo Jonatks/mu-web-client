@@ -11,6 +11,7 @@ import { isMobileDevice } from '../../controllers/interface/mobile';
 import { MoveTargetEffect } from '../../controllers/fx/moveTargetEffect';
 import { GameOptions } from '@/controllers/settings';
 import { WALK_KEYS } from '../../controllers/interface/keyBindings';
+import { stickHeld, TouchStick } from '../../controllers/interface/touchStick';
 import { aimX, aimY } from '../../controllers/camera';
 import { Commands } from '../../modules/chat/commands';
 import { teleportGate } from '../../modules/warp/teleportRules';
@@ -185,8 +186,9 @@ export const PlayerControllerSystem: ISystemFactory = world => {
     let forward = 0;
     let strafe = 0;
 
+    // The touch stick walks like the WASD keys, whether or not that option is on.
     if (
-      GameOptions.wsadMovement &&
+      (GameOptions.wsadMovement || stickHeld()) &&
       playerEntity &&
       camera &&
       // Dead until the server respawns us, the same gate the click walk has.
@@ -195,10 +197,15 @@ export const PlayerControllerSystem: ISystemFactory = world => {
     ) {
       const keys = world.keyboardInput.pressedKeys;
 
-      if (keys.has(WALK_KEYS.forward)) forward++;
-      if (keys.has(WALK_KEYS.back)) forward--;
-      if (keys.has(WALK_KEYS.right)) strafe++;
-      if (keys.has(WALK_KEYS.left)) strafe--;
+      if (GameOptions.wsadMovement) {
+        if (keys.has(WALK_KEYS.forward)) forward++;
+        if (keys.has(WALK_KEYS.back)) forward--;
+        if (keys.has(WALK_KEYS.right)) strafe++;
+        if (keys.has(WALK_KEYS.left)) strafe--;
+      }
+
+      forward = Math.max(-1, Math.min(1, forward + TouchStick.forward));
+      strafe = Math.max(-1, Math.min(1, strafe + TouchStick.strafe));
     }
 
     if ((!forward && !strafe) || !playerEntity || !camera) {

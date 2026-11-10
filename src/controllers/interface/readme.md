@@ -46,6 +46,9 @@ windows themselves are content in `versions/shared/ui/` (see
   asks for fullscreen and locks landscape; a phone held upright sees the rotate screen
   (`versions/shared/ui/components/rotate_overlay`); leaving fullscreen asks again on the next tap. iPhone has no
   fullscreen API for pages, so there only the rotate screen applies (the web app installed to the home screen covers it).
+- `touchStick.ts` (`TouchStick`, `stickDirection`, `setStick`, `clearStick`, `stickHeld`): the touch HUD's thumb stick as a walk
+  direction (forward and strafe, eight ways, dead zone 30%). `ecs/systems/playerControllerSystem.ts` reads it like the WASD keys, even with
+  that option off; the ring and knob are `versions/shared/ui/hud/mobile_controls/joystick.tsx`.
 - `mobile.ts` (`isMobileDevice`, `useIsMobile`), `hudFormat.ts`, `tokens.less` (web tokens),
   `root.less` (the root layer pages and windows are drawn in; `boot.tsx` imports it).
 

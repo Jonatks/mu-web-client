@@ -84,11 +84,89 @@
       outline: none;
     }
   </style>
+  <style>
+    /* First screen, before any script has loaded: `boot.tsx` removes it once the app has painted. */
+    #boot-splash {
+      position: fixed;
+      inset: 0;
+      z-index: 2000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      padding: 24px;
+      text-align: center;
+      color: #fff;
+      background: #0d0b0a;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    #boot-splash.bs-hide {
+      opacity: 0;
+    }
+
+    #boot-splash .bs-title {
+      font-size: 34px;
+      letter-spacing: 6px;
+      color: rgb(255, 204, 26);
+    }
+
+    #boot-splash .bs-spinner {
+      width: 30px;
+      height: 30px;
+      border: 3px solid rgba(255, 204, 26, 0.25);
+      border-top-color: rgb(255, 204, 26);
+      border-radius: 50%;
+      animation: bs-spin 0.9s linear infinite;
+    }
+
+    #boot-splash .bs-line {
+      font-size: 15px;
+      opacity: 0.85;
+    }
+
+    #boot-splash .bs-rotate {
+      display: none;
+      max-width: 300px;
+      margin-top: 10px;
+      padding: 10px 16px;
+      font-size: 14px;
+      border: 1px solid rgba(255, 204, 26, 0.7);
+      border-radius: 14px;
+    }
+
+    @media (orientation: portrait) and (pointer: coarse) {
+      #boot-splash .bs-rotate {
+        display: block;
+      }
+    }
+
+    @keyframes bs-spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
 </head>
 
 <body>
   <canvas class="game-canvas" width="400" height="300"></canvas>
   <div id="root"></div>
+  <div id="boot-splash" role="status">
+    <div class="bs-title">MU</div>
+    <div class="bs-spinner"></div>
+    <div class="bs-line" id="bs-line">Loading...</div>
+    <div class="bs-rotate" id="bs-rotate">Rotate your phone to landscape to play.</div>
+  </div>
+  <script>
+    // Spanish when the browser is Spanish; the app's own text takes over once it loads.
+    if (/^es/i.test(navigator.language || '')) {
+      document.getElementById('bs-line').textContent = 'Cargando...';
+      document.getElementById('bs-rotate').textContent = 'Gira tu celular a horizontal para jugar.';
+    }
+  </script>
   <script type="module" src="/src/app/main.tsx"></script>
 </body>
 

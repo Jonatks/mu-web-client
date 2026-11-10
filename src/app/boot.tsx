@@ -431,6 +431,15 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   </React.StrictMode>
 );
 
+// The static first screen of `index.html` steps aside once the app has painted.
+requestAnimationFrame(() =>
+  requestAnimationFrame(() => {
+    const splash = document.getElementById('boot-splash');
+    splash?.classList.add('bs-hide');
+    setTimeout(() => splash?.remove(), 350);
+  })
+);
+
 if (Session.isOffline) {
   playOffline();
 }
