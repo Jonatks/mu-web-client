@@ -132,6 +132,10 @@ export function deserializeAppearance(app: DataView) {
   } as const;
 }
 
+export function classFromAppearance(app: DataView): CharacterClassNumber {
+  return ClassFromAppearance(GetByteValue(app.getUint8(0), 5, 3));
+}
+
 function ClassFromAppearance(raw: number): CharacterClassNumber {
   switch (raw) {
     case 0:

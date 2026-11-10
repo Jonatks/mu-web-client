@@ -18,6 +18,8 @@ if (APP_STAGE === 'dev' || QA_ENABLED) {
   import('@babylonjs/core/Legacy/legacy');
 }
 
+if (location.search.includes('mock')) (window as any).__Store = Store;
+
 const canvas = document.querySelector('canvas')!;
 
 let useAntialiaing = false;

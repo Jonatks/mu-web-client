@@ -8,6 +8,7 @@ import {
 } from '../../../common/packets/ServerToClientPackets';
 import { MAX_PASSWORD_LENGTH, MAX_USERNAME_LENGTH } from '../../../consts';
 import { RequestCharacterListPacket } from '../../../common/packets/ClientToServerPackets';
+import { MenuBackdrop, MuLogo } from '../../shell/menu';
 
 export const LoginPage = observer(() => {
   useEventBus('LoginResponse', async bytes => {
@@ -53,42 +54,52 @@ export const LoginPage = observer(() => {
   };
 
   return (
-    <div className="login-page">
-      {!!Store.loginError && <p className="login-error">{Store.loginError}</p>}
-      <form action="POST">
-        <h3>Iniciar sesión</h3>
-        <label>
-          Usuario
-          <input
-            type="text"
-            value={Store.username}
-            onChange={e => {
-              Store.username = e.target.value;
-            }}
-            maxLength={MAX_USERNAME_LENGTH}
-          ></input>
-        </label>
-        <label>
-          Contraseña
-          <input
-            type="password"
-            value={Store.password}
-            onChange={e => {
-              Store.password = e.target.value;
-            }}
-            maxLength={MAX_PASSWORD_LENGTH}
-          ></input>
-        </label>
-
-        <button
-          onClick={e => {
+    <div className="mu-screen mu-login">
+      <MenuBackdrop />
+      <div className="mu-split">
+        <div className="mu-hero">
+          <MuLogo />
+          <p className="tag">Prueba cerrada · v0.1</p>
+        </div>
+        <form
+          className="mu-frame"
+          onSubmit={e => {
             e.preventDefault();
             onLoginClicked();
           }}
         >
-          {Store.loginProcessing ? 'Entrando…' : 'Entrar'}
-        </button>
-      </form>
+          <h3>Iniciar sesión</h3>
+          {!!Store.loginError && <p className="mu-error">{Store.loginError}</p>}
+          <label>
+            Usuario
+            <input
+              type="text"
+              autoCapitalize="none"
+              autoComplete="username"
+              value={Store.username}
+              onChange={e => {
+                Store.username = e.target.value;
+              }}
+              maxLength={MAX_USERNAME_LENGTH}
+            />
+          </label>
+          <label>
+            Contraseña
+            <input
+              type="password"
+              autoComplete="current-password"
+              value={Store.password}
+              onChange={e => {
+                Store.password = e.target.value;
+              }}
+              maxLength={MAX_PASSWORD_LENGTH}
+            />
+          </label>
+          <button className="mu-btn" type="submit" disabled={Store.loginProcessing}>
+            {Store.loginProcessing ? 'Entrando…' : 'ENTRAR'}
+          </button>
+        </form>
+      </div>
     </div>
   );
 });
