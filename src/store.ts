@@ -586,6 +586,7 @@ export const Store = new (class _Store {
     selectCharacterPacket.setName(name);
 
     console.log(`select character [${name}]`);
+    this.focusedChar = name;
     this.sendToGS(selectCharacterPacket.buffer);
   }
 

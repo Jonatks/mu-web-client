@@ -11,7 +11,7 @@ const PlayerBadge = observer(() => (
   <div className="player-badge">
     <div className="lvl">{Store.playerData.level}</div>
     <div className="meta">
-      <b>{Store.username || 'Jugador'}</b>
+      <b>{Store.focusedChar || Store.username || 'Jugador'}</b>
       <span>HP {Store.playerData.currentHP}/{Store.playerData.maxHP}</span>
     </div>
   </div>

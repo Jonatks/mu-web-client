@@ -11,7 +11,7 @@ import {
   CharacterListPacket,
 } from '../../../common/packets/ServerToClientPackets';
 import { CharacterClassNumber } from '../../../common';
-import { classFromAppearance } from '../../../common/deserializeAppearance';
+import { appearanceClassCode, classFromAppearance } from '../../../common/deserializeAppearance';
 import { ClassIcon, MenuBackdrop, MuLogo, classInfo } from '../../shell/menu';
 
 const MAX_SLOTS = 5;
@@ -63,17 +63,41 @@ export const CharactersPage = observer(() => {
     setMessage('No se pudo crear el personaje (nombre en uso o inválido).');
   });
 
+  // OpenMU no reenvía la lista (F3 00) si ya estamos en la selección de personaje,
+  // así que, igual que el cliente original, se añade el personaje con los datos de F3 01.
   useEventBus('CharacterCreationSuccessful', bytes => {
-    const created = Store.newCharName;
+    const requestedClass = Store.newCharClass;
+    const p = new CharacterCreationSuccessfulPacket(bytes);
+    const name = p.CharacterName || Store.newCharName;
     Store.newCharName = '';
     Store.newCharClass = CharacterClassNumber.DarkKnight;
 
-    const p = new CharacterCreationSuccessfulPacket(bytes);
-    console.log(p);
+    const appearance = new DataView(new ArrayBuffer(18));
+    const preview = p.PreviewData;
+    for (let i = 0; i < Math.min(18, preview.byteLength); i++) appearance.setUint8(i, preview.getUint8(i));
+    if (preview.byteLength < 18 || classFromAppearance(appearance) !== requestedClass) {
+      // Vista previa vacía o ilegible: codificar al menos la clase elegida (bits 3..7 del byte 0)
+      appearance.setUint8(0, (appearanceClassCode(requestedClass) << 3) & 0xf8);
+    }
+
+    const entry = {
+      SlotIndex: p.CharacterSlot,
+      Name: name,
+      Level: p.Level || 1,
+      Status: 0,
+      IsItemBlockActive: false,
+      Appearance: appearance,
+      GuildPosition: 0xff,
+    } as (typeof Store.charactersList)[number];
+
+    Store.charactersList = [...Store.charactersList.filter(c => c.Name !== name), entry].sort(
+      (a, b) => a.SlotIndex - b.SlotIndex
+    );
+    Store.loadingCharactersList = false;
     setMessage('');
     setCreating(false);
-    Store.focusedChar = created;
-    Store.refreshCharactersListRequest();
+    Store.focusedChar = name;
+    Store.focusCharacterRequest(name);
   });
 
   useEventBus('CharacterFocused', bytes => {

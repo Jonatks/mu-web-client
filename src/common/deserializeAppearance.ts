@@ -136,6 +136,13 @@ export function classFromAppearance(app: DataView): CharacterClassNumber {
   return ClassFromAppearance(GetByteValue(app.getUint8(0), 5, 3));
 }
 
+const APPEARANCE_CLASS_CODES = [0, 1, 2, 4, 6, 8, 10, 12, 16, 20, 24];
+
+/** Inverso de classFromAppearance: valor de 5 bits que va en los bits 3..7 del byte 0. */
+export function appearanceClassCode(cls: CharacterClassNumber): number {
+  return APPEARANCE_CLASS_CODES.find(raw => ClassFromAppearance(raw) === cls) ?? 0;
+}
+
 function ClassFromAppearance(raw: number): CharacterClassNumber {
   switch (raw) {
     case 0:

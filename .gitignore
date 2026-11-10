@@ -3,3 +3,4 @@ dist
 public/game-assets
 public/items
 .DS_Store
+e2e-shots
