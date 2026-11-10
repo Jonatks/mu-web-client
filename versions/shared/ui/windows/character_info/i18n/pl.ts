@@ -1,0 +1,38 @@
+/** Polish text of the `character_info` window. */
+
+import type en from './en';
+
+export default {
+  'stat.short.strength': 'SIŁ',
+  'stat.short.agility': 'ZRĘ',
+  'stat.short.vitality': 'WIT',
+  'stat.short.energy': 'ENE',
+  'charInfo.dmgRate': 'Obrażenia (skuteczność): {min}~{max} ({rate})',
+  'charInfo.dmg': 'Obrażenia: {min}~{max}',
+  'charInfo.attackRate': 'Celność: {value}',
+  'charInfo.attackRateBonus': 'Celność: {value} (+{bonus})',
+  'charInfo.defenseRateFull': 'Obrona (skuteczność): {defense} ({rate} +{bonus})',
+  'charInfo.defenseRate': 'Obrona (skuteczność): {defense} ({rate})',
+  'charInfo.defenseFull': 'Obrona: {defense} (+{bonus})',
+  'charInfo.defense': 'Obrona: {defense}',
+  'charInfo.attackSpeed': 'Szybkość ataku: {value}',
+  'charInfo.defenseRatePvp': 'Skuteczność obrony: {value}',
+  'charInfo.defenseRatePvpBonus': 'Skuteczność obrony: {value} (+{bonus})',
+  'charInfo.hp': 'HP: {current} / {max}',
+  'charInfo.meleeDamage': 'Obrażenia wręcz: {value}%',
+  'charInfo.mana': 'Mana: {current} / {max}',
+  'charInfo.wizardryRate': 'Obrażenia magiczne: {min}~{max} (+{rate})',
+  'charInfo.wizardry': 'Obrażenia magiczne: {min}~{max}',
+  'charInfo.curseSpell': ' Zaklęcie klątwy: {min} ~ {max}',
+  'charInfo.curseSpellRate': ' Zaklęcie klątwy: {min} ~ {max}(+{rate})',
+  'charInfo.skillDamage': 'Obrażenia umiejętności: {value}%',
+  'charInfo.divineDamage': 'Obrażenia boskie (Roar, Slasher): {value}%',
+  'charInfo.aoeDamage': 'Obrażenia obszarowe (Dark Side): {value}%',
+  'charInfo.addAmount': 'Punkty do dodania',
+  'charInfo.stopAdding': 'Stop',
+  'characterInfo.title': 'Postać',
+  'characterInfo.close': 'Zamknij (C)',
+  'characterInfo.quest': 'Zadanie (T)',
+  'characterInfo.pet': 'Zwierzak',
+  'characterInfo.masterTree': 'Drzewko mistrzowskie (A)',
+} satisfies Partial<Record<keyof typeof en, string>>;

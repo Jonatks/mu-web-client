@@ -1,0 +1,21 @@
+/**
+ * 0.97d packet set. OpenMU keeps every version's definitions in the same
+ * three XMLs, so `bun run generate` already emitted the `…075` / `…095` /
+ * `…097` classes beside the Season 6 ones; there is nothing extra to
+ * generate for 0.97d and no second codec to ship. Which class wins for a
+ * shared code is `gameVersion.protocol.variantRank`'s job.
+ *
+ * Export exactly these names: the dispatcher in
+ * `controllers/net/sockets/createSocket.ts` reads them off the resolved version.
+ */
+import { ServerToClientPackets as generated } from '../../shared/packets/ServerToClientPackets';
+import { ChangeMapServerInfoPacket } from '../../season6/packets/mapServerMove';
+import { BandRelayPacket } from '../../season6/packets/bandRelay';
+import { PingRelayPacket } from '../../season6/packets/pingRelay';
+import { ModulePacket } from '../../season6/packets/modulePacket';
+
+/** The generated set plus the hand-written map-server move (C1 B1 00), the proxy's relays (C1 FA band, C1 FB ping) and the module packet (E8). */
+export const ServerToClientPackets = [...generated, ChangeMapServerInfoPacket, BandRelayPacket, PingRelayPacket, ModulePacket];
+export { ChangeMapServerInfoPacket, BandRelayPacket, PingRelayPacket, ModulePacket };
+export { ConnectServerPackets } from '../../shared/packets/ConnectServerPackets';
+export { ClientToServerPackets } from '../../shared/packets/ClientToServerPackets';

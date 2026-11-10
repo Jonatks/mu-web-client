@@ -1,0 +1,94 @@
+/** German text of the improvements. */
+
+import type en from './en';
+
+export default {
+  'fidelity.otherPlayersOwnSpeed': 'Andere Spieler mit eigenem Tempo',
+  'fidelity.otherPlayersOwnSpeed.hint':
+    'Andere Spieler schlagen und zaubern mit ihrem eigenen Angriffs- und Magietempo. Klassisch: alle bewegen sich in deinem Tempo, wie im Original.',
+  'fidelity.masterBuffCancel': 'Meister-Buffs enden beim Aufheben',
+  'fidelity.masterBuffCancel.hint':
+    'Ein Meister- oder Rage-Fighter-Buff verschwindet, sobald der Server ihn aufhebt. Klassisch: er bleibt, bis sein Timer abläuft.',
+  'fidelity.archangelFeathers': 'Erzengel-Federn',
+  'fidelity.archangelFeathers.hint':
+    'Die Erzengel in Blood Castle verlieren Federn und ihr Leuchten am Boden ist größer. Klassisch: das kleine Original-Leuchten, keine Federn.',
+  'fidelity.loginChandeliers': 'Brennende Kronleuchter beim Login',
+  'fidelity.loginChandeliers.hint':
+    'Die Kronleuchter im Login-Bildschirm brennen. Klassisch: sie sind kalt, wie im Original.',
+  'fidelity.torchCrackle': 'Fackelgeräusche',
+  'fidelity.torchCrackle.hint':
+    'Brennende Fackeln knistern, wenn du in der Nähe bist. Klassisch: Fackeln sind stumm.',
+  'fidelity.loginWallTorches': 'Brennende Wandfackeln beim Login',
+  'fidelity.loginWallTorches.hint':
+    'Die Wandfackeln im Login-Bildschirm brennen mit Feuer und erhellen den Boden. Klassisch: nur ihr Schein, wie im Original.',
+  'fidelity.fortressLights': 'Lichter der Kaiserfestung',
+  'fidelity.fortressLights.hint':
+    'Wandfackeln, Kronleuchter und Feuerschalen in der Kaiserfestung erhellen den Boden um sich. Klassisch: kein Licht, wie im Original.',
+  'fidelity.lampFlares': 'Licht und Schein von Lampen',
+  'fidelity.lampFlares.hint':
+    'Straßenlaternen, Kerzen, Herdfeuer und Feuerschalen leuchten mit einem Schein, Kerzen brennen und manche Lampen und Feuer erhellen den Boden um sie herum. Klassisch: nur, was das Original zeichnet.',
+  'fidelity.roofFade': 'Durchsichtige Dächer',
+  'fidelity.roofFade.hint':
+    'Dächer blenden aus, solange du darunter stehst, damit du hineinsiehst. Klassisch: Dächer bleiben immer sichtbar.',
+  'fidelity.openRooms': 'Offene Räume',
+  'fidelity.openRooms.hint':
+    'In einem Raum bleibt die Stadt ringsum sichtbar, statt schwarz zu werden. Klassisch: alles außerhalb des Raums ist schwarz.',
+  'fidelity.requestTimeout': 'Anfragen verfallen nach 20 s',
+  'fidelity.requestTimeout.hint':
+    'Eine Handels-, Gruppen- oder Duellanfrage, die du liegen lässt, wird nach 20 Sekunden abgelehnt. Klassisch: Sie wartet, bis du antwortest.',
+  'fidelity.noticeLinks': 'Links in Servermeldungen',
+  'fidelity.noticeLinks.hint':
+    'Webadressen in den Servermeldungen sind unterstrichene Links, die einen neuen Tab öffnen. Klassisch: einfacher Text, wie im Original.',
+  'fidelity.cameraKeepsView': 'Kamera bleibt beim Kartenwechsel',
+  'fidelity.cameraKeepsView.hint':
+    'Zoom, Drehung und Neigung der Kamera bleiben erhalten, wenn du dich teleportierst oder die Karte wechselst, und eine Schaltfläche „Kamera zurücksetzen“ erscheint, solange die Ansicht verstellt ist. Klassisch: Jeder Kartenwechsel setzt die Kamera zurück, wie im Original.',
+  'fidelity.swingFill': 'Schläge füllen die Zeit dazwischen',
+  'fidelity.swingFill.hint':
+    'Bei hohem Angriffstempo läuft der Teil deines Schlags nach dem Treffer langsamer, sodass er bis zum nächsten Schlag dauert, statt dass der Held dazwischen erstarrt. Treffer landen im selben Moment. Klassisch: Der Schlag endet früh und der Held steht still, wie im Original.',
+  'fidelity.drawnClothShadows': 'Aufgeräumte Stoffschatten',
+  'fidelity.drawnClothShadows.hint':
+    'Nur Umhänge, Roben und Haare, die eine Figur zeigt, werfen einen Schatten. Klassisch: Ein Stoff, den die Figur nicht mehr zeigt, wirft seinen Schatten weiter dort, wo er zurückblieb, wie im Original.',
+  'fidelity.loginTokens': 'Gespeicherte Anmeldungen',
+  'fidelity.loginTokens.hint':
+    'Auf Welten, die es anbieten, behält „Angemeldet bleiben“ ein Anmelde-Token statt deines Passworts, sodass die nächste Anmeldung kein Passwort braucht. Klassisch: Du gibst das Passwort jedes Mal ein, wie im Original.',
+  'fidelity.teleportLandsEarly': 'Teleport landet sofort',
+  'fidelity.teleportLandsEarly.hint':
+    'Dein eigener Teleport setzt dich auf das Feld, sobald du ausgeblendet bist, ohne auf die Antwort des Servers zu warten. Klassisch: Du bleibst ausgeblendet auf dem alten Feld, bis der Server antwortet, wie im Original.',
+  'fidelity.soccerBoardClock':
+    'Fußballuhr auf der Anzeigetafel',
+  'fidelity.soccerBoardClock.hint':
+    'Die Battle-Soccer-Zeit erscheint als Uhr auf der Anzeigetafel statt als Zeile in der Bildschirmmitte. Klassisch: Die verbleibende Zeit steht in der Bildschirmmitte, wie im Original.',
+  'fidelity.enhancedSkillEffects': 'Verbesserte Fertigkeitseffekte',
+  'fidelity.enhancedSkillEffects.hint':
+    'Einige Fertigkeiten werden in unserem eigenen Aussehen gezeichnet, etwa der Schwarm von Evil Spirit mit Rauch und Schleier. Auch die Option Fertigkeitseffekte. Klassisch: Jede Fertigkeit wird wie im Original gezeichnet.',
+  'fidelity.restAnyWall': 'An jede Wand lehnen',
+  'fidelity.restAnyWall.hint':
+    'Klicke auf eine gerade Wand oder einen Zaun, und dein Held geht daneben und lehnt sich an, wie an den Anlehnstellen. Klassisch: Du kannst dich nur an den Stellen anlehnen, die die Karte vorgibt, wie im Original.',
+  'fidelity.stallGridPrices': 'Preise unter Standwaren',
+  'fidelity.stallGridPrices.hint':
+    'Ein persönlicher Laden zeigt den Preis jedes Gegenstands unter seinen Feldern. Klassisch: Der Preis steht nur im Tooltip des Gegenstands, wie im Original.',
+  'fidelity.menuLabelFit': 'Lange Menütexte anpassen',
+  'fidelity.menuLabelFit.hint':
+    'Ein langer Text im Escape-Menü wird verkleinert, damit er auf seine Schaltfläche passt. Klassisch: Jeder Text behält seine Größe, wie im Original.',
+  'fidelity.muHelperButtons': 'MU-Helper-Schaltflächen',
+  'fidelity.muHelperButtons.hint':
+    'Start/Stopp- und Einstellungen-Schaltflächen für den MU Helper unter den Event-Timern. Klassisch: nur die Tasten Pos1 und Ende, wie im Original.',
+  'fidelity.statCommandNotice': 'Hinweis zu Wertebefehlen',
+  'fidelity.statCommandNotice.hint':
+    'Nach /addstr und den anderen Wertebefehlen meldet das Systemprotokoll, wie viele Punkte in welchen Wert gingen. Klassisch: nur die Antwort des Servers, wie im Original.',
+  'fidelity.loadBarCreep': 'Ladebalken bleiben in Bewegung',
+  'fidelity.loadBarCreep.hint':
+    'Ladebalken kriechen zwischen den Meldungen weiter, damit sie nie stillstehen, während eine Karte aufgebaut wird. Klassisch: der Balken zeigt den Ladestand und wartet, wie im Original.',
+  'fidelity.jewelryUpgrade': 'Juwelen auf Ringen und Anhängern',
+  'fidelity.jewelryUpgrade.hint':
+    'Bless, Soul und Life lassen sich auf die gewöhnlichen Ringe und Anhänger legen, auf Welten, deren Server das unterstützt. Klassisch: Ringe und Anhänger lehnen sie ab, wie im Original.',
+  'fidelity.jewelBundling': 'Juwelen per Rechtsklick bündeln',
+  'fidelity.jewelBundling.hint':
+    'Ein Rechtsklick auf ein Juwel im Inventar bündelt 10, 20 oder 30, auf ein Bündel teilt es auf, ohne Lahap, auf Welten, deren Server das unterstützt. Klassisch: Juwelen werden nur bei Lahap gebündelt, wie im Original.',
+  'fidelity.warpFade': 'Überblendung beim Warp',
+  'fidelity.warpFade.hint':
+    'Ein Warp auf eine andere Karte zeigt ein Standbild der verlassenen Karte, das in die neue überblendet. Klassisch: der Ladebildschirm deckt jeden Kartenwechsel ab, wie im Original.',
+  'fidelity.liteAssets': 'Leichtere Dateien',
+  'fidelity.liteAssets.hint':
+    'Lädt die kleineren WebP-Texturen und die Opus-Musik, die dieser Server neben den Originaldateien anbietet: schnellere Downloads, etwas geringere Qualität, auf Welten, die sie anbieten. Klassisch: die Originaldateien, wie im Original.',
+} satisfies Partial<Record<keyof typeof en, string>>;

@@ -1,0 +1,113 @@
+import { Vector3, type Scene } from '../../controllers/render/babylon/exports';
+import { EventBus } from '../../core/eventBus';
+import { playBurst, type BurstKind } from '../../controllers/fx/bursts';
+import { playUiSound } from '../../controllers/sound/ui';
+import { TerrainDecal } from '../../controllers/fx/moveTargetEffect';
+import { dropTier, type DropTier } from '@/controllers/item_rules';
+import { lighting } from '../../controllers/lighting';
+import type { Entity, ISystemFactory } from '../world';
+
+/**
+ * Renders server-driven object effects:
+ *  - `objectEffect` events (ShowEffect / ShowSwirl / level-up) → particle bursts
+ *    at the object (controllers/fx/bursts.ts).
+ *  - dropped items: a soft ground glow under excellent / high-level drops so
+ *    valuable loot reads from a distance (tier colours from dropTier.ts).
+ */
+
+const GLOW_TEXTURE = 'Effect/flare01.OZJ';
+const GLOW_SCALE = 1.4;
+const GLOW_LIGHT: Record<Exclude<DropTier, 'normal'>, [number, number, number]> = {
+  excellent: [0.25, 0.7, 0.3],
+  high: [0.7, 0.55, 0.15],
+  money: [0.6, 0.5, 0.1],
+  archangel: [0.6, 0.1, 0.6],
+};
+
+const tmp = new Vector3();
+
+function positionOf(e: Entity, height: number): Vector3 {
+  const t = e.transform!;
+  return tmp.set(
+    t.pos.x + (t.posOffset?.x ?? 0),
+    t.pos.y + height,
+    t.pos.z + (t.posOffset?.z ?? 0)
+  );
+}
+
+/**
+ * The burst at `entity` with no sound of its own, for a packet that shows the
+ * level-up flare under another sound (the quest reward's SOUND_CHANGE_UP).
+ */
+export function showObjectEffect(scene: Scene, entity: Entity, effect: BurstKind): void {
+  playBurst(scene, effect, positionOf(entity, 0).clone());
+
+  // The burst also lights the ground and whoever stands by - the lighting
+  // layer's `objectEffects` entry owns the recipe and the follow.
+  lighting.objectEffect(scene, entity, effect);
+}
+
+export const ObjectEffectSystem: ISystemFactory = world => {
+  const drops = world.with('droppedItem', 'transform');
+  const glows = new Map<Entity, TerrainDecal>();
+  const pool: TerrainDecal[] = [];
+  let glowSeq = 0;
+
+  EventBus.on('objectEffect', ({ entity, effect }) => {
+    // ReceiveDisplayEffectViewport 0x10 (WSclient.cpp:9653): SOUND_LEVEL_UP,
+    // 2D, for any player in view.
+    if (effect === 'levelUp') playUiSound('levelUp');
+    showObjectEffect(world.scene, entity, effect);
+  });
+
+  drops.onEntityAdded.subscribe(e => {
+    const tier = dropTier(e.droppedItem);
+    if (tier === 'normal') return;
+    const decal =
+      pool.pop() ??
+      new TerrainDecal(world, `dropGlow${glowSeq++}`, GLOW_TEXTURE, GLOW_SCALE);
+    decal.setAlpha(0.6);
+    // On the drop, not on the middle of its tile. `RequestTerrainHeight`
+    // samples the height field with vertex `i` at world `i`, so a tile spans
+    // `[i, i+1]` and everything the client places from a server tile - drops,
+    // players, monsters - stands at the corner. Centring this one on the tile
+    // instead left the glow half a tile off its own item, which only became
+    // obvious once a zen pile was wider than a single coin.
+    decal.draw(
+      world,
+      e.transform.pos.x,
+      e.transform.pos.z,
+      GLOW_SCALE,
+      0,
+      GLOW_LIGHT[tier]
+    );
+    glows.set(e, decal);
+  });
+
+  drops.onEntityRemoved.subscribe(e => {
+    const decal = glows.get(e);
+    if (!decal) return;
+    decal.hide();
+    glows.delete(e);
+    pool.push(decal);
+  });
+
+  return {
+    update: () => {
+      // Decals drape lazily once their texture arrives.
+      for (const [e, decal] of glows) {
+        if (decal.enabled) continue;
+        const tier = dropTier(e.droppedItem!);
+        if (tier === 'normal') continue;
+        decal.draw(
+          world,
+          e.transform!.pos.x,
+          e.transform!.pos.z,
+          GLOW_SCALE,
+          0,
+          GLOW_LIGHT[tier]
+        );
+      }
+    },
+  };
+};

@@ -1,0 +1,185 @@
+// Copies the subset of the original `Data/` tree that the client fetches at
+// runtime into `dist/Data`, so a `vite build` is self-contained.
+//
+// Everything the client reads from `./Data/` goes through
+// `src/controllers/assets/mu/dataFolder.ts` (sprites, effect textures, Local tables,
+// gate.bmd, PBR maps). Models, terrain and sounds live in the converted
+// `public/game-assets` and are picked up by Vite on their own. The rules
+// below were derived by grepping every `downloadDataFile`, `loadMuSprite`,
+// `loadInterfaceSprite`, `loadEffectTexture` and `resolveDataUrl` call site;
+// keep them in step when a new folder or extension is fetched.
+//
+// Usage: bun run tools/copyData.ts [--src Data] [--out dist/Data] [--dry]
+// Skipped entirely when DATA_COPY=off (e.g. a deployment that serves Data/
+// from another origin via VITE_DATA_URL).
+
+import {
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  rmSync,
+  statSync,
+} from 'fs';
+import { join, relative, resolve } from 'path';
+
+type Rule = {
+  /** Folder under Data/ (`''` = the root, not recursed). */
+  dir: string;
+  /** Lower-case extensions to keep; `null` = every file. */
+  ext: string[] | null;
+  /** Lower-case file names always kept regardless of extension. */
+  names?: string[];
+  /** Match `dir` as a prefix with a numeric suffix (`World` → World1, World73…). */
+  numbered?: boolean;
+};
+
+const SPRITE = ['ozj', 'ozt'];
+
+const RULES: Rule[] = [
+  // gates.ts → gate.bmd
+  { dir: '', ext: [], names: ['gate.bmd'] },
+  // libs/mu/sprites.ts → loadInterfaceSprite('…') = Interface/**
+  { dir: 'Interface', ext: SPRITE },
+  // effect textures, item chrome maps (Chrome01/Shiny01/Chrome02 .OZJ)
+  { dir: 'Effect', ext: SPRITE },
+  // loginPage → Logo/MU-logo*.OZ?
+  { dir: 'Logo', ext: SPRITE },
+  // masterTree / questFiles / moveReqFile / minimap markers → Local/**/*.bmd,
+  // plus the language packs' NpcName_<Lang>.txt (libs/mu/npcNameFile.ts).
+  { dir: 'Local', ext: ['bmd', 'txt', ...SPRITE] },
+  // pbrMaps.ts → PBR/manifest.json + authored maps (optional folder)
+  { dir: 'PBR', ext: null },
+  // minimap.ts → World*/mini_map.OZT + Minimap.bmd; weather → World*/leaf*.OZ?
+  { dir: 'World', ext: [], names: ['mini_map.ozt', 'minimap.bmd', 'leaf01.ozt', 'leaf01.ozj', 'leaf02.ozj', 'leaf02.ozt'], numbered: true },
+  // common/signPlates.ts → the three signpost plates it repaints, out of
+  // whichever Object<n> folder the sign's map draws from.
+  { dir: 'Object', ext: [], names: ['notice.ozj', 'snotice.ozj', 'snotice02.ozj'], numbered: true },
+  // fx/recipes.ts → effect sprites kept in Skill/ (Recover's halo, skull, ice, the GM mark...).
+  { dir: 'Skill', ext: SPRITE },
+  // libs/mu/terrainWater.ts → Object8/wt00..wt31.OZJ (Atlans caustics flipbook)
+  { dir: 'Object8', ext: [], names: Array.from({ length: 32 }, (_, i) => `wt${String(i).padStart(2, '0')}.ozj`) },
+  // lighting/effectLights.ts → Object39/k_effect_01.OZJ (BITMAP_KANTURU_2ND_EFFECT1, the relic lamps' star)
+  { dir: 'Object39', ext: [], names: ['k_effect_01.ozj'] },
+  // actors/wings.ts → Item/msword01_r.OZJ (BITMAP_3RDWING_LAYER, the Wing of Ruin's layer)
+  { dir: 'Item', ext: [], names: ['msword01_r.ozj'] },
+  // versions/shared/cloaks/ → the capes, robes and hair cloths are drawn with (Skill/ ones ship above)
+  { dir: 'Item', ext: [], names: ['dl_redwings02.ozt', 'dl_redwings03.ozt', 'monke_manto.ozt', 'monk_manto01.ozt', 'msword03.ozt', 'nccape.ozt', 't_lower_14m.ozt'] },
+  { dir: 'Monster', ext: [], names: ['deasuler_cloth.ozt', 'iui02.ozt', 'iui03.ozt', 'iui06.ozj', 'nightmare_cloth.ozt'] },
+  { dir: 'Player', ext: [], names: ['dark3chima3.ozt', 'darklordrobe.ozt', 'kaa.ozt', 'lower2_15m.ozt', 'robe01.ozj', 'robe02.ozj', 'robe03.ozt'] },
+  // actors/skinTexture.ts → the bitmaps a dropped armour / pants draws mesh 0 with (Mistery to Lilium,
+  // Faith, Queen, and Lucky 65 / 70 under Player/LuckyItem/)
+  {
+    dir: 'Player',
+    ext: [],
+    names: [
+      ...[40, 41, 42, 43, 44, 45].flatMap(n => [`invenarmormale${n}.ozt`, `invenpantsmale${n}.ozt`]),
+      'item312_armoritem.ozt', 'item312_pantitem.ozt', 'skinclass706_upperitem.ozt', 'skinclass706_loweritem.ozt',
+      'invenarmormale40_luck.ozt', 'invenpantsmale40_luck.ozt', 'invenarmormale41_luck.ozt', 'invenpantsmale41_luck.ozt',
+    ],
+  },
+];
+
+function keep(rule: Rule, file: string): boolean {
+  const lower = file.toLowerCase();
+  if (rule.names?.includes(lower)) return true;
+  if (rule.ext === null) return true;
+  const ext = lower.split('.').pop() ?? '';
+  return rule.ext.includes(ext);
+}
+
+/** Whether a path under Data/ (`Skill/ice.OZJ`) ends up in the build. */
+export function shipsDataFile(rel: string): boolean {
+  const parts = rel.split('/');
+  const file = parts[parts.length - 1];
+  return RULES.some(rule => {
+    if (rule.dir === '') return parts.length === 1 && keep(rule, file);
+    if (rule.numbered) return parts.length === 2 && new RegExp(`^${rule.dir}\\d+$`, 'i').test(parts[0]) && keep(rule, file);
+    return parts[0] === rule.dir && keep(rule, file);
+  });
+}
+
+function arg(name: string, fallback: string): string {
+  const i = process.argv.indexOf(name);
+  return i >= 0 && process.argv[i + 1] ? process.argv[i + 1] : fallback;
+}
+
+function main() {
+  const ROOT = resolve(import.meta.dir, '..');
+  const SRC = resolve(ROOT, arg('--src', 'Data'));
+  const OUT = resolve(ROOT, arg('--out', 'dist/Data'));
+  const DRY = process.argv.includes('--dry');
+
+  if ((process.env.DATA_COPY ?? 'on') === 'off') {
+    console.log('copyData: DATA_COPY=off, skipping');
+    process.exit(0);
+  }
+
+  if (!existsSync(SRC)) {
+    console.error(`copyData: source folder not found: ${SRC}`);
+    process.exit(1);
+  }
+
+  let files = 0;
+  let bytes = 0;
+  const perDir = new Map<string, { files: number; bytes: number }>();
+
+  function copyTree(rule: Rule, from: string, recurse: boolean) {
+    for (const entry of readdirSync(from, { withFileTypes: true })) {
+      const full = join(from, entry.name);
+      if (entry.isDirectory()) {
+        if (recurse) copyTree(rule, full, true);
+        continue;
+      }
+      if (!entry.isFile() || !keep(rule, entry.name)) continue;
+
+      const rel = relative(SRC, full);
+      const dest = join(OUT, rel);
+      const size = statSync(full).size;
+      if (!DRY) {
+        mkdirSync(join(dest, '..'), { recursive: true });
+        copyFileSync(full, dest);
+      }
+      files++;
+      bytes += size;
+      const top = rel.split(/[\\/]/)[0];
+      const stat = perDir.get(top) ?? { files: 0, bytes: 0 };
+      stat.files++;
+      stat.bytes += size;
+      perDir.set(top, stat);
+    }
+  }
+
+  if (!DRY) {
+    rmSync(OUT, { recursive: true, force: true });
+    mkdirSync(OUT, { recursive: true });
+  }
+
+  for (const rule of RULES) {
+    if (rule.dir === '') {
+      copyTree(rule, SRC, false);
+      continue;
+    }
+    if (rule.numbered) {
+      const re = new RegExp(`^${rule.dir}\\d+$`, 'i');
+      for (const entry of readdirSync(SRC, { withFileTypes: true })) {
+        if (entry.isDirectory() && re.test(entry.name)) {
+          copyTree(rule, join(SRC, entry.name), false);
+        }
+      }
+      continue;
+    }
+    const dir = join(SRC, rule.dir);
+    if (existsSync(dir)) copyTree(rule, dir, true);
+  }
+
+  const mb = (n: number) => `${(n / 1024 / 1024).toFixed(1)} MB`;
+  for (const [dir, stat] of [...perDir].sort()) {
+    console.log(`  ${dir.padEnd(12)} ${String(stat.files).padStart(5)} files  ${mb(stat.bytes)}`);
+  }
+  console.log(
+    `copyData: ${DRY ? 'would copy' : 'copied'} ${files} files, ${mb(bytes)} → ${OUT}`
+  );
+}
+
+if (import.meta.main) main();

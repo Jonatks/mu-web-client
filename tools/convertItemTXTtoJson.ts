@@ -1,5 +1,14 @@
-import { ItemsDatabase } from '../src/common/itemsDatabase';
-import { ItemGroups } from '../src/common/objects/enum';
+// Item.txt -> the item files (versions/shared/items/<group>/<item>.ts).
+//
+// This rewrites the item files from scratch, so the `RF` class column goes with
+// it: Item.txt names only six classes and has no Rage Fighter one. Follow
+// every run with `bun run tools/addRageFighterColumn.ts`, which puts it back
+// from the server's item definitions, then `bun run
+// tools/syncItemRequirements.ts`, which does the same for the requirements, and
+// `bun run tools/syncItemClasses.ts`, which sets the class block to the original Item.bmd's.
+import { ItemsDatabase } from '../versions/shared/items/itemsDatabase';
+import { ItemGroups } from '../versions/shared/objects/enum';
+import { writeItemFiles } from './itemFiles';
 
 const itemFile = await Bun.file('Item.txt').text();
 
@@ -24,29 +33,15 @@ interface ItemGroup {
 const result: ItemGroup[] = [];
 
 function extractValues(line: string) {
+  // Tokens are runs of non-whitespace, or a double-quoted string (names
+  // with spaces). Splitting on single characters injected empty values
+  // after every quoted name and shifted every stat column by two.
   const values: string[] = [];
-
-  line = line.replaceAll('\t', ' ').replaceAll('  ', ' ');
-
-  let val = '';
-  for (let i = 0; i < line.length; i++) {
-    const char = line[i];
-    if (char === `"`) {
-      i++;
-      while (line[i] !== `"`) {
-        val += line[i];
-        i++;
-      }
-      values.push(val);
-      val = '';
-    } else if (char === ' ') {
-      values.push(val);
-      val = '';
-    } else {
-      val += char;
-    }
+  const re = /"([^"]*)"|(\S+)/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(line))) {
+    values.push(m[1] !== undefined ? m[1] : m[2]);
   }
-
   return values;
 }
 
@@ -134,12 +129,5 @@ while (lineIndex < lines.length) {
   lineIndex++;
 }
 
-// Write result to JSON file
-await Bun.write(
-  'items.json',
-  JSON.stringify(
-    result.flatMap(g => g.items),
-    null,
-    2
-  )
-);
+// Write the result as item files
+writeItemFiles(result.flatMap(g => g.items));

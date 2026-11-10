@@ -1,0 +1,461 @@
+import type { Entity, ISystemFactory, Item } from '../world';
+import {
+  itemVisualTier,
+  setItemGlowClock,
+  strongestTierOf,
+  type ItemVisualTier,
+} from '../../controllers/item_fx/itemVisualTier';
+import {
+  improvedItemEffectsOn,
+  itemEffectSignature,
+} from '../../controllers/item_fx/itemEffectMode';
+import type { PlayerObject } from '../../controllers/actors/playerObject';
+import type { ModelObject } from '../../controllers/render/modelObject';
+import {
+  createItemAura,
+  type ItemAura,
+  type ItemAuraKind,
+  type ItemAuraSlot,
+} from '../../controllers/fx/itemAura';
+import { createItemCrackle, type ItemCrackle } from '../../controllers/fx/itemCrackle';
+import type { ItemSparkleKind } from '../../controllers/fx/itemSparkle';
+import { effects, type EffectHandle } from '../../controllers/fx';
+import { bonePos, entityGone, entityPos, entityYaw, followEntity, tmpA } from '../../controllers/fx/core';
+import type { Vector3 } from '../../controllers/render/babylon/exports';
+import { requestGlowProbe } from '../../controllers/render/sceneLook';
+import { EventBus } from '../../core/eventBus';
+import { itemSelfLight, lightItem, type ItemLampKind } from '../../controllers/lighting/items';
+import type { LightSource } from '../../controllers/lighting/lightSource';
+import { shownGear, type Gear } from '../../controllers/actors';
+import { gearEffectsShown } from './othersShown';
+import { ammoGoldWanted, paintAmmo } from '../../controllers/actors/ammoGold';
+
+/**
+ * Item glow: tier stamps, the +9..+15 lamp / aura / crackle and the excellent
+ * `CreateShiny` glints, worn or dropped. See ecs/readme.md.
+ */
+
+type Lamp = {
+  tier: ItemVisualTier;
+  /** Shared with the light source, the aura and the crackle; moved in place. */
+  position: { x: number; y: number; z: number };
+  source: LightSource | null;
+  /**
+   * The world generation this lamp's scene objects were built in. A map load
+   * takes the scene they live in with it, so a lamp from an older generation
+   * has to be rebuilt even though the gear that made it never changed.
+   */
+  gen: number;
+  aura: ItemAura | null;
+  crackle: ItemCrackle | null;
+  /** The piece that won the tier: the aura is emitted off it, not off the body. */
+  auraSlot: ItemAuraSlot;
+  /** A weapon's own bone-linked node, when the winner is one. */
+  auraPart: ModelObject | null;
+  /** Flips every frame so a pair of gloves / boots emits from both ends. */
+  auraFlip: boolean;
+};
+
+/** Player skeleton bones the aura hangs on (player.glb bone names). */
+const PELVIS_BONE = 2;
+const FOOT_BONES = [5, 12] as const;
+const CHEST_BONE = 18;
+const HEAD_BONE = 20;
+const HAND_BONES = [28, 37] as const;
+
+/** Chest height: where the aura sits until the skeleton is up. */
+const AURA_FALLBACK_HEIGHT = 0.9;
+
+/** Equipment order of the tier lookup below, as aura slots. */
+const AURA_SLOTS: readonly ItemAuraSlot[] = [
+  'weapon',
+  'weapon',
+  'helm',
+  'armor',
+  'pants',
+  'gloves',
+  'boots',
+];
+
+/** Moves `out` onto the glowing item: its own node for a weapon, else a bone. */
+function auraAnchor(e: Entity, lamp: Lamp, out: Vector3): void {
+  const part = lamp.auraPart;
+  if (part?.Ready) {
+    out.copyFrom(part.node.getAbsolutePosition());
+    return;
+  }
+
+  lamp.auraFlip = !lamp.auraFlip;
+  const side = lamp.auraFlip ? 1 : 0;
+  const bone =
+    lamp.auraSlot === 'helm'
+      ? HEAD_BONE
+      : lamp.auraSlot === 'pants'
+        ? PELVIS_BONE
+        : lamp.auraSlot === 'gloves'
+          ? HAND_BONES[side]
+          : lamp.auraSlot === 'boots'
+            ? FOOT_BONES[side]
+            : CHEST_BONE;
+
+  bonePos(e, bone, out, AURA_FALLBACK_HEIGHT);
+}
+
+type Tracked = {
+  /** The item-effect options and gear (`gearKeyChanged`) the lamp was last checked against. */
+  options: string;
+  key: number[];
+  lamp: Lamp | null;
+  stamped: boolean;
+  /** An excellent item is here: keep a sparkle alive (re-spawned after a map reset). */
+  sparkleWanted: boolean;
+  sparkle: EffectHandle | null;
+  /** Infinity Arrow's gold quiver per hand, and the model it was painted on (a reload repaints). */
+  ammoGold: [boolean, boolean];
+  ammoModel: [unknown, unknown];
+};
+
+function anyExcellent(app: Gear): boolean {
+  return !!(
+    app.leftHand?.isExcellent ||
+    app.rightHand?.isExcellent ||
+    app.helm?.isExcellent ||
+    app.armor?.isExcellent ||
+    app.pants?.isExcellent ||
+    app.gloves?.isExcellent ||
+    app.boots?.isExcellent
+  );
+}
+
+/** One number for what the lamp reads off a piece (-1 = empty slot). */
+function itemKey(item: Item | null | undefined): number {
+  if (!item) return -1;
+  const flags = (item.isExcellent ? 1 : 0) + (item.isAncient ? 2 : 0) + (item.socketCount ?? 0) * 4;
+  return ((item.group * 1024 + item.num) * 64 + (item.lvl ?? 0)) * 64 + flags;
+}
+
+function keySlot(key: number[], at: number, value: number): boolean {
+  if (key[at] === value) return false;
+  key[at] = value;
+  return true;
+}
+
+/** Writes this gear's key in place (no per-frame string); true when it changed. */
+export function gearKeyChanged(key: number[], app: Gear, applied: number, gearOn: boolean): boolean {
+  // Bitwise | so every slot is written even after the first change.
+  return (
+    (+keySlot(key, 0, applied) |
+      +keySlot(key, 1, gearOn ? 1 : 0) |
+      +keySlot(key, 2, itemKey(app.leftHand)) |
+      +keySlot(key, 3, itemKey(app.rightHand)) |
+      +keySlot(key, 4, itemKey(app.helm)) |
+      +keySlot(key, 5, itemKey(app.armor)) |
+      +keySlot(key, 6, itemKey(app.pants)) |
+      +keySlot(key, 7, itemKey(app.gloves)) |
+      +keySlot(key, 8, itemKey(app.boots))) !==
+    0
+  );
+}
+
+function stampMeshes(part: ModelObject, item: Item | null | undefined, ground = false): void {
+  const tier = itemVisualTier(item, ground);
+  // A tier stamp is what wakes the GlowLayer up (sceneLook's layer gate).
+  if (item && tier.active) requestGlowProbe();
+  for (const mesh of part.getMeshes(true)) {
+    mesh.metadata ??= {};
+    mesh.metadata.itemTier = item && tier.active ? tier : null;
+    mesh.metadata.itemLvl = tier.level;
+    mesh.metadata.isExcellent = tier.isExcellent;
+    mesh.metadata.timeOffset = 0;
+  }
+}
+
+/** Paints a hand's bolts or arrows gold while Infinity Arrow holds, when that or the model changes. */
+function keepAmmoGold(part: ModelObject, gold: boolean, state: Tracked, hand: 0 | 1): void {
+  const model = part.gltf ?? null;
+  if (state.ammoGold[hand] === gold && state.ammoModel[hand] === model) return;
+  state.ammoGold[hand] = gold;
+  state.ammoModel[hand] = model;
+  if (model) paintAmmo(part, gold);
+}
+
+/** Equipment slots and the part they load into (appearanceSystem.ts). */
+function stampPlayer(player: PlayerObject, app: Gear): void {
+  stampMeshes(player.HelmMask, app.helm);
+  stampMeshes(player.Armor, app.armor);
+  stampMeshes(player.Pants, app.pants);
+  stampMeshes(player.Gloves, app.gloves);
+  stampMeshes(player.Boots, app.boots);
+  stampMeshes(player.Weapon1, app.leftHand);
+  stampMeshes(player.Weapon2, app.rightHand);
+}
+
+export const ItemGlowSystem: ISystemFactory = world => {
+  const players = world.with('charAppearance', 'modelObject', 'transform');
+  const drops = world.with('droppedItem', 'modelObject', 'transform');
+
+  const tracked = new Map<Entity, Tracked>();
+
+  let optionState = itemEffectSignature();
+
+  function clock(): number {
+    return world.gameTime.TotalGameTime.TotalSeconds;
+  }
+
+  function lightLamp(
+    tier: ItemVisualTier,
+    x: number,
+    y: number,
+    z: number,
+    kind: ItemLampKind,
+    slot: ItemAuraSlot,
+    auraPart: ModelObject | null
+  ): Lamp {
+    const position = { x, y, z };
+    // The crackle still wraps the whole body; only the aura is per item.
+    const body: ItemAuraKind = slot === 'drop' ? 'drop' : 'character';
+
+    return {
+      tier,
+      position,
+      source: lightItem(world.scene, tier, kind, position),
+      gen: worldGen,
+      aura: createItemAura(world.scene, tier, slot, x, y, z),
+      crackle: createItemCrackle(world.scene, tier, body, x, y, z),
+      auraSlot: slot,
+      auraPart,
+      auraFlip: false,
+    };
+  }
+
+  /** Anything to draw for this tier in the improved look besides emissive? */
+  function wantsLamp(tier: ItemVisualTier): boolean {
+    return tier.lightGain > 0 || tier.auraRate > 0 || tier.crackleRate > 0;
+  }
+
+  function snuff(state: Tracked): void {
+    if (!state.lamp) return;
+    // Idempotent: after a map change the facade already disposed it.
+    state.lamp.source?.dispose();
+    state.lamp.aura?.dispose();
+    state.lamp.crackle?.dispose();
+    state.lamp = null;
+  }
+
+  function stateOf(e: Entity): Tracked {
+    let state = tracked.get(e);
+    if (!state) {
+      state = {
+        options: '',
+        key: [],
+        lamp: null,
+        stamped: false,
+        sparkleWanted: false,
+        sparkle: null,
+        ammoGold: [false, false],
+        ammoModel: [null, null],
+      };
+      tracked.set(e, state);
+    }
+    return state;
+  }
+
+  /** `CreateShiny`: the glints an excellent item throws; ends with the entity. */
+  function spawnSparkle(e: Entity, kind: ItemSparkleKind): EffectHandle {
+    return effects.spawn('itemSparkle', world.scene, entityPos(e, 0, tmpA), {
+      kind,
+      follow: followEntity(e, 0),
+      yaw: () => entityYaw(e),
+      until: () => entityGone(e),
+    });
+  }
+
+  /** Keeps exactly one live sparkle while wanted (a map reset ends the old one). */
+  function keepSparkle(e: Entity, state: Tracked, kind: ItemSparkleKind): void {
+    if (state.sparkleWanted) {
+      if (!state.sparkle?.alive) state.sparkle = spawnSparkle(e, kind);
+    } else if (state.sparkle) {
+      state.sparkle.stop();
+      state.sparkle = null;
+    }
+  }
+
+  function forget(e: Entity): void {
+    const state = tracked.get(e);
+    if (!state) return;
+    snuff(state);
+    state.sparkle?.stop();
+    state.sparkle = null;
+    e.modelObject?.SelfLight.setAll(0);
+    tracked.delete(e);
+  }
+
+  players.onEntityRemoved.subscribe(forget);
+  drops.onEntityRemoved.subscribe(forget);
+
+  /** The map the lamps were built against, and the generation counter. */
+  let lampWorld = world.mapIndex;
+  let worldGen = 0;
+
+  // Loading a map disposes every light source (`lighting.reset()`) and takes
+  // the scene the auras live in with it. Map objects are recreated with their
+  // map so they re-light on their own; a worn item lamp is the one thing that
+  // outlives the load, so the generation bump re-seats it at the wearer's new
+  // position on the next apply of their items. Note what it is *not* for: the
+  // crackle vanishing across a gate was never this - see itemCrackle.ts's
+  // `disposeCrackleMaterial`, which is the actual cause and the actual fix.
+  EventBus.on('warpCompleted', ({ map }) => {
+    // Warping to the map you are already on reloads nothing.
+    if (map === lampWorld) return;
+    lampWorld = map;
+    worldGen++;
+  });
+
+  const selfColour = { r: 0, g: 0, b: 0 };
+
+  return {
+    update: () => {
+      const now = clock();
+      setItemGlowClock(now);
+
+      const lampsOn = improvedItemEffectsOn();
+
+      // Option changed: every baked tier is stale - re-stamp and re-light.
+      const options = itemEffectSignature();
+      const restamp = options !== optionState;
+      optionState = options;
+
+      // --- dropped items ----------------------------------------------------
+      for (const e of drops) {
+        const state = stateOf(e);
+        const { modelObject, transform, droppedItem } = e;
+
+        keepSparkle(e, state, 'drop');
+        if (state.stamped && !restamp) continue;
+        if (!modelObject.Ready) continue;
+
+        const tier = itemVisualTier(droppedItem.item, true);
+        state.sparkleWanted = tier.isExcellent;
+        stampMeshes(modelObject, droppedItem.item, true);
+
+        snuff(state);
+        if (lampsOn && wantsLamp(tier)) {
+          state.lamp = lightLamp(
+            tier,
+            transform.pos.x,
+            transform.pos.y,
+            transform.pos.z,
+            'drop',
+            'drop',
+            null
+          );
+        }
+
+        state.stamped = true;
+      }
+
+      // --- characters -------------------------------------------------------
+      for (const e of players) {
+        const state = stateOf(e);
+        const { charAppearance, modelObject, transform } = e;
+        const app = shownGear(e, world.mapIndex) ?? charAppearance;
+        const gearEffects = gearEffectsShown(e);
+
+        // The apply counter leads: the lamp belongs to this character's
+        // items, so it is re-examined whenever those items are put on the
+        // model, not only when they come out different - re-applying the same
+        // gear is exactly what a warp does.
+        const gearChanged = gearKeyChanged(state.key, app, charAppearance.applied ?? 0, gearEffects);
+        if (gearChanged || options !== state.options) {
+          state.options = options;
+          state.sparkleWanted = gearEffects && anyExcellent(app);
+
+          // This list is in AURA_SLOTS order: the winner's index names the
+          // piece the aura comes off.
+          const { tier, index } = strongestTierOf([
+            app.leftHand,
+            app.rightHand,
+            app.helm,
+            app.armor,
+            app.pants,
+            app.gloves,
+            app.boots,
+          ]);
+          const slot = AURA_SLOTS[index] ?? 'armor';
+          const player = modelObject as PlayerObject;
+          const auraPart =
+            index === 0 ? player.Weapon1 : index === 1 ? player.Weapon2 : null;
+
+          // Re-examined is not rebuilt. itemVisualTier interns its tiers, so
+          // identity is the whole comparison: same tier, same generation, and
+          // the lamp standing there is the one this gear would build anyway.
+          //
+          // This guard is load-bearing, not an optimisation. The apply beat
+          // fires on every inventory move, and a rebuild throws away the
+          // crackle's GreasedLine mesh and compiles a fresh ShaderMaterial
+          // for the replacement. Doing that on repeat is how a shader compile
+          // starts failing, and a material whose shader fails to compile
+          // renders WHITE - see the note above.
+          const stale =
+            restamp ||
+            !gearEffects ||
+            !state.lamp ||
+            state.lamp.tier !== tier ||
+            state.lamp.auraSlot !== slot ||
+            state.lamp.gen !== worldGen;
+
+          if (stale) {
+            snuff(state);
+            modelObject.SelfLight.setAll(0);
+
+            if (restamp && modelObject.Ready) {
+              stampPlayer(modelObject as PlayerObject, app);
+            }
+
+            if (lampsOn && gearEffects && wantsLamp(tier)) {
+              state.lamp = lightLamp(
+                tier,
+                transform.pos.x,
+                transform.pos.y,
+                transform.pos.z,
+                e.localPlayer ? 'hero' : 'player',
+                slot,
+                auraPart
+              );
+            }
+          }
+        }
+
+        const hands = modelObject as PlayerObject;
+        if (hands.Weapon1) {
+          keepAmmoGold(hands.Weapon1, ammoGoldWanted(e.buffs, app.leftHand), state, 0);
+          keepAmmoGold(hands.Weapon2, ammoGoldWanted(e.buffs, app.rightHand), state, 1);
+        }
+
+        keepSparkle(e, state, 'character');
+
+        const lamp = state.lamp;
+        if (!lamp) continue;
+
+        const x = transform.pos.x + (transform.posOffset?.x ?? 0);
+        const y = transform.pos.y + (transform.posOffset?.y ?? 0);
+        const z = transform.pos.z + (transform.posOffset?.z ?? 0);
+
+        // The light source follows this object; the tile re-registration of
+        // the terrain stain is its own business.
+        lamp.position.x = x;
+        lamp.position.y = y;
+        lamp.position.z = z;
+
+        if (lamp.aura) auraAnchor(e, lamp, lamp.aura.emitter);
+        lamp.crackle?.position.set(x, y, z);
+
+        if (!lamp.source?.alive) continue;
+
+        // The wearer is lit by their own gear, as the original adds o->Light.
+        const c = itemSelfLight(lamp.source, selfColour);
+        modelObject.SelfLight.set(c.r, c.g, c.b);
+      }
+    },
+  };
+};

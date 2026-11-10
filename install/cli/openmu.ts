@@ -1,0 +1,53 @@
+// OpenMU, installed the OpenMU way: their repository at a release tag, their all-in-one compose.
+// With a source ref set, their own Startup/Dockerfile builds the image instead of pulling the release.
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
+import type { Config } from './config';
+import { must, runLogged } from './exec';
+import type { Paths } from './paths';
+
+const OPENMU_REPO = 'https://github.com/MUnique/OpenMU.git';
+
+/** OpenMU's default branch: as a source ref, every checkout (and `mu update`) takes its newest commit. */
+export const OPENMU_MAIN = 'master';
+
+/** Which of the three choices a config holds: a release, the main branch, or a fixed commit or tag. */
+export function openmuSourceKind(c: Pick<Config, 'openmuSourceRef'>): 'release' | 'main' | 'source' {
+  if (!c.openmuSourceRef) return 'release';
+  return c.openmuSourceRef === OPENMU_MAIN ? 'main' : 'source';
+}
+
+/**
+ * Whether Docker Hub has the munique/openmu image of a release. OpenMU tags some releases without publishing one
+ * (0.11.0 had a tag and no image), and the pull then fails mid-install. Only a clear 404 says no: an unreachable
+ * Docker Hub leaves the release as it is.
+ */
+export async function hasReleaseImage(version: string, get: typeof fetch = fetch): Promise<boolean> {
+  try {
+    const r = await get(`https://hub.docker.com/v2/repositories/munique/openmu/tags/${version}`, { signal: AbortSignal.timeout(10_000) });
+    return r.status !== 404;
+  } catch {
+    return true;
+  }
+}
+
+const git = (p: Paths, ...args: string[]) => must('git', ['-C', p.openmu, ...args]);
+
+/** Checks out the ref the config names (release tag, or the source ref), fetching only that. */
+export async function checkoutOpenMu(c: Config, p: Paths): Promise<void> {
+  const ref = c.openmuSourceRef || `v${c.openmuVersion}`;
+  if (!existsSync(join(p.openmu, '.git'))) {
+    await must('git', ['init', '-q', p.openmu]);
+    await git(p, 'remote', 'add', 'origin', OPENMU_REPO);
+  }
+  await git(p, 'fetch', '-q', '--depth', '1', 'origin', ref);
+  await git(p, 'checkout', '-q', '--force', 'FETCH_HEAD');
+}
+
+/** Builds OpenMU from its source with its own Dockerfile, when the config asks for a source ref. */
+export async function buildOpenMuFromSource(c: Config, p: Paths, log: string, onLine?: (l: string) => void): Promise<void> {
+  if (!c.openmuSourceRef) return;
+  const src = join(p.openmu, 'src');
+  const code = await runLogged('docker', ['build', '-t', 'mu-openmu-base:local', '-f', join(src, 'Startup', 'Dockerfile'), src], log, onLine);
+  if (code !== 0) throw new Error(`Building OpenMU from source failed; see ${log}`);
+}

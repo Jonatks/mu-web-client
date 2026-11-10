@@ -1,0 +1,864 @@
+/**
+ * Monster body effects: `MoveCharacterVisual` (ZzzCharacter.cpp:5583), one row per monster folder
+ * (`bodyFx`) and one emitter per `CreateParticle` line. Driven by monsterVisualSystem.ts. See fx/readme.md.
+ */
+import { Vector3, type Scene } from '../render/babylon/exports';
+import { ENUM_WORLD } from '../../core/types';
+import { MonsterActionType as A } from '@versions/shared/objects/enum';
+import { TILE_CM } from '../terrain/consts';
+import type { Entity } from '../../ecs/world';
+import {
+  LiveList,
+  bonePos,
+  boneLocalPos,
+  emitBurst,
+  entityGone,
+  entityPos,
+  entityYaw,
+  inWindow,
+  type ParticleRecipe,
+  type PointSource,
+  type RGB,
+} from './core';
+import { spawnDebris } from './debris';
+import { blurLayer } from './blur';
+import { spawnJoint } from './joint';
+import { spawnRing } from './ring';
+import { spawnSprite } from './sprite';
+import { glowMonster, type GlowTexture, type MonsterGlow } from './monsterGlow';
+import { NO_TURN, spawnParticle, type KindName } from './effectParticles';
+import {
+  BODY_SMOKE,
+  ENERGY_CHIPS,
+  FIRE_PUFF,
+  FLAME_LICK,
+  HIT_SPARKS,
+  MODEL,
+  RGBS,
+  SAND_SMOKE,
+  SAND_SMOKE_BURST,
+  SMOKE,
+  TEX,
+} from './recipes';
+import { DEAD_HANDLE, type EffectHandle, type EffectLayer } from './layer';
+import {
+  monsterRegistry,
+  takeLookCue,
+  type BodyBlurSheet,
+  type BodyCard,
+  type BodyFxEmitter,
+  type BodyFxGate,
+  type BodyGround,
+  type BodyParticle,
+  type BodyPuff,
+  type BodyShard,
+  type BodyTexture,
+  type MonsterBodyFx,
+  type LookCueName,
+} from '../monsters';
+
+// ---- 1. tuning -------------------------------------------------------------
+
+/** One original tick: `MoveCharacterVisual` runs at 25 Hz. */
+const TICK = 1 / 25;
+
+/** Ticks one frame may pay out; a hitch never dumps a backlog of puffs. */
+const MAX_TICKS_PER_FRAME = 4;
+
+/** `CreatePointer(BITMAP_BLOOD, …, 0.65)`: 0.65 of the 64 px sheet, in tiles. */
+const BLOOD_DECAL_TILES = (0.65 * 64) / TILE_CM;
+
+/** The pointer lives 50-80 ticks and fades over its last 50 (ZzzEffectPointer.cpp:41, :85). */
+const BLOOD_DECAL_SECONDS: readonly [number, number] = [50 * TICK, 80 * TICK];
+
+/** `MovePointers` writes `Light = (0.1, 0, 0)` on a blood pointer: dark, drying. */
+const BLOOD_DECAL_COLOUR: RGB = [0.35, 0.06, 0.05];
+
+/** `CreateJoint(BITMAP_JOINT_THUNDER, …, 7, NULL, 14.f)`: Scale 14 is a 14 cm ribbon. */
+const THUNDER_WIDTH = 14 / TILE_CM;
+
+/** ...with 20 tries a tick, each 1/10 a puff and 1/10 a stone (ZzzCharacter.cpp:5641-5651). */
+const APPEAR_TRIES = 20;
+const APPEAR_EVERY = 10;
+
+/**
+ * `BITMAP_JOINT_SPARK` SubType 0 (ZzzEffectJoint.cpp:950): Scale 2, Velocity
+ * 6-25 cm a tick, LT 8-15 ticks, MaxTails 2, white; no gravity, no fade.
+ */
+const SPARK_VELOCITY: readonly [number, number] = [
+  (6 * 25) / TILE_CM,
+  (25 * 25) / TILE_CM,
+];
+const SPARK_SECONDS: readonly [number, number] = [8 * TICK, 15 * TICK];
+const SPARK_TAILS = 2;
+/**
+ * Scale 2 is a 2 cm filament. The ribbon is drawn a little wider so it reads
+ * at our camera, but 6 cm was three times the original and the anvil threw
+ * what looked like ribbons rather than sparks; 3 cm still reads.
+ */
+const SPARK_WIDTH = 0.03;
+
+// ---- 2. the rows ------------------------------------------------------------
+
+/**
+ * Each monster folder writes its own rows (`MonsterDef.bodyFx`, types in
+ * `controllers/monsters/bodyFx.ts`); particles and textures there are names, resolved here.
+ */
+type Resolved<E> = E extends unknown
+  ? {
+      readonly [K in keyof E]: K extends 'recipe' | 'devias'
+        ? ParticleRecipe
+        : K extends 'texture'
+          ? string
+          : E[K];
+    }
+  : never;
+
+type Emitter = Resolved<BodyFxEmitter>;
+type Gate = BodyFxGate;
+/** A box in the original's centimetres: `rand() % (2x) - x` each way, `z` up. */
+type Cm3 = readonly [number, number, number];
+
+type MonsterVisual = readonly Emitter[];
+
+const PARTICLES: Readonly<Record<BodyParticle, ParticleRecipe>> = {
+  bodySmoke: BODY_SMOKE,
+  energyChips: ENERGY_CHIPS,
+  firePuff: FIRE_PUFF,
+  flameLick: FLAME_LICK,
+  sandSmoke: SAND_SMOKE,
+  sandSmokeBurst: SAND_SMOKE_BURST,
+};
+
+const SHARDS: Readonly<Record<BodyShard, readonly string[]>> = { brokenIce: MODEL.brokenIce, stone2: [MODEL.stone2] };
+
+/** `CreateEffect(BITMAP_*, p, ..., Light, SubType)` of a terrain mark, as a ring at `p` in the row's light. */
+const GROUNDS: Readonly<Record<BodyGround, (scene: Scene, at: Vector3, colour: RGB) => void>> = {
+  // BITMAP_CRATER SubType 2: 40 ticks at 3 tiles, alpha tested; Light and Alpha are LifeTime / 10 over the last 10
+  // (ZzzEffect.cpp:4135-4140, :10054-10057, MoveHandlers.cpp:6902-6914).
+  crater2: (scene, at, colour) =>
+    void spawnRing(scene, at, { texture: TEX.crater, colour, seconds: 40 * TICK, scale: 3, blend: 'alpha', fadeTail: 0.25, fadeColour: true }),
+  // BITMAP_SHOCK_WAVE SubType 8: 10 ticks, Scale (rand() % 10 + 10) / 5 growing 1 a tick, the light 1/1.3 a tick
+  // under LifeTime 6 (ZzzEffect.cpp:3579-3583, MoveHandlers.cpp:5808-5811, :5877-5884).
+  shockWave8: (scene, at, colour) => {
+    const from = (Math.floor(Math.random() * 10) + 10) / 5;
+    spawnRing(scene, at, {
+      texture: TEX.shockwave,
+      colour,
+      seconds: 10 * TICK,
+      maxScale: 14,
+      scaleAt: t => from + t / TICK,
+      alphaAt: p => (1 / 1.3) ** Math.max(0, Math.floor(p * 10) - 4),
+    });
+  },
+  // SubType 11: 20 ticks, Scale (rand() % 10 + 10) / 10 growing rand() % 5 / 10 a tick; SubType 12: 10 ticks from Scale
+  // 0.1, growing (LifeTime - 4) * 0.25 a tick while above 4; both 1/1.3 of their light a tick under LifeTime 6
+  // (ZzzEffect.cpp:3598-3607, MoveHandlers.cpp:5822-5833, :5877-5884).
+  shockWave11: (scene, at, colour) => {
+    let size = (Math.floor(Math.random() * 10) + 10) / 10;
+    const sizes = [size];
+    for (let i = 0; i < 20; i++) sizes.push((size += Math.floor(Math.random() * 5) / 10));
+    spawnRing(scene, at, {
+      texture: TEX.shockwave,
+      colour,
+      seconds: 20 * TICK,
+      maxScale: 10,
+      scaleAt: t => sizes[Math.min(20, Math.floor(t / TICK + 1e-3))],
+      alphaAt: p => (1 / 1.3) ** Math.max(0, Math.floor(p * 20) - 14),
+    });
+  },
+  shockWave12: (scene, at, colour) =>
+    void spawnRing(scene, at, {
+      texture: TEX.shockwave,
+      colour,
+      seconds: 10 * TICK,
+      scaleAt: t => {
+        const n = Math.min(5, Math.floor(t / TICK + 1e-3));
+        return 0.1 + 0.25 * (5 * n - (n * (n - 1)) / 2);
+      },
+      alphaAt: p => (1 / 1.3) ** Math.max(0, Math.floor(p * 10) - 4),
+    }),
+};
+
+const BLUR_SHEETS: Readonly<Record<BodyBlurSheet, string>> = { blur01: TEX.blur, blur02: TEX.blur2, motionBlur: TEX.motionBlur };
+
+const TEXTURES: Readonly<Record<BodyTexture, string>> = {
+  flare: TEX.flare,
+  magicGround2: TEX.magicGround2,
+  gmAurora: TEX.gmAurora,
+};
+
+const CARDS: Readonly<Record<BodyCard, GlowTexture>> = {
+  light: 'flare',
+  lightRed: 'lightRed',
+  lightMarks: 'lightMarks',
+  shockWave: 'shockWave',
+  shiny2: 'wisp',
+  shiny6: 'shiny6',
+  energy: 'energy',
+  flareBlue: 'flareBlue',
+  flareRed: 'flareRed',
+  flare2: 'flare2',
+  eventCloud: 'eventCloud',
+  hole: 'hole',
+  lightning2: 'halo',
+  blur01: 'blur',
+};
+
+const PUFFS: Readonly<Record<BodyPuff, KindName>> = {
+  fire1: 'fire1',
+  fire2: 'fire2',
+  fire3: 'fire3',
+  smoke1: 'smoke1',
+  smoke13: 'smoke13',
+  smoke17: 'smoke17',
+  smoke21: 'smoke21',
+  smoke50: 'smoke50',
+  smokeLine1: 'smokeLine1',
+  smokeLine2: 'smokeLine2',
+  smokeLine3: 'smokeLine3',
+  smokeLine1_2: 'smokeLine1_2',
+  smokeLine2_2: 'smokeLine2_2',
+  smokeLine3_2: 'smokeLine3_2',
+  fire1_3: 'fire1_3',
+  smokeLine1_1: 'smokeLine1_1',
+  smokeLine2_1: 'smokeLine2_1',
+  smokeLine3_1: 'smokeLine3_1',
+  clud64_6: 'clud64_6',
+  trueFire: 'trueFire',
+  fireMono1_4: 'fireMono1_4',
+  fireMono2_8: 'fireMono2_8',
+  fireMono3_5: 'fireMono3_5',
+  waterfall4Orbit0: 'waterfall4Orbit0',
+  waterfall4Orbit1: 'waterfall4Orbit1',
+  waterfall4Orbit2: 'waterfall4Orbit2',
+  waterfall4_15: 'waterfall4_15',
+  smoke39: 'smoke39',
+  spark1_11: 'spark1_11',
+  waterfall3_6: 'waterfall3_6',
+  smoke3_3: 'smoke3_3',
+  smoke3_4: 'smoke3_4',
+  blueBlur1: 'blueBlur1',
+  spark1_16: 'spark1_16',
+};
+
+type CardsRow = Extract<BodyFxEmitter, { kind: 'cards' }>;
+
+/** A `cards` row as the glow entry draws it: each spot its own sheet, scale and offset (cm to tiles). */
+function cardGlow(em: CardsRow, e: Entity, roar: Roar): MonsterGlow {
+  const gate = em.gate;
+  return {
+    when: gate && (gate.action || gate.frames || gate.when) ? () => shownNow(e, gate) : undefined,
+    scaleBy: em.roar ? () => roar.value : undefined,
+    bones: [],
+    spots: em.spots.map(s => ({
+      bone: s.bone,
+      tex: CARDS[s.card],
+      scale: s.scale,
+      local: s.local && [s.local[0] / TILE_CM, s.local[1] / TILE_CM, s.local[2] / TILE_CM],
+      spin: s.spin,
+    })),
+    cards: [],
+    colour: em.colour,
+    breathe: !!em.pulse,
+    breathSpeed: em.pulse?.speed,
+    breathAmount: em.pulse?.amount,
+    breathBase: em.pulse?.base,
+    swellSpeed: em.swell?.speed,
+    swellAmount: em.swell?.amount,
+    liftSpeed: em.lift?.speed,
+    liftAmount: em.lift?.amount,
+    liftBase: em.lift?.base,
+    liftChannels: em.lift?.channels,
+    luminosity: 1,
+  };
+}
+
+/** A row with its names swapped for the recipes and textures they name; keys keep their order. */
+function resolve(e: BodyFxEmitter): Emitter {
+  const out: Record<string, unknown> = { ...e };
+  if ('recipe' in e) out.recipe = PARTICLES[e.recipe];
+  if ('devias' in e && e.devias) out.devias = PARTICLES[e.devias];
+  if ('texture' in e) out.texture = TEXTURES[e.texture];
+  return out as Emitter;
+}
+
+const resolved = new WeakMap<MonsterBodyFx, MonsterVisual>();
+
+/** The body effects a character type carries (its folder's `bodyFx`), if any. */
+export function monsterVisualFor(npcType: number): MonsterVisual | undefined {
+  const fx = monsterRegistry.def(npcType)?.bodyFx;
+  if (!fx) return undefined;
+  let row = resolved.get(fx);
+  if (!row) {
+    row = fx.map(resolve);
+    resolved.set(fx, row);
+  }
+  return row;
+}
+
+// ---- 3. state + readers ----------------------------------------------------
+
+/**
+ * A recipe re-coloured or re-sized for one row. The particle pool is keyed
+ * by recipe identity, so each (base, colour, scale) gets one stable object.
+ */
+const variants = new WeakMap<ParticleRecipe, Map<string, ParticleRecipe>>();
+
+function variant(
+  base: ParticleRecipe,
+  colour?: RGB,
+  scale?: number
+): ParticleRecipe {
+  if (!colour && !scale) return base;
+  let mine = variants.get(base);
+  if (!mine) {
+    mine = new Map();
+    variants.set(base, mine);
+  }
+  const key = `${colour?.join(',') ?? ''}|${scale ?? ''}`;
+  let r = mine.get(key);
+  if (!r) {
+    r = { ...base };
+    if (colour) {
+      r.colour = colour;
+      if (base.colourEnd) {
+        const k =
+          (base.colourEnd[0] + base.colourEnd[1] + base.colourEnd[2]) /
+          Math.max(1e-3, base.colour[0] + base.colour[1] + base.colour[2]);
+        r.colourEnd = [colour[0] * k, colour[1] * k, colour[2] * k];
+      }
+    }
+    if (scale) r.size = base.size * scale;
+    mine.set(key, r);
+  }
+  return r;
+}
+
+/** The map the entries are stepping for; `body` reads it for the Devias sheet. */
+let currentMap: ENUM_WORLD = ENUM_WORLD.WD_0LORENCIA;
+
+const live = new LiveList();
+
+const tmp = new Vector3();
+const tmpLocal = new Vector3();
+/** A spark's heading: `spawnJoint` copies it, so one serves them all. */
+const sparkHeading = new Vector3();
+const ZERO_CM: Cm3 = [0, 0, 0];
+/** An `origin` puff's one spot. */
+const ORIGIN: readonly number[] = [0];
+
+const scatter = (v: number) => (Math.random() * 2 - 1) * v;
+
+function boxed(e: Entity, box: Cm3, out: Vector3): Vector3 {
+  entityPos(e, 0, out);
+  out.x += scatter(box[0] / TILE_CM);
+  out.z += scatter(box[1] / TILE_CM);
+  out.y += scatter(box[2] / TILE_CM);
+  return out;
+}
+
+function boneSource(e: Entity, at: number): PointSource {
+  return out => bonePos(e, at, out);
+}
+
+type Frame = {
+  readonly action: A | undefined;
+  readonly frame: number;
+  readonly prevFrame: number;
+  readonly alive: boolean;
+  readonly buffs: ReadonlySet<number> | undefined;
+  /** This body took its rows' cue on this tick. */
+  cued: boolean;
+};
+
+function open(gate: Gate | undefined, f: Frame): boolean {
+  if (!gate) return true;
+  if (gate.alive && !f.alive) return false;
+  if (gate.buff !== undefined && !f.buffs?.has(gate.buff)) return false;
+  if (gate.when && !gate.when()) return false;
+  if (gate.cue && !f.cued) return false;
+  if (
+    gate.action &&
+    (f.action === undefined || !gate.action.includes(f.action))
+  )
+    return false;
+  if (
+    gate.frames &&
+    !gate.frames.some(([a, b]) => inWindow(f.prevFrame, f.frame, a, b))
+  ) {
+    return false;
+  }
+  return true;
+}
+
+/** A row's offset in cm as a point in tiles, made once with the row. */
+function tiles(cm: Cm3 | undefined): Vector3 {
+  return cm ? new Vector3(cm[0] / TILE_CM, cm[1] / TILE_CM, cm[2] / TILE_CM) : new Vector3();
+}
+
+/** A cards gate as it stands this frame: the action and frame now, no crossing. */
+function shownNow(e: Entity, gate: Gate): boolean {
+  const model = e.modelObject;
+  const action = e.monsterAnimation?.action ?? (model?.CurrentAction as A | undefined);
+  if (gate.alive && e.dying) return false;
+  if (gate.when && !gate.when()) return false;
+  if (gate.action && (action === undefined || !gate.action.includes(action))) return false;
+  if (!gate.frames) return true;
+  const frame = model?.actionFrame() ?? 0;
+  for (const [a, b] of gate.frames) if (inWindow(-1, frame, a, b)) return true;
+  return false;
+}
+
+/** The Shock roar's `o->PKKey`, `o->Skill` and the `fRoar` they make. */
+type Roar = { pk: number; skill: number; value: number };
+
+/** One tick of the roar (GMHellas.cpp:1596-1622): `fRoar` is 1 out of Shock. */
+function stepRoar(r: Roar, action: A | undefined, frame: number): void {
+  if (action !== A.Shock) {
+    r.pk = 0;
+    r.value = 1;
+    return;
+  }
+  if (frame > 10 && r.pk > 10) r.pk -= 1;
+  else if (frame > 4) r.pk += 1;
+  else r.pk = 10;
+  if ((frame > 4 && frame < 6) || (frame > 8 && frame < 10)) {
+    if (frame < 5 || (frame > 8 && frame < 9)) r.skill += 3;
+    else if (r.skill > 3) r.skill -= 3;
+  } else r.skill = 0;
+  r.value = (r.pk + r.skill) * 0.15;
+}
+
+/** The emitting monster's `fRoar`, for its `roar` puffs. */
+let roarNow = 1;
+
+/** The monster's `Angle` as a node turn: a push of `(0, -1, 0)` goes the way it faces (`entityYaw`). */
+const facingTurn = { x: 0, y: 0, z: 0 };
+
+function facing(e: Entity): typeof facingTurn {
+  facingTurn.y = -entityYaw(e);
+  return facingTurn;
+}
+
+/** `o->Position` plus `(0, -cm, 0)` turned by its Angle: `cm` along the way it faces. */
+function ahead(e: Entity, cm: number, out: Vector3): Vector3 {
+  const yaw = entityYaw(e);
+  entityPos(e, 0, out);
+  out.x += (Math.sin(yaw) * cm) / TILE_CM;
+  out.z -= (Math.cos(yaw) * cm) / TILE_CM;
+  return out;
+}
+
+function boneCount(e: Entity): number {
+  // The GLB adds a root above the MU bones (core.ts bonePos).
+  return Math.max(0, (e.modelObject?.gltf?.skeleton?.bones.length ?? 0) - 1);
+}
+
+/** One tick of one emitter, the 1/every roll already won. `rides`: the row's kept anchors (`ride`). */
+function emit(scene: Scene, e: Entity, em: Emitter, f: Frame, rides?: readonly Vector3[]): void {
+  switch (em.kind) {
+    case 'body': {
+      if (!open(em.gate, f)) return;
+      const recipe = variant(
+        em.devias && currentMap === ENUM_WORLD.WD_2DEVIAS
+          ? em.devias
+          : em.recipe,
+        em.colour
+      );
+      for (let i = 0; i < (em.count ?? 1); i++) {
+        emitBurst(scene, recipe, boxed(e, em.box, tmp), 1);
+      }
+      return;
+    }
+    case 'bone': {
+      if (!open(em.gate, f)) return;
+      const local = em.local ?? [0, 0, 0];
+      tmpLocal.set(local[0] / TILE_CM, local[1] / TILE_CM, local[2] / TILE_CM);
+      boneLocalPos(e, em.bone, tmpLocal, tmp);
+      emitBurst(scene, variant(em.recipe, em.colour, em.scale), tmp, 1);
+      return;
+    }
+    case 'bones': {
+      if (!open(em.gate, f)) return;
+      const n = boneCount(e);
+      if (n <= 0) return;
+      const recipe = variant(em.recipe, em.colour);
+      for (let i = 0; i < em.count; i++) {
+        emitBurst(
+          scene,
+          recipe,
+          bonePos(e, Math.floor(Math.random() * n), tmp),
+          1
+        );
+      }
+      return;
+    }
+    case 'blood': {
+      entityPos(e, 0, tmp);
+      tmp.x += scatter(em.scatterCm / TILE_CM);
+      tmp.z += scatter(em.scatterCm / TILE_CM);
+      const [lo, hi] = BLOOD_DECAL_SECONDS;
+      const seconds = lo + Math.random() * (hi - lo);
+      spawnRing(scene, tmp, {
+        texture: TEX.blood,
+        colour: BLOOD_DECAL_COLOUR,
+        seconds,
+        scale: BLOOD_DECAL_TILES,
+        // `Scale += 0.004` a tick: barely spreads.
+        grow: 1.1,
+        blend: 'alpha',
+        fadeTail: (50 * TICK) / seconds,
+      });
+      return;
+    }
+    case 'appear': {
+      for (let i = 0; i < APPEAR_TRIES; i++) {
+        if (Math.random() < 1 / APPEAR_EVERY) {
+          emitBurst(scene, SAND_SMOKE_BURST, boxed(e, [32, 32, 16], tmp), 1);
+        }
+        if (Math.random() < 1 / APPEAR_EVERY) {
+          spawnDebris(scene, entityPos(e, 0, tmp), {
+            model: Math.random() < 0.5 ? MODEL.stone : MODEL.stone2,
+            count: 1,
+            colour: RGBS.white,
+            puff: FIRE_PUFF,
+          });
+        }
+      }
+      return;
+    }
+    case 'sparks': {
+      if (!open(em.gate, f)) return;
+      const local = em.local ?? [0, 0, 0];
+      tmpLocal.set(local[0] / TILE_CM, local[1] / TILE_CM, local[2] / TILE_CM);
+      boneLocalPos(e, em.bone, tmpLocal, tmp);
+      for (let i = 0; i < em.tries; i++) {
+        if (Math.random() >= 1 / em.every) continue;
+        const pitch =
+          ((em.pitch[0] + Math.random() * (em.pitch[1] - em.pitch[0])) *
+            Math.PI) /
+          180;
+        const yaw =
+          ((em.yaw[0] + Math.random() * (em.yaw[1] - em.yaw[0])) * Math.PI) /
+          180;
+        // `AngleMatrix((pitch, 0, yaw))` on the joint's forward (0, 1, 0):
+        // the original's y is horizontal and z is up.
+        const fwd = Math.cos(pitch);
+        const up = Math.sin(pitch);
+        const heading = sparkHeading.set(-fwd * Math.sin(yaw), up, fwd * Math.cos(yaw));
+        spawnJoint(scene, tmp, {
+          velocity:
+            SPARK_VELOCITY[0] +
+            Math.random() * (SPARK_VELOCITY[1] - SPARK_VELOCITY[0]),
+          heading,
+          seconds:
+            SPARK_SECONDS[0] +
+            Math.random() * (SPARK_SECONDS[1] - SPARK_SECONDS[0]),
+          maxTails: SPARK_TAILS,
+          width: SPARK_WIDTH,
+          colour: RGBS.white,
+          texture: TEX.spark,
+        });
+        if (Math.random() < em.chip) emitBurst(scene, HIT_SPARKS, tmp, 1);
+      }
+      return;
+    }
+    case 'puff': {
+      if (!open(em.gate, f)) return;
+      const local = em.local ?? ZERO_CM;
+      const turn = em.turned ? facing(e) : NO_TURN;
+      const spots = em.origin ? ORIGIN : em.bones;
+      const n = em.pick ?? spots.length;
+      for (let b = 0; b < n; b++) {
+        if (em.rollEach && Math.random() >= 1 / em.every) continue;
+        tmpLocal.set(local[0] / TILE_CM, local[1] / TILE_CM, local[2] / TILE_CM);
+        if (em.origin) entityPos(e, 0, tmp);
+        else boneLocalPos(e, em.pick ? spots[Math.floor(Math.random() * spots.length)] : spots[b], tmpLocal, tmp);
+        const anchor = rides ? rides[em.ride === 'bone' ? b : 0] : undefined;
+        const colour = em.colours ? em.colours[Math.floor(Math.random() * em.colours.length)] : em.colour;
+        for (let i = 0; i < em.particles.length; i++) {
+          const p = em.particles[i];
+          const name = typeof p === 'string' ? p : p[Math.floor(Math.random() * p.length)];
+          const scale = (em.scales?.[i] ?? em.scale ?? 1) * (em.roar ? roarNow : 1);
+          void spawnParticle(scene, PUFFS[name], tmp, turn, scale, colour, em.jitterCm, anchor);
+        }
+      }
+      return;
+    }
+    case 'shards': {
+      if (!open(em.gate, f)) return;
+      const models = SHARDS[em.shards];
+      const ice = em.shards === 'brokenIce';
+      const puff = ice ? variant(SMOKE, em.colour) : undefined;
+      const n = em.aheadCm === undefined ? em.bones.length : 1;
+      for (let s = 0; s < n; s++) {
+        if (em.aheadCm === undefined) bonePos(e, em.bones[s], tmp);
+        else ahead(e, em.aheadCm, tmp);
+        for (let i = 0; i < em.count; i++) {
+          const model = models[Math.floor(Math.random() * models.length)];
+          spawnDebris(scene, tmp, ice ? { model, ice, colour: em.colour, puff } : { model, count: 1, colour: em.colour });
+        }
+      }
+      return;
+    }
+    case 'call':
+      if (open(em.gate, f)) em.run(scene, e);
+      return;
+    case 'ground': {
+      if (!open(em.gate, f)) return;
+      const n = em.aheadCm === undefined ? em.bones.length : 1;
+      for (let s = 0; s < n; s++) {
+        if (em.aheadCm === undefined) bonePos(e, em.bones[s], tmp);
+        else ahead(e, em.aheadCm, tmp);
+        for (let i = 0; i < em.count; i++) GROUNDS[em.ground](scene, tmp, em.colour);
+      }
+      return;
+    }
+    case 'bolts':
+    case 'cards':
+    case 'trail':
+    case 'blur':
+      // Spawned once at start, or by the row's own state (`blur`); nothing per tick here.
+      return;
+  }
+}
+
+/**
+ * Start the row's effects on one monster. The handle lives until the entity
+ * leaves the world or the map resets; a death does not end it, because the
+ * sand cloud and Bali's fire are die effects.
+ */
+export function visualMonster(
+  scene: Scene,
+  e: Entity,
+  row: MonsterVisual
+): EffectHandle {
+  const model = e.modelObject;
+  if (!model) return DEAD_HANDLE;
+
+  let bank = 0;
+  let ticks = 0;
+  let prevFrame = -1;
+  let stopped = false;
+  const children: EffectHandle[] = [];
+  /** The ones that end with its life (`gate.alive`). */
+  const mortal: EffectHandle[] = [];
+  /** By row: the points a riding puff's particles follow, one a body or one a bone, kept where they are. */
+  const rides = row.map(em =>
+    em.kind === 'puff' && em.ride ? (em.ride === 'bone' ? em.bones : [0]).map(() => new Vector3()) : undefined
+  );
+
+  /** The one-shot cue its rows wait on, if any (`gate.cue`). */
+  let cue: LookCueName | undefined;
+  for (const em of row) if ('gate' in em && em.gate && 'cue' in em.gate && em.gate.cue) cue = em.gate.cue;
+
+  const roar: Roar = { pk: 0, skill: 0, value: 1 };
+  const roars = row.some(em => (em.kind === 'cards' || em.kind === 'puff') && em.roar);
+
+  /** By row: a `blur` row's live trail and its two points in tiles. */
+  const blurs = row.map(em => (em.kind === 'blur' ? { live: DEAD_HANDLE, from: tiles(em.fromLocal), to: tiles(em.toLocal) } : undefined));
+  const swing = (em: Extract<Emitter, { kind: 'blur' }>, b: { live: EffectHandle; from: Vector3; to: Vector3 }) => {
+    const gate = em.gate;
+    b.live = blurLayer.spawn(scene, tmp, {
+      follow: out => boneLocalPos(e, em.to, b.to, out),
+      base: out => boneLocalPos(e, em.from, b.from, out),
+      texture: BLUR_SHEETS[em.sheet],
+      colour: em.colour,
+      blend: em.dark ? 'subtract' : 'add',
+      short: em.short,
+      tickHistory: true,
+      samplesPerTick: em.samples,
+      seconds: Infinity,
+      until: () => stopped || entityGone(e) || (gate !== undefined && !shownNow(e, gate)),
+    });
+  };
+
+  for (const em of row) {
+    if (em.kind === 'cards') {
+      const card = glowMonster(scene, e, cardGlow(em, e, roar));
+      children.push(card);
+      if (em.gate?.alive) mortal.push(card);
+      continue;
+    }
+    if (em.kind === 'trail') {
+      const gate = em.gate;
+      const ribbon = spawnJoint(scene, bonePos(e, em.bone, tmp), {
+        intensity: gate && (gate.action || gate.frames) ? () => (shownNow(e, gate) ? 1 : 0) : undefined,
+        head: boneSource(e, em.bone),
+        maxTails: em.maxTails,
+        width: em.widthCm / TILE_CM,
+        colour: em.colour,
+        texture: em.ribbon === 'flare' ? TEX.flareBig : em.ribbon === 'spark' ? TEX.spark3 : TEX.jointLaser,
+        seconds: Infinity,
+        fadeTail: 0,
+        until: () => stopped || entityGone(e),
+      });
+      children.push(ribbon);
+      if (em.gate?.alive) mortal.push(ribbon);
+      continue;
+    }
+    if (em.kind === 'halo') {
+      children.push(
+        spawnSprite(scene, entityPos(e, em.heightCm / TILE_CM, tmp), {
+          texture: em.texture,
+          colour: em.colour,
+          size: em.size,
+          seconds: Infinity,
+          fadeTail: 0,
+          height: em.heightCm / TILE_CM,
+          follow: out => entityPos(e, 0, out),
+        })
+      );
+      continue;
+    }
+    if (em.kind === 'mark') {
+      // The original turns these off `WorldTime`, so one that has been under
+      // a character since it came into scope is already part-way round.
+      children.push(
+        spawnRing(scene, entityPos(e, 0, tmp), {
+          texture: em.texture,
+          colour: em.colour,
+          scale: em.tiles,
+          spin: em.spin,
+          spinFrom: (performance.now() * em.spin) / 1000,
+          seconds: Infinity,
+          fadeTail: 0,
+          follow: out => entityPos(e, 0, out),
+          until: () => stopped || entityGone(e),
+        })
+      );
+      continue;
+    }
+    if (em.kind !== 'bolts') continue;
+    for (const [a, b] of em.pairs) {
+      children.push(
+        spawnJoint(scene, bonePos(e, a, tmp), {
+          from: boneSource(e, a),
+          to: boneSource(e, b),
+          colour: RGBS.arc,
+          seconds: Infinity,
+          width: THUNDER_WIDTH,
+          segments: 8,
+          forks: 1,
+          jitter: 0.1,
+          texture: TEX.jointThunder,
+          textureRepeats: 2,
+          textureScroll: 1,
+          until: () => stopped || entityGone(e),
+        })
+      );
+    }
+  }
+
+  return live.push({
+    update(dt) {
+      if (entityGone(e)) return false;
+
+      if (e.dying && mortal.length) {
+        for (const h of mortal) h.stop();
+        mortal.length = 0;
+      }
+
+      for (let r = 0; r < row.length; r++) {
+        const em = row[r];
+        const points = rides[r];
+        if (!points || em.kind !== 'puff') continue;
+        if (em.ride === 'body') entityPos(e, 0, points[0]);
+        else for (let b = 0; b < points.length; b++) bonePos(e, em.bones[b], points[b]);
+      }
+
+      bank += dt;
+      let due = 0;
+      while (bank >= TICK && due < MAX_TICKS_PER_FRAME) {
+        bank -= TICK;
+        due++;
+      }
+      if (bank >= TICK) bank = 0;
+      if (due === 0) return true;
+
+      // Off screen it costs nothing, and the bank has already been paid.
+      if (!model.Ready || model.OutOfView) return true;
+
+      const frame = model.actionFrame();
+      const f: Frame = {
+        // An NPC has no `monsterAnimation`; its idle is the model's action 0.
+        action: e.monsterAnimation?.action ?? (model.CurrentAction as A),
+        frame,
+        prevFrame,
+        alive: !e.dying,
+        buffs: e.buffs,
+        cued: false,
+      };
+      prevFrame = frame;
+
+      for (let t = 0; t < due; t++) {
+        ticks++;
+        f.cued = cue !== undefined && takeLookCue(cue);
+        if (roars) stepRoar(roar, f.action, frame);
+        roarNow = roar.value;
+        for (let r = 0; r < row.length; r++) {
+          const em = row[r];
+          if (em.kind === 'appear') {
+            if (ticks <= em.ticks) emit(scene, e, em, f);
+            continue;
+          }
+          // A mark, cards and a trail are not re-made on a tick: they were started with the body.
+          if (em.kind === 'mark' || em.kind === 'cards' || em.kind === 'trail') continue;
+          // A halo is, but on every one of them rather than a roll.
+          if (em.kind === 'halo') {
+            emit(scene, e, em, f);
+            continue;
+          }
+          if (em.kind === 'bolts' || em.kind === 'blood') {
+            if (em.kind === 'blood' && Math.random() < 1 / em.every)
+              emit(scene, e, em, f);
+            continue;
+          }
+          if (em.kind === 'blur') {
+            const b = blurs[r];
+            if (b && !b.live.alive && open(em.gate, f)) swing(em, b);
+            continue;
+          }
+          if ((em.kind === 'puff' && em.rollEach) || Math.random() < 1 / em.every) emit(scene, e, em, f, rides[r]);
+        }
+      }
+      return true;
+    },
+    release() {
+      stopped = true;
+      for (const b of blurs) b?.live.stop();
+      for (const c of children) c.stop();
+      children.length = 0;
+    },
+  });
+}
+
+function update(map: ENUM_WORLD, dt: number): void {
+  currentMap = map;
+  live.update(dt);
+}
+
+function reset(): void {
+  live.clear();
+}
+
+// ---- 4. the layer ----------------------------------------------------------
+
+interface MonsterVisualsOptions {
+  entity: Entity;
+  row?: MonsterVisual;
+}
+
+export const monsterVisualsLayer: EffectLayer<
+  MonsterVisualsOptions,
+  'monsterVisuals'
+> = {
+  name: 'monsterVisuals',
+  update,
+  reset,
+  spawn(scene, _at, opts) {
+    const row = opts.row ?? monsterVisualFor(opts.entity.npcType ?? -1);
+    return row ? visualMonster(scene, opts.entity, row) : DEAD_HANDLE;
+  },
+};

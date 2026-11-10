@@ -1,33 +1,168 @@
-import { TWFlags } from '../../common/terrain/consts';
-import { isFlagInBinaryMask } from '../../common/utils';
-import { Scalar } from '../../libs/babylon/exports';
-import { Store } from '../../store';
-import type { ISystemFactory } from '../world';
+import { TILE_CM, TWFlags } from '../../controllers/terrain/consts';
+import { isFlagInBinaryMask } from '../../controllers/assets/download';
+import { InventoryConstants } from '@/core/inventoryConstants';
+import { Hero } from '../../modules/hero';
+import { BaseClass, getBaseClass } from '../../modules/hero/characterStats';
+import { isSwimWorld } from '../../controllers/actors/locomotion';
+import { isFastWing } from '../../controllers/actors/wings';
+import { isRidingMount } from '@/controllers/pets';
+import type { Entity, ISystemFactory } from '../world';
+import { distanceAlongPath } from '../../controllers/actors/approachPath';
+import { debuffSlow } from '../../controllers/actors/debuffBody';
+
+/**
+ * OpenMU walks every object by wall-clock time: each step takes
+ * `100 * tileDistance / movementSpeed * 40 ms` (PlayerMovement.GetStepDelay),
+ * i.e. `movementSpeed / 4` tiles per second. The speed is 12 while walking
+ * (safe zone, or no running gear) and the MovementSpeed attribute otherwise -
+ * 15 with boots of level >= 5 or wings (MovementSpeedConstants). The client
+ * has to cover the same distance in the same time, otherwise the next
+ * WalkRequest's source tile drifts away from the server's position and the
+ * server rubber-bands us (`Resynchronizing client`, tolerance 5 tiles).
+ */
+const WALK_MOVEMENT_SPEED = 12;
+const RUNNING_GEAR_MOVEMENT_SPEED = 15;
+const RUNNING_GEAR_MINIMUM_LEVEL = 5;
+const REFERENCE_FRAME_SECONDS = 0.04;
+
+/** Tiles per second the server expects for `movementSpeed`. */
+function tilesPerSecond(movementSpeed: number): number {
+  return movementSpeed / (TILE_CM * REFERENCE_FRAME_SECONDS);
+}
+
+/** OpenMU `MovementSpeedConstants`: wings / mounts, and the classes that run natively. */
+const DEFAULT_WING_MOVEMENT_SPEED = 15;
+const FAST_WING_MOVEMENT_SPEED = 16;
+const BASIC_MOUNT_MOVEMENT_SPEED = 15;
+const HORSE_OR_FENRIR_MOVEMENT_SPEED = 17;
+const DARK_HORSE = 4;
+const HORN_OF_FENRIR = 37;
+
+/**
+ * `Stats.MovementSpeed` (or `MovementSpeedUnderwater` in a swim world) as
+ * OpenMU aggregates it (AggregateType.Maximum) from the class and the gear:
+ *  - Dark Lord, Magic Gladiator and Rage Fighter carry 15 as a base value
+ *    (ClassDarkLord.cs:128, ClassMagicGladiator.cs:130, ClassRageFighter.cs:100),
+ *  - boots of level >= 5 give 15 (gloves >= 5 underwater instead),
+ *  - wings 15, Wings of Dragon / Wing of Storm 16,
+ *  - Uniria / Dinorant 15, Dark Horse / Fenrir 17 (the upgraded-Fenrir
+ *    combination bonuses are not modelled).
+ * Without any of these the server walks at 12 even while the client plays the
+ * run clip - OpenMU has no free run for the Dark Knight.
+ */
+function runningMovementSpeed(entity: Entity, world: number): number {
+  const items = Hero.items;
+  const app = entity.charAppearance;
+  const local = !!entity.localPlayer;
+  const boots = local ? items[InventoryConstants.BootsSlot] : app?.boots;
+  const gloves = local ? items[InventoryConstants.GlovesSlot] : app?.gloves;
+  const wings = local ? items[InventoryConstants.WingsSlot] : app?.wings;
+  const pet = local ? items[InventoryConstants.PetSlot] : app?.pet;
+  const cls = local ? Hero.charClass : app?.charClass;
+
+  let speed = 0;
+  if (cls !== undefined) {
+    const base = getBaseClass(cls);
+    if (base === BaseClass.DarkLord || base === BaseClass.MagicGladiator || base === BaseClass.RageFighter) {
+      speed = RUNNING_GEAR_MOVEMENT_SPEED;
+    }
+  }
+  const gear = isSwimWorld(world) ? gloves : boots;
+  if (gear && (gear.lvl ?? 0) >= RUNNING_GEAR_MINIMUM_LEVEL) {
+    speed = Math.max(speed, RUNNING_GEAR_MOVEMENT_SPEED);
+  }
+  if (wings) {
+    speed = Math.max(speed, isFastWing(wings) ? FAST_WING_MOVEMENT_SPEED : DEFAULT_WING_MOVEMENT_SPEED);
+  }
+  if (pet) {
+    // Horse and Fenrir first: both count as riding mounts, at 17 not 15.
+    if (pet.num === DARK_HORSE || pet.num === HORN_OF_FENRIR) speed = Math.max(speed, HORSE_OR_FENRIR_MOVEMENT_SPEED);
+    else if (isRidingMount(pet)) speed = Math.max(speed, BASIC_MOUNT_MOVEMENT_SPEED);
+  }
+  return speed;
+}
+
+/** `PlayerMovement.GetClientMovementSpeed` for player entities. */
+function playerTilesPerSecond(entity: Entity, inSafeZone: boolean, world: number): number {
+  if (inSafeZone) return tilesPerSecond(WALK_MOVEMENT_SPEED);
+  return tilesPerSecond(
+    Math.max(WALK_MOVEMENT_SPEED, runningMovementSpeed(entity, world))
+  );
+}
+
+/**
+ * Longest wall-clock gap a walker is allowed to catch up on at once. A
+ * WalkRequest carries at most 15 steps (~5 s), so anything longer is a stall
+ * the server has long finished walking for us; ObjectMoved fixes the rest.
+ */
+const MAX_WALK_CATCH_UP_SECONDS = 6;
 
 export const MoveAlongPathSystem: ISystemFactory = world => {
   const query = world.with('transform', 'pathfinding', 'movement');
 
-  return {
-    update: (deltaTime: number) => {
-      for (const {
-        pathfinding,
-        transform,
-        movement,
-        localPlayer,
-        attributeSystem,
-      } of query) {
-        if (localPlayer) {
-          Store.playerData.setPosition(~~transform.pos.x, ~~transform.pos.z);
+  let lastTick = performance.now();
 
-          const flag = world.getTerrainFlag(
-            ~~transform.pos.x,
-            ~~transform.pos.z
-          );
-          Store.playerData.setTileFlag(flag);
+  return {
+    update: () => {
+      // The render loop clamps its delta to 100 ms (MAX_FRAME_DELTA) so
+      // effects never skip ahead; walkers must not inherit that clamp - the
+      // server keeps stepping at wall-clock pace while we render at 3 fps in
+      // a background tab, and every lost frame became a tile of desync.
+      const now = performance.now();
+      const deltaTime = Math.min(
+        (now - lastTick) / 1000,
+        MAX_WALK_CATCH_UP_SECONDS
+      );
+      lastTick = now;
+
+      for (const entity of query) {
+        const { pathfinding, transform, movement, localPlayer, attributeSystem } =
+          entity;
+
+        if (localPlayer) {
+          // A MobX action: writing an unchanged value still runs it (and its
+          // reaction pass), so the flag of the hero's tile is mirrored only when it changes.
+          const flag = world.getTerrainFlag(~~transform.pos.x, ~~transform.pos.z);
+          if (Hero.tileFlag !== flag) Hero.setTileFlag(flag);
         }
 
-        const speed = attributeSystem?.getValue('totalMovementSpeed') ?? 4;
-        let deltaSpeed = speed * deltaTime;
+        let speed: number;
+        if (entity.playerAnimation || localPlayer) {
+          // OpenMU's SafezoneMap is the terrain's SafeZone flag at the
+          // player's current (integer) position.
+          const flag = world.getTerrainFlag(
+            Math.round(transform.pos.x),
+            Math.round(transform.pos.z)
+          );
+          speed = playerTilesPerSecond(
+            entity,
+            isFlagInBinaryMask(flag, TWFlags.SafeZone),
+            world.mapIndex
+          );
+        } else {
+          // getValue() materialises a 0-valued element for unknown
+          // attributes, so guard with hasAttribute: a 0 speed silently
+          // freezes the walker.
+          speed = attributeSystem?.hasAttribute('totalMovementSpeed')
+            ? attributeSystem.getValue('totalMovementSpeed')
+            : 4;
+        }
+        // CharacterMoveSpeed's Freeze / Cold slow (ZzzCharacter.cpp:6352-6359), monsters and players alike.
+        let deltaSpeed = speed * debuffSlow(entity.buffs) * deltaTime;
+
+        // The hero may not outwalk what the server has been told. A frame
+        // hitch (a tab in the background, a burst of asset loading) hands
+        // this loop seconds of catch-up at once, and without a stop it
+        // strides past the end of the sent chunk - where the server's walker
+        // is parked - by several tiles. The next WalkRequest then starts from
+        // a tile the server has not reached, which is what it reports as a
+        // speedhack and what rubber-bands the player back a moment later.
+        if (localPlayer && pathfinding.sentThrough && pathfinding.path) {
+          deltaSpeed = Math.min(
+            deltaSpeed,
+            distanceAlongPath(transform.pos, pathfinding.path, pathfinding.sentThrough)
+          );
+        }
 
         if (
           !pathfinding.path ||
@@ -52,13 +187,6 @@ export const MoveAlongPathSystem: ISystemFactory = world => {
           if (deltaDistance === distance) {
             pathfinding.path.shift();
 
-            // if (pathfinding.path.length === 0) {
-            //   movement.velocity.x = 0;
-            //   movement.velocity.y = 0;
-
-            //   break;
-            // }
-
             if (distance < 0.00001) continue;
           }
 
@@ -72,28 +200,14 @@ export const MoveAlongPathSystem: ISystemFactory = world => {
           transform.pos.z += deltaY;
 
           if (world.terrain) {
-            const h1 = world.getTerrainHeight(
-              ~~transform.pos.x,
-              ~~transform.pos.z
+            // RequestTerrainHeight is bilinear at the float position
+            // (ZzzLodTerrain.cpp:825-839, ZzzCharacter.cpp:6265) - the
+            // previous 4 integer samples averaged with fixed weights made
+            // characters float/sink on slopes.
+            transform.pos.y = world.getTerrainHeight(
+              transform.pos.x,
+              transform.pos.z
             );
-            const h2 = world.getTerrainHeight(
-              ~~transform.pos.x,
-              ~~transform.pos.z
-            );
-            const h3 = world.getTerrainHeight(
-              ~~transform.pos.x + 1,
-              ~~transform.pos.z
-            );
-            const h4 = world.getTerrainHeight(
-              ~~transform.pos.x + 1,
-              ~~transform.pos.z + 1
-            );
-            const h = Scalar.Lerp(
-              Scalar.Lerp(h1, h2, 0.5),
-              Scalar.Lerp(h3, h4, 0.5),
-              0.5
-            );
-            transform.pos.y = Scalar.Lerp(transform.pos.y, h, 15 * deltaTime);
 
             if (attributeSystem) {
               const flag = world.getTerrainFlag(

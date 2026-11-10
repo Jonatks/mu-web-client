@@ -1,0 +1,163 @@
+// The Instrument window, in the item-window frame. Coordinates live in the
+// component; this is the look of the three tables and their rows, after the
+// party window's.
+.instrument-window {
+  font-size: 11px;
+
+  .band-title {
+    position: absolute;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-weight: bold;
+    color: #ffcc1a;
+    text-shadow: 1px 1px 0 #000;
+  }
+
+  .head-close {
+    position: absolute;
+    cursor: pointer;
+  }
+
+  .table-fill {
+    position: absolute;
+    background-color: #0000004d;
+  }
+
+  .band-table {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    text-shadow: 1px 1px 0 #000;
+  }
+
+  .band-head {
+    color: #ffd927;
+    margin-bottom: 3px;
+  }
+
+  .band-sub {
+    color: #a8a8a8;
+    font-size: 10px;
+    margin-bottom: 2px;
+  }
+
+  .band-empty {
+    color: #a8a8a8;
+    font-size: 10px;
+  }
+
+  .band-list {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .band-line {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+    min-height: 18px;
+  }
+
+  .band-file,
+  .band-name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  // `newui_party_lifebar01/02` as the song's position: the trough and the
+  // fill, the fill's width the played fraction of the 147 pixels.
+  .band-bar {
+    position: relative;
+    margin-top: 3px;
+  }
+
+  .band-bar-fill {
+    position: absolute;
+  }
+
+  .band-time {
+    color: #d8d8d8;
+    font-size: 10px;
+    margin: 2px 0 3px;
+    text-align: right;
+  }
+
+  .band-transport {
+    justify-content: flex-start;
+    gap: 3px;
+  }
+
+  .band-channel {
+    display: flex;
+    gap: 4px;
+    height: 16px;
+    line-height: 16px;
+
+    &.silent {
+      color: #7a7a7a;
+    }
+
+    .band-ch {
+      width: 16px;
+      color: #ffeec1;
+      text-align: right;
+    }
+
+    .band-notes {
+      color: #a8a8a8;
+    }
+  }
+
+  .band-status {
+    position: absolute;
+    left: 14px;
+    right: 14px;
+    text-align: center;
+    font-size: 10px;
+    color: #d8d8d8;
+    text-shadow: 1px 1px 0 #000;
+
+    &.error {
+      color: #ff8a8a;
+    }
+  }
+
+  .band-put-away {
+    position: absolute;
+  }
+
+  button {
+    height: 16px;
+    padding: 0 5px;
+    border: 1px solid #7a6b45;
+    background: #2a2518;
+    color: #e2e2e2;
+    font: inherit;
+    font-size: 10px;
+    line-height: 14px;
+    white-space: nowrap;
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+      color: #fff;
+      border-color: #c8b87a;
+    }
+
+    &.on {
+      color: #ffd927;
+      border-color: #c8b87a;
+    }
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+  }
+}

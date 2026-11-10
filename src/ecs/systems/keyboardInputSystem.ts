@@ -1,11 +1,144 @@
-import { EventBus } from '../../libs/eventBus';
+import { EventBus } from '../../core/eventBus';
+import { MsgBox } from '../../controllers/interface';
+import {
+  isCapturingKey,
+  isKey,
+  WALK_KEY_CODES,
+} from '../../controllers/interface/keyBindings';
+import { GameOptions } from '@/controllers/settings';
+import { ITEM_HOTKEY_CODES } from '../../modules/inventory/itemHotkeys';
+import { MuWindows } from '../../controllers/interface/windowManager';
+import { openSystemMenu } from '../../modules/session/sessionExit';
+import { AppState, UIState } from '../../controllers/interface/uiState';
+import { playUiSound } from '../../controllers/sound/sfx';
 import type { ISystemFactory } from '../world';
 
+/** Keys the page would scroll on; kept from doing so while playing. */
+const PAGE_SCROLL_KEYS = new Set(['Space', 'ArrowUp', 'ArrowDown']);
+
+const isTextField = (el: EventTarget | null): boolean => {
+  const node = el as HTMLElement | null;
+  return (
+    !!node &&
+    (node.tagName === 'INPUT' ||
+      node.tagName === 'TEXTAREA' ||
+      !!node.isContentEditable)
+  );
+};
+
+function hasPageSelection(): boolean {
+  const selection = window.getSelection();
+  return !!selection && !selection.isCollapsed;
+}
+
+/** The focused element takes characters, so nothing here is a hot key. */
+export const isTypingInField = (): boolean => isTextField(document.activeElement);
+
+/** The pre-game `CSysMenuWin` (versions/shared/ui/windows/system_menu/pregame.tsx). */
+export const PREGAME_MENU = 'sys_menu';
+
+/**
+ * `CUIMng::Update` (UIMng.cpp:691-705): Escape on the server list or the character screen shows
+ * `CSysMenuWin` when no message box or Options is up; the window stack hides it again.
+ */
+export function openPregameMenu(): boolean {
+  const screen = AppState.uiState;
+  if (screen !== UIState.Servers && screen !== UIState.Characters) return false;
+  if (MsgBox.msgWin || MuWindows.isOpen('options') || MuWindows.isOpen(PREGAME_MENU)) return false;
+  MuWindows.setOpen(PREGAME_MENU, true);
+  playUiSound('click');
+  return true;
+}
+
+/**
+ * The one keyboard dispatcher. Every keydown goes through here before any
+ * window sees it, in the original's order (`NewUIManager::UpdateKeyEvent`):
+ * a focused text field first, then the modal message box, then the topmost
+ * window for Escape, and only then the `keyPressed` broadcast the hot keys
+ * listen to.
+ */
 export const KeyboardInputSystem: ISystemFactory = world => {
   const pressedKeys = new Set<string>();
 
   document.addEventListener('keydown', e => {
-    if (!pressedKeys.has(e.code)) {
+    // A CJK composition in progress: the syllable is not committed yet, and
+    // Enter / Escape belong to the IME (229 is the legacy IME keyCode).
+    if (e.isComposing || e.keyCode === 229) return;
+
+    // The event's own target as well as the focus: React flushes a field's
+    // unmount synchronously inside the keydown (Escape closes the chat box),
+    // so by the time this runs the focus is already back on the body.
+    const typing = isTextField(e.target) || isTypingInField();
+    if (!typing) {
+      // Tab opens the minimap by default; keep it from cycling browser focus
+      // while playing. Text fields keep the normal behaviour.
+      if (e.code === 'Tab') e.preventDefault();
+      // ALT shows drop names (and the original's macro chord); in a browser a
+      // bare ALT moves focus to the menu bar and eats the next click. A text
+      // field keeps it (Alt+Gr characters, Alt+arrow caret moves).
+      if (e.code === 'AltLeft' || e.code === 'AltRight') e.preventDefault();
+      // Space / arrows scroll the page; a field needs them as characters and
+      // caret keys.
+      if (PAGE_SCROLL_KEYS.has(e.code)) e.preventDefault();
+      // Ctrl+Q/W/E/R over the inventory binds an item hot key
+      // (NewUIMyInventory.cpp:622), but the browser claims the chord first:
+      // Ctrl+R reloads the page and Ctrl+E opens the search bar. Only while
+      // the window is open, so Ctrl+R still reloads the rest of the time.
+      // Ctrl+W is the browser's own and cannot be taken back from here.
+      if (
+        e.ctrlKey &&
+        MuWindows.isOpen('inventory') &&
+        ITEM_HOTKEY_CODES.includes(e.code)
+      ) {
+        e.preventDefault();
+      }
+    }
+    // The Options window is waiting for a key to rebind: it reads the key
+    // itself, nothing else should react to it.
+    if (isCapturingKey()) return;
+    // Typing in the chat box (or any field) is not a hot key: the original
+    // routes keys to the focused input first. That includes Escape - the
+    // field closes itself (chat, prompts) rather than the windows behind it.
+    if (typing) return;
+    // `CMsgWin` is modal: while it is up it owns Enter and Escape.
+    if (MsgBox.msgWin) return;
+    // Ctrl+C over text selected in the chat log is the browser's copy, not
+    // the Character window's C.
+    if ((e.ctrlKey || e.metaKey) && e.code === 'KeyC' && hasPageSelection()) return;
+    // A key first pressed in a field, a message box or a window that stopped it
+    // is held, not pressed again: CInput::IsKeyDown is edge-only.
+    if (e.repeat && !pressedKeys.has(e.code)) {
+      pressedKeys.add(e.code);
+      return;
+    }
+    // `NewUIHotKey.cpp:131`: while the minimap sheet is up only its own key
+    // (and Escape, which closes it) get through to the windows.
+    if (MuWindows.isOpen('minimap')) {
+      if (!isKey('minimap', e.code) && e.code !== 'Escape') return;
+    } else if (e.code === 'Escape' && !pressedKeys.has('Escape')) {
+      // Escape closes the top window only. A window without a closer of its
+      // own leaves it to the broadcast below (every legacy handler closes).
+      if (MuWindows.closeTop()) {
+        pressedKeys.add(e.code);
+        return;
+      }
+      // Nothing left to close, so Escape means the system menu, as it does
+      // in the original.
+      if (openPregameMenu() || openSystemMenu()) {
+        pressedKeys.add(e.code);
+        return;
+      }
+    }
+    // W/A/S/D walk the hero while the option is on, so the actions they
+    // carry (potion slot 2, master skills, sort, the command window) are not
+    // broadcast for them. Ctrl + the key still is: that is the way to those
+    // actions without rebinding anything, and nothing walks with Ctrl held.
+    // The key still joins `pressedKeys` either way - that set is what the
+    // walk polls.
+    const walks =
+      GameOptions.wsadMovement && !e.ctrlKey && WALK_KEY_CODES.has(e.code);
+
+    if (!walks && !pressedKeys.has(e.code)) {
       EventBus.emit('keyPressed', e.code);
     }
     pressedKeys.add(e.code);

@@ -1,8 +1,173 @@
-import type { IVector2Like } from '../../libs/babylon/exports';
-import { MonsterActionType, PlayerAction } from '../../common/objects/enum';
-import type { MUAttributeSystem } from '../../libs/attributeSystem';
+import type { AnimationGroup } from '@babylonjs/core/Animations/animationGroup';
+import { MonsterActionType, PlayerAction } from '@versions/shared/objects/enum';
 import type { ISystemFactory } from '../world';
-import type { PlayerObject } from '../../common/playerObject';
+import { isPlayerBody, type PlayerObject } from '../../controllers/actors/playerObject';
+import { isOneShotPlayerAction, isRestAction } from '../../controllers/anim/playerActionMapper';
+import { monsterClipFor } from '../../controllers/actors/transformedBody';
+import type { ModelObject } from '../../controllers/render/modelObject';
+import {
+  chooseFenrirIdleAction,
+  chooseFenrirRunAction,
+  chooseFenrirWalkAction,
+  chooseIdleAction,
+  chooseRunAction,
+  chooseWalkAction,
+  isCrossbow,
+  isSocialAction,
+  isWeaponItem,
+  type CharacterPose,
+  type Hands,
+} from '../../controllers/actors/weaponClass';
+import {
+  applyWeaponAttachments,
+  applyWeaponPoses,
+} from '../../controllers/actors/weaponAttachment';
+import { TWFlags } from '../../controllers/terrain/consts';
+import { isFlagInBinaryMask } from '../../controllers/assets/download';
+import {
+  monsterModelTypeOf,
+  monsterPlaySpeed,
+  playerFrameSpeedScale,
+  debuffSlowsClip,
+  playerPlaySpeed,
+  wingsPlaySpeed,
+} from '../../controllers/anim/playSpeed';
+import { debuffSlow } from '../../controllers/actors/debuffBody';
+import { attackSpeedOf, magicSpeedOf } from '../../modules/hero/characterStats';
+import { BaseClass, getBaseClass } from '../../modules/hero/characterStats';
+import { isFemaleClass } from '../../controllers/actors/mapPlayerNetClassToModelClass';
+import {
+  FENRIR_RUN_DELAY,
+  RUN_THRESHOLD,
+  RUN_UNITS_PER_SECOND,
+  canAccumulateRun,
+  characterMoveSpeed,
+  forcesRun,
+  inBloodCastle,
+  inChaosCastle,
+  isSwimWorld,
+} from '../../controllers/actors/locomotion';
+import { isWingItem } from '../../controllers/actors/wings';
+import { isRidingMount, mountKind, petSpec } from '@/controllers/pets';
+import { Hero } from '../../modules/hero';
+import { heldWeapons } from '../../controllers/actors';
+import { isOn } from '../../controllers/fidelity';
+import { isSliding } from './positionSlideSystem';
+
+// Clip rates come from the original's PlaySpeed tables (controllers/anim/playSpeed.ts);
+// attack/cast rates additionally scale with the attackSpeed/magicSpeed
+// attributes: the hero's (SetAttackSpeed), or another player's own from the scope packet.
+// Death (delay, Die clip, corpse, fade, despawn) is owned by DeathSystem.
+
+const MONSTER_ONE_SHOT_ACTIONS = new Set<MonsterActionType>([
+  // A finished STOP2 goes back to STOP1 (ZzzCharacter.cpp:3530); the Assassin summon arrives in it.
+  MonsterActionType.Stop2,
+  MonsterActionType.Attack1,
+  MonsterActionType.Attack2,
+  MonsterActionType.Attack3,
+  MonsterActionType.Attack4,
+  MonsterActionType.Shock,
+  MonsterActionType.Appear,
+]);
+
+/** eDeBuff_Stun (61) and eDeBuff_Sleep (72) skip PlayAnimation: the body holds its frame (ZzzCharacter.cpp:2552-2555). */
+const isHeld = (buffs: ReadonlySet<number> | undefined): boolean => !!buffs && (buffs.has(61) || buffs.has(72));
+/** The rate each held clip had, given back on release. */
+const heldModels = new WeakMap<ModelObject, { action: number; ratio: number }>();
+
+/** Stops (or lets go of) the playing clip; a clip held at speed 0 keeps rendering, a paused one would not. */
+function holdClip(model: ModelObject, held: boolean): void {
+  const was = heldModels.get(model);
+  if (!held && !was) return;
+  const group = model.gltf?.animationGroups[model.CurrentAction];
+  if (!held) {
+    heldModels.delete(model);
+    if (group) group.speedRatio = was!.action === model.CurrentAction ? was!.ratio : model.speedRatio;
+    return;
+  }
+  if (!group) return;
+  if (!was || was.action !== model.CurrentAction) {
+    heldModels.set(model, { action: model.CurrentAction, ratio: group.speedRatio || model.speedRatio });
+  }
+  group.speedRatio = 0;
+}
+
+/** The rates of a held item's running clips, given back on release. */
+const heldParts = new WeakMap<ModelObject, Map<AnimationGroup, number>>();
+
+/** A linked item skips its own PlayAnimation under the same buffs (ZzzCharacter.cpp:6975-6978): every clip it runs stops. */
+function holdPart(part: ModelObject | undefined, held: boolean): void {
+  if (!part) return;
+  let was = heldParts.get(part);
+  if (!held) {
+    if (!was) return;
+    for (const [group, ratio] of was) group.speedRatio = ratio;
+    heldParts.delete(part);
+    return;
+  }
+  const groups = part.gltf?.animationGroups;
+  if (!groups) return;
+  for (const group of groups) {
+    if (!group.isStarted || group.speedRatio === 0) continue;
+    if (!was) heldParts.set(part, (was = new Map()));
+    was.set(group, group.speedRatio);
+    group.speedRatio = 0;
+  }
+}
+
+/**
+ * Another player's Nova charge is never stopped (ZzzCharacter.cpp:3488) and rewinds when it ends
+ * (:3496-3499), so it loops until the release replaces it; the hero's is kept up by SkillCastSystem.
+ * OpenMU releases within 6 s, so 7 s only bounds a release that never arrives.
+ */
+const NOVA_HOLD_MS = 7000;
+const novaHeldSince = new WeakMap<object, number>();
+
+function holdsNovaCharge(entity: { localPlayer?: unknown }, action: PlayerAction): boolean {
+  if (action !== PlayerAction.PLAYER_SKILL_HELL_BEGIN || entity.localPlayer) {
+    novaHeldSince.delete(entity);
+    return false;
+  }
+  const now = performance.now();
+  const since = novaHeldSince.get(entity);
+  if (since === undefined) novaHeldSince.set(entity, now);
+  return since === undefined || now - since < NOVA_HOLD_MS;
+}
+
+/**
+ * One frame of a character that is wearing a monster's body. The action it
+ * would have played is translated (`monsterClipFor`) and, since not every
+ * monster has all eleven clips, anything the model does not carry falls back
+ * to standing - the original picks the same way, by index into whatever the
+ * BMD holds.
+ */
+function playMonsterClip(
+  model: ModelObject,
+  skin: number,
+  action: PlayerAction,
+  moving: boolean
+): void {
+  const clips = model.gltf?.animationGroups.length ?? 0;
+  let clip = monsterClipFor(action, moving);
+  if (clip >= clips) clip = MonsterActionType.Stop1;
+  if (clip >= clips) return;
+
+  model.AnimationSpeed =
+    model.actionPlaySpeed(clip) ??
+    monsterPlaySpeed(monsterModelTypeOf(skin), clip);
+  model.playAction(clip, !MONSTER_ONE_SHOT_ACTIONS.has(clip));
+}
+
+/** `GetEquipedBowType(c) == BOWTYPE_CROSSBOW` - picks the crossbow variants. */
+function equippedCrossbow(hands: Hands | undefined): boolean {
+  if (!hands) return false;
+  return isCrossbow(hands.leftHand) || isCrossbow(hands.rightHand);
+}
+
+function isArmed(hands: Hands | undefined): boolean {
+  if (!hands) return false;
+  return isWeaponItem(hands.leftHand) || isWeaponItem(hands.rightHand);
+}
 
 export const AnimationSystem: ISystemFactory = world => {
   const playersQuery = world.with(
@@ -20,170 +185,444 @@ export const AnimationSystem: ISystemFactory = world => {
     'modelObject'
   );
 
-  const animatableModelObjectsQuery = world.with('modelObject');
+  /**
+   * SetPlayerStop / SetPlayerWalk (ZzzCharacter.cpp:157-679) minus the Dark
+   * Spirit. The order is the original's and it matters: Fenrir, then the
+   * horse, the horns, wings, the swim worlds, and only then the weapon
+   * switch - a winged character in Atlans flies, it does not swim.
+   */
+  function calculateAnimation(ctx: {
+    pose: CharacterPose;
+    inSafeZone: boolean;
+    isMoving: boolean;
+    run: number;
+    wings: boolean;
+    riding: boolean;
+    /** The rider is on a Dark Horse, which has its own clip pair. */
+    ridingHorse: boolean;
+    /** The rider is on a Fenrir: weapon-split clips, run break at 20. */
+    ridingFenrir: boolean;
+    swimWorld: boolean;
+  }): PlayerAction {
+    const armed = isArmed(ctx.pose.hands);
+    const crossbow = equippedCrossbow(ctx.pose.hands);
+    const running = ctx.run >= RUN_THRESHOLD;
 
-  function calculateAnimation(
-    attributeSystem: MUAttributeSystem,
-    velocity: IVector2Like
-  ) {
-    const inSafeZone = attributeSystem.isAboveZero('inSafeZone');
-    const isFemale = attributeSystem.isAboveZero('isFemale');
-    const isFlying = attributeSystem.isAboveZero('isFlying');
-    const isSwimming = attributeSystem.isAboveZero('isSwimming');
-    const isSpearEquipped = attributeSystem.isAboveZero('isSpearEquipped');
-    const isMoving = velocity.x !== 0 || velocity.y !== 0;
-
-    //
-    // Female player animations
-    //
-
-    if (inSafeZone) {
-      if (isFemale) {
-        if (isMoving) {
-          return PlayerAction.PLAYER_WALK_FEMALE;
-        }
-
-        return PlayerAction.PLAYER_STOP_FEMALE;
-      }
-
-      if (isMoving) {
-        return PlayerAction.PLAYER_WALK_MALE;
-      }
-
-      return PlayerAction.PLAYER_STOP_MALE;
+    // The Fenrir is tested first (SetPlayerStop:164-187, SetPlayerWalk:
+    // 466-476): its own weapon-split families, breaking into the run clips
+    // at FENRIR_RUN_DELAY instead of the usual 40.
+    if (ctx.ridingFenrir && !ctx.inSafeZone) {
+      if (!ctx.isMoving) return chooseFenrirIdleAction(ctx.pose);
+      return ctx.run < FENRIR_RUN_DELAY
+        ? chooseFenrirWalkAction(ctx.pose)
+        : chooseFenrirRunAction(ctx.pose);
     }
 
-    if (isSpearEquipped) {
-      if (isMoving) {
-        if (isFlying) {
-          return PlayerAction.PLAYER_FLY;
-        }
-
-        if (isSwimming) {
-          return PlayerAction.PLAYER_WALK_SWIM;
-        }
-
-        return PlayerAction.PLAYER_WALK_SPEAR;
-      }
-
-      return PlayerAction.PLAYER_STOP_SPEAR;
+    // The Dark Horse is tested before the horns and ignores the weapon
+    // split - both arms of the original pick the same clip
+    // (SetPlayerStop:189-195, SetPlayerWalk:477-480).
+    if (ctx.ridingHorse && !ctx.inSafeZone) {
+      return ctx.isMoving
+        ? PlayerAction.PLAYER_RUN_RIDE_HORSE
+        : PlayerAction.PLAYER_STOP_RIDE_HORSE;
     }
 
-    if (isFemale) {
-      if (isMoving) {
-        if (isFlying) {
-          return PlayerAction.PLAYER_FLY;
-        }
-
-        if (isSwimming) {
-          return PlayerAction.PLAYER_WALK_SWIM;
-        }
-
-        return PlayerAction.PLAYER_WALK_FEMALE;
+    // Horn of Uniria / Dinorant (SetPlayerStop:201-209, SetPlayerWalk:485-527).
+    if (ctx.riding && !ctx.inSafeZone) {
+      if (ctx.isMoving) {
+        return armed
+          ? PlayerAction.PLAYER_RUN_RIDE_WEAPON
+          : PlayerAction.PLAYER_RUN_RIDE;
       }
-
-      if (isFlying) {
-        return PlayerAction.PLAYER_STOP_FLY;
-      }
-
-      if (isSwimming) {
-        return PlayerAction.PLAYER_STOP_FEMALE;
-      }
-
-      return PlayerAction.PLAYER_STOP_FEMALE;
+      return armed
+        ? PlayerAction.PLAYER_STOP_RIDE_WEAPON
+        : PlayerAction.PLAYER_STOP_RIDE;
     }
 
-    //
-    // Male player animations
-    //
-
-    if (isMoving) {
-      if (isFlying) {
-        return PlayerAction.PLAYER_FLY;
+    // Wings (`Fly`, SetPlayerStop:213-245; SetPlayerWalk:533-541).
+    if (!ctx.inSafeZone && ctx.wings) {
+      if (ctx.isMoving) {
+        return crossbow
+          ? PlayerAction.PLAYER_FLY_CROSSBOW
+          : PlayerAction.PLAYER_FLY;
       }
+      return crossbow
+        ? PlayerAction.PLAYER_STOP_FLY_CROSSBOW
+        : PlayerAction.PLAYER_STOP_FLY;
+    }
 
-      if (isSwimming) {
-        return PlayerAction.PLAYER_WALK_SWIM;
+    // Atlans / Hellas / Doppelganger 3. Standing there is the *fly* pose:
+    // SetPlayerStop sets `Fly = true` for these maps outside a safe zone
+    // (:218-219), which is what makes a character tread water.
+    if (!ctx.inSafeZone && ctx.swimWorld) {
+      if (ctx.isMoving) {
+        return running
+          ? PlayerAction.PLAYER_RUN_SWIM
+          : PlayerAction.PLAYER_WALK_SWIM;
       }
-
-      return PlayerAction.PLAYER_WALK_MALE;
+      return crossbow
+        ? PlayerAction.PLAYER_STOP_FLY_CROSSBOW
+        : PlayerAction.PLAYER_STOP_FLY;
     }
 
-    if (isFlying) {
-      return PlayerAction.PLAYER_STOP_FLY;
-    }
-    if (isSwimming) {
-      return PlayerAction.PLAYER_STOP_MALE;
-    }
+    if (!ctx.isMoving) return chooseIdleAction(ctx.pose);
 
-    return PlayerAction.PLAYER_STOP_MALE;
+    return running ? chooseRunAction(ctx.pose) : chooseWalkAction(ctx.pose);
   }
+
+  let lastRunTick = performance.now();
 
   return {
     update: () => {
-      // calculate current anim
-      for (const {
-        playerAnimation,
-        movement,
-        attributeSystem,
-      } of playersQuery) {
-        if (
-          playerAnimation.action === PlayerAction.PLAYER_ATTACK_FIST ||
-          playerAnimation.action === PlayerAction.PLAYER_DIE1
-        ) {
-          continue;
+      // c->Run is a wall-clock walk-up (the original counts real frames at
+      // its own FPS). The render dt is clamped to 0.1 s in app/main.tsx, so under
+      // 10 fps the walker (already on wall-clock time) runs while this
+      // counter would still say "walking" - use the real elapsed time, capped
+      // so a stalled tab does not jump straight to running.
+      const nowMs = performance.now();
+      const runDt = Math.min(1, (nowMs - lastRunTick) / 1000);
+      lastRunTick = nowMs;
+      const mapIndex = world.mapIndex;
+      const swimWorld = isSwimWorld(mapIndex);
+      const chaosCastle = inChaosCastle(mapIndex);
+      const bloodCastle = inBloodCastle(mapIndex);
+      // Server-computed speeds (CurrentStatsExtended) win over the client-side agility formula.
+      const pd = Hero;
+      const heroAttackSpeed = pd.attackSpeed ?? attackSpeedOf(pd.charClass, pd.agi);
+      const heroMagicSpeed = pd.magicSpeed ?? magicSpeedOf(pd.charClass, pd.agi);
+      const ownSpeeds = isOn('otherPlayersOwnSpeed');
+
+      for (const entity of playersQuery) {
+        const { playerAnimation, movement, attributeSystem, modelObject } = entity;
+
+        // c->SafeZone is re-evaluated every frame from the terrain flag
+        // (ZzzCharacter.cpp:5490); the path system alone left it stale after
+        // spawns and teleports.
+        if (entity.transform) {
+          const flag = world.getTerrainFlag(
+            ~~entity.transform.pos.x,
+            ~~entity.transform.pos.z
+          );
+          attributeSystem.setValue(
+            'inSafeZone',
+            isFlagInBinaryMask(flag, TWFlags.SafeZone) ? 1 : 0
+          );
         }
-        playerAnimation.action = calculateAnimation(
-          attributeSystem,
-          movement.velocity
+
+        // The original plays every body at the hero's speeds (one MODEL_PLAYER table, ZzzCharacter.cpp:812-1028);
+        // another player with speeds from the scope packet plays at its own (controllers/anim/readme.md).
+        const own = entity.localPlayer || !ownSpeeds ? undefined : entity.speeds;
+        attributeSystem.setValue('attackSpeed', own?.attack ?? heroAttackSpeed);
+        attributeSystem.setValue('magicSpeed', own?.magic ?? heroMagicSpeed);
+
+        const inSafeZone = attributeSystem.isAboveZero('inSafeZone');
+        const hands = entity.charAppearance;
+        // Chaos Castle takes the wings off (`ClearChaosCastleHelper`), so
+        // nobody flies in there.
+        const wings =
+          !chaosCastle && isWingItem(hands?.wings) ? hands!.wings : null;
+        const mount = petSpec(hands?.pet);
+        const riding = isRidingMount(hands?.pet);
+        const ridingHorse = riding && mount?.riderClips === 'horse';
+        const ridingFenrir = riding && mount?.riderClips === 'fenrir';
+
+        // `c->Wing.Type != -1 && !SafeZone` (SetPlayerStop:213,
+        // SetPlayerWalk:535). The swim worlds also set the original’s local
+        // `Fly`, but not this flag: its consumers (the walk sound) want
+        // "airborne", and swimming keeps its footstep.
+        attributeSystem.setValue('isFlying', !inSafeZone && wings ? 1 : 0);
+        attributeSystem.setValue('isSwimming', !inSafeZone && swimWorld ? 1 : 0);
+
+        const moving = movement.velocity.x !== 0 || movement.velocity.y !== 0;
+
+        // --- c->Run (ZzzCharacter.cpp:159, :376-408).
+        const speedInput = {
+          run: playerAnimation.run,
+          inSafeZone,
+          wings,
+          riding,
+          fenrir: ridingFenrir,
+          fenrirUpgraded: (hands?.pet?.excellentFlags ?? 0) > 0,
+          world: mapIndex,
+        };
+
+        if (!moving || inSafeZone) {
+          // SetPlayerStop opens with `c->Run = 0`, and SetPlayerWalk zeroes it
+          // again inside a safe zone.
+          playerAnimation.run = 0;
+        } else if (forcesRun(speedInput)) {
+          // Wings, a mount and Chaos Castle skip the walk-up entirely
+          // (`CharacterMoveSpeed` writes `c->Run = 40` outright).
+          playerAnimation.run = RUN_THRESHOLD;
+        } else if (
+          playerAnimation.run < RUN_THRESHOLD &&
+          // A player-rigged NPC (guards, Lumen…) has no c->Run walk-up: the
+          // original moves NPCs with SetPlayerWalk on a MODEL_PLAYER object
+          // whose Run stays 0, so a patrol is always PLAYER_WALK_*.
+          entity.npcType === undefined &&
+          canAccumulateRun(
+            hands?.charClass ?? Hero.charClass,
+            hands?.boots,
+            hands?.gloves,
+            mapIndex,
+            ridingFenrir
+          )
+        ) {
+          playerAnimation.run = Math.min(
+            RUN_THRESHOLD,
+            playerAnimation.run + RUN_UNITS_PER_SECOND * runDt
+          );
+        }
+
+        speedInput.run = playerAnimation.run;
+        attributeSystem.setValue(
+          'totalMovementSpeed',
+          characterMoveSpeed(speedInput)
         );
+
+        // Dinorant riders float 30 units off the terrain (:6263-6273).
+        modelObject.HoverHeight =
+          riding && !inSafeZone ? (mount?.riderLift ?? 0) : 0;
+
+        // RenderCharacterBackItem: weapons ride on the back in safe zones,
+        // during social actions and swim walks. Blood Castle and Chaos Castle
+        // override it back to false (:14969-14980).
+        const bindBack =
+          !bloodCastle &&
+          !chaosCastle &&
+          (inSafeZone ||
+            isSocialAction(playerAnimation.action) ||
+            // An instrument takes both hands; the weapons wait on the back.
+            !!entity.performing ||
+            playerAnimation.action === PlayerAction.PLAYER_WALK_SWIM ||
+            playerAnimation.action === PlayerAction.PLAYER_RUN_SWIM);
+        if (attributeSystem.isAboveZero('weaponsOnBack') !== bindBack) {
+          // Latch the flag only once the attachments were actually applied:
+          // a character spawning already in a safe zone hits this before its
+          // PlayerObject exists, and consuming the flip then would leave the
+          // weapons on the hand links forever (the original re-evaluates
+          // every frame, ZzzCharacter.cpp:14953).
+          if ((modelObject as PlayerObject).Weapon1) {
+            attributeSystem.setValue('weaponsOnBack', bindBack ? 1 : 0);
+            applyWeaponAttachments(
+              modelObject as PlayerObject,
+              entity.charAppearance,
+              bindBack
+            );
+          }
+        }
+
+        // The Classic shadow's rider, safe-zone and bow rules (PlayerObject.setClassicShadows).
+        if ((modelObject as PlayerObject).Weapon1) {
+          const mounted = mountKind(hands?.pet, inSafeZone);
+          (modelObject as PlayerObject).setClassicShadows(
+            mounted === 'uniria' || mounted === 'dinorant',
+            inSafeZone,
+            hands?.leftHand,
+            hands?.rightHand
+          );
+        }
+
+        // Dead or about to die: c->Movement = false, no stop/walk re-evaluation.
+        if (playerAnimation.action === PlayerAction.PLAYER_DIE1 || entity.dying) continue;
+
+        // Performing: BandSystem holds the pose; nothing to re-evaluate until a step.
+        if (entity.performing && !moving) continue;
+
+        if (!moving && holdsNovaCharge(entity, playerAnimation.action)) continue;
+
+        if (isOneShotPlayerAction(playerAnimation.action) && !moving) {
+          // Hold the one-shot clip until it has played through once, then
+          // fall back to idle/walk (ActionIterationWasFinished is set by the
+          // animation-group end observer in ModelObject). Walking cuts it
+          // short: the original re-evaluates the walk action as soon as
+          // c->Movement is set, so a swing never plays over a step.
+          if (
+            modelObject.CurrentAction !== playerAnimation.action ||
+            !modelObject.ActionIterationWasFinished
+          ) {
+            continue;
+          }
+        }
+
+        if (isRestAction(playerAnimation.action) && !moving) continue;
+
+        const npcClass =
+          entity.npcType !== undefined
+            ? ((modelObject.constructor as typeof PlayerObject).NpcClass ?? undefined)
+            : undefined;
+        const charClass =
+          npcClass ?? hands?.charClass ?? Hero.charClass;
+
+        playerAnimation.action = calculateAnimation({
+          pose: {
+            hands: heldWeapons(entity, mapIndex),
+            baseClass: getBaseClass(charClass),
+            isFemale:
+              npcClass !== undefined
+                ? isFemaleClass(npcClass)
+                : attributeSystem.isAboveZero('isFemale'),
+            // "(no weapon) or (safe zone outside Blood Castle)" - the caller
+            // side of the collapse is the safe zone; the no-weapon half is
+            // tested inside chooseIdleAction / chooseWalkAction.
+            weaponsStowed: inSafeZone && !bloodCastle,
+            inChaosCastle: chaosCastle,
+          },
+          inSafeZone,
+          isMoving: moving,
+          run: playerAnimation.run,
+          wings: !!wings,
+          riding,
+          ridingHorse,
+          ridingFenrir,
+          swimWorld,
+        });
       }
 
-      // update anim
-      for (const { playerAnimation, modelObject } of playerAnimatableQuery) {
+      for (const entity of playerAnimatableQuery) {
+        const { playerAnimation, modelObject } = entity;
         const playerObject = modelObject as PlayerObject;
         if (!playerObject.Ready) continue;
 
-        if (modelObject.ActionIterationWasFinished) {
+        // A character wearing a whole monster (a transformation ring, or a
+        // game master's `/skin`) has none of a character's clips to play:
+        // its action is translated into the monster's five.
+        if (!isPlayerBody(modelObject)) {
+          const velocity = entity.movement?.velocity;
+          const moving = !!velocity && (velocity.x !== 0 || velocity.y !== 0);
+          playMonsterClip(
+            modelObject,
+            entity.skin ?? -1,
+            playerAnimation.action,
+            moving
+          );
+          continue;
         }
 
-        if (
-          playerAnimation.action >= PlayerAction.PLAYER_WALK_MALE &&
-          playerAnimation.action <= PlayerAction.PLAYER_RUN_SWIM
-        ) {
-          playerObject.AnimationSpeed = 6; // TODO depends on movement speed;
+        const action = playerAnimation.action;
+        const attrs = entity.attributeSystem;
+        const baseClass = getBaseClass(
+          entity.charAppearance?.charClass ?? Hero.charClass
+        );
+        const isRageFighter = baseClass === BaseClass.RageFighter;
+
+        const speed =
+          playerObject.actionPlaySpeed(action) ??
+          playerPlaySpeed(
+            action,
+            attrs?.getValue('attackSpeed') ?? 0,
+            attrs?.getValue('magicSpeed') ?? 0,
+            isRageFighter
+          );
+        // A clip already playing takes its per-frame slowdown straight into the running group; a Freeze or
+        // Cold slows the walk and run, so it bites mid-run.
+        const slow = debuffSlowsClip(action) ? debuffSlow(entity.buffs) : 1;
+        // `swingFill`: the hero's swing after its blow, set by attackSystem for that clip only.
+        const fill = playerAnimation.swingFill;
+        const filled = fill?.serial === playerObject.actionSerial ? fill.scale : 1;
+        if (playerObject.CurrentAction === action) {
+          playerObject.setAnimationSpeed(
+            speed *
+              slow *
+              filled *
+              playerFrameSpeedScale(
+                action,
+                playerObject.actionFrame(),
+                baseClass === BaseClass.DarkLord
+              )
+          );
+        } else {
+          playerObject.AnimationSpeed = speed * slow;
         }
 
-        playerObject.playAction(playerAnimation.action, true);
+        // A performer's clip loops whatever band it sits in: the pose is held
+        // for as long as the instrument is out.
+        const novaLoop = action === PlayerAction.PLAYER_SKILL_HELL_BEGIN && !entity.localPlayer;
+        const oneShot =
+          (isOneShotPlayerAction(action) && !entity.performing && !novaLoop) ||
+          action === PlayerAction.PLAYER_DIE1;
+        playerObject.playAction(action, !oneShot);
+        const held = isHeld(entity.buffs);
+        holdClip(playerObject, held);
 
-        if (playerObject.Wings) {
-          if (playerObject.CurrentAction < 15) {
-            playerObject.Wings.AnimationSpeed = 4;
-          } else {
-            playerObject.Wings.AnimationSpeed = 16;
-          }
+        // RenderCharacterItem rewrites the weapons' own clip every frame off
+        // the character's: a bow only draws while the shot plays.
+        if (playerObject.Weapon1) {
+          applyWeaponPoses(
+            playerObject,
+            entity.charAppearance,
+            attrs?.isAboveZero('weaponsOnBack') ?? false,
+            action,
+            held ? 0 : playerObject.AnimationSpeed
+          );
         }
+
+        const wings = playerObject.Wings;
+        if (wings?.Ready) {
+          wings.setAnimationSpeed(wingsPlaySpeed(action, wings.spec));
+          // The Wings of Darkness fold shut in town (:6785); every other
+          // wing has a single flap clip.
+          const folded =
+            (entity.attributeSystem?.isAboveZero('inSafeZone') ?? false) &&
+            wings.spec?.safeZoneAction !== undefined;
+          wings.playAction(folded ? wings.spec!.safeZoneAction! : 0, true);
+        }
+
+        // The Imp flaps at its own fixed rate (ZzzCharacter.cpp:15149).
+        const pet = playerObject.Pet;
+        if (pet?.Ready) {
+          const spec = petSpec(entity.charAppearance?.pet);
+          pet.setAnimationSpeed(spec?.playSpeed ?? 0.25);
+          pet.playAction(0, true);
+        }
+
+        holdPart(playerObject.Weapon1, held);
+        holdPart(playerObject.Weapon2, held);
+        holdPart(playerObject.PhoenixWing1, held);
+        holdPart(playerObject.PhoenixWing2, held);
+        holdPart(playerObject.Wings, held);
       }
 
-      //
-      // Monsters
-      //
+      for (const entity of monsterAnimatableQuery) {
+        const { monsterAnimation, movement, modelObject } = entity;
+        if (!modelObject.Ready) continue;
 
-      for (const {
-        monsterAnimation,
-        movement,
-        modelObject,
-      } of monsterAnimatableQuery) {
-        const isMoving = movement.velocity.x !== 0 || movement.velocity.y !== 0;
-
-        if (isMoving) {
-          monsterAnimation.action = MonsterActionType.Walk;
+        if (monsterAnimation.action === MonsterActionType.Die) {
+          // Death: play once and hold the last frame; DeathSystem fades and despawns.
+          modelObject.AnimationSpeed =
+            modelObject.actionPlaySpeed(MonsterActionType.Die) ??
+            monsterPlaySpeed(monsterModelTypeOf(entity.npcType), MonsterActionType.Die);
+          modelObject.playAction(MonsterActionType.Die, false);
+          continue;
         }
-        // monsterAnimation.action = isMoving
-        //   ? MonsterActionType.Walk
-        //   : MonsterActionType.Stop1;
+        // Killed but the Die clip has not started yet (death delay): freeze.
+        if (entity.dying) continue;
 
-        modelObject.playAction(monsterAnimation.action, true);
+        const oneShot = MONSTER_ONE_SHOT_ACTIONS.has(monsterAnimation.action);
+        if (
+          oneShot &&
+          modelObject.CurrentAction === monsterAnimation.action &&
+          modelObject.ActionIterationWasFinished
+        ) {
+          monsterAnimation.action = MonsterActionType.Stop1;
+        }
+
+        const isMoving = movement.velocity.x !== 0 || movement.velocity.y !== 0;
+        if (isMoving && !MONSTER_ONE_SHOT_ACTIONS.has(monsterAnimation.action)) {
+          monsterAnimation.action = MonsterActionType.Walk;
+        } else if (!isMoving && monsterAnimation.action === MonsterActionType.Walk && !isSliding(entity)) {
+          // Path consumed: the original returns to MONSTER01_STOP1 when the
+          // walk ends (MoveHumen); the server never sends a "stop" animation.
+          // A Crust walks by sliding instead and stops when the slide does.
+          monsterAnimation.action = MonsterActionType.Stop1;
+        }
+
+        const action = monsterAnimation.action;
+        modelObject.AnimationSpeed =
+          modelObject.actionPlaySpeed(action) ??
+          monsterPlaySpeed(monsterModelTypeOf(entity.npcType), action);
+        modelObject.playAction(action, !MONSTER_ONE_SHOT_ACTIONS.has(action));
+        holdClip(modelObject, isHeld(entity.buffs));
       }
     },
   };

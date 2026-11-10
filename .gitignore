@@ -1,6 +1,29 @@
-node_modules
+node_modules/
 dist
-public/game-assets
-public/items
-.DS_Store
-e2e-shots
+dist-register
+
+# Build-time endpoints and the OpenMU admin credentials. `.env.example` files
+# are committed in their place. Note `dist` above does not cover
+# `dist-register`: gitignore matches whole path segments, not prefixes.
+.env
+
+# gzip sidecars (tools/compressAssets.ts). Generated into dist/ by the build;
+# a dev server can be given its own set under public/, which is not committed -
+# they are derived from files that are.
+public/**/*.gz
+Data/**/*.gz
+Data-v097d/**/*.gz
+
+# .NET build output of the OpenMU plugins
+openmu/plugins/bin/
+openmu/plugins/obj/
+
+# --- Este fork: assets originales / derivados del cliente de Webzen. NUNCA al repo ---
+/Data/
+/Data-v097d/
+/public/Data
+/public/game-assets/
+/public/game-assets-v097d/
+/public/items/
+/public/packs/
+e2e-shots/

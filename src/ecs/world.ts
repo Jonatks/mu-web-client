@@ -1,17 +1,51 @@
-import { type Bucket, World as ECSWorld } from 'miniplex';
-import type { IVector2Like, IVector3Like, Mesh } from '../libs/babylon/exports';
-import type { ModelObject } from '../common/modelObject';
-import type { MonsterActionType, PlayerAction } from '../common/objects/enum';
-import type { MUAttributeSystem } from '../libs/attributeSystem';
-import { TransformNode } from '../libs/babylon/exports';
-import { createPathfinding } from '../libs/pathfinding';
-import { CharacterClassNumber, ENUM_WORLD } from '../common';
-import { AssetsManager, Color3, Viewport } from '../libs/babylon/exports';
-import type { HighlightLayer } from '../libs/babylon/exports';
-import type { TestScene } from '../scenes/testScene';
+import type { EmoteId } from '../modules/hero/emotes';
+import type { EmojiBubbleId } from '../modules/chat/emojiBubbles';
+import type { ChatEmojiBubble } from '../modules/chat/chatEmojis';
+import type { InstrumentId } from '../modules/band/instruments';
+import type { BandHit } from '../modules/band/music/performing';
+import type { GuildMemberRoleEnum } from '@versions/shared/packets/ServerToClientPackets';
+import { type Bucket, type With, World as ECSWorld } from 'miniplex';
+import type {
+  IVector2Like,
+  IVector3Like,
+  Mesh,
+  HighlightLayer,
+} from '../controllers/render/babylon/exports';
+import type { ModelObject } from '../controllers/render/modelObject';
+import type { MonsterActionType, PlayerAction } from '@versions/shared/objects/enum';
+import type { PetFollow, PetSpec } from '@/controllers/pets';
+import type { MUAttributeSystem } from '../core/attributeSystem';
+import type { TerrainPicker } from '../controllers/terrain/terrainPick';
+import {
+  TransformNode,
+  Color3,
+  Vector3,
+  Viewport,
+} from '../controllers/render/babylon/exports';
+import { createPathfinding } from '../core/pathfinding';
+import { CharacterClassNumber, ENUM_WORLD } from '@/core/types';
+import { TILE_CM } from '../controllers/terrain/consts';
+import type { TestScene } from '../controllers/render/scenes/testScene';
+import type { CursorHover } from '@/controllers/interface/components/game_cursor';
 
 export type EntityTypeFromQuery<TB extends Bucket<any> = Bucket<any>> =
   TB extends Bucket<infer T> ? T : never;
+
+/** An entity the server named: it has a `netId` and, like every scoped object, a `transform`. */
+export type NetEntity = With<Entity, 'netId' | 'transform'>;
+
+type BandRequest =
+  | { kind: 'takeOut'; instrument: InstrumentId }
+  | { kind: 'putAway' };
+
+/** A tile's two mapping layers and the blend between them. See `World.getTerrainLayers`. */
+export type TerrainLayers = {
+  layer1: number;
+  /** 255 when the tile has no second layer. */
+  layer2: number;
+  /** 0…1: how far layer 2 is painted over layer 1. */
+  alpha: number;
+};
 
 export type ISystemFactory = (world: World) => {
   update?: (deltaTime: number) => void;
@@ -22,8 +56,64 @@ export type Item = {
   group: number;
   lvl?: number;
   isExcellent?: boolean;
+  isAncient?: boolean;
+  /** Socket slots the item carries (0 for unsocketed gear). */
+  socketCount?: number;
+  /** Socket bytes 7-11 as sent (option number, 0xFE = empty slot). */
+  sockets?: number[];
+  /** Byte 6: the Jewel of Harmony option (high nibble) and level, or a socket item's bonus option. */
+  socketBonus?: number;
   hasSkill?: boolean;
+  /** Luck: +5% critical, +25% Jewel of Soul (byte 1, bit 2). */
+  luck?: boolean;
+  /** Option level 0..7 (+4 damage/defense each): byte 1 bits 0-1 + byte 3 bit 6. */
+  optionLevel?: number;
+  /** Excellent option bits 0-5 of byte 3 (CalcExcellentOptions order). */
+  excellentFlags?: number;
+  /** Wings and capes: the wing option bits 0-3 of byte 3 (`CalcWingOptions`). */
+  wingOptions?: number;
+  /** Wings and capes: `OptionType`, the kind of the additional option (byte 3 bits 4-5). */
+  wingOptionKind?: number;
+  /** Ancient set discriminator (byte 4 bits 0-1) and +5/+10 bonus level (bits 2-3). */
+  ancientDiscriminator?: number;
+  ancientBonusLevel?: number;
+  durability?: number;
+  raw?: number[];
 };
+
+/**
+ * The original's `OBJECT` fields a dying body borrows for its motion
+ * (`Direction`, `Velocity`, `Gravity`, `m_vDownAngle`), in cm and cm/tick
+ * like the C++ so the constants read straight off it.
+ */
+export type DeathMotion =
+  | {
+      /** `AT_SKILL_NOVA` / `AT_SKILL_COMBO` (ZzzCharacter.cpp:3173-3182): a slide along `HeadAngle`. */
+      kind: 'knock';
+      /** Unit direction in the map plane (toward the killer, `CreateAngle2D`). */
+      dirX: number;
+      dirZ: number;
+      /** `o->Direction[1]`: cm per tick, 40…54 to start. */
+      speed: number;
+      /** `o->Velocity`: the per-tick loss, 1.0…1.4, +1 a tick. */
+      decel: number;
+    }
+  | {
+      /** Blood Castle bridge edge (`TW_ACTION`) or Chaos Castle pit (`TW_NOGROUND`), WSclient.cpp:5440-5487. */
+      kind: 'fall';
+      /** +1 / -1: which side of the bridge is the void (`m_vDownAngle` sign); 0 = straight down. */
+      side: number;
+      /** `o->Direction[0]`: sideways acceleration, cm/tick². */
+      accel: number;
+      /** `o->Direction[1]`: sideways speed, cm/tick. */
+      speed: number;
+      /** `o->Gravity`: height above the death spot, cm (starts upward!). */
+      height: number;
+      /** `o->Velocity`: vertical speed, cm/tick. */
+      vy: number;
+      /** `o->Direction[2]`: vertical loss a tick. */
+      drop: number;
+    };
 
 export type Entity = Partial<{
   netId: number;
@@ -31,47 +121,225 @@ export type Entity = Partial<{
   worldIndex: ENUM_WORLD;
   modelFilePath: string;
   npcType: number;
+  /**
+   * AddTransformedCharactersToScope: a player wearing a monster's appearance
+   * (a transformation ring, or a game master's `/skin`). The number is the
+   * monster it is drawn as; the entity is still a player for every command,
+   * trade and shop click, and never a target the way a monster is.
+   */
+  skin: number;
+  /** AddSummonedMonstersToScope: name of the player who summoned this monster. */
+  summonedBy: string;
   localPlayer: true;
   transform: {
     pos: IVector3Like;
+    /** Target orientation; `rot.y` is the yaw the character *wants* to face. */
     rot: IVector3Like;
     scale: number;
     posOffset?: IVector3Like;
+    /** Smoothed yaw actually rendered for characters (TurnAngle2 ×0.1/tick). */
+    visualRotY?: number;
   };
   modelObject: ModelObject;
   modelFactory: typeof ModelObject;
+  /**
+   * The record is drawn by a prop batch (`controllers/render/propBatches.ts`) and never
+   * gets a `modelObject` of its own: which type's batch, and which chunk.
+   */
+  propBatch: { type: number; chunk: number };
   objOutOfScope: true;
+  /**
+   * Playing an instrument (the band system): the held pose, the model in the
+   * hand and the hits still to twitch on. `BandSystem` owns it; the facade in
+   * `modules/band/music` adds and removes it through `modules/band/music/performing.ts`.
+   */
+  performing: {
+    instrument: InstrumentId;
+    /** The emote the pose is copied from (already gendered). */
+    source: PlayerAction;
+    /** The copied clip's index on this entity's model, -1 until the model is loaded. */
+    clip: number;
+    /** The hero, whose sound is never attenuated. */
+    local: boolean;
+    /** Hits not yet shown, ascending by audio time. */
+    hits: BandHit[];
+    /** The model in the hand (the row's first), where the notes are born. */
+    model: ModelObject | null;
+    /** The row's other models: a bow, a second stick, the kit at the feet. */
+    parts: ModelObject[];
+  };
   pathfinding: {
     from: IVector2Like;
     to: IVector2Like;
     path: IVector2Like[] | null;
     calculated: boolean;
+    /**
+     * The last step of `path` the server has been sent (NetworkSystem, the
+     * only writer). Undefined when it has the whole path. MoveAlongPathSystem
+     * refuses to walk the hero past it: a WalkRequest whose source tile is
+     * where the server's walker has not reached is what the speedhack check
+     * and the 5-tile resync both fire on.
+     */
+    sentThrough?: IVector2Like;
   };
   playerMoveTo: {
     point: IVector2Like;
     handled: boolean;
     sendToServer?: boolean;
+    /**
+     * No move-target marker on the ground for this one. Consumed with
+     * `handled`: a held walk key re-issues several times a second and would
+     * carpet the map in markers.
+     */
+    silent?: boolean;
   };
   movement: {
     velocity: IVector2Like;
   };
   playerAnimation: {
     action: PlayerAction;
+    /**
+     * `c->Run` (ZzzCharacter.cpp:159, :387-408): 0…40, climbing 25 per second
+     * while the character walks outside a safe zone and its class/boots allow
+     * it. At 40 the run clips take over. See controllers/actors/locomotion.ts.
+     */
+    run: number;
+    /**
+     * `c->SwordCount` (ZzzCharacter.cpp:1129): swings this character has
+     * thrown. `SetPlayerAttack` cycles the repeated clips on it - three
+     * two-hand swings, three scythe swings, the four-clip dual-wield round -
+     * so it has to live on the character, not on the system that reads it.
+     * Absent until the first swing.
+     */
+    swordCount?: number;
+    /**
+     * `swingFill` (Enhanced): the hero's swing clip after its blow plays at `scale`, so it ends as
+     * the next swing may start; only while the clip started as `serial` (`actionSerial`) runs.
+     */
+    swingFill?: { serial: number; scale: number };
   };
+  /**
+   * A `MonsterDef.ball` body (the Battle Soccer ball): `PushingCharacter`'s MODEL_BALL lines - its
+   * height over the 30 cm floor and `Gravity` (cm, cm a tick), its roll (`Direction[0]`, `[1]`,
+   * degrees a tick) and the part of a 25 fps tick not yet stepped. `positionSlideSystem.ts`.
+   */
+  ball: { height: number; gravity: number; spinX: number; spinZ: number; ticks: number };
   monsterAnimation: {
     action: MonsterActionType;
   };
+  /**
+   * Death state (the original's c->Dead / c->Rot / o->Alpha, ZzzCharacter.cpp:3105,3958).
+   * Added by ObjectGotKilled; DeathSystem drives the delay, Die clip, blood,
+   * fade + sink and the final despawn.
+   */
+  dying: {
+    /** 25 Hz ticks since the kill packet: the original's `c->Dead` counter (ZzzCharacter.cpp:4076). */
+    time: number;
+    /** Die clip started (SetPlayerDie ran). */
+    started: boolean;
+    /** c->Rot accumulator: 0.02 per 25 Hz tick; fade begins at 1. */
+    rot: number;
+    /** Model alpha, 1 → 0 during the fade. */
+    alpha: number;
+    /** World-unit drop applied while fading (0.4 cm per tick in the original). */
+    sink: number;
+    /** The hero landed the killing blow. */
+    killedByHero: boolean;
+    /** Ticks the hero's hit request waited for its blow: the Die clip's 14 ticks count from the swing's start. */
+    held: number;
+    /** ObjectGotKilled `SkillId` (`c->m_byDieType`, WSclient.cpp:5504): Nova / Combo pick the knock-up. */
+    skill: number;
+    /** ObjectGotKilled `KillerId` (the `TKey` a Nova / Combo victim turns to face, :5537-5546). */
+    killerNetId: number;
+    /** The body burst into pieces (`o->Live = false`, ZzzCharacter.cpp:1397-1416): no fade, no sink. */
+    shattered: boolean;
+    /**
+     * Render-only displacement from `transform.pos` in tiles (y up) and a
+     * pitch in radians: the Nova / Combo slide (ZzzCharacter.cpp:3173-3182)
+     * and the Blood / Chaos Castle fall (`FallingCharacter`, :3014-3032).
+     */
+    offset: { x: number; y: number; z: number };
+    pitch: number;
+    /** Integrator state of that motion; set by DeathSystem when the kill arrives. */
+    motion?: DeathMotion;
+  };
   attributeSystem: MUAttributeSystem;
+  /** Another player's own attack and magic speed, from the extended scope packet (AnimationSystem). */
+  speeds: { attack: number; magic: number };
+  /** HeroStateChanged: PK / hero status byte of a player (name tint later). */
+  heroState: number;
+  /** Active MagicEffectStatus effect ids on this object (everyone in scope). */
+  buffs: Set<number>;
   visibility: {
     state: 'visible' | 'nearby' | 'hidden';
     lastChecked: number;
+    /** Set by the first distance check; the loading screen waits for it. */
+    swept?: boolean;
   };
   screenPosition: {
     x: number;
     y: number;
     worldOffsetZ: number;
   };
+  /**
+   * A short-lived emoji over (or beside) a character - see
+   * `modules/chat/emojiBubbles.ts`. `EmojiBubbleSystem` owns the lifetime and the
+   * side anchor, `CalculateScreenPositionSystem` projects that anchor, and
+   * the `EmojiBubbles` overlay draws it.
+   */
+  emojiBubble: {
+    /** A bubble word, or null for an emoji sent in chat. */
+    id: EmojiBubbleId | null;
+    /** A pack emoji's url, when one was sent. */
+    picture: string | null;
+    /** A system emoji's text, when one was sent. */
+    glyph: string | null;
+    /** Seconds left before it disappears. */
+    life: number;
+    /** Full lifetime, so the overlay can drive the fade. */
+    duration: number;
+    /** Bumped on every (re)trigger so the overlay can restart its animation. */
+    serial: number;
+    /** Cached `placement === 'side'`, so the hot paths need no catalogue lookup. */
+    isSide: boolean;
+    /**
+     * The bubble's own world anchor - over the head, or on the shoulder
+     * currently facing the camera. Without `mapParent` (the projection adds
+     * it, as it does for the main anchor).
+     */
+    anchor: IVector3Like;
+    /** Projected `anchor` in CSS pixels; only meaningful while `onScreen`. */
+    screenX: number;
+    screenY: number;
+    onScreen: boolean;
+  };
   objectNameInWorld: string;
+  /**
+   * The original's `CHAT` balloon (ZzzInterface.cpp:703): a hovered NPC's or
+   * player's name, plus up to two chat lines. Lifetimes are 25 Hz ticks;
+   * NameTagSystem owns it, the `NameTags` overlay draws it.
+   */
+  nameTag: {
+    /** `IDLifeTime`: the name shows while > 0 or while a chat line lives. */
+    idLife: number;
+    /** `Color`: the PK byte the name is tinted by (0 for NPCs). */
+    color: number;
+    /** `Text[0]` (newest, drawn last) and `Text[1]` (older, drawn above it). */
+    text: [string, string];
+    /** `LifeTime[0..1]` in ticks. */
+    life: [number, number];
+  };
+  /** AssignCharacterToGuild: the guild a player belongs to (name via GuildMarks). */
+  guild: {
+    id: number;
+    role: GuildMemberRoleEnum;
+  };
+  /**
+   * `bGmMode` of `RenderBoolean`: the original reads `CtlCode` / the GM buff,
+   * neither of which OpenMU sends. The one GM signal it does give is the `#`
+   * shout, so the flag is raised the first time a player in scope sends one.
+   */
+  isGm: true;
   charAppearance: {
     helm: Item | null;
     armor: Item | null;
@@ -81,8 +349,114 @@ export type Entity = Partial<{
     leftHand: Item | null;
     rightHand: Item | null;
     wings: Item | null;
+    /** `c->Helper`: Guardian Angel, Imp, Horn of Uniria / Dinorant (group 13). */
+    pet: Item | null;
     charClass: CharacterClassNumber;
     changed: boolean;
+    /**
+     * Bumped by AppearanceSystem every time it applies these slots to the
+     * model - not only when they differ from last time. Item effects are
+     * re-stamped on every apply (`PlayerObject.loadPartAsync`), so anything
+     * else a character's items own has to be re-examined on the same beat, or
+     * it survives exactly until something re-applies the same gear underneath
+     * it (a warp, a re-scope). ItemGlowSystem's lamp reads it.
+     */
+    applied?: number;
+  };
+  /**
+   * A pet or mount object owned by another entity: the free-flying Guardian
+   * Angel, the two ridden mounts (`Mounts[]` in the original, GOBoid.cpp) and
+   * the Dark Raven (`CSPetDarkSpirit`). Created and driven by PetSystem; the
+   * Imp is not one of these - it is a bone-linked child of its owner's
+   * PlayerObject.
+   */
+  petActor: {
+    owner: Entity;
+    kind: 'angel' | 'mount' | 'raven' | 'follower';
+    /** `o->Angle[2]` in radians (MU yaw convention, like `transform.rot.y`). */
+    yaw: number;
+    /** `o->Direction` in MU units per 25 Hz tick. */
+    dir: { x: number; y: number; z: number };
+    /** Seconds until the next `rand_fps_check(32)` direction re-roll. */
+    reroll: number;
+    /** `FlyRange` in world units. */
+    flyRange: number;
+    /** World units the mount sits below its rider. */
+    drop: number;
+    /** `SetAction(o, n)` while standing / moving - mounts differ. */
+    standAction: number;
+    moveAction: number;
+    /**
+     * A Fenrir mount: its clips mirror the rider's `PLAYER_FENRIR_*` action
+     * instead of the stand/move pair, and its body arcs the variant's
+     * lightning tint (`fenrirMountAction` / PetSystem).
+     */
+    fenrirThunder?: readonly [number, number, number];
+    /** The variant's footprint subtype (`PetSpec.footSubType`). */
+    fenrirFoot?: number;
+    /** The wolf's own spec, for the body passes (`fenrirShine`). */
+    fenrirSpec?: PetSpec;
+    /** Last frame's `AnimationFrame`, for the footfall windows. */
+    fenrirFrame?: number;
+    /**
+     * A follower pet (`PetObject`): how it holds station on its owner, the
+     * `PlaySpeed` of its one clip, and the seconds its body light pulses
+     * over when it has one. See `PetFollow` in controllers/pets/pets.ts.
+     */
+    follow?: PetFollow;
+    followSpeed?: number;
+    pulseSeconds?: number;
+    /** `m_timer->GetTimeElapsed()` - milliseconds since the pet was created. */
+    clock?: number;
+    /**
+     * A collector pet fetching zen: which of `PetActionCollecter`'s four
+     * states it is in, the drop it set out for and where that drop was,
+     * and the two clocks the original keeps (`m_dwRootingTime`, the state's
+     * own patience, and `m_dwSendDelayTime`, the gap between asks).
+     */
+    collect?: {
+      state: 'stand' | 'move' | 'get' | 'return';
+      target: Entity | null;
+      x: number;
+      z: number;
+      since: number;
+      sent: number;
+    };
+  };
+  /**
+   * `Boids[]` - the ambient wildlife (`controllers/fx/boids.ts`, GOBoid.cpp). Created
+   * and driven by BoidSystem; it has no server presence and nothing else
+   * reads it.
+   */
+  boid: {
+    kind: 'bird' | 'bat' | 'butterfly' | 'crow' | 'fish' | 'dragon';
+    /** `o->AI`: only the bird uses more than `fly`. */
+    ai: 'fly' | 'down' | 'ground' | 'up';
+    /**
+     * `o->LifeTime` in seconds, and Infinity for the species that have none.
+     * The invasion dragons are the only boid the original gives a clock; at
+     * zero it is told to leave rather than dropped, so it fades like the rest.
+     */
+    life: number;
+    /** `o->Angle[2]`, degrees, MU convention. */
+    yaw: number;
+    /** `o->Direction[2]`: the vertical component, MU units per tick. */
+    rise: number;
+    /** `o->Velocity`. */
+    velocity: number;
+    /** `o->Timer`, which the fish use to schedule their darting. */
+    timer: number;
+    /** Where the flock steering aims: `o->Direction[0..1]`, world units. */
+    leadX: number;
+    leadZ: number;
+    /**
+     * `o->Alpha` climbing to `o->AlphaTarget`: 0 on spawn, 1 in the air, and
+     * counting back down once the boid has been told to leave. The original
+     * fades one in and this did not, which is why they popped.
+     */
+    alpha: number;
+    /** On its way out. Nothing renews it, and at 0 alpha it is removed. */
+    leaving: boolean;
   };
   highlighted: {
     color: Color3;
@@ -99,11 +473,26 @@ export type Entity = Partial<{
     onEnter?: () => void;
     onLeave?: () => void;
   };
+  droppedItem: {
+    isMoney: boolean;
+    /** Zen in the pile (`isMoney` drops only): what the loot filter weighs. */
+    amount?: number;
+    /** Parsed item (level / excellent) for name tints and ground glow. */
+    item?: Item;
+    /** `IsFreshDrop`: it just left a hand or a corpse - falls and tumbles in (dropMotionSystem). */
+    fresh?: boolean;
+    /** `ITEM_GROUP_*` and the index inside it: what `ItemAngle` poses the drop by. */
+    group: number;
+    num: number;
+    /** A pickup request went out for it: the MU Helper does not go for it again (`DeleteItem`). */
+    pickupAsked?: boolean;
+  };
   onDispose?: () => void;
 }>;
 
 export class World extends ECSWorld<Entity> {
-  readonly terrainScale = 100;
+  /** Centimetres per tile (the original's `TERRAIN_SCALE`); see `controllers/terrain/consts.ts`. */
+  readonly terrainScale = TILE_CM;
 
   viewport = new Viewport(0, 0, 1, 1);
 
@@ -112,6 +501,21 @@ export class World extends ECSWorld<Entity> {
   readonly mapParent: TransformNode;
 
   readonly netObjsQuery = this.with('netId', 'transform');
+
+  /**
+   * Every entity that carries a `netId`, keyed by it - the server's object id
+   * is how every packet names its subject, so this is the lookup the packet
+   * handlers do. Maintained by `netObjsQuery`'s add / remove hooks; a
+   * stale entity that shares an id with a newer one never shadows it (the
+   * newest add wins, a remove only clears its own entry). `netId` is never
+   * reassigned in place, so the index cannot drift from the component.
+   */
+  readonly byNetId = new Map<number, NetEntity>();
+
+  /** The entity the server calls `netId`, or `undefined` when it is not in the world. */
+  getByNetId(netId: number): NetEntity | undefined {
+    return this.byNetId.get(netId);
+  }
 
   readonly playersQuery = this.with(
     'attributeSystem',
@@ -127,6 +531,24 @@ export class World extends ECSWorld<Entity> {
     return this.#localPlayerQuery.entities[0];
   }
 
+  /**
+   * Takes the hero out of the world, which is what leaving a session does.
+   * The pre-game screens are not the world: their camera is the backdrop's,
+   * nowhere near the hero, and everything that culls against the hero
+   * (`CalculateVisibilitySystem`, the prop batches' ring) hides the scene the
+   * camera is actually looking at while a body is still standing on the map
+   * it was left on. The next entry spawns it again (`addCharacterToScope`).
+   */
+  removeHero(): void {
+    // A switch to another character leaves its own entity behind, so the
+    // loop: the getter hands back whichever one the query has first.
+    for (let hero = this.playerEntity; hero; hero = this.playerEntity) {
+      this.remove(hero);
+      hero.onDispose?.();
+      hero.modelObject?.dispose();
+    }
+  }
+
   #keyboardInputQuery = this.with('keyboardInput');
 
   get keyboardInput() {
@@ -137,6 +559,8 @@ export class World extends ECSWorld<Entity> {
 
   terrain: {
     mesh: Mesh;
+    /** Every ground pick: `pickGround` (terrainPick.ts). */
+    picker: TerrainPicker;
     MapTileObjects: (typeof ModelObject)[];
     extraHeight: number;
   } | null = null;
@@ -146,14 +570,84 @@ export class World extends ECSWorld<Entity> {
     height: 256,
   });
 
-  readonly assetsManager: AssetsManager;
-
   currentPointerTarget: Entity | null = null;
+
+  attackTarget: Entity | null = null;
+
+  /** Drop the hero walks to and picks up (MOVEMENT_GET); ItemPickupSystem. */
+  pickupTarget: Entity | null = null;
+
+  /** NPC the hero walks to and talks to (MOVEMENT_TALK); NpcTalkSystem. */
+  talkTarget: Entity | null = null;
 
   pointerPressed = false;
 
+  /** Right mouse button held (repeats the current skill, like MouseRButton). */
+  rightPointerPressed = false;
+
+  /** Pending right-click cast: object under the cursor and/or the ground point. */
+  castRequest: {
+    target: Entity | null;
+    point: { x: number; y: number } | null;
+    /** Ctrl was held: the cast goes at the ground point, whatever is under the cursor. */
+    forced?: boolean;
+    /**
+     * `target` is another player the hero may attack (`CheckAttack`: the
+     * duel enemy, an outlaw, or anyone while Ctrl is held). Without this a
+     * player under the cursor is no target at all.
+     */
+    pvp?: boolean;
+  } | null = null;
+
+  /**
+   * The square a cast is walking the hero up to, and how close he has to get
+   * before he stops: `attackTarget`'s opposite number for skills, written by
+   * SkillCastSystem while an approach is in flight and read by NetworkSystem
+   * to cut the walk short of the target. Null on every other frame.
+   */
+  castApproach: { x: number; y: number; range: number } | null = null;
+
+  cursorHover: CursorHover | null = null;
+
+  /** Emote picked in the radial menu, consumed by EmoteSystem next frame. */
+  emoteRequest: EmoteId | null = null;
+
+  /** Emoji bubble picked in the radial menu or sent in chat, consumed by EmojiBubbleSystem. */
+  emojiRequest: EmojiBubbleId | ChatEmojiBubble | null = null;
+
+  /** Instrument taken out or put away from the radial menu, consumed by BandSystem next frame. */
+  bandRequest: BandRequest | null = null;
+
+  cursorBlocked = false;
+
   constructor(readonly scene: TestScene) {
     super();
+
+    // `netIdCount` only exists for the transient case of two entities sharing
+    // an id (a re-scoped object before `removeNetObject` purged the stale
+    // one): when the indexed entity of a still-shared id goes, the survivor
+    // is found by the one linear scan this index otherwise never does.
+    const netIdCount = new Map<number, number>();
+    this.netObjsQuery.onEntityAdded.subscribe(e => {
+      this.byNetId.set(e.netId, e);
+      netIdCount.set(e.netId, (netIdCount.get(e.netId) ?? 0) + 1);
+    });
+    this.netObjsQuery.onEntityRemoved.subscribe(e => {
+      const id = e.netId;
+      const left = (netIdCount.get(id) ?? 1) - 1;
+      if (left <= 0) netIdCount.delete(id);
+      else netIdCount.set(id, left);
+      if (this.byNetId.get(id) !== e) return;
+      this.byNetId.delete(id);
+      if (left > 0) {
+        for (const other of this.netObjsQuery.entities) {
+          if (other !== e && other.netId === id) {
+            this.byNetId.set(id, other);
+            break;
+          }
+        }
+      }
+    });
 
     this.add({
       keyboardInput: {
@@ -161,25 +655,90 @@ export class World extends ECSWorld<Entity> {
       },
     });
 
-    this.assetsManager = new AssetsManager(this.scene);
-    this.assetsManager.useDefaultLoadingScreen = false;
-
     this.mapParent = new TransformNode('mapParent', scene);
   }
 
-  getTerrainHeight(x: number, y: number): number {
+  getTerrainHeight(_x: number, _y: number): number {
     return -9999;
   }
 
-  isWalkable(x: number, y: number): boolean {
+  isWalkable(_x: number, _y: number): boolean {
     return true;
   }
 
-  getTerrainFlag(x: number, y: number): number {
+  getTerrainFlag(_x: number, _y: number): number {
     return 0;
   }
 
-  getTerrainTile(x: number, y: number): number {
+  /**
+   * `AddTerrainAttributeRange`: set (`set` true) or clear one `TW_*` flag over
+   * the `w`×`h` tile block at (x, y). Bound by `loadMapIntoScene` to the
+   * current terrain's attribute array; a no-op until a map is loaded.
+   */
+  setTerrainFlags(
+    _x: number,
+    _y: number,
+    _w: number,
+    _h: number,
+    _flag: number,
+    _set: boolean
+  ): void {}
+
+  /**
+   * A copy of the ground still standing over `rects` (`x, y, w, h` tile
+   * blocks), as a mesh of its own on the terrain's material, for a caller to
+   * animate and dispose. Null when none of those tiles has ground, or until
+   * a map is loaded.
+   */
+  detachGround(
+    _rects: readonly (readonly [x: number, y: number, w: number, h: number])[]
+  ): Mesh | null {
+    return null;
+  }
+
+  getTerrainTile(_x: number, _y: number): number {
     return 0;
+  }
+
+  /**
+   * Both mapping layers under tile (x, y) and the alpha (0…1) the second is
+   * painted over the first with, written into `out`. `getTerrainTile` is the
+   * original's `TerrainMappingLayer1` lookup and stays that way for the
+   * things that copy the original (footstep sounds); this is for anything
+   * that has to agree with what the ground is *drawn* as.
+   */
+  getTerrainLayers(x: number, y: number, out: TerrainLayers): void {
+    out.layer1 = this.getTerrainTile(x, y);
+    out.layer2 = 255;
+    out.alpha = 0;
+  }
+
+  getTerrainLight(_x: number, _y: number): IVector3Like {
+    return Vector3.OneReadOnly;
+  }
+}
+
+// A hot update must reload the page: a re-executed module would hand
+// later-loaded importers a second `World` class (and a second `Entity`
+// type identity for instanceof-free checks), forking the ECS.
+const hot = (import.meta as { hot?: { decline(): void } }).hot;
+if (hot) hot.decline();
+
+// The bus events that carry an entity (core/eventBus/events.ts).
+declare module '@/core/eventBus/events' {
+  interface EventMap {
+    objectDamaged: {
+      entity: With<Entity, 'transform' | 'screenPosition'>;
+      healthDamage: number;
+      shieldDamage: number;
+      kind: number;
+      isDouble: boolean;
+      isTriple: boolean;
+    };
+    /** Server asked to show an effect on an object (level-up beam, shield potion/lost). */
+    objectEffect: {
+      entity: With<Entity, 'transform'>;
+      effect: 'levelUp' | 'shieldPotion' | 'shieldLost' | 'swirl';
+    };
   }
 }

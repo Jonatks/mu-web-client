@@ -1,5 +1,9 @@
-import { Matrix, Vector2, Vector3 } from '../../libs/babylon/exports';
-import { EventBus } from '../../libs/eventBus';
+import { Matrix, Vector2, Vector3 } from '../../controllers/render/babylon/exports';
+import {
+  clearScreenPositionListeners,
+  emitScreenPosition,
+  emitScreenPositionFrameEnd,
+} from '../../controllers/interface/screenPositionBus';
 import { Entity, ISystemFactory } from '../world';
 
 const DIST = 10;
@@ -13,9 +17,12 @@ export const CalculateScreenPositionSystem: ISystemFactory = world => {
 
   const finalPosition = Vector3.Zero();
   const screenPosition = Vector3.Zero();
+  const viewProjection = Matrix.Identity();
 
   const tmp1 = Vector3.Zero();
   const tmp2 = Vector3.Zero();
+  const sidePosition = Vector3.Zero();
+  const sideScreen = Vector3.Zero();
 
   const result = {
     entity: null as Entity | null,
@@ -26,11 +33,11 @@ export const CalculateScreenPositionSystem: ISystemFactory = world => {
 
   query.onEntityRemoved.subscribe(e => {
     hiddenEntities.delete(e);
+    clearScreenPositionListeners(e);
   });
 
   const scene = world.scene;
 
-  // const rm = world.resourcesManager;
   const engine = scene.getEngine();
 
   return {
@@ -44,67 +51,64 @@ export const CalculateScreenPositionSystem: ISystemFactory = world => {
       const camera = scene.activeCamera;
       if (!camera) return;
 
-      camera.viewport.toGlobalToRef(
-        engine.getRenderWidth(),
-        engine.getRenderHeight(),
-        world.viewport
-      );
-      const projMatrix = scene.getTransformMatrix();
+      const renderW = engine.getRenderWidth();
+      const renderH = engine.getRenderHeight();
+      camera.viewport.toGlobalToRef(renderW, renderH, world.viewport);
 
-      const ratio = 1 / (engine._hardwareScalingLevel || 1);
+      // Project with the camera's *current* view matrix, not
+      // `scene.getTransformMatrix()`, which is the matrix of the previous
+      // `scene.render()` - a stale camera makes labels trail their owners.
+      camera
+        .getViewMatrix()
+        .multiplyToRef(camera.getProjectionMatrix(), viewProjection);
 
-      tmp1.x = playerEntity.transform.pos.x;
-      tmp1.y = playerEntity.transform.pos.y;
-      tmp1.z = playerEntity.transform.pos.z;
+      // Labels are CSS-positioned, so convert render pixels to CSS pixels
+      // (device pixel ratio / hardware scaling).
+      const canvas = engine.getRenderingCanvas();
+      const cssW = canvas?.clientWidth || renderW;
+      const cssH = canvas?.clientHeight || renderH;
+      const ratioX = renderW / cssW;
+      const ratioY = renderH / cssH;
+
+      const mapParent = world.mapParent.position;
+
+      const playerTransform = playerEntity.transform;
+      tmp1.x = playerTransform.pos.x + (playerTransform.posOffset?.x ?? 0);
+      tmp1.y = playerTransform.pos.y + (playerTransform.posOffset?.y ?? 0);
+      tmp1.z = playerTransform.pos.z + (playerTransform.posOffset?.z ?? 0);
 
       query.entities.forEach(entity => {
         if (world.mapIndex !== entity.worldIndex) {
           if (!hiddenEntities.has(entity)) {
             hiddenEntities.add(entity);
-            result.entity = entity;
             entity.screenPosition.x = entity.screenPosition.y = 0;
             result.screenPosition.copyFrom(entity.screenPosition);
-            EventBus.emit('entityScreenPositionUpdated', result as any);
+            emitScreenPosition(entity, result.screenPosition);
           }
           return;
         }
 
-        // if (entity.enabled !== true) {
-        //   if (!hiddenEntities.has(entity.id)) {
-        //     hiddenEntities.add(entity.id);
-        //     result.id = entity.id;
-        //     entity.screenPosition.x = entity.screenPosition.y = 0;
-        //     result.screenPosition.copyFrom(entity.screenPosition);
-        //     bus.onEntityScreenPositionUpdated.notifyObservers(result);
-        //   }
-        //   return;
-        // }
-
         screenPosition.setAll(0);
 
-        const position = entity.transform.pos;
-        finalPosition.x = position.x;
-        finalPosition.y = position.y;
-        finalPosition.z = position.z;
-
-        finalPosition.z += entity.screenPosition.worldOffsetZ;
+        // Anchor at the rendered position: `transform.pos` is the tile
+        // corner, `posOffset` centres characters on the tile (RenderSystem /
+        // HeadTrackingSystem apply the same sum).
+        const { pos, posOffset } = entity.transform;
+        finalPosition.x = pos.x + (posOffset?.x ?? 0) + mapParent.x;
+        finalPosition.y = pos.y + (posOffset?.y ?? 0) + mapParent.y;
+        finalPosition.z = pos.z + (posOffset?.z ?? 0) + mapParent.z;
 
         tmp2.copyFrom(finalPosition);
 
+        finalPosition.y += entity.screenPosition.worldOffsetZ;
+
         const distSquared = Vector3.DistanceSquared(tmp1, tmp2);
 
-        let distToCompare = DIST_SQUARED;
-
-        // if (entity.screenPositionDistSqrt != null) {
-        //   distToCompare = entity.screenPositionDistSqrt;
-        // }
-
-        if (distSquared < distToCompare) {
-          finalPosition.y = 256 - finalPosition.y;
+        if (distSquared < DIST_SQUARED) {
           Vector3.ProjectToRef(
             finalPosition,
             ZERO_MATRIX,
-            projMatrix,
+            viewProjection,
             world.viewport,
             screenPosition
           );
@@ -112,10 +116,46 @@ export const CalculateScreenPositionSystem: ISystemFactory = world => {
 
         const scrPos = entity.screenPosition;
 
-        scrPos.x = screenPosition.x / ratio;
-        scrPos.y = screenPosition.y / ratio;
+        scrPos.x = screenPosition.x / ratioX;
+        scrPos.y = screenPosition.y / ratioY;
 
-        result.entity = entity;
+        // An emoji bubble hangs off its own world anchor (over the head, or
+        // on the shoulder facing the camera - placed by EmojiBubbleSystem)
+        // rather than off the balloon anchor above, so it gets its own
+        // projection here, where the matrices and the ratios are to hand.
+        const bubble = entity.emojiBubble;
+
+        if (bubble) {
+          sidePosition.x = bubble.anchor.x + mapParent.x;
+          sidePosition.y = bubble.anchor.y + mapParent.y;
+          sidePosition.z = bubble.anchor.z + mapParent.z;
+
+          // Behind the camera the projection folds back onto the screen, so
+          // test the clip-space w before trusting it.
+          const m = viewProjection.m;
+          const w =
+            sidePosition.x * m[3] +
+            sidePosition.y * m[7] +
+            sidePosition.z * m[11] +
+            m[15];
+
+          if (w > 0) {
+            Vector3.ProjectToRef(
+              sidePosition,
+              ZERO_MATRIX,
+              viewProjection,
+              world.viewport,
+              sideScreen
+            );
+
+            bubble.screenX = sideScreen.x / ratioX;
+            bubble.screenY = sideScreen.y / ratioY;
+            bubble.onScreen = true;
+          } else {
+            bubble.onScreen = false;
+          }
+        }
+
         result.screenPosition.copyFrom(scrPos);
 
         const uiDistSqrt = scrPos.x * scrPos.x + scrPos.y * scrPos.y;
@@ -125,7 +165,7 @@ export const CalculateScreenPositionSystem: ISystemFactory = world => {
         if (isHidden) {
           if (!hiddenEntities.has(entity)) {
             hiddenEntities.add(entity);
-            EventBus.emit('entityScreenPositionUpdated', result as any);
+            emitScreenPosition(entity, result.screenPosition);
           }
 
           return;
@@ -133,8 +173,10 @@ export const CalculateScreenPositionSystem: ISystemFactory = world => {
 
         hiddenEntities.delete(entity);
 
-        EventBus.emit('entityScreenPositionUpdated', result as any);
+        emitScreenPosition(entity, result.screenPosition);
       });
+
+      emitScreenPositionFrameEnd();
     },
   };
 };

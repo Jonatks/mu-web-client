@@ -1,0 +1,765 @@
+import type { Entity, ISystemFactory } from '../world';
+import { Bag } from '../../modules/inventory';
+import { Hero } from '../../modules/hero';
+import { Session } from '../../modules/session';
+import { applyPlayerActionSpeed, serverMinAttackInterval } from '../../controllers/anim/playSpeed';
+import {
+  AreaSkillPacket,
+  EnterGateRequestPacket,
+  RageAttackRangeRequestPacket,
+  RageAttackRequestPacket,
+  InstantMoveRequestPacket,
+  TargetedSkillPacket,
+  TeleportTargetPacket,
+} from '@versions/shared/packets/ClientToServerPackets';
+import { skillDefinition, type SkillDefinition } from '@versions/shared/skills/skillsDatabase';
+import {
+  advancesSwordCount,
+  chooseSkillAction,
+  isAreaSkill,
+  isSelfCastable,
+  isTeleportSkill,
+  rotationByte256,
+  TELEPORT,
+} from '../../modules/skills/skillCasting';
+import {
+  inSquareRange,
+  pickAllySquare,
+  teleportGate,
+  teleportRefusal,
+  TELEPORT_PREVENTING_EFFECTS,
+} from '../../modules/warp/teleportRules';
+import { beginTeleport, endTeleport, teleportBusy } from './teleportSystem';
+import { Social } from '../../modules/social/social';
+import {
+  isAttackableEntity,
+  isAttackablePlayer,
+  isOtherPlayer,
+  reloadAmmo,
+} from './attackSystem';
+import { isFemaleClass } from '../../controllers/actors/mapPlayerNetClassToModelClass';
+import { getBaseClass } from '../../modules/hero/characterStats';
+import { isWingItem } from '../../controllers/actors/wings';
+import type { AttackPose } from '../../controllers/actors/weaponClass';
+import { mountKind } from '@/controllers/pets';
+import { clipCastSound, heroCastSound, playCombat, playSkill } from '../../controllers/sound/combat';
+import { skills, HeroSkills } from '../../modules/skills';
+import { combat } from '../../controllers/combat';
+
+import { CONSECUTIVE_ATTACK_KEY } from '../../controllers/combat/skillMovement';
+import { castsInPlace, castsOnPlayersOnly, castsOnSelfOnly } from '../../controllers/combat/castTargets';
+import { PlayerAction } from '@versions/shared/objects/enum';
+import type { CastContext } from '../../controllers/combat';
+import { Vector3 } from '../../controllers/render/babylon/exports';
+import { effects } from '../../controllers/fx';
+import { boneLocalPos } from '../../controllers/fx/core';
+import { warriorGlint, warriorGlintStar, WARRIOR_GLINT_BONE, WARRIOR_GLINT_TIP } from '../../controllers/item_fx/weaponBlur';
+import { hasWarriorGlint } from '../../controllers/skills';
+import { tierIndex } from '../../controllers/lighting/lightingQuality';
+import { lighting } from '../../controllers/lighting';
+import { isPlayerAttackAction } from '../../controllers/anim/playerActionMapper';
+import { heldWeapons } from '../../controllers/actors';
+import { isSliding } from './positionSlideSystem';
+
+/** The first lighting tier that draws the improved looks (controllers/skills/visuals.ts). */
+const ENHANCED_TIER = 1;
+const glintTmp = new Vector3();
+
+/**
+ * Right-click skill use (Attack() / ExecuteSkill, ZzzInterface.cpp:6703-7130):
+ * the current skill is cast on the object under the cursor, or on the ground
+ * point for area skills; the hero first walks into the skill's Distance, then
+ * the packet is sent and the cast clip plays. Holding the right button
+ * repeats the cast once the clip has played through.
+ *
+ * Timing and wire specials come from the `combat` layer: the per-skill clip
+ * (through `chooseSkillAction`), the Nova hold (its begin skill on press, the
+ * release on release, both named by Nova's file),
+ * Dark Side's 0x4B/0x4A pair with its follow-up blows, and the 0xDB
+ * `AreaSkillHit` for skills whose hits the client names. Re-use delays and
+ * usability are the `skills` layer's verdict.
+ */
+
+const FALLBACK_CAST_COOLDOWN = 0.8;
+const APPROACH_INTERVAL = 0.4;
+const DEFAULT_RANGE = 1.8;
+const NO_EXTRA_TARGET = 0xffff;
+
+function isPlayer(e: Entity): boolean {
+  return !!e.playerAnimation && e.netId !== undefined && !e.dying;
+}
+
+export const SkillCastSystem: ISystemFactory = world => {
+  let cooldown = 0;
+  let approachDelay = 0;
+  let alternate = false;
+  /**
+   * The request a cast has already gone out for. The button is usually let go
+   * of while the cast clip is still running, so the request outlives the
+   * release and would fire a second time on the frame the clip ends.
+   */
+  let castSent: object | null = null;
+  /** A summon already went out during the right button's current hold. */
+  let summonCast = false;
+  /**
+   * A Rage Fighter contact skill whose step has not landed yet. Beast
+   * Uppercut, Chain Drive and Dragon Slasher relocate the caster partway
+   * through the clip rather than as it starts (`IsRageHalfwaySkillAni` /
+   * `UseSkillRagePosition`, MonkSystem.cpp:428-442), which is what makes
+   * them read as a lunge instead of a swing on the spot.
+   */
+  let pendingStep: {
+    clip: PlayerAction;
+    to: { x: number; y: number };
+    /** Seconds left to see the clip reach its key before the step is dropped. */
+    expiresIn: number;
+  } | null = null;
+
+  function playClip(hero: Entity, action: PlayerAction): number {
+    const model = hero.modelObject;
+    if (model) applyPlayerActionSpeed(model, action, hero.attributeSystem);
+    if (model && hero.playerAnimation!.action === action) {
+      model.restartAction();
+    }
+    hero.playerAnimation!.action = action;
+    return model?.getActionDuration(action) ?? 0;
+  }
+
+  /**
+   * What the clip switches branch on: the mount (collapsed to none inside a
+   * safe zone, the way every `&& !c->SafeZone` in the original does),
+   * `IsFemale(Class)` - which is Elf *and* Summoner, not "is elf" - and the
+   * active world, for Rider's flying variant.
+   */
+  function castContext(hero: Entity): CastContext {
+    const cls = hero.charAppearance?.charClass ?? Hero.charClass;
+    const inSafeZone = !!hero.attributeSystem?.isAboveZero('inSafeZone');
+    return {
+      mount: mountKind(hero.charAppearance?.pet, inSafeZone),
+      isFemale: isFemaleClass(cls),
+      world: world.mapIndex,
+      alternate,
+    };
+  }
+
+  /** The swing half of the fallback: what `SetPlayerAttack` would read. */
+  function attackPose(hero: Entity): AttackPose {
+    const hands = hero.charAppearance;
+    const inSafeZone = !!hero.attributeSystem?.isAboveZero('inSafeZone');
+    return {
+      hands: heldWeapons(hero, world.mapIndex),
+      baseClass: getBaseClass(hands?.charClass ?? Hero.charClass),
+      swordCount: hero.playerAnimation?.swordCount ?? 0,
+      wings: isWingItem(hands?.wings),
+      mount: mountKind(hands?.pet, inSafeZone),
+    };
+  }
+
+  /**
+   * UseSkillWarrior's glint and brandish (SkillCast.cpp:357-376): the hero's own warrior casts
+   * only. The swing clips already brandish in CombatSfxSystem; Rider's clip is no swing. Twisting
+   * Slash takes it only on a picked target, as a ground cast never passes UseSkillWarrior.
+   */
+  function warriorCast(hero: Entity, skill: number, action: PlayerAction, targeted: boolean): void {
+    if (!hasWarriorGlint(skill, mountKind(hero.charAppearance?.pet) !== null)) return;
+    if (!targeted && action === PlayerAction.PLAYER_ATTACK_SKILL_WHEEL) return;
+    const tip = new Vector3(0, -WARRIOR_GLINT_TIP, 0);
+    const pos = hero.transform!.pos;
+    const at = (out: Vector3): Vector3 => boneLocalPos(hero, WARRIOR_GLINT_BONE, tip, out);
+    effects.spawn('sprite', world.scene, Vector3.Zero(), warriorGlint(at));
+    if (tierIndex() >= ENHANCED_TIER) {
+      effects.spawn('sprite', world.scene, Vector3.Zero(), warriorGlintStar(at));
+      lighting.skillSpot(world.scene, 0, 'glint', out => {
+        const p = at(glintTmp);
+        out.x = p.x;
+        out.y = p.y;
+        out.z = p.z;
+      });
+    }
+    if (!isPlayerAttackAction(action) && action !== PlayerAction.PLAYER_FENRIR_ATTACK_SPEAR) {
+      playCombat(Math.random() < 0.5 ? 'Sound/eSwingWeapon1' : 'Sound/eSwingWeapon2', pos);
+    }
+  }
+
+  function clipFor(hero: Entity, def: SkillDefinition): PlayerAction {
+    const ctx = castContext(hero);
+    const action = chooseSkillAction(def, attackPose(hero), ctx);
+    // `c->SwordCount++`: every SetPlayerAttack / SetPlayerHighBowAttack the
+    // skill switch falls through to ends on it, and Slash.
+    if (hero.playerAnimation && advancesSwordCount(def, ctx)) {
+      hero.playerAnimation.swordCount = (hero.playerAnimation.swordCount ?? 0) + 1;
+    }
+    alternate = !alternate;
+    return action;
+  }
+
+  function sendTargeted(skill: number, targetId: number): void {
+    if (Session.isOffline) return;
+    const packet = TargetedSkillPacket.createPacket();
+    packet.SkillId = skill;
+    packet.TargetId = targetId;
+    Session.sendToGS(packet.buffer);
+  }
+
+  function sendRageAttack(skill: number, targetId: number): void {
+    if (Session.isOffline) return;
+    const packet = RageAttackRequestPacket.createPacket();
+    packet.SkillId = skill;
+    packet.TargetId = targetId;
+    Session.sendToGS(packet.buffer);
+  }
+
+  /**
+   * Teleport (6): the square under the cursor, refused in silence the way the
+   * server would refuse it (`AT_SKILL_TELEPORT`, ClassAttack.cpp:1479-1549;
+   * WizardTeleportAction.cs). The original stops the hero and drops his
+   * target (NewUIMainFrameWindow.cpp:1950-1956, `SetPlayerStop` on the
+   * reply); the Begin fades him out here and the server's `MapChanged` lands
+   * him (`teleportLandsEarly`: teleportSystem lands him without waiting).
+   *
+   * Teleport Ally (15): a party member pulled onto a free square next to the
+   * caster (ClassAttack.cpp:1407-1479).
+   */
+  function castTeleport(
+    hero: Entity,
+    def: SkillDefinition,
+    target: Entity | null,
+    point: { x: number; y: number } | null
+  ): boolean {
+    const now = performance.now() / 1000;
+    const heroPos = hero.transform!.pos;
+    const from = { x: Math.floor(heroPos.x), y: Math.floor(heroPos.z) };
+    const ally = def.num !== TELEPORT;
+    const disabled = TELEPORT_PREVENTING_EFFECTS.some(id => skills.hasBuff(id));
+    const inSafeZone = !!hero.attributeSystem?.isAboveZero('inSafeZone');
+
+    let to: { x: number; y: number } | null;
+    if (!ally) {
+      if (!point) return false;
+      to = { x: Math.floor(point.x), y: Math.floor(point.y) };
+      const refusal = teleportRefusal({
+        from,
+        to,
+        range: def.distance,
+        flag: world.getTerrainFlag(to.x, to.y),
+        heroInSafeZone: inSafeZone,
+        disabled,
+        holdingItem: !!Bag.pickedItem,
+        busy: teleportGate.isPending(now) || teleportBusy(hero),
+        sinceMapChange: teleportGate.sinceMapChange(now),
+      });
+      if (refusal) return false;
+    } else {
+      if (inSafeZone || Bag.pickedItem || !isPartyAlly(target, hero)) return false;
+      const mate = target!;
+      const allyPos = mate.transform!.pos;
+      if (
+        teleportBusy(mate) ||
+        mate.modelObject?.CurrentAction === PlayerAction.PLAYER_SKILL_TELEPORT ||
+        // OpenMU checks the ally's effects too (CanPlayerBeTeleported).
+        TELEPORT_PREVENTING_EFFECTS.some(id => mate.buffs?.has(id))
+      ) {
+        return false;
+      }
+      to = pickAllySquare(from, (x, y) => world.getTerrainFlag(x, y));
+      // OpenMU: the square within the skill's Range + 1 of the ally.
+      if (!to || !inSquareRange({ x: Math.floor(allyPos.x), y: Math.floor(allyPos.z) }, to, def.distance + 1)) {
+        return false;
+      }
+    }
+    if (!skills.canUse(def.num)) return false;
+    skills.startCooldown(def.num);
+
+    // The hero stops: no path, no swing target, no walk into a cast, no pickup.
+    world.attackTarget = null;
+    world.castApproach = null;
+    world.pickupTarget = null;
+    const pathfinding = hero.pathfinding!;
+    const next = pathfinding.path?.[0];
+    if (next) {
+      pathfinding.path = null;
+      pathfinding.from = { x: from.x, y: from.y };
+      pathfinding.to = { x: from.x, y: from.y };
+      Hero.sendWalkStop(next.x, next.y, hero.transform!.rot.y);
+    }
+
+    if (ally) {
+      // `to->Angle[2]` toward where it is headed, then `SetPlayerTeleport(tc)`.
+      const allyTransform = target!.transform!;
+      const adx = to.x - allyTransform.pos.x;
+      const adz = to.y - allyTransform.pos.z;
+      if (adx * adx + adz * adz > 0.01) allyTransform.rot.y = Math.atan2(adz, adx) + Math.PI / 2;
+      if (target!.playerAnimation) {
+        target!.playerAnimation.action = PlayerAction.PLAYER_SKILL_TELEPORT;
+        target!.modelObject?.restartAction();
+      }
+      if (!Session.isOffline) {
+        const packet = TeleportTargetPacket.createPacket();
+        packet.TargetId = target!.netId!;
+        packet.TeleportTargetX = to.x;
+        packet.TeleportTargetY = to.y;
+        Session.sendToGS(packet.buffer);
+      }
+      // What the caster's reply would draw (`CreateTeleportEnd(so)`, WSclient.cpp:4312-4316):
+      // OpenMU names the ally as both caster and target instead, so the caster's half is drawn here.
+      endTeleport(hero, def.num, { telekinesis: true });
+      return true;
+    }
+
+    // The original takes the facing before the teleport, while the hero is
+    // still on the old square (`o->Angle[2] = CreateAngle2D`).
+    const dx = to.x - heroPos.x;
+    const dz = to.y - heroPos.z;
+    if (dx * dx + dz * dz > 0.01) hero.transform!.rot.y = Math.atan2(dz, dx) + Math.PI / 2;
+
+    if (!Session.isOffline) {
+      const packet = EnterGateRequestPacket.createPacket();
+      packet.GateNumber = 0;
+      packet.TeleportTargetX = to.x;
+      packet.TeleportTargetY = to.y;
+      Session.sendToGS(packet.buffer);
+    }
+    teleportGate.begin(from, to, now);
+    beginTeleport(hero, def.num, { move: to });
+    return true;
+  }
+
+  /** `IsPartyMember(SelectedCharacter)`: another player in scope who is in the hero's party. */
+  function isPartyAlly(target: Entity | null, hero: Entity): boolean {
+    if (!target || target === hero || !isPlayer(target) || !target.transform) return false;
+    // The classic scope packet pads names; the party list does not.
+    const name = target.objectNameInWorld?.trimEnd();
+    return !!name && Social.partyMembers.some(m => m.name.trimEnd() === name);
+  }
+
+  /** The attackable object nearest to (x, y), within `radius` tiles of it. */
+  function nearestAttackable(x: number, y: number, radius: number): Entity | null {
+    let best: Entity | null = null;
+    let bestD = radius * radius;
+    for (const e of world.netObjsQuery.entities) {
+      if (!isAttackableEntity(world, e)) continue;
+      const dx = e.transform!.pos.x - x;
+      const dz = e.transform!.pos.z - y;
+      const d = dx * dx + dz * dz;
+      if (d <= bestD) {
+        bestD = d;
+        best = e;
+      }
+    }
+    return best;
+  }
+
+  /**
+   * `SendInstantMoveRequest(CharPosX, CharPosY)` (MonkSystem.cpp:466-473):
+   * the caster is put on the square one tile short of the target, along the
+   * line between them, when that square is walkable. The server answers with
+   * the move; offline the hero is placed directly so the lunge is still
+   * visible.
+   */
+  function stepIn(hero: Entity, to: { x: number; y: number }): void {
+    const x = ~~to.x;
+    const y = ~~to.y;
+    if (!world.isWalkable(x, y)) return;
+    if (!Session.isOffline) {
+      const packet = InstantMoveRequestPacket.createPacket();
+      packet.TargetX = x;
+      packet.TargetY = y;
+      Session.sendToGS(packet.buffer);
+    }
+    const pos = hero.transform!.pos;
+    pos.x = x;
+    pos.z = y;
+    pos.y = world.getTerrainHeight(x, y);
+  }
+
+  /**
+   * The mid-clip half: the step lands the first time the clip passes the
+   * consecutive-attack key, once per cast. The clip itself is only started by
+   * `animationSystem` later in the frame, so this waits for the model to be
+   * in it rather than latching a serial at cast time, and gives up after the
+   * clip's own length in case it never gets there (the cast was interrupted,
+   * the hero walked away, the model is still loading).
+   *
+   * The original also re-sends the skill packet on this frame; that is not
+   * repeated here, because the cast already went out as a
+   * `RageAttackRequest` and OpenMU reads a second one as a second hit.
+   * Chain Drive keeps the facing it stepped in with (`m_btAttState ==
+   * FRAME_SECONDATT`, MonkSystem.cpp:476-478), which `clipHoldsFacing` covers.
+   */
+  function drainPendingStep(hero: Entity, dt: number): void {
+    if (!pendingStep) return;
+    pendingStep.expiresIn -= dt;
+    if (pendingStep.expiresIn <= 0) {
+      pendingStep = null;
+      return;
+    }
+    const model = hero.modelObject;
+    if (!model || model.CurrentAction !== pendingStep.clip) return;
+    if (model.actionFrame() < CONSECUTIVE_ATTACK_KEY) return;
+    stepIn(hero, pendingStep.to);
+    pendingStep = null;
+  }
+
+  /** 0xDB: name the attackable objects inside the area around (x, y). */
+  function sendAreaHit(def: SkillDefinition, x: number, y: number): void {
+    if (Session.isOffline || !combat.needsAreaHit(def)) return;
+    const radius = combat.areaHitRadius(def);
+    const ids: number[] = [];
+    for (const e of world.netObjsQuery.entities) {
+      if (!isAttackableEntity(world, e)) continue;
+      const dx = e.transform!.pos.x - x;
+      const dz = e.transform!.pos.z - y;
+      if (dx * dx + dz * dz <= radius * radius) ids.push(e.netId!);
+    }
+    const packet = combat.buildAreaHit(def.num, x, y, ids);
+    if (packet) Session.sendToGS(packet.buffer);
+  }
+
+  return {
+    update: dt => {
+      cooldown -= dt;
+      approachDelay -= dt;
+      if (!world.rightPointerPressed) summonCast = false;
+      // Re-armed below for as long as the approach walk is still running, so
+      // a dropped cast never leaves a stale cut on the next ordinary walk.
+      world.castApproach = null;
+
+      const hero = world.playerEntity;
+      if (!hero || hero.dying) {
+        world.castRequest = null;
+        if (combat.novaCharging) combat.releaseNova();
+        return;
+      }
+
+      drainPendingStep(hero, dt);
+
+      // `MoveHero` returns while the server's move slides the hero in (`JumpTime > 0`): the cast waits.
+      if (isSliding(hero)) return;
+
+      // Standing on a safe zone tile: no skill goes out at all, whatever the
+      // gesture was - `if (c->SafeZone) break` out of the AT_SKILL_* branches
+      // (ZzzInterface.cpp:3325), the same rule that already refuses the plain
+      // attack click (attackSystem). Ahead of the request so nothing is left
+      // half-done: no walk into range, no clip, no packet, and a Nova charge
+      // carried in from outside is dropped instead of fired.
+      if (hero.attributeSystem?.isAboveZero('inSafeZone')) {
+        if (combat.novaCharging) combat.releaseNova();
+        world.castRequest = null;
+        return;
+      }
+
+      const req = world.castRequest;
+
+      // ---- Nova hold: the button came up (or the left button was clicked)
+      // while charging → AT_SKILL_NOVA at the selected target (`SkillKeyPush`).
+      if (combat.novaCharging && (!world.rightPointerPressed || world.pointerPressed)) {
+        combat.releaseNova();
+        const nova = combat.novaSkill;
+        const def = skillDefinition(nova);
+        const target = req?.target ?? null;
+        const targetId =
+          target && isAttackableEntity(world, target) && target.netId !== undefined
+            ? target.netId
+            : (Hero.playerId ?? 0);
+        sendTargeted(nova, targetId);
+        if (def) {
+          const duration = playClip(hero, clipFor(hero, def));
+          cooldown = Math.max(
+            duration > 0 ? duration : FALLBACK_CAST_COOLDOWN,
+            serverMinAttackInterval(hero.attributeSystem?.getValue('attackSpeed') ?? 0)
+          );
+          playSkill(def.num, hero.transform.pos);
+        }
+        world.castRequest = null;
+        return;
+      }
+
+      // The repeat belongs to the held button, not to the request: one that
+      // has already cast is dropped as soon as the button is up, instead of
+      // waiting for the clip to end and going out a second time. A request
+      // that has not cast yet is left alone - that is the hero still walking
+      // into range, which the mobile pad and the approach walk both rely on.
+      if (req && castSent === req && !world.rightPointerPressed) {
+        world.castRequest = null;
+        castSent = null;
+        return;
+      }
+
+      if (!req) return;
+
+      const def = skillDefinition(HeroSkills.currentSkill);
+      if (!def) {
+        // No skill selected: the right button behaves like a plain attack
+        // click, and another player is only swung at with Ctrl held.
+        const swingAt = req.target;
+        if (
+          swingAt &&
+          (isAttackableEntity(world, swingAt) ||
+            (req.pvp && isAttackablePlayer(world, swingAt)))
+        ) {
+          world.attackTarget = swingAt;
+        }
+        world.castRequest = null;
+        return;
+      }
+
+      // One summon per press. The button is still down when the cast goes
+      // out, and a right-drag re-arms the request on every mouse move, so
+      // without the latch the second cast dismisses the monster the first
+      // one just put on the map.
+      if (def.type === 'SummonMonster' && summonCast) {
+        world.castRequest = null;
+        return;
+      }
+
+      // ---- Nova hold: the button is down - keep the charge clip up.
+      if (combat.novaCharging) {
+        const model = hero.modelObject;
+        if (model?.ActionIterationWasFinished) {
+          const beginDef = skillDefinition(combat.novaBeginSkill);
+          if (beginDef) playClip(hero, clipFor(hero, beginDef));
+        }
+        return;
+      }
+
+      if (cooldown > 0) return;
+
+      // `CheckArrow()` (SkillCast.cpp:580-590, :1189): a bow skill with no ammunition in hand puts
+      // the next quiver in and goes out once it is there; with none in the bag it is dropped.
+      if (combat.checksArrows(def.num) && !combat.hasAmmo(hero.charAppearance)) {
+        if (!reloadAmmo(hero.charAppearance)) world.castRequest = null;
+        return;
+      }
+
+      // ---- Teleport: a one-shot at the square under the cursor.
+      if (isTeleportSkill(def.num)) {
+        // Clip, flash and sound are the Begin / End's (teleportSystem).
+        if (castTeleport(hero, def, req.target ?? null, req.point)) {
+          const duration =
+            hero.modelObject?.getActionDuration(PlayerAction.PLAYER_SKILL_TELEPORT) ?? 0;
+          cooldown = duration > 0 ? duration : FALLBACK_CAST_COOLDOWN;
+        }
+        world.castRequest = null;
+        return;
+      }
+
+      // Heal, Greater Damage / Defense, Soul Barrier: a monster or NPC selected cancels the cast
+      // (`Attacking = -1`, ClassAttack.cpp:162-167, :1158).
+      if (castsOnPlayersOnly(def) && req.target?.npcType !== undefined) {
+        world.castRequest = null;
+        return;
+      }
+
+      // Weakness / Innovation: an area cast on the hero's own tile, the selection ignored.
+      const inPlace = castsInPlace(def);
+      const area = inPlace || isAreaSkill(def);
+
+      let target: Entity | null = inPlace ? null : (req.target ?? null);
+      if (
+        target &&
+        !(isAttackableEntity(world, target) || (isPlayer(target) && target !== hero))
+      ) {
+        target = null;
+      }
+      // `CheckAttack` (ZzzInterface.cpp:1778) hands a hostile skill another
+      // player's key only while Ctrl is held, so a right click on a passer-by
+      // is not an attack. The ally casts - Heal, Greater Damage / Defense,
+      // Soul Barrier - are the original's own exception (:4896-4909) and
+      // reach a player without it.
+      if (
+        target &&
+        isOtherPlayer(target) &&
+        !isSelfCastable(def) &&
+        !(req.pvp && isAttackablePlayer(world, target))
+      ) {
+        target = null;
+      }
+      // Ctrl + right button on a targeted skill: the hovered object was
+      // dropped by the pointer system, so aim at whoever stands nearest the
+      // cursor's ground point inside the skill's reach instead.
+      if (req.forced && !area && !target && req.point && !isSelfCastable(def)) {
+        target = nearestAttackable(req.point.x, req.point.y, def.distance > 0 ? def.distance : DEFAULT_RANGE);
+      }
+      // `SendRequestMagic(Skill, HeroKey)` with the selection ignored: Swell
+      // Life, the elf summons, Infinity Arrow, Berserker and the Rage
+      // Fighter party buffs go out on the caster even with a monster picked.
+      if (castsOnSelfOnly(def)) target = hero;
+      else if (!area && !target && isSelfCastable(def)) target = hero;
+
+      // Dark Side goes out with nothing selected too, where the hero stands and with no turn
+      // (SkillCast.cpp:881-895, :1047-1049; CheckTarget needs only the cursor on the ground).
+      const here = inPlace || (!target && combat.isDarkSide(def.num) && !!req.point);
+      const heroPos = hero.transform.pos;
+      let tx: number | undefined;
+      let ty: number | undefined;
+      if (here) {
+        tx = heroPos.x;
+        ty = heroPos.z;
+      } else if (target) {
+        tx = target.transform!.pos.x;
+        ty = target.transform!.pos.z;
+      } else if ((area || req.forced) && req.point) {
+        // Forced cast with nothing near the cursor still fires at the
+        // ground point instead of silently returning.
+        tx = req.point.x;
+        ty = req.point.y;
+      }
+
+      // ---- Nova: the press starts the charge on the hero, no target needed.
+      if (def.num === combat.novaSkill) {
+        const beginDef = skillDefinition(combat.novaBeginSkill) ?? def;
+        if (!skills.canUse(def.num) || !combat.beginNova()) {
+          world.castRequest = null;
+          return;
+        }
+        skills.startCooldown(def.num);
+        sendTargeted(combat.novaBeginSkill, Hero.playerId ?? 0);
+        playClip(hero, clipFor(hero, beginDef));
+        return;
+      }
+
+      if (tx === undefined || ty === undefined) {
+        if (!world.rightPointerPressed) world.castRequest = null;
+        return;
+      }
+
+      const dx = ~~tx - heroPos.x;
+      const dz = ~~ty - heroPos.z;
+      const dist = Math.sqrt(dx * dx + dz * dz);
+      const range = def.distance > 0 ? def.distance + 0.5 : DEFAULT_RANGE;
+
+      // Force cast (Ctrl) fires in place like the original's force attack -
+      // it never walks the hero into range first.
+      if (target !== hero && dist > range && !req.forced) {
+        // The walk is aimed at the target's own cell, so both the server and
+        // the client's walker have to be told to give up the last `range`
+        // tiles of it (NetworkSystem, `truncatePathWithinRange`). Without
+        // that the walk ends on top of what the hero came to cast at.
+        world.castApproach = { x: ~~tx, y: ~~ty, range };
+        if (approachDelay <= 0) {
+          approachDelay = APPROACH_INTERVAL;
+          const moveTo = hero.playerMoveTo;
+          moveTo.point.x = tx;
+          moveTo.point.y = ty;
+          moveTo.handled = false;
+          moveTo.sendToServer = true;
+        }
+        return;
+      }
+
+      // `LetHeroStop()` (ZzzInterface.cpp:1935): every cast drops the path
+      // first, so a skill is never taken mid-stride.
+      // Mid-step the hero's tile is the step's destination, the path's next node (ZzzAI.cpp:556-562).
+      const { pathfinding } = hero;
+      const next = pathfinding.path?.[0];
+      if (next) {
+        pathfinding.path = null;
+        pathfinding.from = { x: ~~heroPos.x, y: ~~heroPos.z };
+        pathfinding.to = { x: ~~heroPos.x, y: ~~heroPos.z };
+      }
+      // `bLookAtMouse = false` (:7394-7419): Rageful Blow and Chain Drive
+      // keep the facing they started with, so a repeat cast does not snap
+      // the caster round mid-swing.
+      const heldClip =
+        hero.modelObject &&
+        !hero.modelObject.ActionIterationWasFinished &&
+        combat.clipHoldsFacing(hero.modelObject.CurrentAction);
+      if (!here && target !== hero && dist > 0.01 && !heldClip) {
+        hero.transform.rot.y = Math.atan2(dz, dx) + Math.PI / 2;
+      }
+      // The stop is a packet, not just a dropped path. The server is still
+      // walking the steps it was handed - for the approach walk, all the way
+      // onto the target's tile - while the hero stands here casting, and once
+      // the two are more than 5 tiles apart it resynchronises us onto its own
+      // position with an ObjectMoved.
+      if (next) Hero.sendWalkStop(next.x, next.y, hero.transform.rot.y);
+
+      // Mana / AG / re-use delay / requirements are gated client-side first
+      // (the skill layer's verdict; the server re-checks everything).
+      if (!skills.canUse(def.num)) {
+        world.castRequest = null;
+        return;
+      }
+      skills.startCooldown(def.num);
+
+      if (!Session.isOffline) {
+        if (combat.isDarkSide(def.num)) {
+          // Dark Side: 0x4B asks the server for the targets, 0x4A lands the first blow; with nothing
+          // selected the key is 0 and the server picks them (SkillCast.cpp:881-895; OpenMU RageSkillAttackAction).
+          const targetId = target?.netId ?? 0;
+          const range = RageAttackRangeRequestPacket.createPacket();
+          range.SkillId = def.num;
+          range.TargetId = targetId;
+          Session.sendToGS(range.buffer);
+          sendRageAttack(def.num, targetId);
+          combat.beginDarkSide(def.num, targetId);
+        } else if (!area && !target) {
+          // Forced cast with nothing near the cursor: the clip whiffs
+          // toward the ground point and nothing goes on the wire. The hero
+          // key must not stand in here - a targeted packet naming the
+          // caster lands the skill on the character, not at the cursor.
+        } else if (area) {
+          const packet = AreaSkillPacket.createPacket();
+          packet.SkillId = def.num;
+          packet.TargetX = ~~tx;
+          packet.TargetY = ~~ty;
+          packet.Rotation = rotationByte256(hero.transform.rot.y);
+          packet.ExtraTargetId = target?.netId ?? NO_EXTRA_TARGET;
+          Session.sendToGS(packet.buffer);
+          sendAreaHit(def, ~~tx, ~~ty);
+        } else {
+          sendTargeted(def.num, target!.netId ?? Hero.playerId ?? 0);
+        }
+      }
+
+      // Where the cast puts the caster (`controllers/combat/skillMovement`): the contact
+      // skills close the last tile themselves, either now or partway through
+      // the clip.
+      // The step closes the last tile, not the whole gap: `SendAttackPacket`
+      // only runs it for a target the skill could already reach. A Ctrl force
+      // cast skips the approach walk, so without the range check here it puts
+      // the caster next to a target anywhere on the map.
+      const step = dist <= range ? combat.skillStepIn(def.num) : null;
+      const stepSquare =
+        step && target && target !== hero
+          ? combat.stepInSquare(
+              { x: heroPos.x, y: heroPos.z },
+              { x: target.transform!.pos.x, y: target.transform!.pos.z }
+            )
+          : null;
+      if (step === 'cast' && stepSquare) stepIn(hero, stepSquare);
+
+      const action = clipFor(hero, def);
+      const duration = playClip(hero, action);
+      warriorCast(hero, def.num, action, !!target && target !== hero);
+
+      if (step === 'midClip' && stepSquare) {
+        pendingStep = {
+          clip: action,
+          to: stepSquare,
+          expiresIn: duration > 0 ? duration : FALLBACK_CAST_COOLDOWN,
+        };
+      }
+
+      // ExecuteSkill plays the skill's sound as the cast starts (Fire Scream's only at its spawn); a cast
+      // its skill makes quiet on this mount (a Dark Horse rider's guard) has none.
+      if (!combat.castQuietOn(def.num, castContext(hero).mount)) {
+        playCombat(clipCastSound(def.num, action) ?? heroCastSound(def.num, !!target && target !== hero), hero.transform.pos);
+      }
+
+      cooldown = Math.max(
+        duration > 0 ? duration : FALLBACK_CAST_COOLDOWN,
+        serverMinAttackInterval(hero.attributeSystem?.getValue('attackSpeed') ?? 0)
+      );
+
+      if (def.type === 'SummonMonster') summonCast = true;
+
+      if (def.type === 'SummonMonster' || !world.rightPointerPressed) {
+        world.castRequest = null;
+        castSent = null;
+      } else {
+        castSent = req;
+      }
+    },
+  };
+};

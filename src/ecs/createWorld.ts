@@ -3,56 +3,210 @@ import { World, type ISystemFactory } from './world';
 import { PathfindingSystem } from './systems/pathfindingSystem';
 import { PlayerControllerSystem } from './systems/playerControllerSystem';
 import { MoveAlongPathSystem } from './systems/moveAlongPathSystem';
+import { PositionSlideSystem } from './systems/positionSlideSystem';
 import { AnimationSystem } from './systems/animationSystem';
+import { AnimationHoldSystem } from './systems/animationHoldSystem';
+import { CombatSfxSystem } from './systems/combatSfxSystem';
+import { WeaponTrailSystem } from './systems/weaponTrailSystem';
+import { WeaponSpriteSystem } from './systems/weaponSpriteSystem';
+import { ImpactEffectSystem } from './systems/impactEffectSystem';
+import { DropMotionSystem } from './systems/dropMotionSystem';
+import { DeathSystem } from './systems/deathSystem';
+import { NameTagSystem } from './systems/nameTagSystem';
+import { HeadTrackingSystem } from './systems/headTrackingSystem';
 import { ModelLoaderSystem } from './systems/modelLoaderSystem';
+import { PropBatchSystem } from './systems/propBatchSystem';
 import { CameraFollowSystem } from './systems/cameraFollowSystem';
+import { AmbientParticleSystem } from './systems/ambientParticleSystem';
+import { WeatherSystem } from './systems/weatherSystem';
+import { TerrainMaskSystem } from './systems/terrainMaskSystem';
+import { FootprintSystem } from './systems/footprintSystem';
+import { BoidSystem } from './systems/boidSystem';
+import { TerrainGrassSystem } from './systems/terrainGrassSystem';
 import { NetworkSystem } from './systems/networkSystem';
 import { OutOfScopeSystem } from './systems/outOfScopeSystem';
 import { CalculateVisibilitySystem } from './systems/calculateVisibilitySystem';
 import { CalculateScreenPositionSystem } from './systems/calculateScreenPositionSystem';
 import { AppearanceSystem } from './systems/appearanceSystem';
+import { QuestItemSystem } from './systems/questItemSystem';
+import { ItemGlowSystem } from './systems/itemGlowSystem';
+import { CharacterLightSystem } from './systems/characterLightSystem';
+import { MonsterGlowSystem } from './systems/monsterGlowSystem';
+import { MonsterVisualSystem } from './systems/monsterVisualSystem';
 import { DrawDebugSystem } from './systems/drawDebugSystem';
 import { HighlightSystem } from './systems/highlightSystem';
-import type { TestScene } from '../scenes/testScene';
+import type { TestScene } from '../controllers/render/scenes/testScene';
 import { PointerInputSystem } from './systems/pointerInputSystem';
 import { KeyboardInputSystem } from './systems/keyboardInputSystem';
-import { BackgroundMusicSystem } from './systems/backgroundMusicSystem';
 import { InteractiveAreaSystem } from './systems/interactiveAreaSystem';
-import { WalkSfxSystem } from './systems/walkSfxSystem';
+import { SoundSystem } from './systems/soundSystem';
+import { GateSystem } from './systems/gateSystem';
+import { RestObjectSystem } from './systems/restObjectSystem';
+import { LoginSceneSystem } from './systems/loginSceneSystem';
+import { CharacterSelectSystem } from './systems/characterSelectSystem';
+import { SceneReadySystem } from './systems/sceneReadySystem';
+import { AttackSystem } from './systems/attackSystem';
+import { TargetCycleSystem } from './systems/targetCycleSystem';
+import { MuHelperSystem } from './systems/muHelperSystem';
+import { SkillCastSystem } from './systems/skillCastSystem';
+import { SkillSystem } from './systems/skillSystem';
+import { ObjectEffectSystem } from './systems/objectEffectSystem';
+import { EffectSystem } from './systems/effectSystem';
+import { ItemPickupSystem } from './systems/itemPickupSystem';
+import { NpcTalkSystem } from './systems/npcTalkSystem';
+import { TerrainLightSystem } from './systems/terrainLightSystem';
+import { EventSystem } from './systems/eventSystem';
+import { CursorSystem } from './systems/cursorSystem';
+import { EmoteSystem } from './systems/emoteSystem';
+import { BandSystem } from './systems/bandSystem';
+import { MapDoorSystem } from './systems/mapDoorSystem';
+import { CeilingHideSystem } from './systems/ceilingHideSystem';
+import { EmojiBubbleSystem } from './systems/emojiBubbleSystem';
+import { QuestSystem } from './systems/questSystem';
+import { PetSystem } from './systems/petSystem';
+import { TeleportSystem } from './systems/teleportSystem';
+import { GuildFlagSystem } from './systems/guildFlagSystem';
+import { ClothSystem } from './systems/clothSystem';
+import { perfOverlayVisible, recordSystemTime } from '../controllers/render/perfOverlay';
 
 const factories: ISystemFactory[] = [
+  CharacterSelectSystem,
   ModelLoaderSystem,
+  // Right behind it: the scenery the loader does not clone per placement.
+  PropBatchSystem,
   PointerInputSystem,
   KeyboardInputSystem,
   InteractiveAreaSystem,
+  GateSystem,
+  ItemPickupSystem,
+  NpcTalkSystem,
   PlayerControllerSystem,
+  // Before AttackSystem: a key press this frame picks the target the swing
+  // loop then works on, exactly as a click would have.
+  TargetCycleSystem,
+  // Before AttackSystem/SkillCastSystem: the helper's cast and pickup
+  // requests are consumed the same frame; player input always wins.
+  MuHelperSystem,
+  AttackSystem,
+  // Skill layer: steps delays / buff clocks before the cast system asks canUse.
+  SkillSystem,
+  SkillCastSystem,
+  RestObjectSystem,
+  EmoteSystem,
+  // Before AnimationSystem, like EmoteSystem: holds a performer's clip; the
+  // per-note bone twitch is applied after Babylon's animation pass instead.
+  BandSystem,
+  CursorSystem,
+  // After CursorSystem: reads this frame's hovered object (SelectedNpc / SelectedCharacter).
+  NameTagSystem,
   PathfindingSystem,
   CalculateVisibilitySystem,
-  CalculateScreenPositionSystem,
   NetworkSystem,
   MoveAlongPathSystem,
+  // The server's instant move slides in (PushingCharacter); render-only posOffset.
+  PositionSlideSystem,
   HighlightSystem,
+  DeathSystem,
   AnimationSystem,
+  CombatSfxSystem,
+  // After AnimationSystem: a swing clip that just (re)started gets its
+  // weapon blur once it reaches the start key (CreateWeaponBlur).
+  WeaponTrailSystem,
+  // Fresh drops fall and tumble in; Icarus drops bob. Render-only posOffset.
+  DropMotionSystem,
+  HeadTrackingSystem,
   AppearanceSystem,
-  WalkSfxSystem,
+  // After AppearanceSystem: the Blood Castle carrier's back item goes on
+  // beside whatever wings the appearance just loaded.
+  QuestItemSystem,
+  // After AnimationSystem (a teleport clip is up to seek) and before PetSystem
+  // (a mount reads its rider's teleport alpha): the teleport fades.
+  TeleportSystem,
+  // After AnimationSystem + AppearanceSystem: mounts follow this frame's
+  // rider pose, and the angel needs its owner's safe-zone flag.
+  PetSystem,
+  // After AppearanceSystem: parts put on this frame are held with their body.
+  AnimationHoldSystem,
+  // After AnimationSystem: the shoulder flag reads this frame's bone 26 pose.
+  GuildFlagSystem,
+  // After AppearanceSystem: a held weapon's sprites ride the model the hand holds this frame.
+  WeaponSpriteSystem,
+  ItemGlowSystem,
+  // Light layer: NPCs/monsters whose folder sets `light` carry a light.
+  CharacterLightSystem,
+  // ...and the ones with a MONSTER_GLOWS row carry their own glow cards.
+  MonsterGlowSystem,
+  // ...and the ones whose folder sets `bodyFx` draw their dust, breath and fire.
+  MonsterVisualSystem,
   CameraFollowSystem,
+  // Weather layer: the rain ramp, the settled snow, the wetness - stepped
+  // before anything reads them .
+  WeatherSystem,
+  // After movement: weather volumes follow this frame's hero position.
+  AmbientParticleSystem,
+  TerrainMaskSystem,
+  // After the mask: a print asks it whether the tile it is landing on is
+  // open, to decide whether there is snow underfoot to press into.
+  FootprintSystem,
+  // After the camera has been moved this frame: the grass streams blocks in
+  // around where the camera is actually looking.
+  TerrainGrassSystem,
+  // The ambient wildlife: spawned around the hero, dropped when it drifts off.
+  BoidSystem,
+  // Before the projection: it places the side bubbles' world anchor, which
+  // CalculateScreenPositionSystem then projects.
+  EmojiBubbleSystem,
+  QuestSystem, // reads the entities EmojiBubbleSystem projects; after it
+  // After movement + camera so labels are projected from this frame's state.
+  CalculateScreenPositionSystem,
+  LoginSceneSystem,
   OutOfScopeSystem,
-  BackgroundMusicSystem,
+  // Sound layer, after movement: the wind is muted by the tile under the
+  // hero's feet and the footsteps read this frame's clip, so
+  // it has to see this frame's position.
+  SoundSystem,
+  // After SoundSystem: the footsteps entry counted this frame's footfalls;
+  // the dust puff and the ObjectHit sparks are spawned here.
+  ImpactEffectSystem,
   DrawDebugSystem,
+  ObjectEffectSystem,
+  // Effects layer: bolts, columns, rings, auras step after movement.
+  EffectSystem,
+  TerrainLightSystem,
+  // Events layer: match clocks + the 30 s countdown line, before the HUD reads them.
+  EventSystem,
+  // After movement: doors react to this frame's hero position; before
+  // RenderSystem so the new pose is drawn this frame.
+  MapDoorSystem,
+  CeilingHideSystem,
   RenderSystem,
+  // After RenderSystem (this frame's OutOfView): names the cloths the render that follows steps.
+  ClothSystem,
+  SceneReadySystem,
 ];
 
 export function createWorld(scene: TestScene) {
   const world = new World(scene);
 
-  const systems = factories.map(f => f(world));
+  const systems = factories.map((f, index) => ({
+    name: f.name || `system${index}`,
+    update: f(world).update,
+  }));
 
   return {
     world,
     updateSystems: (dt: number) => {
-      systems.forEach(system => {
-        system.update?.(dt);
-      });
+      if (!perfOverlayVisible()) {
+        for (const system of systems) system.update?.(dt);
+        return;
+      }
+
+      for (const system of systems) {
+        if (!system.update) continue;
+        const started = performance.now();
+        system.update(dt);
+        recordSystemTime(system.name, performance.now() - started);
+      }
     },
   } as const;
 }
