@@ -29,17 +29,26 @@ propio en una VM de Oracle Cloud Always Free (Ubuntu 24.04, 1 GB de RAM, IP publ
 
 ## 3. Fases, en orden
 
+**Regla de entregables (pedida por el propietario).** Cada parte del plan termina con un ENTREGABLE: algo que se pueda abrir y
+jugar en su celular en `http://155.181.133.84` (cuando la parte toque el cliente). Antes de publicarlo se prueba aqui en emulacion
+movil; se publica por la rama `release` (la VM lo aplica sola en ~3 minutos) y se le avisa con que probar y que reportar.
+Las partes que no tocan el cliente (proxy, web de administracion) tienen su propio entregable verificable (por ejemplo, un enlace).
+
 ### Fase 1. Celular: inmersion e interfaz (prioridad inmediata)
 1a. **Pantalla completa y horizontal.** Aviso "gira tu celular" si esta en vertical; al primer toque (START) entrar en
     pantalla completa, bloquear orientacion horizontal y ocultar la barra del navegador. En iPhone no existe la API de
     pantalla completa: ahi se resuelve con "agregar a inicio" (PWA) y, mas adelante, con la app.
     Hecho cuando: en Android/Chrome el juego ocupa toda la pantalla tras tocar START, y vuelve a pedirla si se sale.
+    ENTREGABLE 1a: abrir la IP en el celular, en vertical aparece "gira tu celular"; en horizontal, al tocar START, pantalla completa.
 1b. **HUD tactil v1** sobre lo que ya trae el cliente (`versions/shared/ui/hud/mobile_controls/`), siguiendo la seccion 3b.
     Criterio del propietario: fieles al juego original en las ventanas y los iconos, pocas licencias; el objetivo es un juego
     pulido y muy fluido en celular. Lo nuevo es lo que rodea al juego (joystick, menu en tiles, boton contextual de NPC).
+    ENTREGABLE 1b: se puede caminar con el joystick, atacar, usar habilidades y pociones, hablar con un NPC y abrir el menu, todo con el pulgar.
 1c. **Escala de la interfaz** ajustable (fuente, ventanas, joystick) y zoom de camara. Ventanas de MU a tamano tocable.
+    ENTREGABLE 1c: ajustes con deslizadores; las ventanas del juego se ven y se tocan comodas en el celular.
 1d. **Ayudas de combate**: pociones automaticas con umbral y MU Helper (auto-ataque, buffs, recoger botin). Es "mejora",
     va detras de opciones, como exige la guia del fork.
+    ENTREGABLE 1d: el Helper se configura y arranca con el dedo, y las pociones se toman solas al umbral elegido.
 1e. **Estrategia de descarga.** Dato del propietario: Mu Magdalena baja ~377 MB al iniciar, todo por adelantado, y despues sigue
     bajando un poco mas. Nuestro cliente baja por demanda: "core" 56 MB comprimido (154 MB en disco) mas ~7-10 MB por mapa; todo
     junto serian ~423 MB (cifras del indice de assets, no medidas en un telefono). El propietario nota que nuestro cliente ARRANCA
@@ -71,7 +80,9 @@ Su cliente tambien es un derivado de la misma base (Babylon.js) con interfaz HTM
 - **MU Helper.** Pestanas Combate y Recoger; rotacion de ataques (cuadricula de iconos de habilidad), buffs "solo si faltan",
   alcance de ataque y de botin, "posicion original", pociones automaticas HP/Maná/SD con umbral del 10% al 100% y boton
   grande "Start helper". Nuestro cliente ya trae un Helper original: la tarea es hacerlo comodo al tacto.
-- **Personaje nuevo.** Empieza en zona segura (Noria), nivel 1, ranuras de habilidad vacias, flechas en el Elf.
+- **Personaje nuevo.** Empieza en zona segura, nivel 1, ranuras de habilidad vacias. Ojo: el punto de partida depende de la
+  clase (el Elf de prueba aparecio en Noria; segun el propietario, la mayoria de las clases empiezan en Lorencia). Cada clase
+  trae sus propias particularidades (flechas del Elf, Command del Dark Lord, libros del Summoner, etc.); se verifican una a una en la fase 3.
 - Rechazado a proposito: tienda de monedas, recargas y cualquier flujo de pago de ese servidor.
 - Reglas tactiles que se adoptan: objetivos tocables de al menos 44-48 px; nada importante bajo el pulgar del joystick;
   interfaz escalable por el jugador; el 3D nunca se tapa con paneles permanentes.
@@ -79,11 +90,20 @@ Su cliente tambien es un derivado de la misma base (Babylon.js) con interfaz HTM
 ### Fase 2. Seguridad y conexion segura de la VM
 2a. **Proxy**: el actual (puerto 8090) acepta cualquier destino. Reemplazarlo por el de Ignies con `ALLOW_TARGETS`
     (solo 44405, 44406 y 45901-45906 de la VM) y sin el registro de eventos que guarda susurros.
+    ENTREGABLE 2a: el juego sigue funcionando igual en el celular y, desde fuera, el proxy rechaza cualquier otro destino (prueba mostrada).
 2b. **HTTPS y `wss://`** sin comprar dominio: nombre gratuito `155-181-133-84.sslip.io` con certificado automatico
     (Caddy) para la web y el proxy. Requiere abrir el puerto 443 en la lista de seguridad de Oracle y en el firewall de la VM
     (lo hace el propietario o la otra sesion). Con HTTPS se habilitan tambien PWA, bloqueo de orientacion fiable y la app.
-2c. **Dominio corto de Vercel** (`algo.vercel.app`) que redirige al sitio de juego. Vercel no puede hacer de puente
-    WebSocket hacia el servidor ni conviene alojar alli los assets de Webzen; por eso el juego se sirve desde la VM.
+2c. **Dominio gratuito de Vercel** (`algo.vercel.app`). DECISION / RECOMENDACION:
+    - Vercel puede alojar la web de administracion (fase 4), pero NO puede hacer de puente WebSocket hacia el servidor de juego.
+    - Si el juego se abre desde una direccion `https://`, el navegador exige que el puente sea `wss://`, y eso necesita un
+      certificado en la VM. Hay una forma gratuita sin comprar dominio: el nombre `155-181-133-84.sslip.io` (apunta solo a la IP
+      de la VM) con certificado automatico de Let's Encrypt a traves de Caddy, que sirve la web y el proxy `wss://`.
+    - Por eso el juego se sirve desde la VM (tampoco conviene alojar alli los assets de Webzen), y el dominio `algo.vercel.app`
+      es la direccion corta y facil de recordar: una redireccion hacia `https://155-181-133-84.sslip.io`. El jugador teclea el
+      dominio de Vercel y no necesita la IP.
+    - Requisito: abrir el puerto 443 en Oracle y en el firewall de la VM (pregunta abierta 3).
+    ENTREGABLE 2b/2c: `https://155-181-133-84.sslip.io` abre el juego con candado y se puede jugar con `wss://`; el dominio de Vercel redirige ahi.
 2e. **Archivos precomprimidos (`.gz`) en la VM.** Hoy la VM comprime al vuelo cada archivo que se pide (el paquete se envio sin
     los `.gz` para ahorrar 186 MB de subida); con la VM de 1 GB y poca CPU, varios jugadores nuevos a la vez la ahogarian. Generar
     los `.gz` una sola vez en la VM (como hacia el script anterior) o enviarlos en el paquete, antes de abrir al publico.
@@ -95,6 +115,8 @@ clases DK, DW, Elf, DL (y las que el servidor habilite) x seleccion, HUD, invent
 (Command solo para Dark Lord), habilidades por clase, combate (muerte, botin, experiencia), tienda, bobeda, comercio,
 party, chat. Se automatiza con las cuentas GM de pruebas. Cada diferencia encontrada se registra y se corrige.
 Despues: suelo de Lorencia mas claro que el original (iluminacion) y otros detalles visuales.
+ENTREGABLE fase 3: por cada lote de clases, un informe (que se comparo y que se corrigio, con capturas lado a lado) y la correccion
+desplegada para jugar con esa clase en el celular.
 
 ### Fase 4. Web de administracion ("webmaster") en Vercel
 Meta: entrar con usuario y contrasena propios y manejar el juego: crear cuentas, editar personajes (nivel, stats, zen),
@@ -111,13 +133,17 @@ inventario y objetos con opciones, baneos, monedas, una especie de MU Editor.
 - El panel de OpenMU nunca se publica: solo por tunel SSH.
 - Nota sobre MU Editor (MSPro): su pagina publica no documenta funciones, solo un historial de cambios; no es una especificacion.
   Las funciones se definen con lo que OpenMU ya expone y con lo que el propietario pida.
+- ENTREGABLE fase 4: una direccion `algo.vercel.app` con login de administrador donde, por tramos del MVP, se puede crear una cuenta
+  y comprobar en el juego (en el celular) que entra. Cada tramo se entrega asi.
 
 ### Fase 5. Preparar la apertura
 Quitar o banear `test0` a `test7` y las cuentas de demostracion; flujo de creacion de cuentas; limites de recursos (la VM
 tiene 1 GB de RAM); copias de seguridad; aviso legal (marcas y archivos de terceros) y terminos; pruebas con jugadores reales.
+ENTREGABLE fase 5: lista de verificacion firmada por el propietario y el juego listo para invitar a otras personas.
 
 ### Fase 6. App Android y PWA
 Envoltorio de la web (TWA o Capacitor) una vez exista HTTPS (fase 2b). iPhone: PWA.
+ENTREGABLE fase 6: un APK para instalar en el celular y una guia de "agregar a inicio" para iPhone.
 
 ### Fase 7. Arte original (largo plazo)
 Reemplazo gradual de modelos, texturas, iconos y sonidos de Webzen por arte propio, sistema por sistema.
