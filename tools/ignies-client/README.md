@@ -34,3 +34,15 @@ codigo hay que respetarlo (`tools/checks/credits.ts` de su repo lo verifica).
 - Sin GPU el dibujo va a ~1 fps; para automatizar, clics sostenidos de ~3 s (ver `/createmonster` y `/teleport` de GM:
   no se puede generar monstruos en zona segura; `testgm` trae 5 personajes equipados).
 - Aun sin hacer: capa tactil (joystick, botones), suelo mas claro que el original (iluminacion), despliegue en la VM.
+
+## Despliegue en la VM (fase 1: cliente nuevo; el proxy actual se queda igual)
+`vm-install.sh` se ejecuta EN LA VM con un token de GitHub de solo lectura para `Jonatks/mu-assets`
+(fine-grained, solo ese repo, permiso Contents: Read, vencimiento corto). Descarga el codigo compilado y los
+assets del repo privado (carpeta `ignies-client/`, 5 partes + codigo + sumas sha256), los verifica, arma
+`client-ignies`, cambia `client` por el nuevo dejando `client-old-<fecha>` de respaldo, reescribe `nginx.conf`
+(copia en `nginx.conf.bak-<fecha>`), reinicia el contenedor `web` y comprueba; si algo falla, revierte solo.
+El cliente abre directo en el login de tu mundo (`server.json` con `directLogin` y `serverlist.md` incluidos en el paquete).
+
+No se sube nada a la rama `release` hasta que la VM tenga el diseño nuevo: el zip viejo de `release/` y el autodespliegue
+asumen el cliente anterior. Despues del cambio, las actualizaciones de codigo van por `release` como siempre.
+Fase 2 pendiente: reemplazar el proxy de la VM (acepta cualquier destino) por el de Ignies con `ALLOW_TARGETS`.
