@@ -35,11 +35,17 @@ movil; se publica por la rama `release` (la VM lo aplica sola en ~3 minutos) y s
 Las partes que no tocan el cliente (proxy, web de administracion) tienen su propio entregable verificable (por ejemplo, un enlace).
 
 ### Fase 1. Celular: inmersion e interfaz (prioridad inmediata)
+**Regla de formato (pedida por el propietario):** el formato de celular NO es el de PC. El cliente detecta solo el tipo de
+dispositivo (`src/controllers/interface/mobile.ts`: puntero tactil como principal y puntos de contacto) y en un PC con raton y
+teclado se queda exactamente como el cliente de escritorio: sin joystick, sin aviso de girar, sin pantalla completa forzada.
+Todo lo nuevo de esta fase cuelga de esa deteccion. Para probar: `?mobile=1` fuerza el formato celular y `?mobile=0` el de PC.
+Se verifica en cada entregable con una prueba de PC y una de celular.
 1a. **Pantalla completa y horizontal.** Aviso "gira tu celular" si esta en vertical; al primer toque (START) entrar en
     pantalla completa, bloquear orientacion horizontal y ocultar la barra del navegador. En iPhone no existe la API de
     pantalla completa: ahi se resuelve con "agregar a inicio" (PWA) y, mas adelante, con la app.
     Hecho cuando: en Android/Chrome el juego ocupa toda la pantalla tras tocar START, y vuelve a pedirla si se sale.
     ENTREGABLE 1a: abrir la IP en el celular, en vertical aparece "gira tu celular"; en horizontal, al tocar START, pantalla completa.
+    ESTADO 1a: hecha y publicada el 2026-11-10 (pruebas: celular vertical, celular horizontal y PC); falta la prueba del propietario en su celular.
 1b. **HUD tactil v1** sobre lo que ya trae el cliente (`versions/shared/ui/hud/mobile_controls/`), siguiendo la seccion 3b.
     Criterio del propietario: fieles al juego original en las ventanas y los iconos, pocas licencias; el objetivo es un juego
     pulido y muy fluido en celular. Lo nuevo es lo que rodea al juego (joystick, menu en tiles, boton contextual de NPC).
@@ -153,6 +159,8 @@ Reemplazo gradual de modelos, texturas, iconos y sonidos de Webzen por arte prop
 - Codigo: commits a `main`; lo que despliega al sitio es solo la rama `release` (se publica cuando algo esta probado).
 - Cambios en la VM: scripts reversibles con respaldo, ejecutados por la sesion con acceso o por el propietario.
 - Tokens y claves: de solo lectura, vencimiento corto, borrados al terminar. Nunca en el repo.
+- Pruebas que fallan por falta de assets (14 al 2026-11-10, ninguna del codigo): las de la version 0.97d (`Data-v097d`, `game-assets-v097d`), el indice de paquetes de texturas (`public/packs`), nombres de archivo con otras mayusculas en `Data/Local`, y 8 archivos propios de Ignies (instrumentos del sistema de banda, `coin.wav`, `win.mp3`). No hay que perseguirlas.
+- Idiomas: solo ingles y espanol son obligatorios en los textos nuevos (`src/i18n/coverage.test.ts`); el resto cae a ingles.
 - Pruebas locales: OpenMU en Docker (`-demo`), su proxy con `ALLOW_TARGETS`, cliente con Vite o `vite preview`.
   Sin GPU el dibujo va a ~1 fps, asi que las pruebas automaticas usan clics sostenidos largos.
 

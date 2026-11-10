@@ -22,7 +22,11 @@ export function keepsPlaceholders(english: string, line: string): boolean {
 const folderOf = (path: string) => path.slice(0, path.lastIndexOf('/'));
 
 /** Every rule broken by these files, one line each; empty when all is well. */
-export function textProblems(files: readonly TextSource[], codes: readonly string[]): string[] {
+export function textProblems(
+  files: readonly TextSource[],
+  codes: readonly string[],
+  required: readonly string[] = codes
+): string[] {
   const out: string[] = [];
 
   const ownerOfKey = new Map<string, string>();
@@ -46,7 +50,7 @@ export function textProblems(files: readonly TextSource[], codes: readonly strin
       continue;
     }
     const keys = Object.keys(en.strings);
-    for (const code of codes) {
+    for (const code of required) {
       if (code === 'en') continue;
       const file = list.find(f => f.code === code);
       if (!file) {

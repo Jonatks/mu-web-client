@@ -42,6 +42,10 @@ windows themselves are content in `versions/shared/ui/` (see
   is the box's Yes and gets the typed text (`msg_window` hands it over), so a chain of boxes, like
   the delete-character one, lives with whoever raises it.
 - `hooks/`: `useEventBus`, `usePositionOnScreen`, `useRenderId`, `useVersionUi`.
+- `immersive.ts` (`Immersive`, `installImmersive`, `enterImmersive`, `shouldPromptFullscreen`): on a touch device the first tap
+  asks for fullscreen and locks landscape; a phone held upright sees the rotate screen
+  (`versions/shared/ui/components/rotate_overlay`); leaving fullscreen asks again on the next tap. iPhone has no
+  fullscreen API for pages, so there only the rotate screen applies (the web app installed to the home screen covers it).
 - `mobile.ts` (`isMobileDevice`, `useIsMobile`), `hudFormat.ts`, `tokens.less` (web tokens),
   `root.less` (the root layer pages and windows are drawn in; `boot.tsx` imports it).
 

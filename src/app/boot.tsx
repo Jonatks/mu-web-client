@@ -55,6 +55,7 @@ import { EventBus } from '../core/eventBus';
 import { installLoginMusic } from '../controllers/sound/loginMusic';
 import { setKeyProfile } from '../controllers/interface/keyBindings';
 import { installBrowserHotkeyGuard } from '../controllers/interface/browserHotkeys';
+import { installImmersive } from '../controllers/interface/immersive';
 import { SessionResume } from '../modules/session/sessionResume';
 import { reaction } from 'mobx';
 import { watchStateWarnings } from '../modules/hero/stateWarnings';
@@ -142,6 +143,9 @@ reaction(
 // keyboard before anything else listens on it (`controllers/interface/browserHotkeys.ts`).
 // The game's own keydown guards - page scroll keys, Tab, Alt, IME, the window
 // stack - live in `ecs/systems/keyboardInputSystem.ts`.
+// Fullscreen and landscape on a phone: the first tap asks for both (`controllers/interface/immersive.ts`).
+installImmersive();
+
 installBrowserHotkeyGuard(
   () =>
     AppState.uiState === UIState.World ||
