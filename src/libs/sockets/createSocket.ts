@@ -65,6 +65,10 @@ export function createSocket({ wsAddress, tcpIP, tcpPort }: Options) {
         // socket.send();//pong
         return;
       }
+
+      // Byte inicial desconocido: descartar el buffer para no bloquear la cola
+      bytes = new Uint8Array(0);
+      return;
     }
 
     const packetHeaderSize = getSizeOfPacketType(packetType);
@@ -93,7 +97,7 @@ export function createSocket({ wsAddress, tcpIP, tcpPort }: Options) {
     const subCode = packet.getUint8(codeIndex + 1);
 
     const packetsByCode = packetsCacheByCode[packetCode];
-    const pDef = packetsByCode.find(p => p.SubCode == null || p.SubCode === subCode);
+    const pDef = packetsByCode?.find(p => p.SubCode == null || p.SubCode === subCode);
 
     if (!pDef) {
       console.error(`${LOG_PREFIX}no packet: 0x` + byteToString(packetCode));
@@ -107,7 +111,12 @@ export function createSocket({ wsAddress, tcpIP, tcpPort }: Options) {
       } lng:${length}`
     );
 
-    EventBus.emit(pDef.Name, packet);
+    try {
+      EventBus.emit(pDef.Name, packet);
+    } catch (e) {
+      // Un error en un listener no debe bloquear la cola de paquetes
+      console.error(`${LOG_PREFIX}error handling ${pDef.Name}`, e);
+    }
 
     removePacketAndGoNext(length);
   }
@@ -118,7 +127,10 @@ export function createSocket({ wsAddress, tcpIP, tcpPort }: Options) {
     const newBytes = new Uint8Array(buffer);
     DEBUG_LOG && console.log(`${LOG_PREFIX}received ${newBytes.length} bytes:`, newBytes);
 
-    bytes = new Uint8Array([...bytes, ...newBytes]);
+    const merged = new Uint8Array(bytes.length + newBytes.length);
+    merged.set(bytes, 0);
+    merged.set(newBytes, bytes.length);
+    bytes = merged;
     handlePacketsQueue();
   });
 

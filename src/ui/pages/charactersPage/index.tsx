@@ -8,7 +8,7 @@ import {
 } from '../../../common/packets/ConnectServerPackets';
 import { useEventBus } from '../../../hooks/useEventBus';
 import { CS_HOST, MAX_USERNAME_LENGTH } from '../../../consts';
-import { Fragment, useEffect } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import {
   CharacterCreationFailedPacket,
   CharacterCreationSuccessfulPacket,
@@ -18,9 +18,27 @@ import {
 import { CharacterClassNumber } from '../../../common';
 
 export const CharactersPage = observer(() => {
+  const [message, setMessage] = useState('');
+
   useEffect(() => {
     Store.refreshCharactersListRequest();
   }, [Store]);
+
+  // Si la lista no llega, reintentar y, al final, mostrar la pantalla igualmente
+  useEffect(() => {
+    if (!Store.loadingCharactersList) return;
+    let tries = 0;
+    const t = setInterval(() => {
+      if (!Store.loadingCharactersList) return clearInterval(t);
+      if (++tries > 3) {
+        Store.loadingCharactersList = false;
+        setMessage('No se pudo actualizar la lista. Vuelve a entrar si no ves tus personajes.');
+        return clearInterval(t);
+      }
+      Store.refreshCharactersListRequest();
+    }, 3500);
+    return () => clearInterval(t);
+  }, [Store.loadingCharactersList]);
 
   useEventBus('CharacterList', bytes => {
     Store.loadingCharactersList = false;
@@ -32,6 +50,7 @@ export const CharactersPage = observer(() => {
   useEventBus('CharacterCreationFailed', bytes => {
     const p = new CharacterCreationFailedPacket(bytes);
     console.log(p);
+    setMessage('No se pudo crear el personaje (nombre en uso o inválido).');
   });
 
   useEventBus('CharacterCreationSuccessful', bytes => {
@@ -40,6 +59,7 @@ export const CharactersPage = observer(() => {
 
     const p = new CharacterCreationSuccessfulPacket(bytes);
     console.log(p);
+    setMessage('');
 
     Store.refreshCharactersListRequest();
   });
@@ -93,6 +113,7 @@ export const CharactersPage = observer(() => {
             })}
           </div>
           <div className="actions">
+            {!!message && <p className="login-error">{message}</p>}
             <form action="POST">
               <h3>Crear personaje</h3>
               <label>
