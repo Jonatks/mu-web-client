@@ -34,20 +34,47 @@ propio en una VM de Oracle Cloud Always Free (Ubuntu 24.04, 1 GB de RAM, IP publ
     pantalla completa, bloquear orientacion horizontal y ocultar la barra del navegador. En iPhone no existe la API de
     pantalla completa: ahi se resuelve con "agregar a inicio" (PWA) y, mas adelante, con la app.
     Hecho cuando: en Android/Chrome el juego ocupa toda la pantalla tras tocar START, y vuelve a pedirla si se sale.
-1b. **HUD tactil v1** sobre lo que ya trae el cliente (`versions/shared/ui/hud/mobile_controls/`): joystick o tocar para
-    caminar, boton de ataque grande, habilidades en arco, pociones, menu de comandos, chat, minimapa. Inspiracion
-    (Mu Magdalena): joystick con mostrar/ocultar, modo precision y tamano ajustable; barra Mover/Atacar/Hablar con NPC;
-    menu de comandos (Inventario, Puntos con botones mas y menos, Helper, Configuracion, Cambiar personaje).
+1b. **HUD tactil v1** sobre lo que ya trae el cliente (`versions/shared/ui/hud/mobile_controls/`), siguiendo la seccion 3b.
+    Criterio del propietario: fieles al juego original en las ventanas y los iconos, pocas licencias; el objetivo es un juego
+    pulido y muy fluido en celular. Lo nuevo es lo que rodea al juego (joystick, menu en tiles, boton contextual de NPC).
 1c. **Escala de la interfaz** ajustable (fuente, ventanas, joystick) y zoom de camara. Ventanas de MU a tamano tocable.
 1d. **Ayudas de combate**: pociones automaticas con umbral y MU Helper (auto-ataque, buffs, recoger botin). Es "mejora",
     va detras de opciones, como exige la guia del fork.
-1e. **Estrategia de descarga.** Dato del propietario: Mu Magdalena baja ~377 MB al iniciar, todo por adelantado. Nuestro cliente
-    baja por demanda: "core" 56 MB comprimido (154 MB en disco) mas ~7-10 MB por mapa; todo junto serian ~423 MB. Se mantiene la
-    descarga por demanda (carga rapida confirmada). Opcional mas adelante: boton "descargar todo para jugar sin esperas" con
-    barra de progreso (MB y archivos), como Magdalena, y cache para que solo ocurra la primera vez.
+1e. **Estrategia de descarga.** Dato del propietario: Mu Magdalena baja ~377 MB al iniciar, todo por adelantado, y despues sigue
+    bajando un poco mas. Nuestro cliente baja por demanda: "core" 56 MB comprimido (154 MB en disco) mas ~7-10 MB por mapa; todo
+    junto serian ~423 MB (cifras del indice de assets, no medidas en un telefono). El propietario nota que nuestro cliente ARRANCA
+    mucho mas rapido (la de Magdalena se queda varios segundos en negro) y prefiere descargar todo al inicio.
+    Decision: conservar el arranque rapido y, justo despues, descargar todo en segundo plano con barra de progreso (MB y
+    archivos), con cache para que solo ocurra la primera vez. Medir en telefono real antes y despues.
     Verificacion: emulacion movil en Playwright (Pixel 7 horizontal), capturas, y el propietario prueba en su celular
     despues de cada despliegue y reporta; ese ciclo es el que decide si una fase se da por buena.
-    Pendiente de observar: la interfaz de Mu Magdalena con cuenta (ver preguntas abiertas).
+    Interfaz de Mu Magdalena ya observada con cuenta de prueba del propietario: ver seccion 3b.
+
+### 3b. Referencia de diseno movil (Mu Magdalena, observada el 2026-11-10 en un celular de 915x412 px CSS)
+Su cliente tambien es un derivado de la misma base (Babylon.js) con interfaz HTML encima del 3D. Lo que hay que copiar en espiritu:
+- **Entrada.** Se abre tambien en vertical; en algun momento pide girar a horizontal para continuar ("Gira tu telefono").
+  NO entra en pantalla completa (la barra del navegador queda visible): eso lo haremos nosotros (fase 1a).
+- **Seleccion de personaje.** Panel inferior con nombre, clase y nivel, puntos de pagina, flechas laterales grandes (unos 52 px),
+  botones Enter / Create / Delete en forma de pastilla. Crear: botones de las 7 clases, retrato grande que cambia, campo de nombre.
+- **HUD en el mundo.** Arriba a la izquierda: nivel, nombre, zona con coordenadas, estado (NORMAL), barra de la mascota.
+  Arriba a la derecha: 4 botones redondos de 48x48 px separados 8 px (pociones "99+", HELPER, tienda del servidor, menu).
+  Abajo a la izquierda: joystick grande (~120 px) con aro ornamental. Abajo al centro: orbes de vida y maná y barra de
+  6 ranuras con el arte original. A la derecha: boton de habilidad de 50x50 px y boton "configurar habilidades" de 50x50 px.
+  Boton contextual (pildora de ~211x38 px) "Hablar - <NPC>" que aparece al acercarse a un NPC. Indicador "SAFE ZONE".
+  Globo de chat de 32 px con contador de mensajes sin leer.
+- **Menu de comandos.** Pantalla casi completa con tiles cuadrados grandes (~114x121 px) con icono y texto: Mover, Inventario,
+  Asignar puntos, Ranking, Gremio, MU Helper, Ajustes, Cambiar personaje, Salir. Pie con jugadores en linea.
+- **Ventanas del juego.** El inventario es la ventana ORIGINAL de MU (mismo marco, ranuras de equipo y bolsa de 8 columnas), acoplada
+  a la derecha y ampliada; solo cambia la moneda. Es el criterio de fidelidad que se pide aqui.
+- **Ajustes.** Pestanas Interfaz y Juego; deslizadores de fuente de juego (190%), fuente de interfaz (190%), tamano del joystick
+  (100%), interruptores "mostrar joystick" y "joystick de precision", zoom de camara (1.25x), restaurar.
+- **MU Helper.** Pestanas Combate y Recoger; rotacion de ataques (cuadricula de iconos de habilidad), buffs "solo si faltan",
+  alcance de ataque y de botin, "posicion original", pociones automaticas HP/Maná/SD con umbral del 10% al 100% y boton
+  grande "Start helper". Nuestro cliente ya trae un Helper original: la tarea es hacerlo comodo al tacto.
+- **Personaje nuevo.** Empieza en zona segura (Noria), nivel 1, ranuras de habilidad vacias, flechas en el Elf.
+- Rechazado a proposito: tienda de monedas, recargas y cualquier flujo de pago de ese servidor.
+- Reglas tactiles que se adoptan: objetivos tocables de al menos 44-48 px; nada importante bajo el pulgar del joystick;
+  interfaz escalable por el jugador; el 3D nunca se tapa con paneles permanentes.
 
 ### Fase 2. Seguridad y conexion segura de la VM
 2a. **Proxy**: el actual (puerto 8090) acepta cualquier destino. Reemplazarlo por el de Ignies con `ALLOW_TARGETS`
@@ -104,10 +131,11 @@ Reemplazo gradual de modelos, texturas, iconos y sonidos de Webzen por arte prop
   Sin GPU el dibujo va a ~1 fps, asi que las pruebas automaticas usan clics sostenidos largos.
 
 ## 5. Preguntas y bloqueos abiertos
-1. **Cuenta de prueba en Mu Magdalena** para ver su interfaz dentro del juego: su registro pide usuario, correo (unico) y
-   contrasena, sin captcha. Falta decidir con que correo (el del propietario, uno desechable, o que el propietario cree la cuenta
-   y comparta una contrasena de prueba) y si el propietario autoriza el uso de su correo con un tercero.
-2. **Vercel**: confirmar que hay una cuenta y como se me dara acceso (conector o token) para la web de administracion.
+1. RESUELTO. Cuenta de prueba en Mu Magdalena: el propietario dio una cuenta propia; se uso solo para ver la interfaz (login,
+   seleccion, creacion de personaje, HUD, menu, inventario, ajustes y Helper). Se creo en ella un personaje de prueba "ClauElf"
+   que el propietario puede borrar. La contrasena no se guarda en ningun archivo.
+2. RESUELTO. Vercel: el propietario tiene cuenta y esta sesion tiene el conector de Vercel. Falta, al llegar a la fase 4,
+   comprobar que el conector puede crear y desplegar un proyecto (un paso de lectura no hace dano).
 3. **Oracle**: abrir el puerto 443 (fase 2b); lo hace el propietario o la otra sesion.
 4. **Sobre el repo**: las reglas de commits del fork original piden no incluir atribucion; en este repo se mantienen las
    lineas de atribucion de la sesion. Si el propietario prefiere otra convencion, se cambia aqui.
