@@ -60,6 +60,8 @@ type ConfigType = {
   password?: string;
 };
 
+export type SkillEntry = { index: number; number: number; level: number };
+
 export enum UIState {
   Preloader,
   Servers,
@@ -311,6 +313,9 @@ export const Store = new (class _Store {
 
   playerData = new PlayerData();
 
+  /** Habilidades que el servidor dice que tiene el personaje (F3 11 / F3 12 / F3 13). */
+  skills: SkillEntry[] = [];
+
   characterInfoEnabled = false;
   inventoryEnabled = false;
 
@@ -342,6 +347,7 @@ export const Store = new (class _Store {
       newCharClass: observable,
       focusedChar: observable,
       playerData: observable,
+      skills: observable.ref,
       notifications: observable,
       world: observable,
       characterInfoEnabled: observable,

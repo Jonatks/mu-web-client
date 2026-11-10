@@ -28,6 +28,9 @@ import {
   ObjectGotKilledPacket,
   ObjectWalkedPacket,
   ServerMessagePacket,
+  SkillAddedPacket,
+  SkillListUpdatePacket,
+  SkillRemovedPacket,
 } from './common/packets/ServerToClientPackets';
 import { ServerToClientActionMap } from './common/playerActionMapper';
 import { PlayerObject } from './common/playerObject';
@@ -35,7 +38,7 @@ import { Entity, World } from './ecs/world';
 import { createAttributeSystem } from './libs/attributeSystem';
 import { Vector3 } from './libs/babylon/exports';
 import { EventBus } from './libs/eventBus';
-import { Store, UIState } from './store';
+import { SkillEntry, Store, UIState } from './store';
 
 function convertDirectionToAngle(direction: number): number {
   // Convert the direction (0-7) to an angle in radians
@@ -182,6 +185,44 @@ EventBus.on('CharacterInformation', packet => {
 //   const p = new MessengerInitializationPacket(packet);
 //   console.log(`MessengerInitialization, friends: ${p.FriendCount} letters: ${p.LetterCount}/${p.MaximumLetterCount}`);
 // });
+
+// Habilidades reales del personaje, enviadas por el servidor.
+// F3 11 es a la vez "lista completa" (variable) y "habilidad añadida" (10 bytes); una lista de
+// 1 habilidad también mide 10 bytes, así que se distingue por el primer byte de datos
+// (cantidad pequeña en la lista; marca >= 0x80 en SkillAdded).
+export function parseSkillPacket(bytes: DataView): { list?: SkillEntry[]; added?: SkillEntry } {
+  const first = bytes.getUint8(4);
+  if (first < 0x80) {
+    const p = new SkillListUpdatePacket(bytes);
+    return {
+      list: p.getSkills().map(s => ({ index: s.SkillIndex, number: s.SkillNumber, level: s.SkillLevel })),
+    };
+  }
+  const p = new SkillAddedPacket(bytes);
+  return { added: { index: p.SkillIndex, number: p.SkillNumber, level: p.SkillLevel } };
+}
+
+function handleSkillPacket(bytes: DataView) {
+  const r = parseSkillPacket(bytes);
+  runInAction(() => {
+    if (r.list) Store.skills = r.list;
+    if (r.added) {
+      const a = r.added;
+      Store.skills = [...Store.skills.filter(s => s.number !== a.number), a].sort((x, y) => x.index - y.index);
+    }
+  });
+  console.log('[skills]', JSON.stringify(Store.skills));
+}
+
+EventBus.on('SkillListUpdate', handleSkillPacket);
+EventBus.on('SkillAdded', handleSkillPacket);
+
+EventBus.on('SkillRemoved', bytes => {
+  const p = new SkillRemovedPacket(bytes);
+  runInAction(() => {
+    Store.skills = Store.skills.filter(s => s.number !== p.SkillNumber);
+  });
+});
 
 EventBus.on('CharacterInventory', packet => {
   const items = Store.playerData.items;

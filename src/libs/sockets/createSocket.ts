@@ -97,7 +97,13 @@ export function createSocket({ wsAddress, tcpIP, tcpPort }: Options) {
     const subCode = packet.getUint8(codeIndex + 1);
 
     const packetsByCode = packetsCacheByCode[packetCode];
-    const pDef = packetsByCode?.find(p => p.SubCode == null || p.SubCode === subCode);
+    const candidates = packetsByCode?.filter(p => p.SubCode == null || p.SubCode === subCode);
+    // Varios paquetes comparten código (p. ej. F3 11: SkillAdded de tamaño fijo y SkillListUpdate variable):
+    // se elige el de tamaño exacto y, si no hay, el de tamaño variable.
+    const pDef =
+      candidates?.find(p => (p as any).Length === length) ??
+      candidates?.find(p => (p as any).Length == null) ??
+      candidates?.[0];
 
     if (!pDef) {
       console.error(`${LOG_PREFIX}no packet: 0x` + byteToString(packetCode));
