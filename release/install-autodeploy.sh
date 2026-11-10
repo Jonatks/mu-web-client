@@ -1,9 +1,10 @@
 #!/bin/bash
 # Instala en la VM un despliegue automático "pull": cada 3 minutos revisa si
-# release/mu-web-update.zip cambió en la rama main y, si cambió, lo publica.
+# release/mu-web-update.zip cambió en la rama RELEASE y, si cambió, lo publica.
+# Publicar una versión probada:  git push origin main:release
 #
 # Uso (una sola vez, en la VM):
-#   curl -fsSL https://raw.githubusercontent.com/Jonatks/mu-web-client/main/release/install-autodeploy.sh -o install-autodeploy.sh
+#   curl -fsSL https://raw.githubusercontent.com/Jonatks/mu-web-client/release/release/install-autodeploy.sh -o install-autodeploy.sh
 #   bash install-autodeploy.sh
 #
 # Seguridad: solo se descarga el zip (archivos estáticos de la web). El script que
@@ -15,10 +16,13 @@ set -euo pipefail
 sudo tee /usr/local/bin/mu-web-autodeploy >/dev/null <<'EOS'
 #!/bin/bash
 set -euo pipefail
-URL="https://raw.githubusercontent.com/Jonatks/mu-web-client/main/release/mu-web-update.zip"
+URL="https://raw.githubusercontent.com/Jonatks/mu-web-client/release/release/mu-web-update.zip"
 WEB=/opt/openmu/web/client
 DIR=/var/lib/mu-web-autodeploy
 mkdir -p "$DIR"
+# Solo descarga si el ETag cambió (un HEAD de pocos bytes en vez de 2.4 MB cada vez)
+TAG=$(curl -fsSIL --retry 3 "$URL?t=$(date +%s)" | tr -d '\r' | awk -F': ' 'tolower($1)=="etag"{print $2}' | tail -1)
+[ -n "$TAG" ] && [ "$TAG" = "$(cat "$DIR/etag" 2>/dev/null || true)" ] && exit 0
 curl -fsSL --retry 3 -o "$DIR/new.zip" "$URL?t=$(date +%s)"
 NEW=$(sha256sum "$DIR/new.zip" | cut -d' ' -f1)
 OLD=$(cat "$DIR/deployed.sha" 2>/dev/null || true)
@@ -32,6 +36,7 @@ unzip -oq "$DIR/new.zip" -d "$WEB"
 find "$WEB" -type f \( -name '*.glb' -o -name '*.js' -o -name '*.json' -o -name '*.css' -o -name '*.wasm' -o -name '*.html' -o -name '*.tga' -o -name '*.TGA' -o -name '*.bmd' -o -name '*.svg' \) ! -name '*.gz' -size +1k -print0 \
   | xargs -0 -r -P 2 -I{} sh -c '[ -f "{}.gz" ] && [ "{}.gz" -nt "{}" ] || nice -n 10 gzip -9 -kf "{}"'
 echo "$NEW" > "$DIR/deployed.sha"
+[ -n "$TAG" ] && echo "$TAG" > "$DIR/etag"
 date -Is > "$DIR/deployed.at"
 echo "desplegado"
 EOS

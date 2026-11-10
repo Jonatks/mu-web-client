@@ -11,15 +11,21 @@ Este repositorio contiene solo código. Los assets del juego no están incluidos
 ## Despliegue automático en la VM
 
 Una sola vez, en la VM (instala un temporizador systemd que cada 3 minutos baja
-`release/mu-web-update.zip` de `main` y lo publica si cambió; solo baja archivos
+`release/mu-web-update.zip` de la rama `release` y lo publica si cambió (solo descarga si el ETag cambió); solo baja archivos
 estáticos, el script de despliegue queda fijo en la VM):
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Jonatks/mu-web-client/main/release/install-autodeploy.sh -o install-autodeploy.sh && bash install-autodeploy.sh
+curl -fsSL https://raw.githubusercontent.com/Jonatks/mu-web-client/release/release/install-autodeploy.sh -o install-autodeploy.sh && bash install-autodeploy.sh
 ```
 
-Desde ahí, cada push a `main` con un `release/mu-web-update.zip` nuevo queda en
-línea en unos minutos. Registro: `sudo journalctl -u mu-web-autodeploy -f`.
+Desde ahí solo se publica lo que se pasa a `release`. Con una versión probada y su
+`release/mu-web-update.zip` ya en `main`:
+
+```bash
+git push origin main:release
+```
+
+Queda en línea en unos minutos. Los push normales a `main` NO publican nada. Registro: `sudo journalctl -u mu-web-autodeploy -f`.
 
 ## Prueba de extremo a extremo (Playwright)
 
