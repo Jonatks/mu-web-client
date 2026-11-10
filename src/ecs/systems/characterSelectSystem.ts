@@ -486,8 +486,8 @@ export const CharacterSelectSystem: ISystemFactory = world => {
 
   const isDoubleClick = doubleClicks();
 
-  world.scene.onPointerObservable.add(event => {
-    if (event.type !== PointerEventTypes.POINTERDOWN) return;
+  /** A press on the line-up: `button` is the mouse button (a finger is always 0). */
+  const press = (button: number) => {
     if (AppState.uiState !== UIState.Characters) return;
 
     const target = world.currentPointerTarget;
@@ -495,7 +495,7 @@ export const CharacterSelectSystem: ISystemFactory = world => {
 
     // Right click on a character closes in on it; again on the same one, or
     // anywhere else, goes back to the line-up. Selection is left alone.
-    if (event.event.button === 2) {
+    if (button === 2) {
       runInAction(() => {
         characterSelectView.zoomedOn =
           hovered && hovered !== characterSelectView.zoomedOn ? hovered : null;
@@ -504,7 +504,7 @@ export const CharacterSelectSystem: ISystemFactory = world => {
     }
 
     // Left click selects; middle does nothing here.
-    if (event.event.button !== 0) return;
+    if (button !== 0) return;
     const double = isDoubleClick(performance.now());
 
     if (!target || !hovered) return;
@@ -526,6 +526,17 @@ export const CharacterSelectSystem: ISystemFactory = world => {
     CharSelect.focusedChar = name;
 
     CharSelect.focusCharacterRequest(name);
+  };
+
+  world.scene.onPointerObservable.add(event => {
+    if (event.type !== PointerEventTypes.POINTERDOWN) return;
+
+    // `PointerInputSystem` is registered after this one and resolves the hovered character against the
+    // press itself, so it is read one microtask later. A finger has no hover before it lands: read at once,
+    // a tap would pick whoever the last hover left behind (the first of the line-up) and Connect would
+    // enter that one. See `characterSelectSystem.order.test.ts`.
+    const button = event.event.button;
+    queueMicrotask(() => press(button));
   });
 
   return {

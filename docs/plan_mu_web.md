@@ -50,12 +50,19 @@ Se verifica en cada entregable con una prueba de PC y una de celular.
     solo en celular vertical, "Gira tu celular") que se ve antes de que llegue el JavaScript y se retira al arrancar la app.
     Motivo: con una conexion lenta o un primer arranque se veia solo negro. Nota: al teclear la IP sin `http://` el navegador prueba
     HTTPS primero y el puerto 443 esta cerrado, asi que puede esperar varios segundos; se resuelve con la fase 2b.
+    Rehecha el 2026-11-10 a pedido del propietario ("muy simple"): fondo de montana, logo MU dorado y barra de carga dorada.
 1b. **HUD tactil v1** sobre lo que ya trae el cliente (`versions/shared/ui/hud/mobile_controls/`), siguiendo la seccion 3b.
     Criterio del propietario: fieles al juego original en las ventanas y los iconos, pocas licencias; el objetivo es un juego
     pulido y muy fluido en celular. Lo nuevo es lo que rodea al juego (joystick, menu en tiles, boton contextual de NPC).
     ENTREGABLE 1b: se puede caminar con el joystick, atacar, usar habilidades y pociones, hablar con un NPC y abrir el menu, todo con el pulgar.
     ESTADO 1b: parte 1 hecha (joystick de 8 direcciones, 120 px, abajo a la izquierda; camina por el mismo codigo que W-A-S-D y solo
     existe en celular). Ya traia el cliente: boton de mover, 5 botones de menu y selector de habilidades con los sprites originales.
+    CORRECCION 2026-11-10: al tocar un personaje en la seleccion, entraba siempre el primero (el sistema de seleccion leia el
+    objetivo antes de que el de punteros lo calculara; con raton no se notaba por el hover). Ahora lo lee un instante despues.
+    Verificado en celular emulado: se toca al Dark Wizard y entra test3Dw. Pendiente de confirmar por el propietario.
+    Comparacion grafica con Mu Magdalena (Noria, misma resolucion, emulacion sin GPU): no reproduzco lo opaco/transparente;
+    se necesita una captura del celular del propietario con el problema.
+    Pulido de interfaz tomando a Magdalena como guia (seccion 3b): pendiente, es el grueso de lo que falta de la 1b.
     Faltan: boton contextual "Hablar - NPC", pociones rapidas, menu de comandos en tiles, y la opcion de mostrar/ocultar el joystick.
 1c. **Escala de la interfaz** ajustable (fuente, ventanas, joystick) y zoom de camara. Ventanas de MU a tamano tocable.
     ENTREGABLE 1c: ajustes con deslizadores; las ventanas del juego se ven y se tocan comodas en el celular.

@@ -94,11 +94,14 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 14px;
+      gap: 12px;
       padding: 24px;
       text-align: center;
-      color: #fff;
-      background: #0d0b0a;
+      color: #f3e6c4;
+      background:
+        radial-gradient(ellipse at 50% 45%, rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.85) 80%),
+        url('./backdrops/character-select.jpeg') center / cover no-repeat,
+        #0d0b0a;
       pointer-events: none;
       transition: opacity 0.3s ease;
     }
@@ -107,24 +110,39 @@
       opacity: 0;
     }
 
-    #boot-splash .bs-title {
-      font-size: 34px;
-      letter-spacing: 6px;
-      color: rgb(255, 204, 26);
+    #boot-splash .bs-logo {
+      width: min(34vh, 180px);
+      height: auto;
+      mix-blend-mode: screen;
+      -webkit-mask-image: radial-gradient(circle, #000 52%, transparent 70%);
+      mask-image: radial-gradient(circle, #000 52%, transparent 70%);
+      animation: bs-glow 2.4s ease-in-out infinite;
     }
 
-    #boot-splash .bs-spinner {
-      width: 30px;
-      height: 30px;
-      border: 3px solid rgba(255, 204, 26, 0.25);
-      border-top-color: rgb(255, 204, 26);
-      border-radius: 50%;
-      animation: bs-spin 0.9s linear infinite;
+    #boot-splash .bs-bar {
+      width: min(60vw, 260px);
+      height: 5px;
+      overflow: hidden;
+      border: 1px solid rgba(240, 210, 138, 0.6);
+      border-radius: 3px;
+      background: rgba(0, 0, 0, 0.6);
+    }
+
+    #boot-splash .bs-bar::after {
+      content: '';
+      display: block;
+      width: 40%;
+      height: 100%;
+      background: linear-gradient(90deg, #a97c25, #f6dc9a);
+      animation: bs-slide 1.3s ease-in-out infinite;
     }
 
     #boot-splash .bs-line {
       font-size: 15px;
-      opacity: 0.85;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #e8d49a;
+      text-shadow: 0 1px 4px #000;
     }
 
     #boot-splash .bs-rotate {
@@ -133,7 +151,8 @@
       margin-top: 10px;
       padding: 10px 16px;
       font-size: 14px;
-      border: 1px solid rgba(255, 204, 26, 0.7);
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid rgba(240, 210, 138, 0.7);
       border-radius: 14px;
     }
 
@@ -143,9 +162,18 @@
       }
     }
 
-    @keyframes bs-spin {
+    @keyframes bs-slide {
+      from {
+        transform: translateX(-100%);
+      }
       to {
-        transform: rotate(360deg);
+        transform: translateX(250%);
+      }
+    }
+
+    @keyframes bs-glow {
+      50% {
+        filter: brightness(1.35);
       }
     }
   </style>
@@ -155,8 +183,8 @@
   <canvas class="game-canvas" width="400" height="300"></canvas>
   <div id="root"></div>
   <div id="boot-splash" role="status">
-    <div class="bs-title">MU</div>
-    <div class="bs-spinner"></div>
+    <img class="bs-logo" src="./icons/icon-192.png" alt="MU" />
+    <div class="bs-bar"></div>
     <div class="bs-line" id="bs-line">Loading...</div>
     <div class="bs-rotate" id="bs-rotate">Rotate your phone to landscape to play.</div>
   </div>
