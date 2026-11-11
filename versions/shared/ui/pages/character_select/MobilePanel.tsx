@@ -33,6 +33,11 @@ export const MobilePanel = observer(({ selecting, onConnect, onCreate, onDelete,
     });
   }, [selected?.Name]);
 
+  // Nothing is focused yet: the first character is, so Enter works at once (Mu Magdalena opens on one).
+  useEffect(() => {
+    if (!selected && list.length) CharSelect.focusCharacterRequest(list[0].Name);
+  }, [selected, list]);
+
   const go = (step: number) => {
     if (!list.length) return;
     const next = list[(Math.max(index, 0) + step + list.length) % list.length];
