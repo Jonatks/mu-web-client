@@ -94,6 +94,12 @@ Estado: [hecho] ya publicado, [investigado] causa estudiada pero sin arreglo, [p
 7. [investigado] Tiron junto a un NPC (el personaje intenta ocupar su lugar y vuelve atras): el servidor OpenMU rechaza un paso y "tira del cliente
    hacia atras" (`RejectWalkAndResynchronizeClient`) por camino bloqueado, exceso de velocidad o posicion de inicio desfasada. Descartado: diferencia
    de casillas entre cliente y servidor (en Lorencia 1 de 65 536). Pendiente: reproducirlo contra OpenMU local con registro del servidor.
+7b. [hecho, a probar] "Poco definido": el 3D se dibujaba SIEMPRE a 1 pixel por pixel CSS (`limitDeviceRatio: 1` con el antialiasing fijo en apagado), o sea a
+   915x412 en un celular de 2400x1082, y el navegador lo estiraba. Ahora en celular dibuja hasta 2x (1830x824); si va lento, se baja con la opcion de escala de
+   render que ya existe. Comparacion antes/despues con la misma escena: bordes sin dientes de sierra y mas detalle de textura. Tambien se rehizo la pantalla del
+   resaltado rojo: tras matar a un monstruo el contorno rojo se quedaba pegado al cuerpo (con el dedo no hay movimiento de cursor que lo quite); ahora se retira al morir.
+   Pendiente: el recuadro cuadrado que el propietario ve cuando los orbes del aura pasan sobre el cuerpo (sospecha: mezcla alfa de sprites aditivos sobre
+   el cuerpo que se desvanece en GPU movil; no se reproduce en emulacion por software). Se revisara en una captura de Chrome.
 8. [pendiente] Seleccion de personajes: personajes pequenos y ambiente oscuro; Magdalena acerca el personaje elegido y lo muestra grande.
 9. [pendiente] Interfaz que tapa la vision: botones del menu duplicados (arriba derecha y en la barra), tres ranuras de habilidad vacias y
    "Activar" a la derecha, ventanas abiertas encima de los botones del menu. Magdalena usa un solo boton de menu, aviso de chat colapsado y
