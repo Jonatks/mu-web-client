@@ -140,8 +140,8 @@ export function installFireLoop(): () => void {
     }
     world.touchCastHeld = true;
     if (!world.castRequest) {
-      const pos = target.transform!.pos;
-      world.castRequest = { target, point: { x: pos.x, y: pos.z }, forced: false };
+      const pos = target.transform?.pos;
+      if (pos) world.castRequest = { target, point: { x: pos.x, y: pos.z }, forced: false };
     }
   }, TICK_MS);
   return () => {
