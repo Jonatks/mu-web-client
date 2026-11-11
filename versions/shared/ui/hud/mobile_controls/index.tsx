@@ -19,6 +19,7 @@ import { MessagesPanel } from './messagesPanel';
 import { SettingsModal } from './settingsModal';
 import { MonsterBars } from './monsterBars';
 import { installPlayerLongPress } from './playerLongPress';
+import { installFireLoop } from './fireControl';
 
 /** The bottom bar of a touch screen: life, the six skill slots with AG / SD over them and experience under, mana. */
 const Bar = observer(() => {
@@ -47,6 +48,7 @@ export const MobileControls = observer(() => {
   const mobile = useIsMobile();
   const inWorld = AppState.uiState === UIState.World;
   useEffect(() => (mobile && inWorld ? installPlayerLongPress() : undefined), [mobile, inWorld]);
+  useEffect(() => (mobile && inWorld ? installFireLoop() : undefined), [mobile, inWorld]);
   if (!mobile) return null;
   // Not over the loading screen: `playerEntity` is plain per-frame state and would not re-render this when it arrives,
   // so the observable state is what gates the HUD.

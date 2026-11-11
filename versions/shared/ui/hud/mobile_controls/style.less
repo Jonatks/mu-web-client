@@ -1310,3 +1310,34 @@ body:has(.mu-item-window) .mobile-controls .mobile-book {
     }
   }
 }
+
+.mobile-picker .mobile-pick-skill.is-basic {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffd2c2;
+  &.is-active {
+    border-color: #ffd96b;
+    box-shadow: 0 0 8px rgba(255, 217, 107, 0.7);
+  }
+}
+
+// The skill in hand is lit on the bar and on the picker's grid.
+.mobile-picker .mobile-pick-skill.is-selected {
+  border-color: #ffd96b;
+  box-shadow: 0 0 8px rgba(255, 217, 107, 0.7);
+}
+
+// While the cast button is holding a fight it pulses, so it is clear it keeps firing until pressed again.
+.mobile-attack.is-firing {
+  animation: mobile-fire-pulse 0.9s ease-in-out infinite;
+}
+
+@keyframes mobile-fire-pulse {
+  50% {
+    box-shadow:
+      0 0 18px rgba(255, 140, 90, 0.85),
+      inset 0 0 0 3px rgba(0, 0, 0, 0.4),
+      0 4px 14px rgba(0, 0, 0, 0.65);
+  }
+}

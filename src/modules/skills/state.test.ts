@@ -40,3 +40,33 @@ describe('active master skills on the bar', () => {
     sent.mockRestore();
   });
 });
+
+describe('the skill in hand when entering the world', () => {
+  it('starts on the first attack skill of the list: the wizard has Energy Ball ready', () => {
+    HeroSkills.selectSkill(-1);
+    HeroSkills.setSkillList([{ index: 0, number: 17, level: 0 }]); // Energy Ball
+    expect(HeroSkills.currentSkill).toBe(17);
+  });
+
+  it('skips a buff for the first skill that hurts', () => {
+    HeroSkills.selectSkill(-1);
+    HeroSkills.setSkillList([
+      { index: 0, number: 18, level: 0 }, // Defense, a buff
+      { index: 1, number: 19, level: 0 }, // Falling Slash
+    ]);
+    expect(HeroSkills.currentSkill).toBe(19);
+  });
+
+  it('leaves the plain attack when the list holds no attack skill (the elf starts with none)', () => {
+    HeroSkills.selectSkill(-1);
+    HeroSkills.setSkillList([{ index: 0, number: 18, level: 0 }]);
+    expect(HeroSkills.currentSkill).toBe(-1);
+  });
+
+  it('does not take a plain-attack choice back when a skill is learned later', () => {
+    HeroSkills.setSkillList([{ index: 0, number: 17, level: 0 }]);
+    HeroSkills.selectSkill(-1);
+    HeroSkills.addSkill({ index: 1, number: 2, level: 0 }); // Meteorite
+    expect(HeroSkills.currentSkill).toBe(-1);
+  });
+});

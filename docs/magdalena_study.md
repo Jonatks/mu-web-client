@@ -89,3 +89,17 @@ a MOVE label and it brightens while held; orbs with glass highlights; the bar si
 
 ## 5. Still not taken
 Ranking by resets, shop top-up, "Buy", country flags, the Pickup tab of the Helper tuned for touch (the original Helper window still opens from the menu).
+
+## 6. Third pass: how a character fights (found after the owner played the build)
+Mistake found in the second build: the cast button only picked the monster, so the plain swing (the fist) took over, and a skill was asked for once and then dropped
+because the touch screen never "holds" a button. The original repeats the current skill while the right button is held (`skillCastSystem`: "the repeat belongs to the
+held button"). Fixed with a touch stand-in, `World.touchCastHeld`, driven by `hud/mobile_controls/fireControl.ts`:
+- The big round button shows the CURRENT skill. One press picks the nearest monster and keeps casting that skill on it (walks into range, repeats on every delay) until the
+  monster dies or the button is pressed again; with no attack skill in hand it is the plain swing. AUTO keeps picking the next monster.
+- A tap on a skill box selects that skill; an attack skill starts the fight, a buff / heal / summon / teleport is cast on the spot.
+- A character starts with its first attack skill selected (`HeroSkills.setSkillList`: the original starts on the first skill of the list, `Hero->CurrentSkill = 0`),
+  so a new Dark Wizard has Energy Ball in hand, on slot 1 of the bar and on the cast button. A fist tile in the skills window selects the plain attack on purpose.
+- The server decides which skills a new character knows: OpenMU gives Energy Ball to a created Dark Wizard (checked on a fresh character: it enters with Energy Ball). The
+  other classes get only castle-siege skills or none until an orb or book is learned, so a new Dark Knight or Elf has only the plain attack until then.
+Mu Magdalena, new Dark Wizard (observed): slot 1 holds the FIST, only the fist and Energy Ball are lit in the skills grid (every other skill shown greyed and locked),
+and the player taps Energy Ball to place it. Magdalena shows the whole class list greyed; this client lists only what is learned.

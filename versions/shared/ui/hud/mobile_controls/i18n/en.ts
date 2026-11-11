@@ -45,6 +45,7 @@ const en = {
   'mobile.set.groundNames': 'Show ground item names',
   'mobile.set.all': 'All options',
   'mobile.cmd.map': 'Map',
+  'mobile.basicAttack': 'Basic attack',
   'mobile.clear': 'Clear',
 };
 

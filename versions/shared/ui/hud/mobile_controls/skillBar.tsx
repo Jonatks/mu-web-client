@@ -4,12 +4,12 @@ import { t } from '@/i18n';
 import { Hero } from '@/modules/hero';
 import { skills, HeroSkills } from '@/modules/skills';
 import { onCooldownTick } from '@/modules/skills/cooldowns';
-import { isHotbarSkill } from '@/modules/skills/skillCasting';
+import { isAttackSkill, isHotbarSkill } from '@/modules/skills/skillCasting';
 import { skillDefinition } from '@versions/shared/skills/skillsDatabase';
 import { MobileSkillSlots, MOBILE_SKILL_SLOTS } from '@/modules/options/mobileSkillSlots';
 import { SkillIcon } from '../../components/skill_icon';
 import { MobileButton } from './mobileButton';
-import { castSkill } from './castSkill';
+import { useSkill } from './fireControl';
 import { MobileMenu } from './menuState';
 import { Icon } from './icons';
 
@@ -39,7 +39,7 @@ const Slot = observer(({ slot }: { slot: number }) => {
     <MobileButton
       className={`mobile-slot${selected ? ' is-selected' : ''}${number < 0 ? ' is-empty' : ''}`}
       title={number >= 0 ? (skillDefinition(number)?.name ?? '') : t('skills.title')}
-      onTap={() => (number >= 0 ? castSkill(number) : (MobileMenu.picker = slot))}
+      onTap={() => (number >= 0 ? useSkill(number) : (MobileMenu.picker = slot))}
       onLongPress={() => (MobileMenu.picker = slot)}
     >
       {() => (
@@ -74,6 +74,8 @@ export const SkillPicker = observer(() => {
 
   const place = (number: number) => {
     MobileSkillSlots.assign(open, number);
+    // A skill put on the bar is the one in hand, so what was placed is what the cast button fires.
+    if (number >= 0 && isAttackSkill(number)) HeroSkills.selectSkill(number);
     if (number >= 0 && open < MOBILE_SKILL_SLOTS - 1) MobileMenu.picker = open + 1;
   };
 
@@ -130,10 +132,17 @@ export const SkillPicker = observer(() => {
               <MobileButton className="mobile-pick-skill is-clear" onTap={() => place(-1)}>
                 {() => <span>{t('mobile.clear')}</span>}
               </MobileButton>
+              <MobileButton
+                className={`mobile-pick-skill is-basic${HeroSkills.currentSkill < 0 ? ' is-active' : ''}`}
+                title={t('mobile.basicAttack')}
+                onTap={() => HeroSkills.selectSkill(-1)}
+              >
+                {() => <Icon name="attack" size={26} />}
+              </MobileButton>
               {learned.map(number => (
                 <MobileButton
                   key={number}
-                  className={`mobile-pick-skill${skills.requirementsMet(number) ? '' : ' is-locked'}`}
+                  className={`mobile-pick-skill${skills.requirementsMet(number) ? '' : ' is-locked'}${number === HeroSkills.currentSkill ? ' is-selected' : ''}`}
                   title={skillDefinition(number)?.name ?? ''}
                   onTap={() => place(number)}
                 >

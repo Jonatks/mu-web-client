@@ -2,7 +2,7 @@ import { action, makeObservable, observable } from 'mobx';
 import { SaveKeyConfigurationPacket } from '@versions/shared/packets/ClientToServerPackets';
 import { Session } from '../session';
 import { MASTER_REPLACES } from '@versions/shared/skills/skillsDatabase';
-import { isHotbarSkill } from './skillCasting';
+import { isAttackSkill, isHotbarSkill } from './skillCasting';
 
 /**
  * The hero's learned skills (F3 11), the selected one (`Hero->CurrentSkill`), its active effects
@@ -46,6 +46,12 @@ export const HeroSkills = new (class {
   setSkillList(list: { index: number; number: number; level: number }[]) {
     this.skills = list.slice().sort((a, b) => a.index - b.index);
     this.refreshSkillSelection();
+    // The original starts with the first skill of the list selected (`Hero->CurrentSkill = 0`): a new wizard has Energy Ball ready.
+    // Only for the whole list that arrives on entering the world, so choosing the plain attack later sticks.
+    if (this.currentSkill === -1) {
+      const first = this.skills.find(s => isAttackSkill(s.number));
+      if (first) this.currentSkill = first.number;
+    }
   }
 
   addSkill(skill: { index: number; number: number; level: number }) {

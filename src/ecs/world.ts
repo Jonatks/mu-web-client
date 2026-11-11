@@ -585,6 +585,12 @@ export class World extends ECSWorld<Entity> {
   /** Right mouse button held (repeats the current skill, like MouseRButton). */
   rightPointerPressed = false;
 
+  /**
+   * Touch stand-in for the held right button (ours): the cast button of the touch HUD keeps the current skill repeating on its target
+   * until it is released, exactly as holding the right button does (`hud/mobile_controls/fireControl.ts`).
+   */
+  touchCastHeld = false;
+
   /** Pending right-click cast: object under the cursor and/or the ground point. */
   castRequest: {
     target: Entity | null;

@@ -47,5 +47,6 @@ export default {
   'mobile.set.groundNames': 'Mostrar nombres de ítems del suelo',
   'mobile.set.all': 'Todas las opciones',
   'mobile.cmd.map': 'Mapa',
+  'mobile.basicAttack': 'Ataque básico',
   'mobile.clear': 'Quitar',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -89,6 +89,10 @@ function isPlayer(e: Entity): boolean {
   return !!e.playerAnimation && e.netId !== undefined && !e.dying;
 }
 
+/** The right button is down, or the touch cast button is held (`World.touchCastHeld`). */
+const castHeld = (world: { rightPointerPressed: boolean; touchCastHeld: boolean }) =>
+  world.rightPointerPressed || world.touchCastHeld;
+
 export const SkillCastSystem: ISystemFactory = world => {
   let cooldown = 0;
   let approachDelay = 0;
@@ -419,7 +423,7 @@ export const SkillCastSystem: ISystemFactory = world => {
     update: dt => {
       cooldown -= dt;
       approachDelay -= dt;
-      if (!world.rightPointerPressed) summonCast = false;
+      if (!castHeld(world)) summonCast = false;
       // Re-armed below for as long as the approach walk is still running, so
       // a dropped cast never leaves a stale cut on the next ordinary walk.
       world.castApproach = null;
@@ -452,7 +456,7 @@ export const SkillCastSystem: ISystemFactory = world => {
 
       // ---- Nova hold: the button came up (or the left button was clicked)
       // while charging → AT_SKILL_NOVA at the selected target (`SkillKeyPush`).
-      if (combat.novaCharging && (!world.rightPointerPressed || world.pointerPressed)) {
+      if (combat.novaCharging && (!castHeld(world) || world.pointerPressed)) {
         combat.releaseNova();
         const nova = combat.novaSkill;
         const def = skillDefinition(nova);
@@ -479,7 +483,7 @@ export const SkillCastSystem: ISystemFactory = world => {
       // waiting for the clip to end and going out a second time. A request
       // that has not cast yet is left alone - that is the hero still walking
       // into range, which the mobile pad and the approach walk both rely on.
-      if (req && castSent === req && !world.rightPointerPressed) {
+      if (req && castSent === req && !castHeld(world)) {
         world.castRequest = null;
         castSent = null;
         return;
@@ -619,7 +623,7 @@ export const SkillCastSystem: ISystemFactory = world => {
       }
 
       if (tx === undefined || ty === undefined) {
-        if (!world.rightPointerPressed) world.castRequest = null;
+        if (!castHeld(world)) world.castRequest = null;
         return;
       }
 
@@ -754,7 +758,7 @@ export const SkillCastSystem: ISystemFactory = world => {
 
       if (def.type === 'SummonMonster') summonCast = true;
 
-      if (def.type === 'SummonMonster' || !world.rightPointerPressed) {
+      if (def.type === 'SummonMonster' || !castHeld(world)) {
         world.castRequest = null;
         castSent = null;
       } else {

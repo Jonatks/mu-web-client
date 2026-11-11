@@ -217,6 +217,16 @@ export function skillIconCell(
  * the castle siege commands and the passive master-tree entries (`SKILL_USE_TYPE_MASTERLEVEL`,
  * OpenMU's PassiveBoost) never sit on a bar slot. A Strengthener or Mastery casts like any skill.
  */
+/**
+ * A skill that hurts what it is cast at (not a buff, a summon, a teleport or a passive): the kind the cast button repeats on a monster
+ * and the kind a character starts with selected (Energy Ball for the wizard).
+ */
+export function isAttackSkill(num: number): boolean {
+  const def = skillDefinition(num);
+  if (!def || !isHotbarSkill(num) || def.damageType === 'None') return false;
+  return def.type === 'DirectHit' || def.type === 'AreaSkillAutomaticHits' || def.type === 'AreaSkillExplicitTarget';
+}
+
 export function isHotbarSkill(num: number): boolean {
   if (num < 1 || (num >= SIEGE_FIRST && num <= SIEGE_LAST)) return false;
   return skillDefinition(num)?.type !== 'PassiveBoost';
