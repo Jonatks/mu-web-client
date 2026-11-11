@@ -63,3 +63,15 @@
   user-select: text;
   cursor: text;
 }
+
+// A close X is about 10 px wide, too small for a finger: on touch its hit area grows (the art stays the same).
+.mu-mobile .mu-item-window {
+  .head-close,
+  [class$='-close'] {
+    &::after {
+      content: '';
+      position: absolute;
+      inset: -16px;
+    }
+  }
+}

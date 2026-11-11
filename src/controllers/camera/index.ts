@@ -48,6 +48,7 @@ import {
   ROTATE_STEP_DEG,
 } from './recipes';
 import { isMobileDevice } from '@/controllers/interface/mobile';
+import { installPinchZoom } from './pinchZoom';
 
 export type { CameraLayer } from './layer';
 export { showHeroBody } from './heroBody';
@@ -62,7 +63,7 @@ for (const layer of CAMERA_LAYERS) {
 }
 
 /** `g_shCameraLevel`, 0..4. */
-let level = DEFAULT_CAMERA_LEVEL;
+let level = nearerOnTouch(DEFAULT_CAMERA_LEVEL);
 
 /** `CameraAngle[2]`, degrees. */
 let headingDeg = DEFAULT_HEADING_DEG;
@@ -74,10 +75,10 @@ let headingDeg = DEFAULT_HEADING_DEG;
 let pitchOffsetDeg = 0;
 
 /** `CameraDistance`, original units, eased toward the level's target. */
-let distance = DISTANCE_BY_LEVEL[DEFAULT_CAMERA_LEVEL];
+let distance = DISTANCE_BY_LEVEL[level];
 
 /** The level the current map opened on, which a reset goes back to. */
-let openingLevel = DEFAULT_CAMERA_LEVEL;
+let openingLevel = level;
 
 /** `cameraKeepsView`: the view is zoomed, turned or tilted off the map's opening frame. */
 export const cameraView = observable({ moved: false });
@@ -154,6 +155,15 @@ let classic: {
  * step is that frame, not an approximation of it.
  */
 function openingLevelFor(world: ENUM_WORLD): number {
+  return nearerOnTouch(pinnedLevelFor(world));
+}
+
+/** A phone is a small screen: the hero opens one step closer than on a monitor (pinch zooms, `installPinchZoom`). */
+function nearerOnTouch(base: number): number {
+  return isMobileDevice() ? Math.max(2, base - 1) : base;
+}
+
+function pinnedLevelFor(world: ENUM_WORLD): number {
   const pinned = byWorld.get(world)?.distance;
 
   if (pinned === undefined) return DEFAULT_CAMERA_LEVEL;
@@ -252,6 +262,11 @@ export function installCameraControl(
     },
     { passive: true }
   );
+
+  installPinchZoom(canvas, () => GameOptions.cameraControl && isActive(), step => {
+    // Never the two closest steps (first person): a thumb pinch should not end up inside the hero.
+    level = Math.max(2, Math.min(MAX_CAMERA_LEVEL, level + step));
+  });
 
   // Ctrl + middle-button drag: left/right rotates the heading, up/down
   // pitches. Ctrl is only needed to start the drag; pointer capture keeps

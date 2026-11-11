@@ -28,7 +28,7 @@ import { weather } from '../controllers/weather';
 import { sound } from '../controllers/sound';
 import { Engine, SceneLoader } from '../controllers/render/babylon/exports';
 import { createEngine } from '../controllers/render/babylon/utils';
-import { devQuery } from '../core/devSeams';
+import { devQuery, devQueryNumber } from '../core/devSeams';
 import {
   applyRenderScale,
   renderScaleForStep,
@@ -57,6 +57,7 @@ import { setKeyProfile } from '../controllers/interface/keyBindings';
 import { installBrowserHotkeyGuard } from '../controllers/interface/browserHotkeys';
 import { installImmersive } from '../controllers/interface/immersive';
 import { installMultiTouchTap } from '../controllers/interface/multiTouchTap';
+import { isMobileDevice } from '../controllers/interface/mobile';
 import { SessionResume } from '../modules/session/sessionResume';
 import { reaction } from 'mobx';
 import { watchStateWarnings } from '../modules/hero/stateWarnings';
@@ -107,9 +108,13 @@ const canvas = document.querySelector('canvas')!;
 
 let useAntialiaing = false;
 
+// A phone's screen has 2 to 3 device pixels per CSS pixel; drawn at 1 the 3D view is blurry and its edges stair-step.
+// A phone draws at up to 1.5x (the render scale option still trades it down); `?dpr=1.5` tries another cap.
+const deviceRatioLimit = devQueryNumber('dpr') ?? (isMobileDevice() ? 1.5 : 1);
+
 let engine: Engine;
 try {
-  const result = createEngine(canvas, useAntialiaing);
+  const result = createEngine(canvas, useAntialiaing, deviceRatioLimit);
   engine = result.engine;
   engine.hideLoadingUI();
   // Babylon's loader screen polls `scene.isReady` over the whole scene every

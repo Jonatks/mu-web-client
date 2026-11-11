@@ -3,6 +3,7 @@ import { useCallback, type CSSProperties } from 'react';
 import { observer } from 'mobx-react-lite';
 import { MuSpriteFrame, useMuSprite } from '../mu_sprite';
 import { MuResizeGrip, useWindowChrome } from './useWindowChrome';
+import { isMobileDevice } from '../../mobile';
 import { MuWindows, type WindowCloser } from '../../windowManager';
 
 const BACK_SPRITE = 'newui_msgbox_back.OZJ';
@@ -70,7 +71,9 @@ export const MuItemWindow = observer(
         onPointerDown={chrome.onPointerDown}
         style={{
           right: column * WINDOW_WIDTH * chrome.scale,
-          bottom: bottomBarScreenHeight(),
+          // A phone is short: like Mu Magdalena, the windows take the full height (the bar sits behind them) so the
+          // title and the close button are never cut off.
+          bottom: isMobileDevice() ? 0 : bottomBarScreenHeight(),
           backgroundImage: back ? `url(${back.url})` : undefined,
           backgroundSize: '100% 100%',
           ...chrome.style,

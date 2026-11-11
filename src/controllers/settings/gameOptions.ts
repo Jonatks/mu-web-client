@@ -1,5 +1,6 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 import { LocalStorage } from '../../core/localStorage';
+import { isMobileDevice } from '../interface/mobile';
 import {
   FIDELITY_DEFAULT,
   FIDELITY_MAX,
@@ -802,10 +803,33 @@ export function optionsFrom(parsed: Record<string, unknown>): GameOptions {
   return loaded;
 }
 
+/**
+ * What a phone starts with (the owner's choice, modelled on Mu Magdalena): the edges smoothed, a touch sharper, and a drop
+ * showing its name only (a tap has no hover to open the full card on). Applied once per profile version, on touch devices only,
+ * so the player's own changes after that stick; raise `MOBILE_PROFILE_VERSION` to push a new set to everyone.
+ */
+export const MOBILE_PROFILE_VERSION = 1;
+const MOBILE_PROFILE_KEY = '_mu_mobile_profile';
+export const MOBILE_PROFILE: Partial<GameOptions> = {
+  fxaa: true,
+  sharpness: 3,
+  dropTooltips: false,
+};
+
+function withMobileProfile(options: GameOptions): GameOptions {
+  if (!isMobileDevice()) return options;
+  if (LocalStorage.load(MOBILE_PROFILE_KEY) === String(MOBILE_PROFILE_VERSION)) return options;
+
+  const next = { ...options, ...MOBILE_PROFILE };
+  LocalStorage.save(OPTIONS_KEY, JSON.stringify(next));
+  LocalStorage.save(MOBILE_PROFILE_KEY, String(MOBILE_PROFILE_VERSION));
+  return next;
+}
+
 function load(): GameOptions {
   const stored = LocalStorage.load(OPTIONS_KEY);
 
-  if (!stored) return { ...DEFAULTS };
+  if (!stored) return withMobileProfile({ ...DEFAULTS });
 
   try {
     const parsed = JSON.parse(stored) as Record<string, unknown>;
@@ -814,9 +838,9 @@ function load(): GameOptions {
 
     if (migrated) LocalStorage.save(OPTIONS_KEY, JSON.stringify(loaded));
 
-    return loaded;
+    return withMobileProfile(loaded);
   } catch {
-    return { ...DEFAULTS };
+    return withMobileProfile({ ...DEFAULTS });
   }
 }
 
