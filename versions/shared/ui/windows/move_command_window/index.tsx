@@ -8,6 +8,7 @@ import { warpCommandRequest } from '@/modules/warp';
 import { Hero } from '@/modules/hero';
 import { Session } from '@/modules/session';
 import { Ecs } from '@/ecs/current';
+import { isMobileDevice } from '@/controllers/interface/mobile';
 import { isKey } from '@/controllers/interface/keyBindings';
 import { BaseClass, getBaseClass } from '@/modules/hero/characterStats';
 import { PVP_MURDERER1 } from '@/controllers/interface/nameTags';
@@ -138,7 +139,7 @@ const OFFLINE_MAPS: Readonly<Record<number, ENUM_WORLD>> = {
   23: ENUM_WORLD.WD_10ICARUS,
 };
 
-type RowState = {
+export type RowState = {
   entry: MoveReqEntry;
   reqLevel: number;
   levelOk: boolean;
@@ -147,7 +148,7 @@ type RowState = {
 };
 
 /** `SettingCanMoveMap` for one row. */
-function rowState(entry: MoveReqEntry, level: number, zen: number, cls: BaseClass, pk: number): RowState {
+export function rowState(entry: MoveReqEntry, level: number, zen: number, cls: BaseClass, pk: number): RowState {
   const reqLevel = effectiveMoveLevel(entry.reqLevel, cls);
   const levelOk = level >= reqLevel;
   const zenOk = zen >= entry.zen;
@@ -160,10 +161,21 @@ function openMoveWindow(): void {
   });
 }
 
-function closeMoveWindow(): void {
+export function closeMoveWindow(): void {
   runInAction(() => {
     MuWindows.setOpen('move_command', false);
   });
+}
+
+/** A click on a white row: hide the window and ask the server (or, offline, warp locally). Also the touch list's row tap. */
+export function warpToEntry(entry: MoveReqEntry): void {
+  closeMoveWindow();
+  if (Session.isOffline) {
+    const map = OFFLINE_MAPS[entry.index];
+    if (map !== undefined) EventBus.emit('requestWarp', { map });
+    return;
+  }
+  warpCommandRequest(SERVER_INDEX[entry.index] ?? entry.index);
 }
 
 const Row = observer(({
@@ -259,7 +271,8 @@ export const MoveCommandWindow = observer(() => {
     };
   }, [open]);
 
-  if (!open) return null;
+  // A touch screen has its own list (`hud/mobile_controls/teleportModal.tsx`).
+  if (!open || isMobileDevice()) return null;
 
   const { level, money, charClass } = Hero;
   const cls = getBaseClass(charClass);
@@ -304,15 +317,7 @@ export const MoveCommandWindow = observer(() => {
     if (dragging.current?.pointerId === e.pointerId) dragging.current = null;
   };
 
-  const warpTo = (entry: MoveReqEntry) => {
-    closeMoveWindow();
-    if (Session.isOffline) {
-      const map = OFFLINE_MAPS[entry.index];
-      if (map !== undefined) EventBus.emit('requestWarp', { map });
-      return;
-    }
-    warpCommandRequest(SERVER_INDEX[entry.index] ?? entry.index);
-  };
+  const warpTo = warpToEntry;
 
   return (
     <div

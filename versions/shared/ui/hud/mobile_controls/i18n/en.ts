@@ -25,6 +25,14 @@ const en = {
   'mobile.pickHint': 'Tap a skill to place it in the selected slot.',
   'mobile.move': 'Move',
   'mobile.use': 'Use',
+  'mobile.teleport': 'Teleport',
+  'mobile.lv': 'Lv.{n}',
+  'mobile.cmd.points': 'Allocate points',
+  'mobile.availablePoints': 'Available points',
+  'mobile.chat': 'Chat',
+  'mobile.messages': 'MESSAGES',
+  'mobile.writeMessage': 'Write a message',
+  'mobile.send': 'Send',
   'mobile.clear': 'Clear',
 };
 

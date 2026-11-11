@@ -27,5 +27,13 @@ export default {
   'mobile.pickHint': 'Toca una habilidad para ponerla en la posición elegida.',
   'mobile.move': 'Mover',
   'mobile.use': 'Usar',
+  'mobile.teleport': 'Teletransporte',
+  'mobile.lv': 'Nv.{n}',
+  'mobile.cmd.points': 'Asignar puntos',
+  'mobile.availablePoints': 'Puntos disponibles',
+  'mobile.chat': 'Chat',
+  'mobile.messages': 'MENSAJES',
+  'mobile.writeMessage': 'Escribe un mensaje',
+  'mobile.send': 'Enviar',
   'mobile.clear': 'Quitar',
 } satisfies Partial<Record<keyof typeof en, string>>;

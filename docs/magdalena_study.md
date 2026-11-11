@@ -1,45 +1,83 @@
-# Mu Magdalena study (mobile, landscape 915x412 CSS px) and what was taken
+# Mu Magdalena study (mobile, landscape 915x412 CSS px)
 
-Source: a play session on `play.mumagdalenas.com` with a test account (touch emulation, Pixel 7 landscape), captures kept outside the repo
-(they show another game's art). Numbers are CSS px at 915x412 unless said otherwise.
+Source: two play sessions on `play.mumagdalenas.com` with the owner's test account (touch emulation, Pixel 7 landscape). Screenshots and DOM dumps
+(element sizes, fonts, colours) were kept outside the repo because they show another game's art. Numbers below are CSS px at 915x412.
+Not studied because they are payment or server specific: the top-up flows (a "Top up by card" dialog pops up by itself), the "Buy" button,
+the cash shop, the reset ranking. Party requests were declined.
 
-## What Mu Magdalena does
-- **World screen is almost free.** Top left: level badge, name, zone with coordinates, NORMAL pill, pet / exp row. Top right: round
-  buttons (quick potion with a "99+" count, HELPER, shop, a hamburger menu). Bottom left: joystick with an ornate ring and the word MOVE.
-  Bottom centre: one slim bar with the life orb (red, number inside), six small skill boxes, the mana orb (blue), AG and SD as thin bars
-  over the boxes and experience as a hairline under them. Bottom right: a round attack button and a book button for the skills window.
-  A "SAFE ZONE" pill. A chat bubble with an unread counter instead of a chat log. Announcements as big gold text at the top centre.
-- **Talk pill** (about 211x38): appears next to an NPC, dark rounded, "Talk . <NPC name>".
-- **Names over players** are rounded translucent pills with a country flag and the clan tag.
-- **Command menu** (hamburger): a near full-screen panel of square tiles with an icon and a word (Move, Inventory, Character, Guild, MU Helper,
-  Settings, Change character, ...), a close X, a footer with players online.
-- **Windows**: the inventory, vault and shops are the ORIGINAL MU windows (same frame, equipment dolls, bag), docked on the right, two side by side.
-- **Item tap** opens a centred sheet with the whole tooltip and a "Move" button, so an item is never picked up by accident. Then tap where it goes.
-- **Skills window**: "1 - select the position" (six boxes) and "2 - select the skill" (grid of every skill, locked ones greyed, a Clear tile),
-  a MANUAL / AUTO attack toggle, a close X.
-- **MU Helper**: tabs Combat / Pickup, a rotation of attacks, buffs "only when missing", attack and loot range, original position,
-  potions with HP / Mana / SD thresholds (10% to 100%) and a big green Start Helper button.
-- **Settings**: tabs Interface / Game, sliders for game font (190%), interface font (190%), pad size (100%), toggle show movement pad.
-- **Character screen**: the focused character is shown large; a card at the bottom with name, class and level, dots, big round arrows,
-  pills Enter / Create / Delete; a menu button top left and a sound button top right.
-- **Not taken on purpose**: the shop / top-up flows (payments), the "Buy" button, country flags.
+## 1. Screens in the order a player meets them
+**Login** (before the game): form with user and password, a language choice, a loading bar; the game files download first (about 377 MB).
 
-## What was taken (all touch only; the mouse client is unchanged)
+**Character screen.** The focused character is large in the centre of a dark scene (the camera zooms in on it). Bottom card (about 555 wide,
+centred, rounded 14, gold 2 px border): name in a serif face with letter spacing, then "Class . Lv N", a row of dots (one per character, the active
+one a longer gold pill), and pills Enter (gold, filled), Create (dark), Delete (dark red). Round arrows 52 px left and right of the card flip through
+characters. A round sound button top right. A black speech-bubble style strip top left shows server messages.
+**Create a new hero**: a big bust portrait of the chosen class above a card with the title and seven class pills (Dark Wizard, Dark Knight, Elf,
+Magic Gladiator, Dark Lord, Summoner, Rage Fighter), a name field, Create (gold) and Cancel.
+
+**World HUD** (DOM over the 3D, everything round or pill shaped, text 9 to 14 px):
+- Top left, 250 wide: row 1 a level badge (50x20, 9.5 px, with an experience ring around it), the name (13 px) and a small gold "Buy" button;
+  row 2 zone name with coordinates (10 px) and a green NORMAL pill (70x17, 11 px); row 3 the pet bar: name (8.5 px, violet) and a mini bar with its value.
+- Top right: four round buttons 48x48 with 8 px between them: quick potion with a "99+" badge, HELPER (label under it), the shop "M", the menu (hamburger).
+- Bottom left: the pad, ring 134x134 with an ornate skull frame, a knob of 55, the word "Move" (9 px) under it; "precision" mode is a setting.
+- Bottom centre: a slim bar drawn in canvas: red orb (life, number inside) left, mana orb (blue) right, six small boxes between, AG and SD as thin bars
+  above them with their numbers, experience as a hairline at the very bottom with the level number at its right end.
+- Bottom right: a round skill button 50x50 showing the current skill's icon (the fist for the basic attack) at y 270; a round book button 50x50 at y 350 that opens
+  the skills window. A "SAFE ZONE" pill appears just above it while on a safe tile.
+- Chat: a 32x32 round bubble above the bar (centre) with a red counter of unread lines. The log is not on the screen: a tap opens a translucent
+  "MESSAGES" panel (about 595x130) with the lines in large blue text, an input "Write a message" and a close x.
+- Talk pill, 211x38 (width follows the name), 14 px, radius full, 1 px gold border, "Talk . <NPC>", centred above the bar; it changes to the nearest NPC.
+- Server announcements: big gold text (20 px) in a 595x56 translucent band at the top centre; one band per message, stacked.
+- Players: names as rounded translucent pills with a flag and the clan tag; clan colours differ. NPC names are plain.
+- Monsters: the name above each one with a red life bar (about 98 px wide) over it, always visible in view; the target has an orange ring on the ground.
+  Damage numbers: white for a miss ("Miss"), red and bold for damage taken, floating up.
+
+**Command menu** (hamburger): a panel 780x386 at (68,13), ridge border 3 px, Georgia; heading "Commands" 23 px with a close x (34 px round);
+a 6 column grid of tiles 116x123 (gap 9): Move, Inventory, Allocate points, Ranking, Guild Clan, MU Helper, Settings, Change character, Sign out. Tile: a line
+icon above a 15 px label. Footer: "Users online: N" and two round social links.
+- **Move**: a full screen overlay (rgba 8,8,12,.82), title "Teleport" 15 px letter spaced, two tabs "World I" / "World II" (212x38), then rows 430x39 radius 12:
+  map name left (14 px), "Lv.N . 2,000 Zen" right (11 px, muted gold), a scroll list, a Close pill 113x35. Maps: Arena, Lorencia, Noria, Elveland (their hub), Devias 1-4,
+  Dungeon 1-3, Atlans 1-3, Lost Tower 1-7, Tarkan, ... each with its level and Zen cost.
+- **Allocate points**: a panel 420x388 (radius 16): title 22 px, "Name . Level N", close x, "Available points N", a Master Skills button (round "M" medallion, master level and points),
+  Change character, then STR / AGI / STA / ENG rows: label gold 16 px, value white 20 px, and a minus and a plus button 46x44 radius 10; a HP and Mana line at the bottom.
+- **Ranking**: reset ranking with Day / Week / Month / All and the character's profile (server specific; not taken).
+- **Guild Clan**: "You are not in a guild. Talk to the Guild Master in Devias to create one."
+- **Settings**: panel 520x360 (radius 16), tabs Interface / Game. Interface: Game font (190%), Interface font (190%), Pad size (100%), Show movement pad (switch),
+  Precision pad (Active), Camera zoom (1.25x), Reset settings. Game: Full effects (switch), Effect limitation (slider, +13), Music ON/OFF, Sound ON/OFF,
+  Hide chat with windows, Configure skills, Show ground items.
+- **MU Helper**: tabs Combat / Pickup, a rotation of attacks (a grid of skill icons with a + to add), buffs "only when missing", attack and loot range (1 to 9),
+  original position (switch), potions HP / Mana / SD with a switch and a threshold 10% to 100%, a big green Start Helper button, state pill (STOPPED), help (?), close x.
+- **Skills**: panel 858x342: left "1 - Select the position" (six slots), right "2 - Select the skill" a 7 column grid of 61x58 tiles with a Clear tile first, locked skills
+  greyed; a MANUAL / AUTO attack toggle bottom left; the hint "Tap a skill to place it in the selected slot." The picked slot shows its number.
+
+**Windows.** Inventory, vault, shops and the character window are the ORIGINAL MU windows (same frame art, equipment dolls, an 8 column bag) docked to the right edge
+and ending at the screen bottom (the bar sits behind), two side by side. Their close x is at the top right.
+**Item tap**: a sheet centred on the screen with the full tooltip and a gold "Mover" button. Then a tap on a cell puts it there.
+**Taking things**: tap a ground name or the item to walk to it and pick it up; "Show ground items" decides if names are drawn.
+**NPC**: the Talk pill walks to the NPC and opens its window (a shop is the original shop window).
+
+## 2. Style tokens
+Dark brown panels (rgba 14,11,8,.9 to 28,21,13), gold borders (217,180,90), text cream (242,230,196), heading gold (255,228,163), serif (Georgia) for titles and the
+menu, a sans face for HUD numbers; radii 10 to 16 on panels, full on pills and round buttons; shadows 0 3 10 black .55.
+
+## 3. What was taken (all touch only; the mouse client is unchanged)
 | Magdalena | Here |
 |---|---|
 | slim bottom bar, orbs, six boxes, AG / SD / exp | `hud/mobile_controls` `Bar` (the original bar hides itself on touch) |
-| status top left | `StatusPanel`: level, name, zone with coordinates, SAFE ZONE pill |
+| status top left | `StatusPanel` |
 | round Helper and menu buttons | `TopButtons` (Helper tap starts / stops, long press opens its settings) |
-| command menu with tiles | `CommandMenu`: Move, Inventory, Character, Skills, Friends, Party, Guild, Quests, MU Helper, Settings, Change character, System |
-| attack button | `AttackButton`: nearest monster within 8 tiles, again to let go |
+| command menu | `CommandMenu` (our tiles: Move, Inventory, Character, Skills, Friends, Party, Guild, Quests, MU Helper, Settings, Change character, System) |
+| attack button | `AttackButton` (nearest monster within 8 tiles) |
 | talk pill | `TalkButton` |
-| skills window | `SkillPicker` (six positions, grid, Clear, close X) |
-| item sheet with Move | `ItemSheetView` + `item_grid/mobileSheet.ts`; inventory, equipment and every shared grid (vault, trade, shops) |
-| name pills | `hud/name_tags/style.less` (rounded, larger) |
+| skills window | `SkillPicker` |
+| item sheet with Move | `ItemSheetView` + `item_grid/mobileSheet.ts` |
+| name pills | `hud/name_tags/style.less`, drop names `world_label/style.less` |
 | character screen | `pages/character_select/MobilePanel.tsx` (zooms on the focused character) |
-| no potion button | NOT taken: potions are the Helper's job (its HP / Mana thresholds) |
-| removed from touch | the original bar and its five buttons, event timers, the Start / Settings Helper buttons, the warp button |
+| Teleport list | `TeleportModal` (this study's second round) |
+| Allocate points | `StatsModal` (this study's second round) |
+| chat bubble and panel | `ChatBubble` (this study's second round) |
+| quick potion button | NOT taken: potions are the Helper's job and the mana potion is automatic |
 
-## Not done yet
-Chat bubble with an unread counter, a Pickup tab on the Helper tuned for touch, the MANUAL / AUTO toggle, a settings window with a pad-size
-slider (the pad size is already in Options > Controls), country flags, the shop window as a sheet. Real-phone checks with Chrome and Samsung Internet.
+## 4. Not taken or not done
+Ranking by resets, shop top-up, "Buy", country flags, monster life bars drawn over every monster (a performance cost on a phone: only the target has one),
+the MANUAL / AUTO toggle, a Pickup tab tuned for touch, the experience ring on the level badge.

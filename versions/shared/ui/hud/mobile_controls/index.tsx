@@ -11,6 +11,10 @@ import { CommandMenu } from './commandMenu';
 import { Joystick } from './joystick';
 import { TalkButton } from './talkButton';
 import { ItemSheetView } from './itemSheet';
+import { TeleportModal } from './teleportModal';
+import { StatsModal } from './statsModal';
+import { ChatBubble } from './chatBubble';
+import { MessagesPanel } from './messagesPanel';
 
 /** The bottom bar of a touch screen: life, the six skill slots with AG / SD over them and experience under, mana. */
 const Bar = observer(() => {
@@ -47,11 +51,15 @@ export const MobileControls = observer(() => {
       <TopButtons />
       <Bar />
       <AttackButton />
+      <ChatBubble />
       <Joystick />
       <TalkButton />
       <SkillPicker />
       <CommandMenu />
       <ItemSheetView />
+      <TeleportModal />
+      <StatsModal />
+      <MessagesPanel />
     </div>
   );
 });

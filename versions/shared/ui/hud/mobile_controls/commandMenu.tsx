@@ -18,7 +18,7 @@ const open = (id: string) => () => MuWindows.setOpen(id, true);
 const TILES: readonly Tile[] = [
   { icon: 'move', label: 'mobile.cmd.move', run: open('move_command') },
   { icon: 'inventory', label: 'mobile.cmd.inventory', run: open('inventory') },
-  { icon: 'character', label: 'mobile.cmd.character', run: open('character_info') },
+  { icon: 'character', label: 'mobile.cmd.points', run: () => (MobileMenu.stats = true) },
   { icon: 'skills', label: 'mobile.cmd.skills', run: () => (MobileMenu.picker = 0) },
   { icon: 'friends', label: 'mobile.cmd.friends', run: () => Messenger.toggleWindow() },
   { icon: 'party', label: 'mobile.cmd.party', run: open('party') },

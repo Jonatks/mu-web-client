@@ -24,6 +24,10 @@
   .mobile-attack,
   .mobile-talk-pill,
   .mobile-sheet-button,
+  .mobile-chat-bubble,
+  .mobile-messages,
+  .mobile-stat-add,
+  .mobile-stats-details,
   .mobile-modal {
     pointer-events: auto;
     cursor: pointer;
@@ -371,7 +375,7 @@
 .mobile-talk-pill {
   position: absolute;
   left: 50%;
-  bottom: 104px;
+  bottom: 126px;
   transform: translateX(-50%);
   max-width: 46vw;
   min-height: 38px;
@@ -617,6 +621,303 @@ body:has(.mu-item-window) .mobile-controls {
       color: #2a1c06;
       background: linear-gradient(#f0cf7a, #c79a35);
       border-color: #f6dc9a;
+    }
+  }
+}
+
+// ---- Teleport (Mu Magdalena): a dimmed screen, a title, big rows, a Close pill ------------------------------------
+.mobile-teleport {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 0 10px;
+  background: rgba(8, 8, 12, 0.84);
+  pointer-events: auto;
+
+  .mobile-teleport-title {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #f4e3c2;
+  }
+
+  .mobile-teleport-list {
+    flex: 1;
+    min-height: 0;
+    width: min(92vw, 520px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    touch-action: pan-y;
+  }
+
+  .mobile-teleport-row {
+    flex: none;
+    height: 40px;
+    padding: 0 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-radius: 12px;
+    background: linear-gradient(rgba(36, 28, 20, 0.95), rgba(20, 15, 10, 0.95));
+    border: 1px solid rgba(214, 172, 90, 0.45);
+    font-size: 14px;
+    color: #f2e7d5;
+    pointer-events: auto;
+    cursor: pointer;
+    touch-action: pan-y;
+
+    &.is-locked {
+      opacity: 0.55;
+    }
+
+    .mobile-teleport-req {
+      font-size: 11px;
+      color: #c9b58c;
+
+      .bad {
+        color: #ff6a52;
+      }
+    }
+  }
+
+  .mobile-teleport-close {
+    flex: none;
+    min-width: 113px;
+    height: 36px;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: #f4e3c2;
+    background: rgba(30, 26, 22, 0.95);
+    border: 1px solid rgba(214, 172, 90, 0.6);
+    pointer-events: auto;
+    cursor: pointer;
+  }
+}
+
+// ---- Allocate points (Mu Magdalena) ---------------------------------------------------------------------------------
+.mobile-stats {
+  width: min(86vw, 420px);
+
+  .mobile-panel-head small {
+    display: block;
+    margin-top: 2px;
+    font-size: 12px;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    color: rgba(255, 237, 194, 0.8);
+  }
+
+  .mobile-stats-body {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 10px 14px 12px;
+    overflow-y: auto;
+  }
+
+  .mobile-stats-points {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 12px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    font-size: 14px;
+
+    b {
+      font-size: 20px;
+      color: #ffe39a;
+    }
+  }
+
+  .mobile-stat-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 44px;
+  }
+
+  .mobile-stat-label {
+    width: 52px;
+    font-size: 16px;
+    font-weight: 700;
+    color: #ffd257;
+  }
+
+  .mobile-stat-value {
+    flex: 1;
+    font-size: 20px;
+    color: #fff;
+  }
+
+  .mobile-stat-add {
+    width: 46px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    font-size: 24px;
+    color: #1a0d03;
+    background: linear-gradient(#f0cf7a, #c79a35);
+    border: 1px solid #f6dc9a;
+    pointer-events: auto;
+    cursor: pointer;
+
+    &.is-off {
+      opacity: 0.35;
+    }
+  }
+
+  .mobile-stats-vitals {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: rgba(255, 237, 194, 0.85);
+  }
+
+  .mobile-stats-details {
+    height: 38px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    color: #ffe9b8;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(202, 140, 60, 0.7);
+    pointer-events: auto;
+    cursor: pointer;
+  }
+}
+
+// ---- chat bubble (Mu Magdalena) ---------------------------------------------------------------------------------------
+.mobile-chat-bubble {
+  position: absolute;
+  left: 50%;
+  bottom: 84px;
+  margin-left: -16px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: @gold;
+  background: radial-gradient(circle at 35% 30%, rgba(58, 44, 24, 0.95), rgba(14, 11, 8, 0.95));
+  border: 2px solid @gold-dim;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.55);
+
+  .mobile-chat-count {
+    position: absolute;
+    top: -7px;
+    right: -9px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+    border-radius: 9px;
+    font-size: 10px;
+    line-height: 18px;
+    text-align: center;
+    color: #fff;
+    background: #c4261d;
+    border: 2px solid rgba(12, 6, 6, 0.9);
+  }
+}
+
+body:has(.mu-item-window) .mobile-controls .mobile-chat-bubble {
+  display: none;
+}
+
+// ---- the messages panel (Mu Magdalena): translucent, at the top so the keyboard does not cover it -----------------------
+.mobile-messages {
+  position: absolute;
+  top: 56px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(78vw, 620px);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 10px 10px;
+  border-radius: 12px;
+  background: rgba(14, 11, 8, 0.78);
+  border: 1px solid rgba(217, 180, 90, 0.5);
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.6);
+  z-index: 2;
+
+  .mobile-messages-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    color: #ffe39a;
+  }
+
+  .mobile-close {
+    width: 30px;
+    height: 30px;
+  }
+
+  .mobile-messages-log {
+    height: 118px;
+    overflow-y: auto;
+    touch-action: pan-y;
+    font-size: 15px;
+    line-height: 1.25;
+    text-shadow: 0 1px 2px #000;
+  }
+
+  .mobile-message {
+    margin-bottom: 2px;
+    word-break: break-word;
+  }
+
+  .mobile-messages-input {
+    display: flex;
+    gap: 8px;
+
+    input {
+      flex: 1;
+      min-width: 0;
+      height: 38px;
+      padding: 0 12px;
+      border-radius: 10px;
+      font-size: 15px;
+      color: #fff;
+      background: rgba(0, 0, 0, 0.55);
+      border: 1px solid rgba(217, 180, 90, 0.5);
+      pointer-events: auto;
+    }
+
+    button {
+      min-width: 72px;
+      height: 38px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #2a1c06;
+      background: linear-gradient(#f0cf7a, #c79a35);
+      border: 1px solid #f6dc9a;
+      pointer-events: auto;
+
+      &:disabled {
+        opacity: 0.45;
+      }
     }
   }
 }
