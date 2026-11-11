@@ -16,12 +16,12 @@ Format version: **1**
 | 0 | 1 | Format version. Anything else means a different table. |
 | 1 | 1 | Number of flag bytes that follow (currently 9). |
 | 2 | 9 | The on/off settings, one bit each, first in bit 0 of the first byte. |
-| 11 | 1 | Number of value bytes that follow (currently 64). |
-| 12 | 64 | The numeric settings, one byte each, each stored as value + 128. |
-| 76 | 2 | Language, two ASCII letters (`65 73` is `es`). |
-| 78 | 2 | Texture pack digest, `0000` when the original textures are in use. |
+| 11 | 1 | Number of value bytes that follow (currently 65). |
+| 12 | 65 | The numeric settings, one byte each, each stored as value + 128. |
+| 77 | 2 | Language, two ASCII letters (`65 73` is `es`). |
+| 79 | 2 | Texture pack digest, `0000` when the original textures are in use. |
 
-Total: **80 bytes**, 160 hex characters.
+Total: **81 bytes**, 162 hex characters.
 
 ## On/off settings
 
@@ -92,9 +92,10 @@ Bit `n` counts from the first flag byte: byte `n / 8`, bit `n % 8`, lowest bit f
 | 60 | 7.4 | `statPointAmounts` |
 | 61 | 7.5 | `stateWarnings` |
 | 62 | 7.6 | `thirdPersonMouseLook` |
-| 63 | 7.7 | `weatherEffects` |
-| 64 | 8.0 | `whisperBeep` |
-| 65 | 8.1 | `wsadMovement` |
+| 63 | 7.7 | `touchStickHidden` |
+| 64 | 8.0 | `weatherEffects` |
+| 65 | 8.1 | `whisperBeep` |
+| 66 | 8.2 | `wsadMovement` |
 
 ## Value settings
 
@@ -161,11 +162,12 @@ Each is one byte; subtract 128 to get the value. Index 0 is the first byte after
 | 56 | `styleStrength` |
 | 57 | `sunShafts` |
 | 58 | `toneMapper` |
-| 59 | `uiScale` |
-| 60 | `uiVolume` |
-| 61 | `upscale` |
-| 62 | `vignette` |
-| 63 | `volume` |
+| 59 | `touchStickSize` |
+| 60 | `uiScale` |
+| 61 | `uiVolume` |
+| 62 | `upscale` |
+| 63 | `vignette` |
+| 64 | `volume` |
 
 ## Worked example
 

@@ -18,6 +18,8 @@ const PotionButton = observer(({ index }: { index: number }) => {
   const slot = findHotkeyItem(items, index, hotkey);
   const count = slot >= 0 ? countHotkeyItems(items, index, hotkey) : 0;
   const item = slot >= 0 ? items[slot] : null;
+  // Nothing to drink: no ghost button over the picture.
+  if (!item) return null;
 
   return (
     <MobileButton

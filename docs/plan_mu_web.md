@@ -1,7 +1,7 @@
 # Plan del proyecto MU Web
 
 Documento vivo. Es la ruta acordada con el propietario; cualquier sesion de trabajo lo lee antes de actuar y lo
-actualiza al terminar una fase. Ultima revision: 2026-11-10.
+actualiza al terminar una fase. Ultima revision: 2026-11-11 (noche).
 
 ## 1. Objetivo y reglas
 
@@ -26,6 +26,21 @@ propio en una VM de Oracle Cloud Always Free (Ubuntu 24.04, 1 GB de RAM, IP publ
 - Despliegue: codigo por la rama `release` (autodespliegue de la VM cada 3 minutos); assets por repo privado y `vm-install.sh`.
 - Feedback del propietario tras probar en celular: carga rapida y bien. Falta pantalla completa y horizontal automaticos,
   y la interfaz no esta pensada para celular.
+
+## 2b. Estado por fases (2026-11-11 noche)
+Esta sesion NO tiene acceso a la VM (solo al puerto 80) y el autodespliegue solo descomprime la web a proposito, asi que lo que toca la VM queda
+como scripts listos y reversibles en `release/vm/` con su guia en `docs/vm_runbook.md`. Se ejecutan a mano en la VM.
+- Fase 1 (celular): hecho y desplegado (build en la VM). Pendiente de decision: menu de teselas, hoja de detalle de item, ventanas en columnas.
+- Fase 2a (proxy): script `proxy-harden.sh` listo. Probado en local con el mismo proxy y reglas: solo 44405, 44406 y 45901-45906 abren; 22, 5432, 55980,
+  metadatos de la nube y destinos de internet se rechazan con 403. NO aplicado en la VM.
+- Fase 2b (HTTPS): script `https-caddy.sh` y `serverlist.https.md` listos. Requiere abrir el 443 en la consola de Oracle (gratis). NO aplicado.
+- Fase 2c (dominio corto): HECHO. `https://mu-valhalla.vercel.app` (Vercel, plan gratuito) redirige a la IP; cambiar el destino a sslip.io cuando exista HTTPS.
+- Fase 2d (copias): `backup-db.sh` listo. NO aplicado. 2e (.gz): ya los genera el autodespliegue al desplegar.
+- Fase 3 (clases): las 4 clases de `test0` entran al mundo en emulacion movil sin errores de pagina (`cls/`): HUD, pociones, boton Hablar con NPC reales.
+  Falta comparar lado a lado con el cliente original por clase, combate y botin. Un `console.error` repetido: paquete 0xD2 sin manejador (inocuo).
+- Fase 4 (web admin): diseno y MVP en `docs/admin_web.md`. NO construida (necesita servicio en la VM).
+- Fase 5: lista en `docs/launch_checklist.md`. Fase 6: PWA lista (nombre MU Valhalla); APK en `docs/android_app.md`, no construido (sin HTTPS, JDK ni SDK).
+- Fase 7: ruta en `docs/original_art.md`.
 
 ## 3. Fases, en orden
 

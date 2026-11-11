@@ -1,6 +1,6 @@
 {
-  "name": "OpenMUCB",
-  "short_name": "OpenMUCB",
+  "name": "MU Valhalla",
+  "short_name": "MU Valhalla",
   "description": "MU Online, played in the browser.",
   "start_url": "./",
   "scope": "./",
