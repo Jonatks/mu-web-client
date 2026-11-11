@@ -483,6 +483,10 @@ export type GameOptions = {
    * the original's prompt / 1 decline / 2 accept on their own (`modules/social`, `autoAnswerParty`).
    */
   partyInviteReply: number;
+  /** Touch stick size (ours): 0 small / 1 normal / 2 large (`hud/mobile_controls`). */
+  touchStickSize: number;
+  /** Hide the touch stick's ring; it still steers (ours). */
+  touchStickHidden: boolean;
   /**
    * 0 Classic (the original client, 1:1) / 1 Enhanced / 2 Ultra: which deliberate
    * improvements run (`controllers/fidelity`).
@@ -580,6 +584,7 @@ const RANGES: Partial<Record<keyof GameOptions, readonly [number, number]>> = {
   // Literal for the same reason: `CHAT_EMOJI_SIZE_MAX`.
   chatEmojiSize: [0, 3],
   partyInviteReply: [0, 2],
+  touchStickSize: [0, 2],
   lowHealthPercent: [LOW_VITAL.min, LOW_VITAL.max],
   lowManaPercent: [LOW_VITAL.min, LOW_VITAL.max],
   uiScale: [0, UI_SCALE_MAX],
@@ -720,6 +725,8 @@ const DEFAULTS: GameOptions = {
   englishItemNames: false,
   helperItemFilters: false,
   partyInviteReply: 0,
+  touchStickSize: 1,
+  touchStickHidden: false,
   fidelity: FIDELITY_DEFAULT,
   fidelityOverrides: {},
   lowPresetApplied: false,

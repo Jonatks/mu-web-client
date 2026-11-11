@@ -128,6 +128,17 @@ SONIDO (Volumen, Sonidos de drops), INTERFAZ (Pantalla, Idioma, Modulos). Hay bu
 Pendiente: definir con el propietario un perfil recomendado para celular (por ejemplo preajuste de Calidad y escala de render) y, si se quiere que arranque asi,
 guardarlo como valor inicial del celular (eso es configuracion, no codigo visual).
 
+### 1h. Pulido del celular a partir de Mu Magdalena (2026-11-11, decision del propietario: aplicar por defecto)
+El propietario autorizo de nuevo los cambios visuales, ahora como valores por defecto del celular. Dos capas:
+- PERFIL MOVIL (solo opciones, `MOBILE_PROFILE` en `src/controllers/settings/gameOptions.ts`): se aplica UNA vez en un dispositivo tactil (marca `_mu_mobile_profile`),
+  luego el jugador manda en Opciones. Valores: FXAA activado, Nitidez 3, tooltips de drops desactivados. En PC no cambia nada.
+- EN EL CLIENTE (no existe opcion para ello, solo tactil): tope de resolucion 1.5x, camara un nivel mas cerca y zoom con pellizco, nombres de los drops visibles,
+  sin resaltado rojo en cuerpos muertos, chat pequeno al costado, ventanas a altura completa (con la X mas grande) y los botones de la derecha se ocultan mientras hay una
+  ventana abierta, celdas de item oscuras (46,77,77), boton "Hablar - NPC" con un NPC a 6 casillas, botones de pocion rapida (Q vida, W mana).
+- NUEVAS OPCIONES: Controles > Camara y movimiento > Tactil: tamano del joystick (pequeno/normal/grande) y ocultar el aro.
+- NO HECHO (decidido dejar para despues): menu de teselas y botones redondos de Magdalena (se mantienen los 5 botones originales), hoja de detalle al tocar un item,
+  ventanas en columnas, ranuras de habilidad estilo Magdalena. Falta verificar en un telefono real (Chrome y Samsung Internet).
+
 ### 3b. Referencia de diseno movil (Mu Magdalena, observada el 2026-11-10 en un celular de 915x412 px CSS)
 Su cliente tambien es un derivado de la misma base (Babylon.js) con interfaz HTML encima del 3D. Lo que hay que copiar en espiritu:
 - **Entrada.** Se abre tambien en vertical; en algun momento pide girar a horizontal para continuar ("Gira tu telefono").

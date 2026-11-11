@@ -6,6 +6,8 @@ import { MoveButton } from './moveButton';
 import { MenuCluster } from './menuCluster';
 import { SkillPad } from './skillPad';
 import { Joystick } from './joystick';
+import { TalkButton } from './talkButton';
+import { PotionButtons } from './potionButtons';
 
 /**
  * The touch HUD. This one guard is what makes "mobile only" true for
@@ -28,6 +30,8 @@ export const MobileControls = observer(() => {
       <MenuCluster />
       <SkillPad />
       <Joystick />
+      <TalkButton />
+      <PotionButtons />
     </div>
   );
 });

@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState, type PointerEvent } from 'react';
+import { observer } from 'mobx-react-lite';
+import { GameOptions } from '@/controllers/settings/gameOptions';
 import { clearStick, setStick, stickDirection, TouchStick } from '@/controllers/interface/touchStick';
 
 /**
@@ -6,7 +8,7 @@ import { clearStick, setStick, stickDirection, TouchStick } from '@/controllers/
  * clamped to the ring, and the hero walks that way until the thumb lifts. All the walking is the
  * player controller's (`controllers/interface/touchStick.ts`); this only reports a direction.
  */
-export const Joystick = () => {
+export const Joystick = observer(() => {
   const ring = useRef<HTMLDivElement>(null);
   const finger = useRef<number | null>(null);
   const [knob, setKnob] = useState({ x: 0, y: 0 });
@@ -41,7 +43,7 @@ export const Joystick = () => {
   return (
     <div
       ref={ring}
-      className="mobile-stick"
+      className={`mobile-stick size-${GameOptions.touchStickSize}${GameOptions.touchStickHidden ? ' is-hidden' : ''}`}
       onPointerDown={e => {
         e.stopPropagation();
         if (finger.current !== null) return;
@@ -59,4 +61,4 @@ export const Joystick = () => {
       <div className="mobile-stick-knob" style={{ transform: `translate(${knob.x}px, ${knob.y}px)` }} />
     </div>
   );
-};
+});

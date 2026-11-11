@@ -23,7 +23,9 @@
   .mobile-menu-button,
   .mobile-skill-slot,
   .mobile-picker-slot,
-  .mobile-picker-action {
+  .mobile-picker-action,
+  .mobile-potion-button,
+  .mobile-talk-pill {
     pointer-events: auto;
     cursor: pointer;
     touch-action: none;
@@ -206,6 +208,36 @@
     inset 0 0 0 2px rgba(0, 0, 0, 0.45),
     0 4px 14px rgba(0, 0, 0, 0.5);
 
+  &.size-0 {
+    width: 96px;
+    height: 96px;
+    .mobile-stick-knob {
+      width: 42px;
+      height: 42px;
+      margin: -21px 0 0 -21px;
+    }
+  }
+
+  &.size-2 {
+    width: 150px;
+    height: 150px;
+    .mobile-stick-knob {
+      width: 64px;
+      height: 64px;
+      margin: -32px 0 0 -32px;
+    }
+  }
+
+  // Invisible, still steering: the ring is the touch target.
+  &.is-hidden {
+    background: none;
+    border-color: transparent;
+    box-shadow: none;
+    .mobile-stick-knob {
+      opacity: 0;
+    }
+  }
+
   .mobile-stick-knob {
     position: absolute;
     left: 50%;
@@ -218,5 +250,90 @@
     border: 2px solid #f0d28a;
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.6);
     pointer-events: none;
+  }
+}
+
+// ---- the Talk pill, centre bottom (Mu Magdalena) -----------------------------
+
+.mobile-talk-pill {
+  position: absolute;
+  left: 50%;
+  bottom: calc(@bar-clearance + 56px);
+  transform: translateX(-50%);
+  max-width: 46vw;
+  min-height: 38px;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 19px;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: rgb(255, 204, 26);
+  background: rgba(14, 12, 8, 0.86);
+  border: 1px solid rgba(255, 204, 26, 0.55);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.55);
+}
+
+// ---- the quick potions, under the menu buttons (Mu Magdalena) ------------------
+
+.mobile-potion-column {
+  position: absolute;
+  top: calc(@edge-gap + 57px + @button-gap);
+  right: @edge-gap;
+  display: flex;
+  flex-direction: column;
+  gap: @button-gap;
+  align-items: flex-end;
+}
+
+.mobile-potion-button {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(30, 24, 16, 0.8), rgba(12, 10, 6, 0.9));
+  border: 2px solid rgba(255, 204, 26, 0.55);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &.is-empty {
+    opacity: 0.45;
+  }
+
+  .item-icon {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+    pointer-events: none;
+  }
+
+  .mobile-potion-count {
+    position: absolute;
+    right: -2px;
+    bottom: -2px;
+    min-width: 16px;
+    padding: 0 3px;
+    border-radius: 8px;
+    font-size: 11px;
+    line-height: 16px;
+    text-align: center;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.8);
+  }
+}
+
+// A window open on the right takes the full height (its title and X at the top): the buttons that
+// sat on that side would cover them, so they step aside until it closes.
+body:has(.mu-item-window) .mobile-controls {
+  .mobile-menu-cluster,
+  .mobile-potion-column,
+  .mobile-skill-pad,
+  .mobile-talk-pill {
+    display: none;
   }
 }

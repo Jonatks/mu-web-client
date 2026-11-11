@@ -199,6 +199,13 @@ const PARTY_INVITE_REPLY_LABEL_KEYS: readonly TextKey[] = [
   'options.partyInviteReply.accept',
 ];
 
+/** `touchStickSize`: 0 small, 1 normal, 2 large. */
+const TOUCH_STICK_SIZE_LABEL_KEYS: readonly TextKey[] = [
+  'options.touchStickSize.small',
+  'options.touchStickSize.normal',
+  'options.touchStickSize.large',
+];
+
 const named =
   (keys: readonly TextKey[] | Record<number, TextKey>) => (value: number) => {
     const key = (keys as Record<number, TextKey>)[value];
@@ -458,6 +465,13 @@ export const CATEGORIES: Category[] = [
               toggle('thirdPersonMouseLook', {
                 needs: [needOn('wsadMovement'), needOn('cameraControl')],
               }),
+            ],
+          },
+          {
+            titleKey: 'options.section.touch',
+            rows: [
+              choice('touchStickSize', 2, named(TOUCH_STICK_SIZE_LABEL_KEYS)),
+              toggle('touchStickHidden'),
             ],
           },
           {

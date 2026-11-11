@@ -22,7 +22,7 @@ const TALK_RANGE = 2;
 const APPROACH_INTERVAL = 0.4;
 
 /** Talkable NPC: a non-monster with a server id that is not a trap. */
-function isTalkableNpc(e: Entity): boolean {
+export function isTalkableNpc(e: Entity): boolean {
   const type = e.npcType;
   if (type === undefined || e.netId === undefined || e.localPlayer) return false;
   if (type >= 100 && type <= 110) return false; // traps
