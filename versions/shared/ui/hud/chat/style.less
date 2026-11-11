@@ -42,17 +42,6 @@
   .chat-window .mu-resize-grip {
     display: none;
   }
-
-  // The passive log sat over the thumb stick (bottom left): it is smaller, sits on the left above the stick and fades
-  // the older lines, so it never builds a wall in front of the world.
-  .chat-log:not(.framed) {
-    transform: translateY(-150px) scale(0.72);
-    transform-origin: left bottom;
-    max-width: 55vw;
-    overflow: hidden;
-    -webkit-mask-image: linear-gradient(to top, #000 55%, transparent);
-    mask-image: linear-gradient(to top, #000 55%, transparent);
-  }
 }
 
 // The log hangs above the input box's position (`m_WndPos.y - m_WndSize.cy`).

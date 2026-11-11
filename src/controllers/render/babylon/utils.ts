@@ -128,9 +128,7 @@ function shareGeometryPassAcrossBoneCounts(engine: Engine): void {
 
 export function createEngine(
   baseCanvas?: HTMLCanvasElement,
-  enableAntialiasing?: boolean,
-  /** Most device pixels per CSS pixel the 3D view is drawn at; the default is 1, or the screen's own ratio with antialiasing on. */
-  deviceRatioLimit?: number
+  enableAntialiasing?: boolean
 ) {
   // create the canvas html element and attach it to the webpage
   const canvas = baseCanvas || createCanvas();
@@ -148,7 +146,7 @@ export function createEngine(
       // explicitly requests the integrated one.
       powerPreference: 'high-performance',
       doNotHandleContextLost: false,
-      limitDeviceRatio: deviceRatioLimit ?? (enableAntialiasing ? undefined : 1),
+      limitDeviceRatio: enableAntialiasing ? undefined : 1,
       failIfMajorPerformanceCaveat: false,
       premultipliedAlpha: false,
       alpha: false,

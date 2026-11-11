@@ -3,7 +3,7 @@ import { useCallback, type CSSProperties } from 'react';
 import { observer } from 'mobx-react-lite';
 import { MuSpriteFrame, useMuSprite } from '../mu_sprite';
 import { MuResizeGrip, useWindowChrome } from './useWindowChrome';
-import { BOTTOM_BAR_HEIGHT, BOTTOM_BAR_ID, MuWindows, type WindowCloser } from '../../windowManager';
+import { MuWindows, type WindowCloser } from '../../windowManager';
 
 const BACK_SPRITE = 'newui_msgbox_back.OZJ';
 const TOP_SPRITE = 'newui_item_back04.OZT';
@@ -22,7 +22,8 @@ const BOTTOM_HEIGHT = 45;
 // The main bar's height in 640x480 units; the bar is scaled by the player, so
 // every window that rides on it (the original's `480 - 51 - h`) follows the
 // bar's on-screen height, not the constant.
-export { BOTTOM_BAR_ID };
+const BOTTOM_BAR_HEIGHT = 51;
+export const BOTTOM_BAR_ID = 'bottom-bar';
 export const bottomBarScreenHeight = () => BOTTOM_BAR_HEIGHT * MuWindows.scaleOf(BOTTOM_BAR_ID);
 
 type MuItemWindowProps = {

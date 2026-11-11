@@ -31,10 +31,6 @@ const defaultScaleOf = (id: string): number =>
 const EDGE_MARGIN = 32;
 
 /** Screen pixels kept free around a window when fitting its scale to the viewport. */
-/** The main bar's height in 640x480 units, and its window id: windows parked in their corner sit above it. */
-export const BOTTOM_BAR_HEIGHT = 51;
-export const BOTTOM_BAR_ID = 'bottom-bar';
-
 const FIT_MARGIN = 12;
 
 /**
@@ -97,14 +93,9 @@ export const MuWindows = new (class _MuWindows {
     const size = this.sizes.get(id);
     if (!size) return MAX_SCALE;
     const { width, height } = this.viewport;
-    // A window parked in its corner rides on the main bar (it is drawn above it), so the bar's height is not room
-    // it can use: without this, on a phone held sideways the top of the inventory (and its close button) was cut off.
-    const p = this.placements[id];
-    const ridesBar = id !== BOTTOM_BAR_ID && (!p || p.x === null || p.y === null);
-    const reserved = ridesBar ? BOTTOM_BAR_HEIGHT * this.scaleOf(BOTTOM_BAR_ID) : 0;
     const fit = Math.min(
       (width - FIT_MARGIN * 2) / size.width,
-      (height - reserved - FIT_MARGIN * 2) / size.height
+      (height - FIT_MARGIN * 2) / size.height
     );
     return Math.min(MAX_SCALE, Math.max(fit, 0.25));
   }

@@ -79,43 +79,54 @@ Se verifica en cada entregable con una prueba de PC y una de celular.
     despues de cada despliegue y reporta; ese ciclo es el que decide si una fase se da por buena.
     Interfaz de Mu Magdalena ya observada con cuenta de prueba del propietario: ver seccion 3b.
 
-### 1f. Lista de defectos reportados por el propietario (capturas del celular, 2026-11-10)
-Estado: [hecho] ya publicado, [investigado] causa estudiada pero sin arreglo, [pendiente].
-1. [hecho] Personajes pequenos: la camara abre un paso mas cerca en celular y se puede hacer zoom con pellizco (antes solo existia Ctrl+rueda).
-2. [hecho] Items del suelo sin nombre: en celular los nombres de los drops estan activos desde el inicio (en PC se activan con ALT).
-3. [hecho] Al tocar un item del suelo salia el cuadro completo con todos sus datos: en celular ahora solo el nombre, como el original; el cuadro completo
-   queda para el inventario. Se puede volver a activar en Opciones.
-4. [hecho] El registro de chat tapaba el joystick: en celular empieza a la derecha del joystick y desvanece las lineas viejas.
-5. [investigado] Fondo celeste de los items en inventario y tienda: el color del codigo es el del original (`glColor4f(0.3, 0.5, 0.5, 0.6)`, citado en
-   `inventory/style.less`) y en mi emulacion se ve verde-azulado oscuro (58,89,89), no el celeste claro de la captura. Sospecha: algo del navegador
-   o de la GPU del telefono (la barra de la captura parece Samsung Internet). Pendiente: probar el mismo telefono con Chrome y comparar.
-6. [investigado] Personaje, mob y drops "transparentes", todo "opaco": no se reproduce en emulacion por software; misma sospecha que el punto 5.
-   Medido: brillo medio nuestro 34% frente a 22% de Mu Magdalena en Noria (en emulacion nuestro es mas claro).
-7. [investigado] Tiron junto a un NPC (el personaje intenta ocupar su lugar y vuelve atras): el servidor OpenMU rechaza un paso y "tira del cliente
-   hacia atras" (`RejectWalkAndResynchronizeClient`) por camino bloqueado, exceso de velocidad o posicion de inicio desfasada. Descartado: diferencia
-   de casillas entre cliente y servidor (en Lorencia 1 de 65 536). Pendiente: reproducirlo contra OpenMU local con registro del servidor.
-7b. [hecho, a probar] "Poco definido": el 3D se dibujaba SIEMPRE a 1 pixel por pixel CSS (`limitDeviceRatio: 1` con el antialiasing fijo en apagado), o sea a
-   915x412 en un celular de 2400x1082, y el navegador lo estiraba. Ahora en celular dibuja hasta 2x (1830x824); si va lento, se baja con la opcion de escala de
-   render que ya existe. Comparacion antes/despues con la misma escena: bordes sin dientes de sierra y mas detalle de textura. Tambien se rehizo la pantalla del
-   resaltado rojo: tras matar a un monstruo el contorno rojo se quedaba pegado al cuerpo (con el dedo no hay movimiento de cursor que lo quite); ahora se retira al morir.
-   Pendiente: el recuadro cuadrado que el propietario ve cuando los orbes del aura pasan sobre el cuerpo (sospecha: mezcla alfa de sprites aditivos sobre
-   el cuerpo que se desvanece en GPU movil; no se reproduce en emulacion por software). Se revisara en una captura de Chrome.
-7c. [hecho, a probar] Multitoque: con un dedo en el joystick, un segundo toque sobre un control que usa clics de raton (X de las ventanas, botones de la barra)
-   no hacia nada, porque el navegador solo genera el clic para un toque unico. Ahora se genera aparte. Comprobado antes/despues: sin el arreglo 0 clics con el
-   joystick sostenido, con el arreglo 1; y cerrar la X del inventario con el joystick sostenido funciona.
-7d. [hecho, a probar] La ventana del inventario (y las que van sobre la barra) quedaba con su parte alta cortada por la pantalla en un celular horizontal (la X en y=-15).
-   El tamano que cabe no descontaba la barra inferior. Corregido (con prueba). Pendiente: la X mide unos 10x9 px, demasiado pequena para el dedo; las ventanas
-   necesitan un boton de cierre grande en celular, como el menu en cuadros de Magdalena.
-7e. [hecho, a probar] Chat: mas pequeno (72%), a la izquierda y por encima del joystick, ancho maximo 55% de la pantalla.
-7f. [a observar] "Se siente un poco lento" y "mas tirones al caminar": el tope de resolucion se bajo de 2x a 1.5x en celular (compromiso nitidez/fluidez; la escala
-   de render de Opciones lo baja mas). El joystick ahora tiene histeresis: un pulgar apoyado entre dos direcciones ya no alterna, que reenviaba pasos al servidor.
-   Hipotesis sin comprobar contra servidor: tirones por pasos rechazados ("tira del cliente hacia atras"). Falta un contador de FPS visible en celular y pruebas
-   contra un OpenMU local con registro del servidor; preguntar al propietario si tambien ocurre al caminar tocando el suelo (sin joystick).
+### 1f. Lista de defectos reportados por el propietario (capturas del celular, 2026-11-10 y 11)
+DECISION DEL PROPIETARIO (2026-11-11): la vista y los graficos NO se arreglan con codigo fijo. El cliente ya trae un menu de Opciones (la tuerca "Option"
+arriba a la derecha en la pantalla de inicio) que permite ajustar casi todo el aspecto visual; se prueba y se configura ahi. Se revirtieron todos los cambios
+visuales hechos por codigo (resolucion 1.5x/2x, camara mas cercana y zoom con pellizco, nombres y cuadros de los drops, resaltado rojo del cuerpo muerto, chat
+mas pequeno, ajuste de ventanas sobre la barra). Si mas adelante hace falta algo visual, primero se mira si una opcion lo resuelve y, si no, se acuerda aqui.
+Estado: [hecho] publicado, [revertido] hecho y deshecho por la decision de arriba, [investigado], [pendiente].
+1. [revertido] Personajes pequenos: zoom inicial mas cercano y pellizco. En Opciones: Controles > Camara y movimiento > Campo de vision.
+2. [revertido] Nombres de los drops en celular. Opciones: Juego > Botin, y la tecla ALT en PC.
+3. [revertido] Cuadro completo al tocar un item del suelo (opcion de tooltips de drops). Opciones: Juego > Botin.
+4. [revertido] Chat sobre el joystick: queda como estaba; en Opciones hay "Chat y avisos" y el tamano de la interfaz.
+5. [investigado] Fondo celeste de los items: color igual al del original; en emulacion sale oscuro. Probar con Chrome en el mismo telefono y con las opciones de Imagen
+   (mapeo de tonos, brillo, resplandor, nitidez, FXAA, post-procesado).
+6. [investigado] Personaje/mob/drops "transparentes" y recuadro cuadrado del aura sobre el cuerpo: se prueba con Video > Calidad (preajuste Bajo/Clasico/Mejorado/Ultra,
+   iluminacion, materiales), Video > Imagen (post-procesado) y la escala de render.
+7. [investigado] Tiron junto a un NPC: el servidor rechaza un paso y "tira del cliente hacia atras" por camino bloqueado, exceso de velocidad o posicion de inicio desfasada.
+   No es diferencia de casillas (en Lorencia 1 de 65 536). Pendiente: reproducirlo contra OpenMU local con registro del servidor.
+7c. [hecho] Multitoque: con un dedo en el joystick, un segundo toque sobre un control que usa clics de raton (X de las ventanas, botones de la barra) no hacia nada
+   (el navegador solo genera el clic para un toque unico). Se genera aparte. NO es un ajuste visual y NO existe en Opciones (se reviso todo el menu). Comprobado:
+   0 clics antes y 1 despues con el joystick sostenido.
+7d. [revertido, pendiente de decision] La ventana del inventario queda con su parte alta cortada en un celular horizontal (la X de cierre a y=-15) porque el tamano que cabe
+   no descuenta la barra inferior. Se corrigio y se deshizo por ser de vista. Alternativa por Opciones: bajar "Tamano de la interfaz" (Interfaz > Pantalla).
+   Ademas la X mide unos 10x9 px (muy pequena para el dedo).
+7f. [hecho] Joystick con histeresis: un pulgar entre dos direcciones ya no alterna (cada cambio reenvia el paso al servidor). Los tirones al caminar siguen sin causa
+   comprobada; falta saber si ocurren al caminar tocando el suelo y un contador de FPS en celular.
 8. [pendiente] Seleccion de personajes: personajes pequenos y ambiente oscuro; Magdalena acerca el personaje elegido y lo muestra grande.
 9. [pendiente] Interfaz que tapa la vision: botones del menu duplicados (arriba derecha y en la barra), tres ranuras de habilidad vacias y
    "Activar" a la derecha, ventanas abiertas encima de los botones del menu. Magdalena usa un solo boton de menu, aviso de chat colapsado y
    el 3D casi libre.
 10. [pendiente] Comparaciones lado a lado con Magdalena que faltan: hablar con un NPC, matar monstruos, caida de drops, menus y estadisticas.
+
+### 1g. Mapa de las Opciones del cliente (tuerca "Option", arriba a la derecha de la pantalla de inicio; revisado el 2026-11-11)
+Arbol del menu: JUEGO (General, Fidelidad, Botin, Chat y avisos), CONTROLES (Camara y movimiento, Teclas), VIDEO (Calidad, Mundo y efectos, Imagen, Estilo),
+SONIDO (Volumen, Sonidos de drops), INTERFAZ (Pantalla, Idioma, Modulos). Hay buscador y boton "Defaults" por pagina.
+- General: ctrl+clic mueve items, confirmar antes de soltar/vender valiosos, pocion de mana y carcaj automaticos, comparar con lo equipado, repartir puntos en bloque,
+  invitaciones a party, reconexion automatica.
+- Fidelidad: tres niveles (Classic, Enhanced, Ultra) y una lista de mejoras sueltas (efectos de habilidades mejorados, luces de lamparas, sombras de telas, techos
+  transparentes, "otros jugadores a su ritmo", botones del MU Helper, "archivos de recursos ligeros", etc.).
+- Botin: filtros de lo que se muestra/recoge y sus tooltips. Chat y avisos: marcas de hora, mensajes de sistema, emojis y su tamano, avisos de vida/mana bajos (umbral).
+- Camara y movimiento: control de camara, CAMPO DE VISION (30 grados), balanceo en primera persona, MOVER CON W A S D, bloquear atajos del navegador.
+- Calidad: preajuste Bajo/Clasico/Mejorado/Ultra, iluminacion, materiales (detalle, metal, placa pintada, rugosidad, brillo de tela, calidez de piel, luz de borde,
+  reflejos de suelo y cielo), mas abajo escala de render, antialiasing, anisotropia y limite de FPS.
+- Mundo y efectos: distancia de dibujo, pasto, nubes, clima, particulas, agua animada, sombras, luces dinamicas, efectos de monstruos y de habilidades de otros.
+- Imagen: post-procesado, mapeo de tonos, BRILLO, bloom, glow, rayos de sol, NITIDEZ, FXAA, grano de pelicula, aberracion cromatica, vineta. Estilo: estilo de render.
+- Pantalla (Interfaz): TAMANO DE LA INTERFAZ (100%), bloquear ventanas, restablecer posiciones, minimapa, temporizadores de eventos, misiones, lectura de rendimiento
+  (FPS), PANTALLA COMPLETA, instalar la app, borrar archivos en cache.
+- No existe opcion para el multitoque, el joystick tactil, el zoom por pellizco ni la resolucion/pixeles por pulgada.
+Pendiente: definir con el propietario un perfil recomendado para celular (por ejemplo preajuste de Calidad y escala de render) y, si se quiere que arranque asi,
+guardarlo como valor inicial del celular (eso es configuracion, no codigo visual).
 
 ### 3b. Referencia de diseno movil (Mu Magdalena, observada el 2026-11-10 en un celular de 915x412 px CSS)
 Su cliente tambien es un derivado de la misma base (Babylon.js) con interfaz HTML encima del 3D. Lo que hay que copiar en espiritu:
