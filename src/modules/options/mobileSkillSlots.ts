@@ -3,7 +3,7 @@ import { LocalStorage } from '../../core/localStorage';
 import { isHotbarSkill } from '../skills/skillCasting';
 
 /**
- * The three skills linked to the mobile pad, per character.
+ * The six skills linked to the mobile bar, per character.
  *
  * Deliberately not `HeroSkills.skillHotkeys`: those ten are the digit keys and are
  * round-tripped to the server through `SaveKeyConfiguration`, so borrowing
@@ -14,7 +14,7 @@ import { isHotbarSkill } from '../skills/skillCasting';
 
 const STORAGE_KEY = 'mu_mobile_skills';
 
-export const MOBILE_SKILL_SLOTS = 3;
+export const MOBILE_SKILL_SLOTS = 6;
 
 const EMPTY: number[] = new Array(MOBILE_SKILL_SLOTS).fill(-1);
 
@@ -34,7 +34,7 @@ function load(): Saved {
 export const MobileSkillSlots = new (class _MobileSkillSlots {
   private saved: Saved = load();
   private character = '';
-  /** The live pad: three wire skill numbers, -1 for empty. */
+  /** The live pad: wire skill numbers, -1 for empty. */
   slots: number[] = EMPTY.slice();
 
   constructor() {
@@ -42,7 +42,7 @@ export const MobileSkillSlots = new (class _MobileSkillSlots {
   }
 
   /** The character changed: swap in that character's pad. */
-  use(character: string): void {
+  forCharacter(character: string): void {
     if (this.character === character) return;
     this.character = character;
     const stored = this.saved[character];

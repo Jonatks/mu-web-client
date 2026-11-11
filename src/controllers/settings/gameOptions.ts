@@ -815,19 +815,22 @@ export function optionsFrom(parsed: Record<string, unknown>): GameOptions {
  * showing its name only (a tap has no hover to open the full card on). Applied once per profile version, on touch devices only,
  * so the player's own changes after that stick; raise `MOBILE_PROFILE_VERSION` to push a new set to everyone.
  */
-export const MOBILE_PROFILE_VERSION = 1;
+/** One set per version: a phone gets every set newer than the one it last applied. */
+const MOBILE_PROFILES: readonly Partial<GameOptions>[] = [
+  { fxaa: true, sharpness: 3, dropTooltips: false },
+  // v2: the potions drink themselves (mana, and the Elf's arrows), as on Mu Magdalena; needs the world's server.json to allow it.
+  { autoManaPotion: true, autoQuiver: true },
+];
+export const MOBILE_PROFILE_VERSION = MOBILE_PROFILES.length;
 const MOBILE_PROFILE_KEY = '_mu_mobile_profile';
-export const MOBILE_PROFILE: Partial<GameOptions> = {
-  fxaa: true,
-  sharpness: 3,
-  dropTooltips: false,
-};
+export const MOBILE_PROFILE: Partial<GameOptions> = Object.assign({}, ...MOBILE_PROFILES);
 
 function withMobileProfile(options: GameOptions): GameOptions {
   if (!isMobileDevice()) return options;
-  if (LocalStorage.load(MOBILE_PROFILE_KEY) === String(MOBILE_PROFILE_VERSION)) return options;
+  const applied = Number(LocalStorage.load(MOBILE_PROFILE_KEY)) || 0;
+  if (applied >= MOBILE_PROFILE_VERSION) return options;
 
-  const next = { ...options, ...MOBILE_PROFILE };
+  const next = { ...options, ...Object.assign({}, ...MOBILE_PROFILES.slice(applied)) };
   LocalStorage.save(OPTIONS_KEY, JSON.stringify(next));
   LocalStorage.save(MOBILE_PROFILE_KEY, String(MOBILE_PROFILE_VERSION));
   return next;

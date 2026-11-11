@@ -15,7 +15,9 @@ import { MuButton } from '@/controllers/interface/components/mu_button';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
 import { MsgWindow } from '@/controllers/interface/components/msg_window';
 
+import { isMobileDevice } from '@/controllers/interface/mobile';
 import { CharMakeWin } from './CharMakeWin';
+import { MobilePanel } from './MobilePanel';
 import {
   CharacterList,
   hasFreeSlot,
@@ -139,7 +141,17 @@ export const CharactersPage = observer(() => {
     <div className="characters-page">
       <CharacterList source={CharSelect} look="lineup" onList={() => setSelecting(false)} />
 
-      <div className="char-sel-bar" style={{ height: BTN_HEIGHT }}>
+      {isMobileDevice() && (
+        <MobilePanel
+          selecting={selecting}
+          onConnect={onConnect}
+          onCreate={() => setCreating(v => !v)}
+          onDelete={onDelete}
+          onMenu={() => MuWindows.setOpen(PREGAME_MENU, true)}
+        />
+      )}
+
+      <div className="char-sel-bar" style={{ height: BTN_HEIGHT, display: isMobileDevice() ? 'none' : undefined }}>
         {}
         <MuSpriteFrame
           file="deco.OZT"

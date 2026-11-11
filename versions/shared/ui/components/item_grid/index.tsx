@@ -6,6 +6,8 @@ import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
 import { Bag } from '@/modules/inventory';
 import { ItemIcon } from '@/controllers/interface/components/item_icon';
 import { ItemTooltip, type TooltipContext } from '../item_tooltip';
+import { isMobileDevice } from '@/controllers/interface/mobile';
+import { openItemSheet } from './mobileSheet';
 import { gridStallPrice } from '../item_tooltip/stallPrice';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
 import { MuTableFrame } from '@/controllers/interface/components/mu_window';
@@ -463,6 +465,17 @@ export const ItemGrid = observer(
         return;
       }
 
+      if (isMobileDevice() && onPick) {
+        openItemSheet({
+          item: entry.item,
+          slot: entry.square,
+          context: tooltipContext,
+          move: () => onPick(entry.square, entry.item),
+          use: onUse ? () => onUse(entry.square, entry.item) : undefined,
+        });
+        return;
+      }
+
       onPick?.(entry.square, entry.item);
     };
 
@@ -584,7 +597,7 @@ export const ItemGrid = observer(
           )}
         </div>
 
-        {!picked && !!hover && !!hoveredEntry && (
+        {!picked && !!hover && !!hoveredEntry && !isMobileDevice() && (
           <ItemTooltip
             item={hoveredEntry.item}
             x={hover.x}

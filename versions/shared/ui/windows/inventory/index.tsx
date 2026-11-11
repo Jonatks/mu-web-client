@@ -12,6 +12,8 @@ import { JewelMix } from '@/modules/chaos_mix/jewelMix';
 import { events } from '@/modules/events';
 import { ItemIcon } from '@/controllers/interface/components/item_icon';
 import { ItemTooltip } from '../../components/item_tooltip';
+import { isMobileDevice } from '@/controllers/interface/mobile';
+import { openItemSheet } from '../../components/item_grid/mobileSheet';
 import { useHoverRelease } from '../../components/item_grid/hoverRelease';
 import { useEventBus } from '@/controllers/interface/hooks';
 import { Item } from '@/ecs/world';
@@ -219,6 +221,10 @@ const EquipmentSlot = observer(
             // REPAIR_MODE_ON (NewUIMyInventory.cpp:1415): the click repairs.
             if (Merchant.repairMode) {
               if (item) Merchant.repairItemRequest(slot);
+              return;
+            }
+            if (item && isMobileDevice()) {
+              openItemSheet({ item, slot, context: 'inventory', move: () => Bag.pickInventoryItem(slot) });
               return;
             }
             if (item) Bag.pickInventoryItem(slot);
@@ -468,29 +474,22 @@ export const Inventory = observer(() => {
       return;
     }
 
+    if (isMobileDevice()) {
+      openItemSheet({
+        item: entry.item,
+        slot: entry.slot,
+        context: 'inventory',
+        move: () => Bag.pickInventoryItem(entry.slot),
+        use: () => applyEntry(entry),
+      });
+      return;
+    }
+
     Bag.pickInventoryItem(entry.slot);
   };
 
-  const onGridContextMenu = (event: React.MouseEvent) => {
-    event.preventDefault();
-
-    // Right button puts the hammer down.
-    if (Merchant.repairMode) {
-      Merchant.toggleRepairMode();
-      return;
-    }
-
-    if (picked) {
-      Bag.cancelPickedItem();
-      return;
-    }
-
-    const square = squareAt(event.clientX, event.clientY);
-    if (square < 0) return;
-
-    const entry = squares[square];
-    if (!entry) return;
-
+  /** The right click on an occupied square (also the sheet's Use on touch): shuttle, read, drink or equip it. */
+  const applyEntry = (entry: { slot: number; item: Item }) => {
     // `ProcessMyInvenItemAutoMove` (NewUIStorageInventory.cpp:400): with a
     // storage window open the right click shuttles the item into it instead
     // of equipping or drinking it.
@@ -524,6 +523,29 @@ export const Inventory = observer(() => {
 
     Bag.pickInventoryItem(entry.slot);
     Bag.placePickedItem(destination);
+  };
+
+  const onGridContextMenu = (event: React.MouseEvent) => {
+    event.preventDefault();
+
+    // Right button puts the hammer down.
+    if (Merchant.repairMode) {
+      Merchant.toggleRepairMode();
+      return;
+    }
+
+    if (picked) {
+      Bag.cancelPickedItem();
+      return;
+    }
+
+    const square = squareAt(event.clientX, event.clientY);
+    if (square < 0) return;
+
+    const entry = squares[square];
+    if (!entry) return;
+
+    applyEntry(entry);
   };
 
   return (
@@ -637,7 +659,7 @@ export const Inventory = observer(() => {
       </div>
 
       {}
-      {!picked && !!hover && (
+      {!picked && !!hover && !isMobileDevice() && (
         <ItemTooltip
           item={hover.item}
           x={hover.x}

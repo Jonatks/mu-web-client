@@ -1,4 +1,5 @@
 import { observer } from 'mobx-react-lite';
+import { isMobileDevice } from '@/controllers/interface/mobile';
 import { isOn } from '@/controllers/fidelity';
 import { MuButton } from '@/controllers/interface/components/mu_button';
 import { GameOptions, uiScaleFactor } from '@/controllers/settings';
@@ -22,7 +23,8 @@ const GAP = 6;
  * and the event timers. Draws nothing on Classic.
  */
 export const MuHelperButtons = observer(() => {
-  if (!isOn('muHelperButtons') || !Ecs.world?.playerEntity) return null;
+  // A touch screen has the Helper switch in its own top-right buttons (`hud/mobile_controls`).
+  if (isMobileDevice() || !isOn('muHelperButtons') || !Ecs.world?.playerEntity) return null;
 
   const ui = uiScaleFactor(GameOptions.uiScale);
   // The event timers' slot (`events/eventTimers.tsx`), then below their rows.

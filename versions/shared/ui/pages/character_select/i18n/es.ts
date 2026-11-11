@@ -5,6 +5,10 @@ import type en from './en';
 export default {
   'characters.loading': 'Cargando personajes...',
   'characters.select': 'Elige un personaje',
+  'characters.m.enter': 'Entrar',
+  'characters.m.create': 'Crear',
+  'characters.m.delete': 'Borrar',
+  'characters.m.menu': 'Menú',
   'characters.hint.select': 'Seleccionar',
   'characters.hint.zoomIn': 'Acercar',
   'characters.hint.zoomOut': 'Alejar',

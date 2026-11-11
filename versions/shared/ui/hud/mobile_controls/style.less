@@ -1,13 +1,13 @@
 @import (reference) '@/controllers/interface/components/mu_text/style.less';
 
-// The touch HUD. Anchored to the viewport, not to the 640x480 stage: these
-// are thumb targets and must keep their size on a small screen. Only ever
-// mounted on a touch client (`MobileControls` returns null otherwise), so
-// nothing here needs a `.mu-mobile` guard of its own.
+// The touch HUD (Mu Magdalena's layout), anchored to the viewport: thumb targets keep their size on a small screen.
+// Only ever mounted on a touch client (`MobileControls` returns null otherwise), so nothing here needs a guard.
 
-@edge-gap: 12px;
-@button-gap: 8px;
-@bar-clearance: 63px;
+@gold: #d9b45a;
+@gold-dim: rgba(217, 180, 90, 0.55);
+@ink: rgba(14, 11, 8, 0.88);
+@text: #f2e6c4;
+@edge: 12px;
 
 .mobile-controls {
   position: absolute;
@@ -15,106 +15,252 @@
   pointer-events: none;
   z-index: 400;
   .mu-font();
-  image-rendering: pixelated;
+  color: @text;
 
-  // Every button opts back in; the layer stays transparent to taps.
+  // Every control opts back in; the layer stays transparent to taps.
   .mobile-stick,
-  .mobile-move-button,
-  .mobile-menu-button,
-  .mobile-skill-slot,
-  .mobile-picker-slot,
-  .mobile-picker-action,
-  .mobile-potion-button,
-  .mobile-talk-pill {
+  .mobile-round,
+  .mobile-slot,
+  .mobile-attack,
+  .mobile-talk-pill,
+  .mobile-sheet-button,
+  .mobile-modal {
     pointer-events: auto;
     cursor: pointer;
     touch-action: none;
   }
-
-  .mobile-scaled {
-    position: relative;
-    overflow: hidden;
-  }
 }
 
-// ---- the warp button, top left ---------------------------------------------
+// ---- status, top left --------------------------------------------------------
 
-.mobile-move-button {
+.mobile-status {
   position: absolute;
-  top: @edge-gap;
-  left: @edge-gap;
-
-  .mobile-move-glyph {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    background-size: 100% 100%;
-    background-repeat: no-repeat;
-  }
-}
-
-// ---- the five main-frame buttons, top right --------------------------------
-
-.mobile-menu-cluster {
-  position: absolute;
-  top: @edge-gap;
-  right: @edge-gap;
-  display: flex;
-  gap: @button-gap;
-
-  &.portrait {
-    flex-direction: column;
-    align-items: flex-end;
-  }
-
-  // Landscape has width to spare and no height: the column becomes a row.
-  &.landscape {
-    flex-direction: row;
-    align-items: flex-start;
-  }
-}
-
-// ---- the skill pad, bottom right above the bar -----------------------------
-
-.mobile-skill-pad {
-  position: absolute;
-  right: @edge-gap;
-  bottom: @bar-clearance;
+  top: 8px;
+  left: calc(@edge + env(safe-area-inset-left, 0px));
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
-  gap: 4px;
+  align-items: flex-start;
+  gap: 3px;
+  text-shadow: 0 1px 3px #000;
 
-  .mobile-skill-slots {
+  .mobile-status-row {
     display: flex;
-    flex-direction: row;
-    gap: @button-gap;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .mobile-level {
+    padding: 1px 8px;
+    border: 2px solid @gold;
+    border-radius: 6px;
+    background: @ink;
+    font-size: 13px;
+    font-weight: 700;
+    color: #ffe39a;
+  }
+
+  .mobile-name {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+
+  .mobile-place {
+    font-size: 12px;
+    opacity: 0.92;
+  }
+
+  .mobile-safe {
+    padding: 1px 10px;
+    border-radius: 10px;
+    background: rgba(24, 96, 52, 0.92);
+    border: 1px solid #5ed48a;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
   }
 }
 
-// What a skill is about to hit, so the pad is not fired blind.
-.mobile-target-label {
-  max-width: 60vw;
-  padding: 1px 5px;
-  font-size: 12px;
-  line-height: 16px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #fff;
-  background: rgba(0, 0, 0, 0.55);
+// ---- helper and menu, top right ------------------------------------------------
+
+.mobile-top-buttons {
+  position: absolute;
+  top: 8px;
+  right: calc(@edge + env(safe-area-inset-right, 0px));
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+
+  .mobile-round-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .mobile-round-label {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-shadow: 0 1px 2px #000;
+  }
 }
 
-.mobile-skill-slot,
-.mobile-picker-slot {
-  // `RenderSkillIcon(…, x + 6, y + 6)`: the icon inside the box.
+.mobile-round {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: @gold;
+  background: radial-gradient(circle at 35% 30%, rgba(58, 44, 24, 0.95), rgba(14, 11, 8, 0.95));
+  border: 2px solid @gold-dim;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.55);
+
+  &.is-on {
+    color: #8dffb0;
+    border-color: #5ed48a;
+    box-shadow: 0 0 10px rgba(94, 212, 138, 0.6), 0 3px 10px rgba(0, 0, 0, 0.55);
+  }
+}
+
+// ---- the bar: life, six slots, mana ---------------------------------------------
+
+.mobile-bar {
+  position: absolute;
+  left: 50%;
+  bottom: max(6px, env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%);
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.mobile-bar-mid {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.mobile-orb {
+  position: relative;
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #120c0a;
+  border: 2px solid #8a6a2c;
+  box-shadow: inset 0 0 14px rgba(0, 0, 0, 0.9), 0 3px 10px rgba(0, 0, 0, 0.6);
+
+  .mobile-orb-fill {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    transition: height 0.25s;
+  }
+
+  &.hp .mobile-orb-fill {
+    background: radial-gradient(circle at 35% 25%, #ff8f7a, #d4181f 45%, #6a0a0f);
+  }
+
+  &.mp .mobile-orb-fill {
+    background: radial-gradient(circle at 35% 25%, #8fd0ff, #1f64dd 45%, #0a1e5e);
+  }
+
+  .mobile-orb-value {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-size: 14px;
+    font-weight: 700;
+    text-shadow: 0 1px 3px #000, 0 0 6px #000;
+  }
+}
+
+.mobile-gauges {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+
+  .mobile-gauge {
+    position: relative;
+    flex: 1;
+    height: 11px;
+    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    overflow: hidden;
+
+    i {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+    }
+
+    b {
+      position: absolute;
+      inset: 0;
+      text-align: center;
+      font-size: 9px;
+      line-height: 11px;
+      text-shadow: 0 1px 2px #000;
+    }
+
+    &.ag i {
+      background: linear-gradient(#ffe27a, #c98f12);
+    }
+
+    &.sd i {
+      background: linear-gradient(#d49cff, #7a30c9);
+    }
+  }
+}
+
+.mobile-slots {
+  display: flex;
+  gap: 5px;
+}
+
+.mobile-slot,
+.mobile-pick-slot {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 7px;
+  background: linear-gradient(#241a10, #0f0b07);
+  border: 2px solid rgba(217, 180, 90, 0.5);
+  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.8), 0 2px 6px rgba(0, 0, 0, 0.55);
+  overflow: hidden;
+
+  &.is-selected,
+  &.is-active {
+    border-color: #ffd96b;
+    box-shadow: 0 0 8px rgba(255, 217, 107, 0.7), inset 0 0 8px rgba(0, 0, 0, 0.8);
+  }
+
+  .mobile-slot-key {
+    position: absolute;
+    right: 2px;
+    bottom: 0;
+    font-size: 9px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.6);
+    pointer-events: none;
+  }
+
+  // `RenderSkillIcon`: the icon inside the box.
   .mobile-skill-art {
     position: absolute;
     left: 50%;
     top: 50%;
-    transform: translate(-50%, -50%) scale(1.5);
+    transform: translate(-50%, -50%) scale(1.3);
     transform-origin: 50% 50%;
+    pointer-events: none;
   }
 
   // RenderSkillDelay: red at half alpha rising from the slot's floor.
@@ -129,76 +275,43 @@
   }
 }
 
-// ---- the picker ------------------------------------------------------------
-
-.mobile-skill-picker {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  pointer-events: auto;
+.mobile-exp {
+  height: 4px;
+  border-radius: 2px;
   background: rgba(0, 0, 0, 0.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  overflow: hidden;
 
-  .mobile-picker-panel {
-    max-width: 92vw;
-    max-height: 82vh;
-    overflow-y: auto;
-    padding: 12px;
-    background: rgba(10, 8, 6, 0.95);
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .mobile-picker-title {
-    color: rgb(255, 200, 50);
-    font-size: 14px;
-    text-align: center;
-  }
-
-  .mobile-picker-empty {
-    color: rgba(255, 255, 255, 0.6);
-    font-size: 12px;
-    text-align: center;
-    padding: 12px 24px;
-  }
-
-  .mobile-picker-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: @button-gap;
-    justify-content: center;
-  }
-
-  .mobile-picker-actions {
-    display: flex;
-    gap: @button-gap;
-    justify-content: center;
-  }
-
-  .mobile-picker-action {
-    min-height: 40px;
-    padding: 0 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    color: #e2e2e2;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    text-align: center;
+  i {
+    display: block;
+    height: 100%;
+    background: linear-gradient(90deg, #4bd16a, #b8ff8a);
   }
 }
 
-// ---- the thumb stick, bottom left ------------------------------------------
+// ---- attack, bottom right -------------------------------------------------------
+
+.mobile-attack {
+  position: absolute;
+  right: calc(@edge + 6px + env(safe-area-inset-right, 0px));
+  bottom: 18px;
+  width: 66px;
+  height: 66px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffd2c2;
+  background: radial-gradient(circle at 35% 30%, #a02a1c, #4a0f0a);
+  border: 3px solid #e0a15a;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.65);
+}
+
+// ---- the thumb stick, bottom left -----------------------------------------------
 
 .mobile-stick {
   position: absolute;
-  left: calc(@edge-gap + env(safe-area-inset-left, 0px));
-  bottom: calc(@bar-clearance + @edge-gap);
+  left: calc(@edge + env(safe-area-inset-left, 0px));
+  bottom: 92px;
   width: 120px;
   height: 120px;
   border-radius: 50%;
@@ -207,6 +320,20 @@
   box-shadow:
     inset 0 0 0 2px rgba(0, 0, 0, 0.45),
     0 4px 14px rgba(0, 0, 0, 0.5);
+
+  .mobile-stick-knob {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 52px;
+    height: 52px;
+    margin: -26px 0 0 -26px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #f6dc9a, #a97c25);
+    border: 2px solid #f0d28a;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.6);
+    pointer-events: none;
+  }
 
   &.size-0 {
     width: 96px;
@@ -237,32 +364,18 @@
       opacity: 0;
     }
   }
-
-  .mobile-stick-knob {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    width: 52px;
-    height: 52px;
-    margin: -26px 0 0 -26px;
-    border-radius: 50%;
-    background: radial-gradient(circle at 35% 30%, #f6dc9a, #a97c25);
-    border: 2px solid #f0d28a;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.6);
-    pointer-events: none;
-  }
 }
 
-// ---- the Talk pill, centre bottom (Mu Magdalena) -----------------------------
+// ---- the Talk pill --------------------------------------------------------------
 
 .mobile-talk-pill {
   position: absolute;
   left: 50%;
-  bottom: calc(@bar-clearance + 56px);
+  bottom: 104px;
   transform: translateX(-50%);
   max-width: 46vw;
   min-height: 38px;
-  padding: 0 16px;
+  padding: 0 18px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -271,69 +384,239 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: rgb(255, 204, 26);
-  background: rgba(14, 12, 8, 0.86);
-  border: 1px solid rgba(255, 204, 26, 0.55);
+  color: @text;
+  background: @ink;
+  border: 1px solid @gold-dim;
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.55);
 }
 
-// ---- the quick potions, under the menu buttons (Mu Magdalena) ------------------
+// ---- modals: the command menu and the skills window -----------------------------
 
-.mobile-potion-column {
+.mobile-modal {
   position: absolute;
-  top: calc(@edge-gap + 57px + @button-gap);
-  right: @edge-gap;
-  display: flex;
-  flex-direction: column;
-  gap: @button-gap;
-  align-items: flex-end;
-}
-
-.mobile-potion-button {
-  position: relative;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(30, 24, 16, 0.8), rgba(12, 10, 6, 0.9));
-  border: 2px solid rgba(255, 204, 26, 0.55);
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.55);
+  inset: 0;
+  z-index: 2;
   display: flex;
   align-items: center;
   justify-content: center;
+  background: rgba(0, 0, 0, 0.62);
+}
 
-  &.is-empty {
-    opacity: 0.45;
+.mobile-panel {
+  display: flex;
+  flex-direction: column;
+  max-width: 94vw;
+  max-height: 92vh;
+  border-radius: 10px;
+  background: linear-gradient(#1c150d, #0e0a06);
+  border: 2px solid rgba(217, 180, 90, 0.55);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7);
+
+  .mobile-panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 10px 6px 16px;
+    border-bottom: 1px solid rgba(217, 180, 90, 0.35);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    color: #ffe39a;
   }
 
-  .item-icon {
-    width: 32px;
-    height: 32px;
-    object-fit: contain;
-    pointer-events: none;
-  }
-
-  .mobile-potion-count {
-    position: absolute;
-    right: -2px;
-    bottom: -2px;
-    min-width: 16px;
-    padding: 0 3px;
-    border-radius: 8px;
-    font-size: 11px;
-    line-height: 16px;
-    text-align: center;
-    color: #fff;
-    background: rgba(0, 0, 0, 0.8);
+  .mobile-close {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid @gold-dim;
+    color: @text;
+    pointer-events: auto;
+    cursor: pointer;
+    touch-action: none;
   }
 }
 
-// A window open on the right takes the full height (its title and X at the top): the buttons that
-// sat on that side would cover them, so they step aside until it closes.
+.mobile-commands {
+  width: min(88vw, 760px);
+
+  .mobile-tiles {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+    padding: 12px;
+    overflow-y: auto;
+  }
+
+  .mobile-tile {
+    height: 84px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 12px;
+    text-align: center;
+    color: @gold;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(217, 180, 90, 0.4);
+    pointer-events: auto;
+    cursor: pointer;
+    touch-action: none;
+
+    span {
+      color: @text;
+      line-height: 1.1;
+    }
+  }
+}
+
+.mobile-picker {
+  width: min(92vw, 820px);
+
+  .mobile-picker-body {
+    display: flex;
+    gap: 10px;
+    padding: 10px;
+    overflow: hidden;
+  }
+
+  .mobile-picker-col {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 8px;
+    border: 1px solid rgba(217, 180, 90, 0.3);
+    border-radius: 6px;
+    min-height: 0;
+
+    &.positions {
+      width: 150px;
+      flex: none;
+    }
+
+    &.skills {
+      flex: 1;
+      min-width: 0;
+    }
+  }
+
+  .mobile-picker-title {
+    text-align: center;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: #ffe39a;
+  }
+
+  .mobile-picker-positions {
+    display: grid;
+    grid-template-columns: repeat(3, 40px);
+    gap: 8px;
+    justify-content: center;
+  }
+
+  .mobile-pick-slot {
+    pointer-events: auto;
+    cursor: pointer;
+    touch-action: none;
+  }
+
+  .mobile-picker-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    overflow-y: auto;
+    max-height: 56vh;
+  }
+
+  .mobile-pick-skill {
+    position: relative;
+    width: 44px;
+    height: 44px;
+    border-radius: 7px;
+    background: linear-gradient(#241a10, #0f0b07);
+    border: 2px solid rgba(217, 180, 90, 0.5);
+    pointer-events: auto;
+    cursor: pointer;
+    touch-action: none;
+
+    &.is-clear {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      background: rgba(120, 40, 36, 0.5);
+    }
+
+    &.is-locked {
+      opacity: 0.45;
+    }
+
+    .mobile-skill-art {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%) scale(1.4);
+      pointer-events: none;
+    }
+  }
+
+  .mobile-picker-hint {
+    font-size: 11px;
+    opacity: 0.8;
+  }
+}
+
+// A window open on the right takes the full height (its title and X at the top): the buttons on that side would
+// cover it, so they step aside and the bar moves left, clear of the windows, until it closes.
 body:has(.mu-item-window) .mobile-controls {
-  .mobile-menu-cluster,
-  .mobile-potion-column,
-  .mobile-skill-pad,
+  .mobile-top-buttons,
+  .mobile-attack,
   .mobile-talk-pill {
     display: none;
+  }
+
+  .mobile-bar {
+    left: calc(@edge + env(safe-area-inset-left, 0px));
+    transform: none;
+  }
+}
+
+// The item sheet: the tooltip floats centred (portalled by `ItemTooltip`), the actions sit along the bottom.
+.mobile-item-sheet {
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 3;
+
+  .mobile-sheet-actions {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 92px;
+  }
+
+  .mobile-sheet-button {
+    min-width: 110px;
+    height: 46px;
+    padding: 0 18px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: @text;
+    background: rgba(255, 255, 255, 0.08);
+    border: 2px solid @gold-dim;
+
+    &.primary {
+      color: #2a1c06;
+      background: linear-gradient(#f0cf7a, #c79a35);
+      border-color: #f6dc9a;
+    }
   }
 }

@@ -1,1 +1,1 @@
-{ "version": 1, "settings": {}, "modulesOff": ["marketplace", "band"], "loginTokens": false, "directLogin": true, "modules": [] }
+{ "version": 1, "settings": { "autoManaPotion": true, "autoQuiver": true, "retryLoginWhenConnected": true, "muHelperAfterReconnect": true }, "modulesOff": ["marketplace", "band"], "loginTokens": false, "directLogin": true, "modules": [] }

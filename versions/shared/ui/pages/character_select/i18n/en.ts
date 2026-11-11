@@ -3,6 +3,10 @@
 const en = {
   'characters.loading': 'Loading characters...',
   'characters.select': 'Select a character',
+  'characters.m.enter': 'Enter',
+  'characters.m.create': 'Create',
+  'characters.m.delete': 'Delete',
+  'characters.m.menu': 'Menu',
   'characters.hint.select': 'Select',
   'characters.hint.zoomIn': 'Zoom in',
   'characters.hint.zoomOut': 'Zoom out',

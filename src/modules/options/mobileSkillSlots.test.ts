@@ -14,21 +14,21 @@ describe('MobileSkillSlots.seed', () => {
   beforeEach(() => MobileSkillSlots.assign(0, -1));
 
   it('fills a fresh character with its first learned skills, once', () => {
-    const [a, b, c, d] = hotbar();
-    MobileSkillSlots.use('Fresh');
-    MobileSkillSlots.seed([a, b, c, d]);
-    expect(MobileSkillSlots.slots).toEqual([a, b, c]);
+    const [a, b, c, d, e, f, g] = hotbar(0, 7);
+    MobileSkillSlots.forCharacter('Fresh');
+    MobileSkillSlots.seed([a, b, c, d, e, f, g]);
+    expect(MobileSkillSlots.slots).toEqual([a, b, c, d, e, f]);
 
     MobileSkillSlots.assign(1, -1);
-    MobileSkillSlots.seed([a, b, c, d]);
-    expect(MobileSkillSlots.slots).toEqual([a, -1, c]);
+    MobileSkillSlots.seed([a, b, c, d, e, f, g]);
+    expect(MobileSkillSlots.slots).toEqual([a, -1, c, d, e, f]);
   });
 
   it('leaves a character the player emptied alone', () => {
     const [a, b] = hotbar();
-    MobileSkillSlots.use('Cleared');
+    MobileSkillSlots.forCharacter('Cleared');
     MobileSkillSlots.assign(0, -1);
     MobileSkillSlots.seed([a, b]);
-    expect(MobileSkillSlots.slots).toEqual([-1, -1, -1]);
+    expect(MobileSkillSlots.slots).toEqual([-1, -1, -1, -1, -1, -1]);
   });
 });

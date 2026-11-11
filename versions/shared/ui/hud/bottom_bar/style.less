@@ -246,3 +246,9 @@
     color: #fff;
   }
 }
+
+// A touch screen has its own bar (`hud/mobile_controls`): life and mana orbs, six slots, experience. This one keeps running
+// (its keys and state) but is not drawn, so the world is not covered twice.
+.mu-mobile .bottom-bar {
+  display: none;
+}

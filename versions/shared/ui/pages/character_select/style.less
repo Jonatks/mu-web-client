@@ -147,3 +147,131 @@
     gap: 3px;
   }
 }
+
+// ---- a touch screen: one card at the bottom, big arrows, pills (Mu Magdalena) ------------------------------------
+.mu-mobile .char-sel-plate {
+  display: none;
+}
+
+.char-m {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: max(6px, env(safe-area-inset-bottom, 0px));
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 14px;
+  pointer-events: none;
+  color: #f2e6c4;
+  font-family: Georgia, 'Times New Roman', serif;
+
+  button {
+    pointer-events: auto;
+    cursor: pointer;
+    color: inherit;
+    font-family: inherit;
+    touch-action: manipulation;
+  }
+
+  .char-m-menu {
+    position: fixed;
+    top: 10px;
+    left: calc(12px + env(safe-area-inset-left, 0px));
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    font-size: 26px;
+    background: rgba(14, 11, 8, 0.85);
+    border: 2px solid rgba(217, 180, 90, 0.55);
+  }
+
+  .char-m-arrow {
+    width: 56px;
+    height: 56px;
+    margin-bottom: 26px;
+    border-radius: 50%;
+    font-size: 34px;
+    line-height: 1;
+    background: rgba(28, 21, 13, 0.92);
+    border: 2px solid rgba(217, 180, 90, 0.6);
+
+    &:disabled {
+      opacity: 0.35;
+    }
+  }
+
+  .char-m-card {
+    pointer-events: auto;
+    min-width: min(52vw, 460px);
+    padding: 6px 16px 8px;
+    text-align: center;
+    border-radius: 14px;
+    background: linear-gradient(rgba(28, 21, 13, 0.94), rgba(12, 9, 6, 0.96));
+    border: 2px solid rgba(217, 180, 90, 0.6);
+    box-shadow: 0 6px 22px rgba(0, 0, 0, 0.7);
+  }
+
+  .char-m-name {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+  }
+
+  .char-m-info {
+    font-size: 14px;
+    color: #d9b45a;
+  }
+
+  .char-m-dots {
+    display: flex;
+    justify-content: center;
+    gap: 7px;
+    margin: 3px 0 6px;
+
+    i {
+      width: 8px;
+      height: 8px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.28);
+
+      &.on {
+        width: 26px;
+        background: #e3b84f;
+      }
+    }
+  }
+
+  .char-m-actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .char-m-pill {
+    min-width: 92px;
+    height: 40px;
+    padding: 0 16px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 700;
+    background: rgba(255, 255, 255, 0.07);
+    border: 2px solid rgba(217, 180, 90, 0.55);
+
+    &.primary {
+      color: #2a1c06;
+      background: linear-gradient(#f0cf7a, #c79a35);
+      border-color: #f6dc9a;
+    }
+
+    &.danger {
+      color: #ffb3b3;
+      background: rgba(120, 30, 30, 0.45);
+      border-color: rgba(220, 90, 90, 0.7);
+    }
+
+    &:disabled {
+      opacity: 0.4;
+    }
+  }
+}

@@ -154,6 +154,16 @@ El propietario autorizo de nuevo los cambios visuales, ahora como valores por de
 - NO HECHO (decidido dejar para despues): menu de teselas y botones redondos de Magdalena (se mantienen los 5 botones originales), hoja de detalle al tocar un item,
   ventanas en columnas, ranuras de habilidad estilo Magdalena. Falta verificar en un telefono real (Chrome y Samsung Internet).
 
+### 1i. Interfaz movil rehecha a partir de Mu Magdalena (2026-11-11 noche; detalle en `docs/magdalena_study.md`)
+Decision del propietario: la interfaz anterior (barra original, 5 botones, pociones, tres casillas) no le gustaba. Se estudio Magdalena pantalla por pantalla y se rehizo
+SOLO para tactil: barra inferior delgada (orbes de vida y mana, 6 casillas de habilidad, AG y SD, experiencia), estado arriba a la izquierda (nivel, nombre, zona y
+coordenadas, ZONA SEGURA), botones redondos arriba a la derecha (Helper y menu), menu de comandos en teselas, boton de ataque, ventana "Habilidades" de dos paneles,
+hoja de detalle al tocar un item (Mover / Usar), nombres como pastillas, y pantalla de personajes con tarjeta, flechas grandes y zoom al personaje elegido.
+Se quitaron de tactil: barra original y sus 5 botones, temporizadores de eventos, botones de texto del Helper, boton de mover, botones de pocion (las pociones las gasta
+el Helper y, con el perfil movil v2, la pocion de mana y el carcaj automaticos). `release/vm/server.json` activa autoManaPotion, autoQuiver, retryLoginWhenConnected y
+muHelperAfterReconnect (decision del propietario para su servidor privado).
+Pendiente: burbuja de chat con contador, conmutador MANUAL/AUTO, pestana Recoger del Helper para tactil, verificacion en un telefono real.
+
 ### 3b. Referencia de diseno movil (Mu Magdalena, observada el 2026-11-10 en un celular de 915x412 px CSS)
 Su cliente tambien es un derivado de la misma base (Babylon.js) con interfaz HTML encima del 3D. Lo que hay que copiar en espiritu:
 - **Entrada.** Se abre tambien en vertical; en algun momento pide girar a horizontal para continuar ("Gira tu telefono").
