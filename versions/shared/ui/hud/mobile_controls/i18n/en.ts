@@ -46,6 +46,7 @@ const en = {
   'mobile.set.all': 'All options',
   'mobile.cmd.map': 'Map',
   'mobile.basicAttack': 'Basic attack',
+  'mobile.pickup': 'Pick up',
   'mobile.clear': 'Clear',
 };
 

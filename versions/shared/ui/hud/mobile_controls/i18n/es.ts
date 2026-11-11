@@ -48,5 +48,6 @@ export default {
   'mobile.set.all': 'Todas las opciones',
   'mobile.cmd.map': 'Mapa',
   'mobile.basicAttack': 'Ataque básico',
+  'mobile.pickup': 'Recoger',
   'mobile.clear': 'Quitar',
 } satisfies Partial<Record<keyof typeof en, string>>;

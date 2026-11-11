@@ -103,3 +103,16 @@ held button"). Fixed with a touch stand-in, `World.touchCastHeld`, driven by `hu
   other classes get only castle-siege skills or none until an orb or book is learned, so a new Dark Knight or Elf has only the plain attack until then.
 Mu Magdalena, new Dark Wizard (observed): slot 1 holds the FIST, only the fist and Energy Ball are lit in the skills grid (every other skill shown greyed and locked),
 and the player taps Energy Ball to place it. Magdalena shows the whole class list greyed; this client lists only what is learned.
+
+## 7. A fight in Mu Magdalena, observed with a real character (Elveland (100,55), mobs adjacent)
+- **Monsters**: each one carries its name and a red life bar (about 98 px wide) all the time; they attack the hero by themselves, so the HP orb drops while you
+  decide. Damage numbers float up: white "Miss", red for damage taken.
+- **Attack**: the round button at the bottom right (50x50, y 270) shows the current skill: the fist (basic attack) or the skill placed on slot 1. One tap attacks the nearest
+  monster and keeps going; the button changes its icon when another skill is chosen in the Skills window (tap the position, tap the skill, close). With the fist
+  selected the character punches ("Miss" rows) and kills slowly; with a spell selected the kill is far faster. The round book button under it opens the Skills window.
+- **Death**: the monster falls, its name and bar go; the experience bar and the level badge ring move.
+- **Drops**: the item lands near the monster and its name appears on the ground in a dark translucent pill ("Blood Bone +1"), white text, small; no tooltip.
+- **Pick up**: while something lies within reach a round HAND button appears at the top, left of the quick potion; one tap picks it up and both the label and the hand
+  disappear. No walking to a tiny item and no tapping its label.
+- **Not seen but expected**: experience gain text, the same sweep with several items.
+Taken: the pick-up hand (`hud/mobile_controls/topButtons.tsx`, the original's own `AutoGetItem` underneath, the Space key), kept sweeping while something is within reach.

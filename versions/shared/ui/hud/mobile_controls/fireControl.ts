@@ -1,4 +1,5 @@
 import { Ecs } from '@/ecs/current';
+import { autoGetItem } from '@/ecs/systems/itemPickupSystem';
 import { isAttackableEntity } from '@/ecs/systems/attackSystem';
 import type { Entity } from '@/ecs/world';
 import { HeroSkills } from '@/modules/skills';
@@ -103,6 +104,8 @@ export function installFireLoop(): () => void {
     const world = Ecs.world;
     const hero = world?.playerEntity;
     if (!world) return;
+    // The pick-up hand keeps going while there is something within reach and the hero is not already walking to one.
+    if (MobileMenu.picking && !world.pickupTarget && !autoGetItem(world)) MobileMenu.picking = false;
     if (!MobileMenu.firing && !MobileMenu.auto) {
       if (world.touchCastHeld) world.touchCastHeld = false;
       return;

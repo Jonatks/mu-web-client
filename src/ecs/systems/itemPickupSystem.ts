@@ -19,13 +19,26 @@ const PICKUP_RANGE = 1;
 /** Seconds between path refreshes while approaching (the drop never moves). */
 const APPROACH_INTERVAL = 0.4;
 /** `AutoGetItem`'s reach: under 300 units, three tiles (NewUIHotKey.cpp:472). */
-const AUTO_GET_RANGE = 3;
+export const AUTO_GET_RANGE = 3;
 
 /**
  * `CNewUIHotKey::AutoGetItem` (NewUIHotKey.cpp:455-490): the first live, drawn item under three
  * tiles from the hero, in the client's own order (not the nearest), becomes the MOVEMENT_GET
  * target. True when one did.
  */
+/** Whether `autoGetItem` would find something: the touch HUD shows its pick-up hand only then. */
+export function dropNearby(world: World): boolean {
+  const hero = world.playerEntity?.transform?.pos;
+  if (!hero) return false;
+  for (const e of world.netObjsQuery.entities) {
+    if (!e.droppedItem || e.objOutOfScope || e.visibility?.state !== 'visible') continue;
+    if (e.worldIndex !== undefined && e.worldIndex !== world.mapIndex) continue;
+    const p = e.transform.pos;
+    if (Math.hypot(p.x - hero.x, p.y - hero.y, p.z - hero.z) < AUTO_GET_RANGE) return true;
+  }
+  return false;
+}
+
 export function autoGetItem(world: World): boolean {
   const hero = world.playerEntity?.transform?.pos;
   if (!hero) return false;
