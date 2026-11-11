@@ -37,7 +37,7 @@ como scripts listos y reversibles en `release/vm/` con su guia en `docs/vm_runbo
 - Fase 2c (dominio corto): HECHO. `https://mu-valhalla.vercel.app` (Vercel, plan gratuito) redirige a la IP; cambiar el destino a sslip.io cuando exista HTTPS.
 - Fase 2d (copias): `backup-db.sh` listo. NO aplicado. 2e (.gz): ya los genera el autodespliegue al desplegar.
 - Fase 3 (clases): las 4 clases de `test0` entran al mundo en emulacion movil sin errores de pagina (`cls/`): HUD, pociones, boton Hablar con NPC reales.
-  Falta comparar lado a lado con el cliente original por clase, combate y botin. Un `console.error` repetido: paquete 0xD2 sin manejador (inocuo).
+  Con el Elf se toco la pildora "Hablar - Potion Girl Amy": se abrio la tienda junto al inventario, a altura completa y con las X visibles. Falta comparar lado a lado con el cliente original por clase, combate y botin (no probados: sin GPU el dibujo va a ~1 fps). Un `console.error` repetido: paquete 0xD2 sin manejador (inocuo).
 - Fase 4 (web admin): diseno y MVP en `docs/admin_web.md`. NO construida (necesita servicio en la VM).
 - Fase 5: lista en `docs/launch_checklist.md`. Fase 6: PWA lista (nombre MU Valhalla); APK en `docs/android_app.md`, no construido (sin HTTPS, JDK ni SDK).
 - Fase 7: ruta en `docs/original_art.md`.
