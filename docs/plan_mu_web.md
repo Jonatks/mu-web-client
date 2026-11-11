@@ -100,6 +100,17 @@ Estado: [hecho] ya publicado, [investigado] causa estudiada pero sin arreglo, [p
    resaltado rojo: tras matar a un monstruo el contorno rojo se quedaba pegado al cuerpo (con el dedo no hay movimiento de cursor que lo quite); ahora se retira al morir.
    Pendiente: el recuadro cuadrado que el propietario ve cuando los orbes del aura pasan sobre el cuerpo (sospecha: mezcla alfa de sprites aditivos sobre
    el cuerpo que se desvanece en GPU movil; no se reproduce en emulacion por software). Se revisara en una captura de Chrome.
+7c. [hecho, a probar] Multitoque: con un dedo en el joystick, un segundo toque sobre un control que usa clics de raton (X de las ventanas, botones de la barra)
+   no hacia nada, porque el navegador solo genera el clic para un toque unico. Ahora se genera aparte. Comprobado antes/despues: sin el arreglo 0 clics con el
+   joystick sostenido, con el arreglo 1; y cerrar la X del inventario con el joystick sostenido funciona.
+7d. [hecho, a probar] La ventana del inventario (y las que van sobre la barra) quedaba con su parte alta cortada por la pantalla en un celular horizontal (la X en y=-15).
+   El tamano que cabe no descontaba la barra inferior. Corregido (con prueba). Pendiente: la X mide unos 10x9 px, demasiado pequena para el dedo; las ventanas
+   necesitan un boton de cierre grande en celular, como el menu en cuadros de Magdalena.
+7e. [hecho, a probar] Chat: mas pequeno (72%), a la izquierda y por encima del joystick, ancho maximo 55% de la pantalla.
+7f. [a observar] "Se siente un poco lento" y "mas tirones al caminar": el tope de resolucion se bajo de 2x a 1.5x en celular (compromiso nitidez/fluidez; la escala
+   de render de Opciones lo baja mas). El joystick ahora tiene histeresis: un pulgar apoyado entre dos direcciones ya no alterna, que reenviaba pasos al servidor.
+   Hipotesis sin comprobar contra servidor: tirones por pasos rechazados ("tira del cliente hacia atras"). Falta un contador de FPS visible en celular y pruebas
+   contra un OpenMU local con registro del servidor; preguntar al propietario si tambien ocurre al caminar tocando el suelo (sin joystick).
 8. [pendiente] Seleccion de personajes: personajes pequenos y ambiente oscuro; Magdalena acerca el personaje elegido y lo muestra grande.
 9. [pendiente] Interfaz que tapa la vision: botones del menu duplicados (arriba derecha y en la barra), tres ranuras de habilidad vacias y
    "Activar" a la derecha, ventanas abiertas encima de los botones del menu. Magdalena usa un solo boton de menu, aviso de chat colapsado y

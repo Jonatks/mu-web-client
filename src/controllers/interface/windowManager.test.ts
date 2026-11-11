@@ -60,3 +60,25 @@ describe('MuWindows.closeAll', () => {
     runInAction(() => (AppState.hudHidden = false));
   });
 });
+
+// A phone held sideways is short: a window parked above the main bar must fit in what is left over the bar,
+// or its top (title and close button) is cut off by the screen's top edge.
+describe('MuWindows.fitScaleOf with the main bar', () => {
+  it('leaves room for the bar under a window parked in its corner', () => {
+    const wm = MuWindows as unknown as { viewport: { width: number; height: number } };
+    const was = { ...wm.viewport };
+    wm.viewport = { width: 915, height: 412 };
+
+    MuWindows.register('bar_fit_probe', { width: 190, height: 429 }, () => false);
+    MuWindows.register('bottom-bar', { width: 640, height: 51 }, () => false);
+    const withBar = MuWindows.fitScaleOf('bar_fit_probe');
+    const bar = MuWindows.scaleOf('bottom-bar');
+
+    // Without the bar's 51 units the window would fit at (412 - 24) / 429; with it, less.
+    expect(withBar).toBeLessThan((412 - 24) / 429);
+    expect(withBar).toBeCloseTo((412 - 51 * bar - 24) / 429, 5);
+
+    for (const id of ['bar_fit_probe', 'bottom-bar']) MuWindows.unregister(id);
+    wm.viewport = was;
+  });
+});

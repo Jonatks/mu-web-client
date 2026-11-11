@@ -43,11 +43,12 @@
     display: none;
   }
 
-  // The passive log sat over the thumb stick (bottom left): it starts to the right of it, and fades
-  // the older lines so it never builds a wall in front of the world.
+  // The passive log sat over the thumb stick (bottom left): it is smaller, sits on the left above the stick and fades
+  // the older lines, so it never builds a wall in front of the world.
   .chat-log:not(.framed) {
-    transform: translateX(150px);
-    max-width: calc(100vw - 150px - 230px);
+    transform: translateY(-150px) scale(0.72);
+    transform-origin: left bottom;
+    max-width: 55vw;
     overflow: hidden;
     -webkit-mask-image: linear-gradient(to top, #000 55%, transparent);
     mask-image: linear-gradient(to top, #000 55%, transparent);

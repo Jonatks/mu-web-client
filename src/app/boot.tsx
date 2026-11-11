@@ -56,6 +56,7 @@ import { installLoginMusic } from '../controllers/sound/loginMusic';
 import { setKeyProfile } from '../controllers/interface/keyBindings';
 import { installBrowserHotkeyGuard } from '../controllers/interface/browserHotkeys';
 import { installImmersive } from '../controllers/interface/immersive';
+import { installMultiTouchTap } from '../controllers/interface/multiTouchTap';
 import { isMobileDevice } from '../controllers/interface/mobile';
 import { SessionResume } from '../modules/session/sessionResume';
 import { reaction } from 'mobx';
@@ -108,8 +109,8 @@ const canvas = document.querySelector('canvas')!;
 let useAntialiaing = false;
 
 // A phone's screen has 2 to 3 device pixels per CSS pixel; drawn at 1 the 3D view is blurry and its edges stair-step.
-// A phone draws at up to 2x (the render scale option still trades it down); `?dpr=1.5` tries another cap.
-const deviceRatioLimit = devQueryNumber('dpr') ?? (isMobileDevice() ? 2 : 1);
+// A phone draws at up to 1.5x (the render scale option still trades it down); `?dpr=1.5` tries another cap.
+const deviceRatioLimit = devQueryNumber('dpr') ?? (isMobileDevice() ? 1.5 : 1);
 
 let engine: Engine;
 try {
@@ -150,6 +151,7 @@ reaction(
 // stack - live in `ecs/systems/keyboardInputSystem.ts`.
 // Fullscreen and landscape on a phone: the first tap asks for both (`controllers/interface/immersive.ts`).
 installImmersive();
+installMultiTouchTap();
 
 installBrowserHotkeyGuard(
   () =>

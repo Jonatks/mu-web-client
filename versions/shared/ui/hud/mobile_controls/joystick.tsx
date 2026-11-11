@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type PointerEvent } from 'react';
-import { clearStick, setStick, stickDirection } from '@/controllers/interface/touchStick';
+import { clearStick, setStick, stickDirection, TouchStick } from '@/controllers/interface/touchStick';
 
 /**
  * The thumb stick, bottom left. A touch starting on the ring grabs it; the knob follows the thumb,
@@ -28,7 +28,7 @@ export const Joystick = () => {
     }
 
     setKnob({ x: dx, y: dy });
-    setStick(stickDirection(dx, dy, radius));
+    setStick(stickDirection(dx, dy, radius, undefined, TouchStick));
   };
 
   const release = (e: PointerEvent) => {
