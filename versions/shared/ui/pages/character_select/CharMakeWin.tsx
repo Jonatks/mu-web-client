@@ -1,18 +1,18 @@
 import { MuWindows } from '@/controllers/interface/windowManager';
 import { t } from '@/i18n';
-import { CREATE_MESSAGES } from '@/modules/character_select/messages';
 import { observer } from 'mobx-react-lite';
 import { useEffect, useRef } from 'react';
 import { CharSelect } from '@/modules/character_select';
-import { addNotification } from '@/modules/chat';
 import { MsgBox } from '@/controllers/interface';
 import { Ecs } from '@/ecs/current';
-import { isReservedName } from '@/modules/servers/reservedNames';
 import { playUiSound } from '@/controllers/sound/sfx';
 import { MuButton } from '@/controllers/interface/components/mu_button';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
 import { TEXT_COLOR } from '@/controllers/interface/components/mu_text';
 import { gameVersion } from '@/version';
+import { isMobileDevice } from '@/controllers/interface/mobile';
+import { MobileCharMake } from './MobileCharMake';
+import { tryCreateCharacter } from './createCharacter';
 import { createClassPreview, type ClassPreview } from './classPreview';
 import {
   ACTION_BTN_FRAMES,
@@ -34,7 +34,6 @@ import {
   DESC_WIDTH,
   DESC_X,
   DESC_Y,
-  hasSpecialCharacters,
   INPUT_HEIGHT,
   INPUT_TEXT_HEIGHT,
   INPUT_TEXT_WIDTH,
@@ -47,7 +46,6 @@ import {
   JOB_BTN_HEIGHT,
   JOB_BTN_WIDTH,
   NAME_MAX_LENGTH,
-  NAME_MIN_LENGTH,
   offeredBy,
   OK_BTN_X,
   PANEL_ALPHA,
@@ -98,7 +96,7 @@ function holdUntilReleased(code: string): void {
   window.addEventListener('blur', release);
 }
 
-export const CharMakeWin = observer(({ onClose }: CharMakeWinProps) => {
+const DesktopCharMakeWin = observer(({ onClose }: CharMakeWinProps) => {
   const selected =
     CREATABLE_CLASSES.find(c => c.netClass === CharSelect.newCharClass) ??
     CREATABLE_CLASSES[0];
@@ -131,28 +129,7 @@ export const CharMakeWin = observer(({ onClose }: CharMakeWinProps) => {
   const isUnlocked = (unlock: number | null) =>
     unlock === null || (CharSelect.creationUnlockFlags & unlock) !== 0;
 
-  const onCreate = () => {
-    if (CharSelect.charCreationPending) return;
-
-    const name = CharSelect.newCharName;
-
-    if (name.length < NAME_MIN_LENGTH) {
-      addNotification(CREATE_MESSAGES.minLength, 'error');
-      return;
-    }
-
-    if (hasSpecialCharacters(name)) {
-      addNotification(CREATE_MESSAGES.specialName, 'error');
-      return;
-    }
-
-    if (isReservedName(name)) {
-      addNotification(CREATE_MESSAGES.reservedName, 'error');
-      return;
-    }
-
-    CharSelect.createCharacterRequest(name, selected.netClass);
-  };
+  const onCreate = () => tryCreateCharacter(selected.netClass);
 
   // The listener is registered once; the ref hands it the current pair.
   const keyActions = useRef({ onCreate, onClose });
@@ -362,3 +339,8 @@ export const CharMakeWin = observer(({ onClose }: CharMakeWinProps) => {
     </div>
   );
 });
+
+/** A touch screen has its own card (`MobileCharMake`); the original window is the mouse's. */
+export const CharMakeWin = observer(({ onClose }: CharMakeWinProps) =>
+  isMobileDevice() ? <MobileCharMake onClose={onClose} /> : <DesktopCharMakeWin onClose={onClose} />
+);

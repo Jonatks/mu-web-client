@@ -31,7 +31,9 @@ export const StatusPanel = observer(() => {
   return (
     <div className="mobile-status">
       <div className="mobile-status-row">
-        <span className="mobile-level">{t('mobile.level', { n: Hero.level })}</span>
+        <span className="mobile-level" style={{ ['--xp' as string]: `${Math.round(Math.max(0, Math.min(1, Hero.expPercent)) * 100)}%` }}>
+          {t('mobile.level', { n: Hero.level })}
+        </span>
         <span className="mobile-name">{Hero.name}</span>
       </div>
       <div className="mobile-place">{place}</div>

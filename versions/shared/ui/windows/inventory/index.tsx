@@ -480,7 +480,8 @@ export const Inventory = observer(() => {
         slot: entry.slot,
         context: 'inventory',
         move: () => Bag.pickInventoryItem(entry.slot),
-        use: () => applyEntry(entry),
+        use: Merchant.npcShop ? () => QuickItemActions.fromInventory(entry.slot) : () => applyEntry(entry),
+        useLabel: Merchant.npcShop ? 'mobile.sell' : undefined,
       });
       return;
     }

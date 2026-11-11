@@ -112,6 +112,17 @@ export const SkillPicker = observer(() => {
                 );
               })}
             </div>
+            <MobileButton
+              className={`mobile-attack-mode${MobileMenu.auto ? ' is-auto' : ''}`}
+              onTap={() => (MobileMenu.auto = !MobileMenu.auto)}
+            >
+              {() => (
+                <>
+                  <Icon name="attack" size={18} />
+                  <span>{MobileMenu.auto ? t('mobile.auto') : t('mobile.manual')}</span>
+                </>
+              )}
+            </MobileButton>
           </div>
           <div className="mobile-picker-col skills">
             <div className="mobile-picker-title">{t('mobile.pickSkill')}</div>

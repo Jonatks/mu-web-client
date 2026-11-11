@@ -24,8 +24,9 @@ const TILES: readonly Tile[] = [
   { icon: 'party', label: 'mobile.cmd.party', run: open('party') },
   { icon: 'guild', label: 'mobile.cmd.guild', run: () => (Social.guildWindowEnabled = true) },
   { icon: 'quests', label: 'mobile.cmd.quests', run: open('quests') },
+  { icon: 'map', label: 'mobile.cmd.map', run: () => MuWindows.setOpen('minimap', !MuWindows.isOpen('minimap')) },
   { icon: 'helper', label: 'mobile.cmd.helper', run: () => toggleMuHelperWindow(true) },
-  { icon: 'options', label: 'mobile.cmd.options', run: open('options') },
+  { icon: 'options', label: 'mobile.cmd.options', run: () => (MobileMenu.settings = true) },
   { icon: 'switch', label: 'mobile.cmd.switch', run: () => SessionExit.request('characters') },
   { icon: 'system', label: 'mobile.cmd.system', run: () => (SessionExit.menuOpen = true) },
 ];

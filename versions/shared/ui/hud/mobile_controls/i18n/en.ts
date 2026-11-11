@@ -33,6 +33,18 @@ const en = {
   'mobile.messages': 'MESSAGES',
   'mobile.writeMessage': 'Write a message',
   'mobile.send': 'Send',
+  'mobile.auto': 'AUTO',
+  'mobile.manual': 'MANUAL',
+  'mobile.buy': 'Buy',
+  'mobile.sell': 'Sell',
+  'mobile.set.uiScale': 'Interface size',
+  'mobile.set.padSize': 'Pad size',
+  'mobile.set.showPad': 'Show movement pad',
+  'mobile.set.music': 'Music',
+  'mobile.set.effects': 'Sound',
+  'mobile.set.groundNames': 'Show ground item names',
+  'mobile.set.all': 'All options',
+  'mobile.cmd.map': 'Map',
   'mobile.clear': 'Clear',
 };
 

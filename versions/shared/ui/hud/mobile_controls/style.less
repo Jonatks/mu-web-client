@@ -25,6 +25,8 @@
   .mobile-talk-pill,
   .mobile-sheet-button,
   .mobile-chat-bubble,
+  .mobile-book,
+  .mobile-attack-mode,
   .mobile-messages,
   .mobile-stat-add,
   .mobile-stats-details,
@@ -310,52 +312,126 @@
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.65);
 }
 
-// ---- the thumb stick, bottom left -----------------------------------------------
-
+// ---- the thumb stick, bottom left (Mu Magdalena's ornate, see-through ring) ------------------------------------------
 .mobile-stick {
+  --stick: 134px;
   position: absolute;
   left: calc(@edge + env(safe-area-inset-left, 0px));
-  bottom: 92px;
-  width: 120px;
-  height: 120px;
+  bottom: 96px;
+  width: var(--stick);
+  height: var(--stick);
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(20, 16, 10, 0.3) 0%, rgba(20, 16, 10, 0.55) 72%);
-  border: 3px solid rgba(255, 204, 26, 0.55);
+  opacity: 0.62;
+  transition: opacity 0.18s;
+  // A dark glass disc, clearer in the middle, with a worn-gold ring, a thin black groove and an inner gold hairline.
+  background: radial-gradient(circle, rgba(10, 8, 6, 0.1) 0%, rgba(10, 8, 6, 0.22) 55%, rgba(10, 8, 6, 0.5) 100%);
+  border: 3px solid rgba(176, 132, 56, 0.85);
   box-shadow:
-    inset 0 0 0 2px rgba(0, 0, 0, 0.45),
-    0 4px 14px rgba(0, 0, 0, 0.5);
+    0 0 0 2px rgba(0, 0, 0, 0.5),
+    inset 0 0 0 5px rgba(0, 0, 0, 0.4),
+    inset 0 0 0 7px rgba(217, 180, 90, 0.35),
+    inset 0 0 18px rgba(0, 0, 0, 0.6),
+    0 6px 16px rgba(0, 0, 0, 0.5);
+
+  &.is-held {
+    opacity: 0.95;
+  }
+
+  // The crest on the top of the ring: a small gold diamond.
+  &::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: -9px;
+    width: 14px;
+    height: 14px;
+    margin-left: -7px;
+    transform: rotate(45deg);
+    background: linear-gradient(135deg, #f0d28a, #8a6a2c);
+    border: 2px solid rgba(0, 0, 0, 0.55);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+  }
+
+  // Four small arrows between the ring and the knob.
+  .mobile-stick-mark {
+    position: absolute;
+    width: 0;
+    height: 0;
+    border: 5px solid transparent;
+    opacity: 0.75;
+
+    &.n {
+      left: 50%;
+      top: 8px;
+      margin-left: -5px;
+      border-bottom: 7px solid rgba(217, 180, 90, 0.85);
+    }
+    &.s {
+      left: 50%;
+      bottom: 8px;
+      margin-left: -5px;
+      border-top: 7px solid rgba(217, 180, 90, 0.85);
+    }
+    &.e {
+      right: 8px;
+      top: 50%;
+      margin-top: -5px;
+      border-left: 7px solid rgba(217, 180, 90, 0.85);
+    }
+    &.w {
+      left: 8px;
+      top: 50%;
+      margin-top: -5px;
+      border-right: 7px solid rgba(217, 180, 90, 0.85);
+    }
+  }
 
   .mobile-stick-knob {
     position: absolute;
     left: 50%;
     top: 50%;
-    width: 52px;
-    height: 52px;
-    margin: -26px 0 0 -26px;
+    width: 55px;
+    height: 55px;
+    margin: -27px 0 0 -27px;
     border-radius: 50%;
-    background: radial-gradient(circle at 35% 30%, #f6dc9a, #a97c25);
-    border: 2px solid #f0d28a;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.6);
+    background: radial-gradient(circle at 35% 30%, rgba(246, 220, 154, 0.85), rgba(120, 84, 28, 0.8) 70%);
+    border: 2px solid rgba(240, 210, 138, 0.9);
+    box-shadow:
+      inset 0 0 0 3px rgba(0, 0, 0, 0.3),
+      0 3px 10px rgba(0, 0, 0, 0.6);
+    pointer-events: none;
+  }
+
+  .mobile-stick-label {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -18px;
+    text-align: center;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: rgba(211, 188, 137, 0.9);
+    text-shadow: 0 1px 2px #000;
     pointer-events: none;
   }
 
   &.size-0 {
-    width: 96px;
-    height: 96px;
+    --stick: 108px;
     .mobile-stick-knob {
-      width: 42px;
-      height: 42px;
-      margin: -21px 0 0 -21px;
+      width: 44px;
+      height: 44px;
+      margin: -22px 0 0 -22px;
     }
   }
 
   &.size-2 {
-    width: 150px;
-    height: 150px;
+    --stick: 164px;
     .mobile-stick-knob {
-      width: 64px;
-      height: 64px;
-      margin: -32px 0 0 -32px;
+      width: 68px;
+      height: 68px;
+      margin: -34px 0 0 -34px;
     }
   }
 
@@ -364,6 +440,9 @@
     background: none;
     border-color: transparent;
     box-shadow: none;
+    &::before,
+    .mobile-stick-mark,
+    .mobile-stick-label,
     .mobile-stick-knob {
       opacity: 0;
     }
@@ -444,11 +523,11 @@
 }
 
 .mobile-commands {
-  width: min(88vw, 760px);
+  width: min(94vw, 860px);
 
   .mobile-tiles {
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
+    grid-template-columns: repeat(7, 1fr);
     gap: 8px;
     padding: 12px;
     overflow-y: auto;
@@ -918,6 +997,316 @@ body:has(.mu-item-window) .mobile-controls .mobile-chat-bubble {
       &:disabled {
         opacity: 0.45;
       }
+    }
+  }
+}
+
+// ---- polish: glass, trim and depth (second pass, after the Mu Magdalena study) ---------------------------------------------
+
+// The bar sits on a dark plate with a worn-gold edge, so the orbs and boxes read as one piece.
+.mobile-bar {
+  &::before {
+    content: '';
+    position: absolute;
+    left: 40px;
+    right: 40px;
+    bottom: 0;
+    height: 52px;
+    border-radius: 14px 14px 6px 6px;
+    background: linear-gradient(rgba(28, 21, 13, 0.55), rgba(8, 6, 4, 0.8));
+    border: 1px solid rgba(176, 132, 56, 0.55);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.55);
+    z-index: -1;
+  }
+}
+
+.mobile-orb {
+  border: 3px solid #a7822f;
+  box-shadow:
+    0 0 0 2px rgba(0, 0, 0, 0.55),
+    inset 0 0 0 2px rgba(0, 0, 0, 0.5),
+    inset 0 -10px 18px rgba(0, 0, 0, 0.55),
+    0 3px 12px rgba(0, 0, 0, 0.65);
+
+  // The glass: a bright oval near the top and a faint rim light.
+  &::after {
+    content: '';
+    position: absolute;
+    left: 14%;
+    top: 7%;
+    width: 52%;
+    height: 34%;
+    border-radius: 50%;
+    background: linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0));
+    pointer-events: none;
+  }
+
+  .mobile-orb-fill::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: -2px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.35);
+    filter: blur(1px);
+  }
+}
+
+.mobile-slot,
+.mobile-pick-slot {
+  border-radius: 8px;
+  border: 2px solid rgba(176, 132, 56, 0.7);
+  background: linear-gradient(rgba(46, 35, 22, 0.95), rgba(12, 9, 6, 0.98));
+
+  &::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 42%;
+    background: linear-gradient(rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0));
+    pointer-events: none;
+  }
+
+  &.is-empty {
+    opacity: 0.85;
+  }
+}
+
+.mobile-round {
+  box-shadow:
+    inset 0 0 0 3px rgba(0, 0, 0, 0.4),
+    inset 0 0 0 4px rgba(217, 180, 90, 0.25),
+    0 3px 10px rgba(0, 0, 0, 0.55);
+}
+
+.mobile-attack {
+  box-shadow:
+    inset 0 0 0 3px rgba(0, 0, 0, 0.4),
+    inset 0 0 0 5px rgba(255, 210, 150, 0.25),
+    inset 0 -8px 14px rgba(0, 0, 0, 0.45),
+    0 4px 14px rgba(0, 0, 0, 0.65);
+
+  &::after {
+    content: '';
+    position: absolute;
+    left: 18%;
+    top: 8%;
+    width: 64%;
+    height: 36%;
+    border-radius: 50%;
+    background: linear-gradient(rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0));
+    pointer-events: none;
+  }
+}
+
+// The level badge carries an experience ring: the border is a conic gradient filled to the percentage.
+.mobile-status .mobile-level {
+  position: relative;
+  border: 3px solid transparent;
+  background:
+    linear-gradient(rgba(14, 11, 8, 0.92), rgba(14, 11, 8, 0.92)) padding-box,
+    conic-gradient(#6fe08c var(--xp, 0%), rgba(255, 255, 255, 0.22) 0) border-box;
+}
+
+.mobile-status .mobile-name {
+  text-shadow: 0 1px 3px #000, 0 0 6px rgba(0, 0, 0, 0.8);
+}
+
+.mobile-panel {
+  border-style: ridge;
+  border-width: 3px;
+  border-color: rgba(176, 132, 56, 0.85);
+}
+
+// ---- the book button over the attack button, the skill on it, AUTO ------------------------------------------------------
+.mobile-attack {
+  .mobile-attack-skill {
+    transform: scale(1.6);
+    pointer-events: none;
+  }
+
+  &.is-auto {
+    border-color: #8dffb0;
+    box-shadow:
+      0 0 14px rgba(94, 212, 138, 0.7),
+      inset 0 0 0 3px rgba(0, 0, 0, 0.4),
+      0 4px 14px rgba(0, 0, 0, 0.65);
+  }
+}
+
+.mobile-book {
+  position: absolute;
+  right: calc(@edge + 14px + env(safe-area-inset-right, 0px));
+  bottom: 96px;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: @gold;
+  background: radial-gradient(circle at 35% 30%, rgba(58, 44, 24, 0.95), rgba(14, 11, 8, 0.95));
+  border: 2px solid @gold-dim;
+  box-shadow:
+    inset 0 0 0 3px rgba(0, 0, 0, 0.4),
+    0 3px 10px rgba(0, 0, 0, 0.55);
+}
+
+body:has(.mu-item-window) .mobile-controls .mobile-book {
+  display: none;
+}
+
+.mobile-picker .mobile-attack-mode {
+  margin-top: auto;
+  height: 38px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: #ffc9b8;
+  background: rgba(110, 30, 24, 0.5);
+  border: 2px solid rgba(224, 96, 72, 0.8);
+  pointer-events: auto;
+  cursor: pointer;
+
+  &.is-auto {
+    color: #b8ffcf;
+    background: rgba(24, 96, 52, 0.5);
+    border-color: #5ed48a;
+  }
+}
+
+// ---- Settings (Mu Magdalena): rows with a switch or a slider ---------------------------------------------------------------
+.mobile-settings {
+  width: min(88vw, 520px);
+
+  .mobile-settings-body {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 8px 14px 12px;
+    overflow-y: auto;
+    max-height: 70vh;
+  }
+
+  .mobile-set-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 42px;
+    font-size: 14px;
+
+    > span {
+      flex: 1;
+    }
+
+    b {
+      width: 64px;
+      text-align: right;
+      font-size: 12px;
+      font-weight: 400;
+      color: #d9b45a;
+    }
+
+    input[type='range'] {
+      flex: 1.2;
+      accent-color: #d9b45a;
+      pointer-events: auto;
+    }
+
+    .mobile-switch {
+      appearance: none;
+      width: 52px;
+      height: 30px;
+      border-radius: 15px;
+      position: relative;
+      background: rgba(255, 255, 255, 0.14);
+      border: 1px solid rgba(217, 180, 90, 0.55);
+      pointer-events: auto;
+
+      &::after {
+        content: '';
+        position: absolute;
+        left: 3px;
+        top: 3px;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: #cbbd9c;
+        transition: transform 0.15s;
+      }
+
+      &:checked {
+        background: rgba(94, 212, 138, 0.35);
+        border-color: #5ed48a;
+
+        &::after {
+          transform: translateX(22px);
+          background: #8dffb0;
+        }
+      }
+    }
+  }
+
+  .mobile-settings-all {
+    margin-top: 6px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    color: #ffe9b8;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(202, 140, 60, 0.7);
+    pointer-events: auto;
+    cursor: pointer;
+  }
+}
+
+// ---- monster labels: the nearest few, name over a red life bar (Mu Magdalena) ------------------------------------------------
+.mobile-monsters {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+
+  .mobile-monster {
+    position: absolute;
+    left: 0;
+    top: 0;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    will-change: transform;
+
+    span {
+      font-size: 12px;
+      color: #fff;
+      white-space: nowrap;
+      text-shadow: 0 1px 3px #000, 0 0 5px #000;
+    }
+
+    div {
+      width: 72px;
+      height: 7px;
+      border-radius: 4px;
+      overflow: hidden;
+      background: rgba(40, 0, 0, 0.8);
+      border: 1px solid rgba(0, 0, 0, 0.8);
+    }
+
+    i {
+      display: block;
+      height: 100%;
+      background: linear-gradient(#ff5a4a, #c4120a);
     }
   }
 }

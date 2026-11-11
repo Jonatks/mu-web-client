@@ -1,4 +1,5 @@
 import './style.less';
+import { useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { AppState, UIState } from '@/controllers/interface/uiState';
 import { useIsMobile } from '@/controllers/interface/mobile';
@@ -15,6 +16,9 @@ import { TeleportModal } from './teleportModal';
 import { StatsModal } from './statsModal';
 import { ChatBubble } from './chatBubble';
 import { MessagesPanel } from './messagesPanel';
+import { SettingsModal } from './settingsModal';
+import { MonsterBars } from './monsterBars';
+import { installPlayerLongPress } from './playerLongPress';
 
 /** The bottom bar of a touch screen: life, the six skill slots with AG / SD over them and experience under, mana. */
 const Bar = observer(() => {
@@ -40,13 +44,17 @@ const Bar = observer(() => {
  * It renders into `.hud`, which is `pointer-events: none`, so each button opts itself back in.
  */
 export const MobileControls = observer(() => {
-  if (!useIsMobile()) return null;
+  const mobile = useIsMobile();
+  const inWorld = AppState.uiState === UIState.World;
+  useEffect(() => (mobile && inWorld ? installPlayerLongPress() : undefined), [mobile, inWorld]);
+  if (!mobile) return null;
   // Not over the loading screen: `playerEntity` is plain per-frame state and would not re-render this when it arrives,
   // so the observable state is what gates the HUD.
   if (AppState.uiState !== UIState.World) return null;
 
   return (
     <div className="mobile-controls">
+      <MonsterBars />
       <StatusPanel />
       <TopButtons />
       <Bar />
@@ -60,6 +68,7 @@ export const MobileControls = observer(() => {
       <TeleportModal />
       <StatsModal />
       <MessagesPanel />
+      <SettingsModal />
     </div>
   );
 });

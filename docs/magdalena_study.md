@@ -78,6 +78,14 @@ menu, a sans face for HUD numbers; radii 10 to 16 on panels, full on pills and r
 | chat bubble and panel | `ChatBubble` (this study's second round) |
 | quick potion button | NOT taken: potions are the Helper's job and the mana potion is automatic |
 
-## 4. Not taken or not done
-Ranking by resets, shop top-up, "Buy", country flags, monster life bars drawn over every monster (a performance cost on a phone: only the target has one),
-the MANUAL / AUTO toggle, a Pickup tab tuned for touch, the experience ring on the level badge.
+## 4. Second pass (all of the above plus what was missing)
+Added after the second study: monster name and red life bar over the nearest five monsters (a fixed pool moved on the DOM, no React render per frame),
+the skill on the big attack button and a book button for the skills window, a MANUAL / AUTO attack mode (AUTO picks the next monster by itself),
+the experience ring on the level badge, a Settings panel (interface size, pad size and visibility, music and sound volumes, ground names, auto mana
+potion and quiver, and a button to the full Options window), the Map tile, a hero creation card for touch (class pills, name, 3D preview), a long press on a
+player (the right click) that opens the original quick menu, Buy in shops (the sheet shows the tooltip with the price first) and Sell for an item in the bag with a
+shop open, notices as translucent bands, and visual polish: the joystick is now a translucent dark glass ring with a worn-gold edge, a crest, four arrows,
+a MOVE label and it brightens while held; orbs with glass highlights; the bar sits on a dark plate; skill boxes with a top gloss; round buttons with an inner trim.
+
+## 5. Still not taken
+Ranking by resets, shop top-up, "Buy", country flags, the Pickup tab of the Helper tuned for touch (the original Helper window still opens from the menu).

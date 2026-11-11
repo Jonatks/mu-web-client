@@ -113,7 +113,7 @@ export const DEFAULT_RENDER_PARAMETERS: ClassRenderParameters = {
   positionOffsetZ: 0,
 };
 
-type CreatableClass = {
+export type CreatableClass = {
   classType: number;
   netClass: CharacterClassNumber;
   nameTextId: number;

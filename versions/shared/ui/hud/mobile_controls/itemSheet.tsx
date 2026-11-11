@@ -28,12 +28,14 @@ export const ItemSheetView = observer(() => {
         linkable={false}
       />
       <div className="mobile-sheet-actions" onPointerDown={e => e.stopPropagation()}>
-        <MobileButton className="mobile-sheet-button primary" onTap={run(entry.move)}>
-          {() => <span>{t('mobile.move')}</span>}
-        </MobileButton>
+        {entry.move && (
+          <MobileButton className="mobile-sheet-button primary" onTap={run(entry.move)}>
+            {() => <span>{t(entry.moveLabel ?? 'mobile.move')}</span>}
+          </MobileButton>
+        )}
         {entry.use && (
           <MobileButton className="mobile-sheet-button" onTap={run(entry.use)}>
-            {() => <span>{t('mobile.use')}</span>}
+            {() => <span>{t(entry.useLabel ?? 'mobile.use')}</span>}
           </MobileButton>
         )}
         <MobileButton className="mobile-sheet-button" onTap={close}>

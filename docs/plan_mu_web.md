@@ -162,7 +162,7 @@ hoja de detalle al tocar un item (Mover / Usar), nombres como pastillas, y panta
 Se quitaron de tactil: barra original y sus 5 botones, temporizadores de eventos, botones de texto del Helper, boton de mover, botones de pocion (las pociones las gasta
 el Helper y, con el perfil movil v2, la pocion de mana y el carcaj automaticos). `release/vm/server.json` activa autoManaPotion, autoQuiver, retryLoginWhenConnected y
 muHelperAfterReconnect (decision del propietario para su servidor privado).
-Pendiente: burbuja de chat con contador, conmutador MANUAL/AUTO, pestana Recoger del Helper para tactil, verificacion en un telefono real.
+Segunda pasada hecha (ver `docs/magdalena_study.md` seccion 4): barras de vida de monstruos cercanos, boton del libro, MANUAL/AUTO, ajustes tactiles, creacion de heroe tactil, pulsacion larga en jugador, comprar y vender con la hoja, pulido visual del joystick. Pendiente: pestana Recoger del Helper para tactil, verificacion en un telefono real.
 
 ### 3b. Referencia de diseno movil (Mu Magdalena, observada el 2026-11-10 en un celular de 915x412 px CSS)
 Su cliente tambien es un derivado de la misma base (Babylon.js) con interfaz HTML encima del 3D. Lo que hay que copiar en espiritu:

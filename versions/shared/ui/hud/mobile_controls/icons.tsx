@@ -15,6 +15,7 @@ const PATHS: Record<string, string> = {
   switch: 'M4 8h13l-3-3M20 16H7l3 3',
   system: 'M12 3v8M6.300 6.300a8 8 0 1 0 11.400 0',
   attack: 'M5 19l10-10M15 9l4-4v4h-4zM19 19L9 9M9 9L5 5v4h4zM4 20l2-2M20 20l-2-2',
+  map: 'M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2zM9 4v14M15 6v14',
   menu: 'M4 7h16M4 12h16M4 17h16',
   close: 'M6 6l12 12M18 6L6 18',
 };

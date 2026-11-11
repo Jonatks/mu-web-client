@@ -8,6 +8,8 @@ import { Bag } from '@/modules/inventory';
 import { ItemIcon } from '@/controllers/interface/components/item_icon';
 import { ItemSearchBox, useItemSearch } from '@/controllers/interface/components/item_search';
 import { ItemTooltip } from '../../components/item_tooltip';
+import { isMobileDevice } from '@/controllers/interface/mobile';
+import { openItemSheet } from '../../components/item_grid/mobileSheet';
 import { Item } from '@/ecs/world';
 import {
   GridSquares,
@@ -174,6 +176,18 @@ export const NpcShop = observer(() => {
       return;
     }
 
+    // A tap would buy at once and the price is in the tooltip: on touch the sheet shows it first, with a Buy button.
+    if (isMobileDevice()) {
+      openItemSheet({
+        item: entry.item,
+        slot: entry.slot,
+        context: 'shop',
+        move: () => Merchant.buyItemFromNpc(entry.slot),
+        moveLabel: 'mobile.buy',
+      });
+      return;
+    }
+
     Merchant.buyItemFromNpc(entry.slot);
   };
 
@@ -282,7 +296,7 @@ export const NpcShop = observer(() => {
         ))}
       </div>
 
-      {!picked && !!hoveredEntry && !!hover && (
+      {!picked && !!hoveredEntry && !!hover && !isMobileDevice() && (
         <ItemTooltip item={hoveredEntry.item} x={hover.x} y={hover.y} context="shop" />
       )}
 
