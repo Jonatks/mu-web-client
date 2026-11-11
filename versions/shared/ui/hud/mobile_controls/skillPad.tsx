@@ -239,7 +239,9 @@ export const SkillPad = observer(() => {
   }, [character]);
 
   useEffect(() => {
-    MobileSkillSlots.prune(learned.map(s => s.number));
+    const numbers = learned.map(s => s.number);
+    MobileSkillSlots.seed(numbers);
+    MobileSkillSlots.prune(numbers);
   }, [learned]);
 
   return (

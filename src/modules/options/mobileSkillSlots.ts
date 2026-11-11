@@ -76,6 +76,20 @@ export const MobileSkillSlots = new (class _MobileSkillSlots {
     this.save();
   }
 
+  /**
+   * A character whose pad was never set up (nothing saved) gets its first learned skills, so the pad is not three empty
+   * boxes on the first login. Once saved, even all-empty, it is the player's and is left alone.
+   */
+  seed(learned: readonly number[]): void {
+    if (!this.character || this.saved[this.character]) return;
+    const first = learned.filter(isHotbarSkill).slice(0, MOBILE_SKILL_SLOTS);
+    if (!first.length) return;
+    runInAction(() => {
+      this.slots = EMPTY.map((_, i) => first[i] ?? -1);
+    });
+    this.save();
+  }
+
   private save(): void {
     if (!this.character) return;
     this.saved = { ...this.saved, [this.character]: this.slots.slice() };
