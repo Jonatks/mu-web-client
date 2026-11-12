@@ -36,7 +36,7 @@ B3. Problemas visuales vistos en el telefono del propietario (celdas celestes, p
 ## C. Interfaz y jugabilidad (solo tactil)
 C1. Inicio de sesion, personajes, crear heroe. [hecho]
 C2. HUD del mundo: barra, orbes, casillas, estado, botones redondos, menu de teselas, chat, mano, hablar, ataque. [hecho]
-C3. Ventanas del juego 1,4 veces mas grandes (inventario, tienda, personaje, baul, comercio, fiesta, clan): rehacer el marco mas alto que 429 unidades. [pendiente]
+C3. Ventanas del juego 1,4 veces mas grandes: Magdalena estira la interfaz 640x480 sobre toda la pantalla (1,43 a lo ancho, 0,86 a lo alto en 915x412). [hecho: `windowStretch`, ventanas pegadas arriba a la derecha, 270 px de ancho como Magdalena; falta revisar cada ventana una por una]
 C4. Ventanas en columnas, cierre con X grande, tocar fuera para cerrar. [parcial]
 C5. Tienda: comprar y vender con la hoja de detalle, precio, falta de zen, impuesto. Probar completo. [parcial]
 C6. NPC: hablar, dialogos con opciones numeradas, misiones (aceptar, seguir, entregar), buffs, evolucion, baul. Probar completo. [pendiente]

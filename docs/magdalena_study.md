@@ -224,3 +224,7 @@ The chat Messages panel opens when the chat bubble is tapped: a centred modal wi
 | This client, offline Lorencia, 40 players + 10 monsters (dev build) | 25 | 24.9k | 602 (40 fps) |
 | Same with other players' skill visuals, gear effects and pets off | 24 | 23.7k | 581 |
 The crowd options change almost nothing here, so they are not the lever. Draws are already lower than Magdalena's; triangles are about 3 times higher, frames about 30 percent lower. The 8.8 against 22 fps measured earlier was online with a real crowd and the full interface; the remaining gap is more likely interface and network objects than the scene. Next lever: measure online with the performance overlay open, and reduce triangles per character.
+
+## 19. Why the windows are 1.4 times wider (found by measuring the inventory)
+The inventory in Magdalena is 270 x 365 px at 915x412, the classic 190 x 429 window. Both ratios follow from stretching the 640x480 interface over the screen: 915/640 = 1.43 across and 412/480 = 0.86 down. The window sits at the top right (x 645 to 915, y 0 to 365). This client now does the same on phones (`windowStretch` in `src/controllers/interface/windowManager.ts`), desktop unchanged.
+The COMMANDS menu there has dark brown tiles with warm orange icons, a spaced muted-gold title and a round X; it has 8 entries (Move, Inventory, Allocate points, Ranking, Guild Clan, MU Helper, Settings, Change character, Sign out); a card "Top up by card" can open on top of it: only its OK button is safe to press.
