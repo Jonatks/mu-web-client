@@ -116,3 +116,10 @@ and the player taps Energy Ball to place it. Magdalena shows the whole class lis
   disappear. No walking to a tiny item and no tapping its label.
 - **Not seen but expected**: experience gain text, the same sweep with several items.
 Taken: the pick-up hand (`hud/mobile_controls/topButtons.tsx`, the original's own `AutoGetItem` underneath, the Space key), kept sweeping while something is within reach.
+
+## 8. Verified on a normal account (no GM), local OpenMU, phone emulation
+- `test6Dk` (level 61, normal account) walked out of the Lorencia south gate and pressed the cast button: it picked a Bull Fighter, hit it (17 attack packets), the monster's
+  bar went 100% to 0%, it died, its drop appeared as "Devil Eye +1", the pick-up hand appeared at the top, one tap picked it up and both the label and the hand went away.
+- A brand new level 1 Dark Wizard (`cdwtest`, created with the touch creation card) enters with Energy Ball on slot 1 and on the cast button; it dies to a Bull Fighter or a
+  Skeleton in a few seconds, as a level 1 character does in the original, so the first levels are on weaker monsters. The cast packet itself was seen only with a GM.
+- Lorencia from the terrain file: the town is walled; the only exits are the two bridge corridors at x 131-134 (north y 147-165, south y 90-105). The east wall is x 153.
