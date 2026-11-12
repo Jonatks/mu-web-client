@@ -1,8 +1,7 @@
 #!/bin/sh
-# Runs in an alpine container that shares OpenMU's network. When the panel writes /d/kick it closes every player's
+# Runs in the mu-kick image (alpine + iproute2-ss, built by install-vm.sh) that shares OpenMU's network. When the panel writes /d/kick it closes every player's
 # connection on the game ports; OpenMU then saves the characters as if the players had left. Exits when no game port
 # listens (OpenMU was recreated), so docker restarts it into the current network.
-until ss -V >/dev/null 2>&1; do apk add --no-cache iproute2-ss >/dev/null 2>&1 || sleep 5; done
 blind=0
 while :; do
   if ss -ltn 2>/dev/null | grep -q ':4590[1-6] '; then blind=0; else blind=$((blind + 1)); [ "$blind" -gt 10 ] && exit 1; fi

@@ -75,8 +75,9 @@ sudo docker run -d --name mu-gate --restart unless-stopped --network container:o
   -v "$APP":/app:ro -v "$DATA":/var/lib/mu-admin -w /app/admin/service oven/bun:1.4.2-slim bun gate-sidecar.ts >/dev/null
 # Desconectar jugadores desde el panel: otro contenedor pequeno, con permiso solo de red, corta los sockets de los puertos de juego.
 sudo docker rm -f mu-kick >/dev/null 2>&1 || true
+printf 'FROM alpine\nRUN apk add --no-cache iproute2-ss\n' | sudo docker build -q -t mu-kick - >/dev/null
 sudo docker run -d --name mu-kick --restart unless-stopped --network container:openmu --cap-add NET_ADMIN --memory 24m \
-  -v "$APP":/app:ro -v "$DATA":/d alpine sh /app/admin/service/kick-sidecar.sh >/dev/null
+  -v "$APP":/app:ro -v "$DATA":/d mu-kick sh /app/admin/service/kick-sidecar.sh >/dev/null
 sudo docker rm -f mu-admin >/dev/null 2>&1 || true
 sudo docker run -d --name mu-admin --restart unless-stopped --network openmu_default --memory 80m \
   -p 127.0.0.1:3200:3200 --env-file "$CFG/env" -e ADMIN_KEY_FILE=/run/key \
