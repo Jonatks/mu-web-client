@@ -88,10 +88,12 @@ setInterval(() => { if (!$('#app').hidden && !document.hidden) refreshGate(); },
 
 /* ------------------------------------------------------------------- pages */
 const PAGES = { accounts, characters, audit, vault };
+let shown = '';
+const setHash = path => { shown = path; location.hash = path; };
 function go(path) {
   const [name, ...rest] = path.split('/');
   const page = PAGES[name] ? name : 'accounts';
-  location.hash = page === name ? path : page;
+  setHash(page === name ? path : page);
   for (const b of document.querySelectorAll('#tabs button')) b.classList.toggle('on', b.dataset.tab === (page === 'vault' ? 'accounts' : page));
   view.replaceChildren();
   PAGES[page](decodeURIComponent(rest.join('/')));
@@ -417,7 +419,7 @@ function characters(selected) {
 
   async function open(name) {
     current = name;
-    location.hash = 'characters/' + encodeURIComponent(name);
+    setHash('characters/' + encodeURIComponent(name));
     for (const b of roster.children) b.classList.toggle('on', b.querySelector('b')?.textContent === name);
     const c = await act(() => api('GET', '/characters/' + name));
     if (!c) return;
@@ -505,6 +507,5 @@ async function audit() {
 }
 
 /* ------------------------------------------------------------------- start */
-addEventListener('hashchange', () => { if (!$('#app').hidden && decodeURIComponent(location.hash.slice(1)) !== currentPath()) go(location.hash.slice(1)); });
-const currentPath = () => decodeURIComponent(location.hash.slice(1));
+addEventListener('hashchange', () => { if (!$('#app').hidden && location.hash.slice(1) !== shown) go(location.hash.slice(1)); });
 fetch('/api/me').then(r => (r.ok ? r.json() : null)).then(d => (d ? enter(d.user) : showLogin()));
