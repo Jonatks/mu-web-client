@@ -355,6 +355,8 @@ function marked(text, q) {
 /** A text box that suggests items (or skills) from the first letter, keyboard friendly. */
 function suggest(onPick, kind = 'items', extra = {}) {
   const slotMode = extra.slot !== undefined && extra.slot !== null;
+  const who = () => (extra.character ? '&character=' + encodeURIComponent(extra.character()) : '');
+  const need = d => (d.needsEvolve ? ` · requiere ${d.requires}` : '');
   const skillsMode = kind === 'skills';
   const input = h('input', { placeholder: skillsMode ? 'Escribe el nombre de la habilidad' : 'Escribe el nombre del ítem (Sword, Wing, Jewel...)', autocomplete: 'off', role: 'combobox', 'aria-expanded': 'false', 'aria-label': skillsMode ? 'Buscar habilidad' : 'Buscar ítem' });
   const list = h('ul', { class: 'sug-list', role: 'listbox', hidden: true });
@@ -366,7 +368,7 @@ function suggest(onPick, kind = 'items', extra = {}) {
     list.replaceChildren(...(found.length ? found.map((d, i) => h('li', {
       class: i === on ? 'on' : '', role: 'option',
       onmousedown: e => { e.preventDefault(); pick(d); },
-    }, h('span', {}, marked(d.name, q)), h('span', { class: 'meta' }, skillsMode ? `n.º ${d.number}` : `${GROUPS[d.group] ?? 'Grupo ' + d.group} · ${d.w}x${d.h}`))) : [h('li', { class: 'meta' }, 'Nada coincide.')]));
+    }, h('span', {}, marked(d.name, q)), h('span', { class: 'meta' }, skillsMode ? `n.º ${d.number}${need(d)}` : `${GROUPS[d.group] ?? 'Grupo ' + d.group} · ${d.w}x${d.h}${need(d)}`))) : [h('li', { class: 'meta' }, 'Nada coincide.')]));
   }
   function pick(d) { input.value = d.name; list.hidden = true; found = []; onPick(d); }
   const search = debounce(async () => {
@@ -374,7 +376,7 @@ function suggest(onPick, kind = 'items', extra = {}) {
     ctl?.abort();
     if (!q && !slotMode) { found = []; return draw(); }
     ctl = new AbortController();
-    const r = await act(() => api('GET', (skillsMode ? '/skills/definitions?q=' : '/items/definitions?q=') + encodeURIComponent(q) + (slotMode ? '&slot=' + extra.slot : ''), undefined, ctl.signal));
+    const r = await act(() => api('GET', (skillsMode ? '/skills/definitions?q=' : '/items/definitions?q=') + encodeURIComponent(q) + (slotMode ? '&slot=' + extra.slot : '') + who(), undefined, ctl.signal));
     if (!r) return;
     found = rank(r, q).slice(0, slotMode ? 40 : 14); on = found.length ? 0 : -1; draw();
   }, 120);
@@ -393,6 +395,7 @@ function suggest(onPick, kind = 'items', extra = {}) {
 /* ---------------------------------------------------------- insert dialog */
 /** Where: { kind: 'inventory'|'vault', id }. slot null = first free place. */
 function insertDialog(where, slot, done) {
+  const classOf = { current: where.kind === 'inventory' ? where.id : where.forChar ?? null };
   const isInv = where.kind === 'inventory';
   const worn = isInv && slot !== null && slot < 12;
   const bodySlot = worn ? DOLL.find(([n]) => n === slot)?.[1] : '';
@@ -415,6 +418,7 @@ function insertDialog(where, slot, done) {
     const chips = exc.map(x => h('button', { type: 'button', class: 'chip', 'aria-pressed': 'false', onclick: e => { x.on = !x.on; e.currentTarget.classList.toggle('on', x.on); e.currentTarget.setAttribute('aria-pressed', String(x.on)); } }, x.o.label ?? `Opción ${x.o.number}`));
     form.replaceChildren(
       h('p', { class: 'mute' }, `${GROUPS[d.group] ?? ''} · ocupa ${d.w}x${d.h}`),
+      d.needsEvolve ? h('p', {}, h('span', { class: 'pill warn' }, `Requiere ser ${d.requires}: ${where.kind === 'inventory' ? where.id : where.forChar} aún no puede usarlo`)) : null,
       h('div', { class: 'fields' },
         d.maxLevel > 0 ? h('label', {}, `Nivel (0-${d.maxLevel})`, level) : null,
         h('label', {}, 'Durabilidad', dur),
@@ -435,10 +439,11 @@ function insertDialog(where, slot, done) {
       return body;
     };
   }
-  const s = suggest(configure, 'items', { slot: worn ? slot : null });
+  const s = suggest(configure, 'items', { slot: worn ? slot : null, character: () => classOf.current });
   go.addEventListener('click', async () => {
     if (!def || !form._read) return;
     go.disabled = true;
+    if (def.needsEvolve && !(await confirmBox(`${def.name} necesita ${def.requires}`, 'Lo puedes poner igual, pero solo lo podrá usar cuando evolucione a esa clase.', 'Poner igual'))) { go.disabled = false; return; }
     const r = await act(() => api('POST', url, form._read()), `Ítem insertado en ${isInv ? 'el inventario' : 'el baúl'}`);
     go.disabled = false;
     if (r) { closeDialog(); done(); }
@@ -446,6 +451,7 @@ function insertDialog(where, slot, done) {
   openDialog(
     h('h3', {}, worn ? `Equipar ítem: ${bodySlot}` : `Insertar ítem en ${dest}`),
     h('p', { class: 'mute' }, worn ? `Se equipa directo en la ranura «${bodySlot}». Solo salen los ítems que se pueden llevar ahí.` : slot === null ? 'Va al primer hueco libre.' : `Va a la casilla ${isInv ? slot - 11 : slot + 1}.`),
+    where.forChar ? h('label', { class: 'inline' }, Object.assign(h('input', { type: 'checkbox' }), { onchange: e => { classOf.current = e.target.checked ? null : where.forChar; s.input.dispatchEvent(new Event('input')); } }), 'Ver también ítems de otras clases (el baúl es de toda la cuenta)') : null,
     s.el, form,
     h('div', { class: 'actions' }, h('button', { onclick: closeDialog }, 'Cancelar'), go));
   s.input.focus();
@@ -500,10 +506,10 @@ async function editItemDialog(it, done) {
 const DOLL = [[7, 'Alas'], [2, 'Casco'], [8, 'Mascota'], [0, 'Mano izq.'], [3, 'Armadura'], [1, 'Mano der.'], [5, 'Guantes'], [4, 'Pantalón'], [9, 'Collar'], [10, 'Anillo'], [6, 'Botas'], [11, 'Anillo']];
 
 /** The visual storage: kind 'inventory' (equipment + 8x8 bag) or 'vault' (account warehouse). */
-function storagePanel(kind, id) {
+function storagePanel(kind, id, forChar) {
   const isInv = kind === 'inventory';
   const box = h('div');
-  const where = { kind, id };
+  const where = { kind, id, forChar };
   let data, sel = null, moving = null;
   const stop = e => { if (e.key === 'Escape' && moving) { moving = null; draw(); } };
   addEventListener('keydown', stop);
@@ -646,20 +652,12 @@ function skillsPanel(name) {
     q.addEventListener('input', draw);
     draw();
 
-    let picked = null;
-    const lvl = h('input', { type: 'number', min: 0, max: 255, value: 0 });
-    const addAny = h('button', { class: 'primary', disabled: true, onclick: () => add(picked.id, picked.name, Number(lvl.value)) }, 'Añadir habilidad');
-    const s = suggest(d => { picked = d; addAny.disabled = !d; }, 'skills');
-
     box.replaceChildren(
       learned,
       h('section', { class: 'panel' }, h('h3', {}, 'Habilidades de su clase'),
         h('div', { class: 'chain' }, av.chain.map((c, i) => [i ? h('span', { class: 'arrow' }, '→') : null, h('span', { class: 'chip' + (c === av.current ? ' on' : '') }, c)])),
-        h('p', { class: 'hint' }, 'Aquí salen todas las habilidades de la línea de su clase. Las marcadas con "Requiere" son de una evolución que todavía no tiene. Los iconos: ⚔ físico, ✦ magia, ☠ maldición, ✚ apoyo, ♜ invocación, ◆ pasiva.'),
-        h('div', { class: 'row bar' }, h('div', { class: 'suggest' }, q)), grid),
-      h('details', { class: 'adv' }, h('summary', {}, 'Buscar una habilidad de cualquier clase'),
-        h('div', { class: 'row bar' }, s.el, h('label', {}, 'Nivel', lvl), addAny),
-        h('p', { class: 'hint' }, 'Las habilidades de Master dependen unas de otras: aquí se añaden sueltas, el juego no revisa los requisitos.')));
+        h('p', { class: 'hint' }, 'Solo salen las habilidades que puede usar su clase y sus evoluciones. Las marcadas con "Requiere" son de una evolución que todavía no tiene. Los iconos: ⚔ físico, ✦ magia, ☠ maldición, ✚ apoyo, ♜ invocación, ◆ pasiva.'),
+        h('div', { class: 'row bar' }, h('div', { class: 'suggest' }, q)), grid));
   }
   load();
   return box;
@@ -676,20 +674,25 @@ function questsPanel(name) {
     const state = new Map(d.states.map(s => [s.group, s]));
     const cards = [...groups].map(([g, qs]) => {
       const st = state.get(g);
-      const opts = () => [h('option', { value: '' }, 'Ninguna'), ...qs.map(q => h('option', { value: q.id }, `${q.name}${q.class ? ` (${q.class})` : ''}`))];
+      const tag = q => (q.needsEvolve ? ` · requiere ${q.class}` : q.tooLow ? ` · desde el nivel ${q.minLevel}` : q.class ? ` (${q.class})` : '');
+      const opts = () => [h('option', { value: '' }, 'Ninguna'), ...qs.map(q => h('option', { value: q.id }, `${q.name}${tag(q)}`))];
+      const locked = qs.filter(q => q.needsEvolve);
       const lf = h('select', {}, opts()), ac = h('select', {}, opts());
       lf.value = st?.lastFinished ?? ''; ac.value = st?.active ?? '';
       return h('section', { class: 'card' },
-        h('h4', {}, `Grupo ${g}`, ' ', h('span', { class: 'pill ' + (st ? 'ok' : '') }, st ? 'Con progreso' : 'Sin empezar')),
-        h('p', { class: 'hint' }, `${qs.length} misión(es) de este grupo.`),
+        h('h4', {}, `Grupo ${g}`, ' ', h('span', { class: 'pill ' + (st ? 'ok' : '') }, st ? 'Con progreso' : 'Sin empezar'), locked.length === qs.length ? h('span', { class: 'pill warn' }, `Requiere ${locked[0].class}`) : null),
+        h('p', { class: 'hint' }, `${qs.length} misión(es) de este grupo.${locked.length && locked.length < qs.length ? ` ${locked.length} necesitan una evolución que aún no tiene.` : ''}`),
         h('div', { class: 'fields' }, h('label', {}, 'Última terminada', lf), h('label', {}, 'Activa ahora', ac)),
         h('div', { class: 'row' },
-          h('button', { class: 'small primary', onclick: async () => { if (await act(() => api('POST', `/characters/${name}/quests/${g}`, { lastFinished: lf.value || null, active: ac.value || null }), 'Misión guardada')) load(); } }, 'Guardar'),
+          h('button', { class: 'small primary', onclick: async () => {
+            const pickedLocked = qs.find(q => q.needsEvolve && (q.id === lf.value || q.id === ac.value));
+            if (pickedLocked && !(await confirmBox(`${pickedLocked.name} es de ${pickedLocked.class}`, `${name} aún no tiene esa evolución. Se guarda igual, pero el juego puede no mostrarla hasta que evolucione.`, 'Guardar igual'))) return;
+            if (await act(() => api('POST', `/characters/${name}/quests/${g}`, { lastFinished: lf.value || null, active: ac.value || null }), 'Misión guardada')) load(); } }, 'Guardar'),
           st ? h('button', { class: 'small danger', onclick: async () => { if (await confirmBox(`¿Reiniciar el grupo ${g}?`, 'Empieza esas misiones de nuevo. Se puede deshacer desde Registro.', 'Reiniciar', true) && (await act(() => api('DELETE', `/characters/${name}/quests/${g}`), 'Grupo reiniciado'))) load(); } }, 'Reiniciar') : null));
     });
     box.replaceChildren(
       h('section', { class: 'panel' }, h('div', { class: 'row bar' },
-        h('div', {}, h('h3', {}, 'Misiones'), h('p', { class: 'hint' }, 'Las misiones de clase (evolución) y las generales, por grupo. Elige cuál terminó por última vez y cuál tiene activa.')),
+        h('div', {}, h('h3', {}, 'Misiones'), h('p', { class: 'hint' }, 'Solo salen las misiones de su clase (y sus evoluciones) y las generales, por grupo. Elige cuál terminó por última vez y cuál tiene activa.')),
         d.states.length ? h('button', { class: 'danger', onclick: async () => { if (await confirmBox('¿Reiniciar todas las misiones?', 'Pierde todo su progreso de misiones. Se puede deshacer desde Registro.', 'Reiniciar todo', true) && (await act(() => api('DELETE', `/characters/${name}/quests`), 'Misiones reiniciadas'))) load(); } }, 'Reiniciar todas') : null),
         cards.length ? h('div', { class: 'cards' }, cards) : h('p', { class: 'empty' }, 'No hay misiones definidas para esta clase.')));
   }
@@ -787,7 +790,19 @@ function characters(selected) {
     const fixed = (pairs, value) => { const s = h('select', {}, pairs.map(([v, t]) => h('option', { value: v }, t))); s.value = String(value); return s; };
 
     // The class line (e.g. Dark Wizard -> Soul Master -> Grand Master): tap a step to evolve or go back.
-    const classSel = pick(classes ?? [], c.classId);
+    const classSel = h('select', {});
+    const inLine = new Set();
+    {
+      const all = classes ?? [];
+      const byId0 = new Map(all.map(k => [k.id, k]));
+      let r0 = c.classId;
+      for (let i = 0; i < 10; i++) { const prev = all.find(k => k.next === r0); if (!prev) break; r0 = prev.id; }
+      for (let cur = r0; cur && inLine.size < 10; cur = byId0.get(cur)?.next ?? null) inLine.add(cur);
+      const opt = k => h('option', { value: k.id }, k.name);
+      classSel.append(...all.filter(k => inLine.has(k.id)).sort((a, b) => [...inLine].indexOf(a.id) - [...inLine].indexOf(b.id)).map(opt),
+        h('optgroup', { label: 'Otras clases (cambia de línea)' }, ...all.filter(k => !inLine.has(k.id)).map(opt)));
+      classSel.value = c.classId;
+    }
     const byId = new Map((classes ?? []).map(k => [k.id, k]));
     let root = c.classId;
     for (let i = 0; i < 10; i++) { const prev = (classes ?? []).find(k => k.next === root); if (!prev) break; root = prev.id; }
@@ -832,7 +847,7 @@ function characters(selected) {
       tabset([
         ['sheet', 'Ficha', sheetTab],
         ['inventory', 'Inventario', () => h('section', { class: 'panel' }, storagePanel('inventory', name))],
-        ['vault', 'Baúl', () => h('section', { class: 'panel' }, h('p', { class: 'hint' }, `Es el baúl de la cuenta ${c.account}: lo comparten todos sus personajes.`), storagePanel('vault', c.account))],
+        ['vault', 'Baúl', () => h('section', { class: 'panel' }, h('p', { class: 'hint' }, `Es el baúl de la cuenta ${c.account}: lo comparten todos sus personajes.`), storagePanel('vault', c.account, name))],
         ['skills', 'Habilidades', () => skillsPanel(name)],
         ['quests', 'Misiones', () => questsPanel(name)],
         ['letters', 'Cartas', () => lettersPanel(name)],

@@ -69,7 +69,7 @@ export function createApp(cfg: Config) {
     }
     if (p[0] === 'maps' && m === 'GET') return characters.listMaps(sql);
     if (p[0] === 'classes' && m === 'GET') return characters.listClasses(sql);
-    if (p[0] === 'skills' && p[1] === 'definitions' && m === 'GET') return skills.searchSkills(sql, q.get('q') ?? '');
+    if (p[0] === 'skills' && p[1] === 'definitions' && m === 'GET') return skills.searchSkills(sql, q.get('q') ?? '', q.get('character') ?? '');
     if (p[0] === 'characters') {
       if (m === 'GET' && p.length === 1) return characters.listCharacters(sql, q.get('q') ?? '', q.get('account') ?? '');
       const name = p[1] ?? '';
@@ -110,7 +110,7 @@ export function createApp(cfg: Config) {
     }
     if (p[0] === 'items' && p[1] === 'definitions' && m === 'GET') {
       if (p[2]) return items.definitionOptions(sql, p[2]);
-      return items.searchDefinitions(sql, q.get('q') ?? '', q.get('group') ?? '', q.get('slot') ?? '');
+      return items.searchDefinitions(sql, q.get('q') ?? '', q.get('group') ?? '', q.get('slot') ?? '', q.get('character') ?? '');
     }
     if (p[0] === 'audit' && m === 'GET') return auditTail(Number(q.get('limit') ?? 100));
     if (p[0] === 'undo' && m === 'GET') return recentUndo();

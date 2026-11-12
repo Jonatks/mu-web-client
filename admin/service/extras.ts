@@ -1,6 +1,7 @@
 // The smaller parts of a player's data: unlocked classes (account), quests, letters, Gens (character) and the cash shop storage (account).
 import type { Sql } from 'postgres';
 import { bad, missing } from './errors';
+import { lineOfCharacter } from './classline';
 import { write } from './undo';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -62,14 +63,20 @@ export async function setUnlockedClasses(sql: Sql, admin: string, login: string,
 
 /* ---------------------------------------------------------------------- quests */
 
+/** Quests for the character's class line: general ones and those of its classes. `needsEvolve` marks quests of a later class of the line. */
 export async function listQuests(sql: Sql, name: string) {
-  const c = await charOf(sql, name);
-  const quests = await sql`
+  const line = await lineOfCharacter(sql, name);
+  const c = { id: line.charId };
+  const rows = await sql`
     SELECT q."Id" AS id, split_part(q."Name", '||', 1) AS name, q."Group" AS "group", q."Number" AS number, q."Repeatable" AS repeatable,
-           q."MinimumCharacterLevel" AS "minLevel", split_part(k."Name", '||', 1) AS class
-    FROM config."QuestDefinition" q LEFT JOIN config."CharacterClass" k ON k."Id" = q."QualifiedCharacterId"
-    WHERE q."QualifiedCharacterId" IS NULL OR q."QualifiedCharacterId" = ${c.classId}
+           q."MinimumCharacterLevel" AS "minLevel", q."QualifiedCharacterId"::text AS cls
+    FROM config."QuestDefinition" q
+    WHERE q."QualifiedCharacterId" IS NULL OR q."QualifiedCharacterId" = ANY(${line.ids}::uuid[])
     ORDER BY q."Group", q."Number"`;
+  const quests = rows.map(q => {
+    const at = q.cls ? line.ids.indexOf(q.cls as string) : -1;
+    return { id: q.id, name: q.name, group: q.group, number: q.number, repeatable: q.repeatable, minLevel: q.minLevel, class: at >= 0 ? line.chain[at]!.name : null, needsEvolve: at > line.idx, tooLow: (q.minLevel as number) > line.level };
+  });
   const states = await sql`
     SELECT s."Id" AS id, s."Group" AS "group", s."LastFinishedQuestId" AS "lastFinished", s."ActiveQuestId" AS active, s."ClientActionPerformed" AS "clientAction",
            (SELECT count(*)::int FROM data."QuestMonsterKillRequirementState" k WHERE k."CharacterQuestStateId" = s."Id") AS kills

@@ -1,6 +1,7 @@
 // Items: search definitions, list a character's inventory, insert an item with its options, delete one.
 import type { Sql } from 'postgres';
 import { bad, missing } from './errors';
+import { gate, lineOfCharacter } from './classline';
 import { INVENTORY, type Layout, fits, freeSlot, vaultLayout } from './grid';
 import { type Writer, write } from './undo';
 
@@ -9,17 +10,26 @@ type OptionRow = { optionId: string; type: string; number: number; label: string
 const NAME = `split_part(d."Name", '||', 1)`;
 
 /** Items by name; `slot` (0-11) keeps only what can be worn in that body slot. */
-export async function searchDefinitions(sql: Sql, q = '', group = '', slot = '') {
+export async function searchDefinitions(sql: Sql, q = '', group = '', slot = '', character = '') {
+  const line = character ? await lineOfCharacter(sql, character) : null;
   const g = group === '' ? -1 : Number(group);
   const s = slot === '' ? -1 : Number(slot);
-  return sql.unsafe(
+  const rows = await sql.unsafe(
     `SELECT d."Id" AS id, d."Group" AS "group", d."Number" AS number, ${NAME} AS name, d."Width" AS w, d."Height" AS h,
-            d."MaximumItemLevel" AS "maxLevel", d."Durability" AS durability, d."SkillId" IS NOT NULL AS "hasSkill"
+            d."MaximumItemLevel" AS "maxLevel", d."Durability" AS durability, d."SkillId" IS NOT NULL AS "hasSkill",
+            ARRAY(SELECT ic."CharacterClassId"::text FROM config."ItemDefinitionCharacterClass" ic WHERE ic."ItemDefinitionId" = d."Id") AS classes
      FROM config."ItemDefinition" d WHERE ${NAME} ILIKE $1 AND ($2 = -1 OR d."Group" = $2)
        AND ($4 = -1 OR EXISTS (SELECT 1 FROM config."ItemSlotType" t WHERE t."Id" = d."ItemSlotId" AND $4::text = ANY (regexp_split_to_array(trim(both ',' from regexp_replace(t."ItemSlots", '\\D+', ',', 'g')), ','))))
+       AND ($5::uuid[] IS NULL OR NOT EXISTS (SELECT 1 FROM config."ItemDefinitionCharacterClass" ic WHERE ic."ItemDefinitionId" = d."Id")
+            OR EXISTS (SELECT 1 FROM config."ItemDefinitionCharacterClass" ic WHERE ic."ItemDefinitionId" = d."Id" AND ic."CharacterClassId" = ANY($5::uuid[])))
      ORDER BY (${NAME} ILIKE $3) DESC, d."Group", d."Number" LIMIT 150`,
-    ['%' + q.replace(/[%_\\]/g, '') + '%', Number.isInteger(g) ? g : -1, q.replace(/[%_\\]/g, '') + '%', Number.isInteger(s) ? s : -1]
+    ['%' + q.replace(/[%_\\]/g, '') + '%', Number.isInteger(g) ? g : -1, q.replace(/[%_\\]/g, '') + '%', Number.isInteger(s) ? s : -1, line ? `{${line.ids.join(',')}}` : null]
   );
+  return rows.map(r => {
+    const g = line ? gate(line, r.classes as string[]) : null;
+    const { classes: _c, ...rest } = r;
+    return { ...rest, requires: g?.requires ?? null, needsEvolve: g?.needsEvolve ?? false };
+  });
 }
 
 /** Options an item can carry: the increasable options of its option definitions, by type. */

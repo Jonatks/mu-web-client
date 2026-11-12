@@ -163,6 +163,23 @@ av = call('GET', '/characters/' + NAME + '/skills/available')
 check('available skills', isinstance(av.get('skills'), list) and len(av['skills']) > 0 and len(av.get('chain', [])) >= 1, str(av)[:200])
 print('chain', av.get('chain'), 'current', av.get('current'), 'skills', len(av.get('skills', [])), 'locked', sum(1 for x in av.get('skills', []) if x['needsEvolve']))
 
+# ---- only what the class line can use
+ids_av = {x['id'] for x in av.get('skills', [])}
+sk = call('GET', '/skills/definitions?q=a&character=' + NAME)
+check('skill search limited to the class line', isinstance(sk, list) and len(sk) > 0 and all(x['id'] in ids_av for x in sk), str(sk)[:160])
+check('unfiltered skill search is wider', len(call('GET', '/skills/definitions?q=a')) >= len(sk))
+after = av.get('chain', [])[av.get('chain', []).index(av.get('current')) + 1:] if av.get('current') in av.get('chain', []) else []
+for q_ in ['Helm', 'Armor', 'Staff', 'Wing']:
+    its = call('GET', '/items/definitions?q=' + q_ + '&character=' + NAME)
+    check('items for the class line (' + q_ + ')', isinstance(its, list) and all((not d['needsEvolve']) or d['requires'] in after for d in its), str(its)[:160])
+if av.get('chain', [None])[0] == 'Dark Wizard':
+    names = [d['name'] for d in call('GET', '/items/definitions?q=Helm&character=' + NAME)]
+    check('wizard sees Pad Helm', 'Pad Helm' in names, names)
+    check('wizard does not see Dragon Helm', 'Dragon Helm' not in names, names)
+    check('all helms exist without the filter', 'Dragon Helm' in [d['name'] for d in call('GET', '/items/definitions?q=Helm')])
+qq = call('GET', '/characters/' + NAME + '/quests')
+check('quests only of the class line', all(x['class'] is None or x['class'] in av.get('chain', []) for x in qq.get('quests', [])), str(qq)[:160])
+
 # ---- unlocked classes
 uc = call('GET', '/accounts/zzacct2/classes')
 check('classes listed', isinstance(uc, list) and len(uc) > 0, uc)

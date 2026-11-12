@@ -1,12 +1,27 @@
 // Skills a character has learned (data."SkillEntry"): list, add, change the level (master skills), remove.
 import type { Sql } from 'postgres';
 import { bad, missing } from './errors';
+import { gate, lineOfCharacter } from './classline';
 import { write } from './undo';
 
 const NAME = `split_part(s."Name", '||', 1)`;
 
-export async function searchSkills(sql: Sql, q = '') {
-  return sql.unsafe(`SELECT s."Id" AS id, s."Number" AS number, ${NAME} AS name FROM config."Skill" s WHERE ${NAME} ILIKE $1 ORDER BY (${NAME} ILIKE $2) DESC, s."Number" LIMIT 60`, ['%' + q.replace(/[%_\\]/g, '') + '%', q.replace(/[%_\\]/g, '') + '%']);
+/** Skills by name. With `character`, only those of that character's class line, each marked when a later evolution is needed. */
+export async function searchSkills(sql: Sql, q = '', character = '') {
+  const clean = q.replace(/[%_\\]/g, '');
+  const line = character ? await lineOfCharacter(sql, character) : null;
+  const rows = await sql.unsafe(
+    `SELECT s."Id" AS id, s."Number" AS number, ${NAME} AS name, s."SkillType" AS "skillType", s."DamageType" AS "damageType",
+            ARRAY(SELECT sc."CharacterClassId"::text FROM config."SkillCharacterClass" sc WHERE sc."SkillId" = s."Id") AS classes
+     FROM config."Skill" s WHERE ${NAME} ILIKE $1
+       AND ($3::uuid[] IS NULL OR EXISTS (SELECT 1 FROM config."SkillCharacterClass" sc WHERE sc."SkillId" = s."Id" AND sc."CharacterClassId" = ANY($3::uuid[])))
+     ORDER BY (${NAME} ILIKE $2) DESC, s."Number" LIMIT 60`,
+    ['%' + clean + '%', clean + '%', line ? `{${line.ids.join(',')}}` : null]
+  );
+  return rows.map(r => {
+    const g = line ? gate(line, r.classes as string[]) : null;
+    return { id: r.id, number: r.number, name: r.name, skillType: r.skillType, damageType: r.damageType, requires: g?.requires ?? null, needsEvolve: g?.needsEvolve ?? false };
+  });
 }
 
 async function charId(sql: Sql, name: string): Promise<string> {
@@ -64,29 +79,17 @@ export async function removeSkill(sql: Sql, admin: string, name: string, entryId
 
 /** Skills of the character's whole class line (e.g. Dark Wizard, Soul Master, Grand Master), each with the class that first gets it. */
 export async function availableSkills(sql: Sql, name: string) {
-  const c = (await sql`SELECT "Id" AS id, "CharacterClassId" AS cls FROM data."Character" WHERE "Name" = ${name}`)[0];
-  if (!c) throw missing('No such character.');
-  const classes = await sql`SELECT "Id" AS id, "NextGenerationClassId" AS next, split_part("Name", '||', 1) AS name FROM config."CharacterClass"`;
-  const byId = new Map(classes.map(k => [k.id as string, k]));
-  let root = c.cls as string;
-  for (let hop = 0; hop < 10; hop++) {
-    const prev = classes.find(k => k.next === root);
-    if (!prev) break;
-    root = prev.id as string;
-  }
-  const chain: { id: string; name: string }[] = [];
-  for (let cur: string | null = root; cur && chain.length < 10; cur = (byId.get(cur)?.next as string | null) ?? null) chain.push({ id: cur, name: byId.get(cur)!.name as string });
-  const mine = chain.findIndex(k => k.id === c.cls);
+  const line = await lineOfCharacter(sql, name);
   const rows = await sql`
     SELECT s."Id" AS id, s."Number" AS number, split_part(s."Name", '||', 1) AS name, s."SkillType" AS "skillType", s."DamageType" AS "damageType",
-           array_agg(sc."CharacterClassId") AS classes,
-           EXISTS (SELECT 1 FROM data."SkillEntry" e WHERE e."CharacterId" = ${c.id as string} AND e."SkillId" = s."Id") AS has
+           array_agg(sc."CharacterClassId"::text) AS classes,
+           EXISTS (SELECT 1 FROM data."SkillEntry" e WHERE e."CharacterId" = ${line.charId} AND e."SkillId" = s."Id") AS has
     FROM config."Skill" s JOIN config."SkillCharacterClass" sc ON sc."SkillId" = s."Id"
-    WHERE sc."CharacterClassId" = ANY(${chain.map(k => k.id)}::uuid[])
+    WHERE sc."CharacterClassId" = ANY(${line.ids}::uuid[])
     GROUP BY s."Id" ORDER BY s."Number"`;
   const skills = rows.map(r => {
-    const first = Math.min(...(r.classes as string[]).map(id => chain.findIndex(k => k.id === id)).filter(i => i >= 0));
-    return { id: r.id, number: r.number, name: r.name, skillType: r.skillType, damageType: r.damageType, has: r.has, requires: chain[first]!.name, needsEvolve: first > mine };
+    const g = gate(line, r.classes as string[])!;
+    return { id: r.id, number: r.number, name: r.name, skillType: r.skillType, damageType: r.damageType, has: r.has, requires: g.requires, needsEvolve: g.needsEvolve };
   });
-  return { chain: chain.map(k => k.name), current: chain[mine]?.name ?? null, skills };
+  return { chain: line.chain.map(k => k.name), current: line.chain[line.idx]?.name ?? null, skills };
 }
