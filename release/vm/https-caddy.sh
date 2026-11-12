@@ -20,6 +20,7 @@ CFG=/opt/caddy
 if [ "${1:-}" = "rollback" ]; then
   sudo docker rm -f caddy >/dev/null 2>&1 || true
   sudo iptables -D INPUT -p tcp --dport 443 -j ACCEPT 2>/dev/null || true
+  sudo sed -i '\#^-A INPUT -p tcp -m tcp --dport 443 -j ACCEPT$#d' /etc/iptables/rules.v4
   echo "Caddy quitado y 443 cerrado en el firewall de la VM"
   exit 0
 fi
@@ -41,7 +42,9 @@ EOF
 
 # Oracle Ubuntu trae iptables con REJECT al final: el 443 se inserta antes.
 sudo iptables -C INPUT -p tcp --dport 443 -j ACCEPT 2>/dev/null || sudo iptables -I INPUT 5 -p tcp --dport 443 -j ACCEPT
-command -v netfilter-persistent >/dev/null && sudo netfilter-persistent save >/dev/null || true
+# Se persiste editando rules.v4: "netfilter-persistent save" volcaria tambien las reglas temporales de Docker.
+RULE="-A INPUT -p tcp -m tcp --dport 443 -j ACCEPT"
+sudo grep -qxF -- "$RULE" /etc/iptables/rules.v4 || sudo sed -i "/^-A INPUT -j REJECT --reject-with icmp-host-prohibited/i $RULE" /etc/iptables/rules.v4
 
 sudo docker rm -f caddy >/dev/null 2>&1 || true
 sudo docker run -d --name caddy --restart unless-stopped --network host --memory 96m \
