@@ -238,3 +238,8 @@ An HTML panel (`helper-panel`), 820 x 400 at (48,10), centred, over a dark veil 
 - Potions row (32 px high): three tinted capsules, HP (red), Mana (blue), SD (purple), each a toggle plus a percent select (default 40%).
 This is the model for plan C8; the Pickup tab was not opened.
 Pickup tab: a single panel "Auto pickup" with the line "Zen stays automatic. Choose jewels and Kundun boxes to pick up.", an "ALL" toggle at its top right, and a grid of six columns of tiles (125 x 78): a round picture of the item, its name (Kundun +1~+5, Bless, Soul, Chaos, Life, Creation, Guardian, Gemstone, Harmony, Lower refine, Higher refine, Jewel of Socket, and more below). A tile on has a green border and gradient and the word AUTO; off is dark with OFF.
+
+## 21. Corrected skill counts (counted again from the page: enabled tiles, not by eye)
+At level 1, skills lit besides the fist: Dark Wizard 1, Dark Knight 6 (of 7), Magic Gladiator 4 (of 21), Dark Lord 6 (of 12), Rage Fighter 4 (of 8), Summoner 0 (of 18). Elf was not recounted (deleted before; first look said 6).
+The page gives no skill names, only "Skill 1" to "Skill N" in tile order, so names must be matched by icon. Dark Knight and Magic Gladiator share two icons (a purple sword slash and a spear lunge).
+Corrects section 12, which overcounted by one or two.
