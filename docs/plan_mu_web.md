@@ -1,4 +1,7 @@
-# Plan del proyecto MU Web
+# Plan del proyecto MU Web (HISTORIA)
+
+REEMPLAZADO el 2026-11-12 por `docs/plan_cliente_igual_a_magdalena.md`, que es el unico plan vigente. Este documento queda con el historial de decisiones y mediciones.
+Descartado por el propietario: fases 5 (apertura), 6 (APK) y 7 (arte original); la fase 2 esta hecha; la fase 4 (administracion) la hace otro chat.
 
 Documento vivo. Es la ruta acordada con el propietario; cualquier sesion de trabajo lo lee antes de actuar y lo
 actualiza al terminar una fase. Ultima revision: 2026-11-11 (noche).

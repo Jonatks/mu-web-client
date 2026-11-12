@@ -1,6 +1,8 @@
-# Plan: un cliente casi identico a Mu Magdalena (aspecto, juego y rendimiento)
+# PLAN UNICO: un cliente casi identico a Mu Magdalena (aspecto, juego, rendimiento y servidor)
 
-Documento vivo, escrito el 2026-11-12 a partir de TODO lo que el propietario ha pedido. Cada punto lleva: que se hace, como se comprueba y su estado.
+Es el unico plan vigente: reemplaza al de 7 fases (`plan_mu_web.md`, que queda como historia). Decisiones del propietario (2026-11-12): servidor de pruebas privado, no se abre a otros
+jugadores (sin registro publico, sin aviso legal ni pruebas con jugadores reales); cuentas de prueba ya quitadas; sin APK ni arte original; la web de administracion la hace el otro chat.
+Documento vivo, escrito a partir de TODO lo que el propietario ha pedido. Cada punto lleva: que se hace, como se comprueba y su estado.
 Reglas fijas: PC conserva raton y teclado (todo lo nuevo es solo tactil); textos nuevos solo en ingles y espanol; sin gastar dinero; no se copian compras, recargas ni banderas;
 no se publican assets de Webzen; las credenciales de prueba no se guardan en archivos; el propietario no interviene (lo que exija su mano se anota y se sigue).
 Estados: [hecho] [parcial] [pendiente] [solo el propietario].
@@ -70,13 +72,12 @@ E7. Pantalla de inicio de sesion mas ligera. [pendiente]
 E8. Descarga: decidir entre bajar todo al inicio (como Magdalena, 510 MB) o por demanda (hoy, ~5 MB); el propietario prefirio todo al inicio con barra de progreso. [parcial]
 E9. Optimizar al final, sin tocar lo que quedo igual; repetir las mediciones y guardarlas. [pendiente]
 
-## F. Servidor y seguridad (otra sesion con la extension de Chrome)
-F1. Copia diaria, proxy endurecido, HTTPS con wss, dominio corto de Vercel. [hecho]
-F2. Revocar el token `mu-vm-install`, borrar `mu-assets` cuando no haga falta, quitar cuentas de prueba, borrar `client-old-20261110-1940`. [solo el propietario]
-F3. Web de administracion (cuentas, personajes, ítems, baneos): diseno en `docs/admin_web.md`, sin construir. [pendiente, fase 4]
-F4. APK y PWA (la PWA esta lista; el APK pide HTTPS, JDK y Android SDK). [pendiente, fase 6]
-F5. Arte original en lugar del de Webzen. [pendiente, fase 7]
-F6. Primera habilidad de las clases que no la reciben del servidor (DK, Elf): decidir si se da por plugin de OpenMU. [pendiente]
+## F. Servidor y administracion
+F1. Copia diaria, proxy endurecido, HTTPS con wss, dominio corto de Vercel, cuentas de prueba quitadas. [hecho]
+F2. Revocar el token `mu-vm-install`, borrar `mu-assets` cuando no haga falta y borrar `client-old-20261110-1940` de la VM. [solo el propietario / otro chat]
+F3. Web de administracion estilo MU Editor (otro chat, con la extension de Chrome): ingreso propio, crear y editar cuentas y personajes, ítems, baneos. Diseno en `docs/admin_web.md`. [otro chat]
+F4. Primera habilidad de las clases que no la reciben del servidor (DK, Elf): decidir si se da por plugin de OpenMU. [pendiente]
+F5. Comprobar que el cliente solo consulta nuestro mundo (sin servidores de terceros). [pendiente]
 
 ## G. Verificacion y entrega
 G1. Pruebas automaticas: tipos, estructura, pruebas de unidad, idiomas. [continuo]
