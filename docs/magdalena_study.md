@@ -207,3 +207,8 @@ longer available to this session, so further study there waits for the owner to 
 - Respawn is in the Lorencia town square (about (134,120)), with HP restored, no loss of items seen.
 - Tapping a mob attacks it: the hero walks up, a red damage number rises above the mob and the orange ring with four ticks stays under it.
 - Near an NPC a pill "Talk" (plus the NPC's role, e.g. "Daily Quest") appears above the bottom bar; tapping it opens the NPC's window as a 270 px wide column on the right edge, full height, dark metal frame, bold title, centred body text, section headings in gold and a wide gold-edged button ("Claim box"). The Daily Quest NPC asks for 250 resets and gives a Box of Reset (5 Jewel of Rare, Purge or Reroll, same chance); it shows account progress "0 / 250".
+
+## 16. Welcome card and server rules (shown on first entry to the world, 2026-11-12)
+- A centred card (about 685 x 230 px, dark purple, gold border, round X) with the server logo, the title "Welcome to MuMagdalenas!", and the line "You already have all skills unlocked. Level up and use /reset (at level 400) to grow stronger and stronger", three gold chips (EXP 300x, Reset level 400, All skills) and a wide gold PLAYER GUIDE button.
+- This is why every class shows its skills lit at level 1: the server grants all class skills at once. For our server this is the answer to plan F4: grant the class skills at character creation (plugin), not a client list.
+- Player Guide: reset at level 400 returns the hero to level 1 with 500 points per accumulated reset (625 for Dark Lord), limit 65,000 per stat, keeps evolution and gear; commands /reset, /agi /str /ene /sta (/vit) /cmd N, and /post message for global chat. Buttons: WhatsApp, Site, CLOSE.
