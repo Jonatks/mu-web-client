@@ -158,3 +158,15 @@ sun shafts, bloom and glow off 4.3; plus classic lighting and materials 5.1; plu
 Phone profile v3 takes those values (post-processing, shadows, lights, MSAA, sun shafts, bloom, glow, FXAA and sharpening off, classic lighting and
 materials, grass 2); all of it can be turned back on in Options. Still heavier than Mu Magdalena: its scene is lighter and its JS heap far smaller. Next steps:
 lower the render resolution on a phone, cull the login scene, and look at the heap (models and textures kept in JS memory).
+
+## 11. What Mu Magdalena is made of (probe, 2026-11-12)
+- It is the C++ client compiled to WebAssembly (Emscripten: a global `Module`, about 510 MB of `.data.bin` packages downloaded before playing, 0.2 MB of JavaScript).
+  Its canvas is drawn at the page's own size (915x411 at a device ratio of 1) with WebGL 2, no antialiasing. That is why its JS heap is 19 MB.
+- Counting WebGL calls from the page gives no fair comparison: Magdalena showed 50 draws and 9.4k triangles per frame, which cannot be the whole crowded world, so its 3D is
+  drawn somewhere the page hook does not see (probably an offscreen canvas in a worker); this client showed 17 draws and 24k triangles per animation frame but renders at far
+  fewer frames than animation callbacks. Do not use those counts. What is comparable is the frames per second on the same machine (section 10).
+- Rewriting this client in C++ / WebAssembly is possible but not recommended: it would discard the ported game and the touch interface, the C++ source of the original client is
+  Webzen's, and the gain is in memory and logic, not in GPU drawing, which goes through WebGL either way.
+- Plan for performance without changing the look: (1) measure frame time per system inside this client (terrain, objects, characters, effects, post-processing) with the engine's own
+  instrumentation; (2) instance repeated objects and grass; (3) compress textures (KTX2); (4) free models and textures kept in JS memory; (5) only then touch quality options, and
+  only to values that look the same on a phone-size screen.
