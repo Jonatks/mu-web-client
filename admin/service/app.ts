@@ -8,14 +8,14 @@ import { GateError, assertNobodyConnected } from './gate';
 import * as items from './items';
 import { auditTail, recentUndo, undo } from './undo';
 
-export type Config = { key: string; gateSources: string[]; sql: Sql };
+export type Config = { key: string; gateFile: string; sql: Sql };
 
 const json = (data: unknown, status = 200) => Response.json(data, { status, headers: { 'cache-control': 'no-store' } });
 
 export function createApp(cfg: Config) {
   const { sql } = cfg;
   const gated = <T>(fn: () => Promise<T>) => {
-    assertNobodyConnected(cfg.gateSources);
+    assertNobodyConnected(cfg.gateFile);
     return fn();
   };
 
@@ -34,7 +34,7 @@ export function createApp(cfg: Config) {
 
     if (p[0] === 'status' && m === 'GET') {
       let gate: { ok: boolean; message: string } = { ok: true, message: 'nobody connected' };
-      try { assertNobodyConnected(cfg.gateSources); } catch (e) { gate = { ok: false, message: (e as Error).message }; }
+      try { assertNobodyConnected(cfg.gateFile); } catch (e) { gate = { ok: false, message: (e as Error).message }; }
       const n = await sql`SELECT (SELECT count(*)::int FROM data."Account") AS accounts, (SELECT count(*)::int FROM data."Character") AS characters`;
       return { gate, ...n[0] };
     }

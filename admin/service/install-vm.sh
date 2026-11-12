@@ -32,7 +32,7 @@ CF
 }
 
 if [ "${1:-}" = "rollback" ]; then
-  sudo docker rm -f mu-admin >/dev/null 2>&1 || true
+  sudo docker rm -f mu-admin mu-gate >/dev/null 2>&1 || true
   write_caddy 0
   echo "mu-admin quitado y ruta /_admin fuera de Caddy"
   exit 0
@@ -66,13 +66,14 @@ sudo docker run --rm -v "$APP/admin/service":/s -w /s oven/bun:1.4.2-slim bun in
 printf 'DATABASE_URL=postgres://mu_admin:%s@database:5432/%s\n' "$PW" "$DB" | sudo tee "$CFG/env" >/dev/null
 sudo chmod 600 "$CFG/env"
 
-# El estado de las conexiones del host (no del contenedor) lo da el modulo de seguimiento de conexiones del kernel.
-MOUNTS=()
-for f in nf_conntrack tcp; do [ -r "/proc/1/net/$f" ] && MOUNTS+=(-v "/proc/1/net/$f:/host/$f:ro"); done
+# Quien esta conectado: un contenedor pequeno comparte la red de OpenMU y escribe cada 2 s cuantos sockets hay en los puertos de juego.
+sudo docker rm -f mu-gate >/dev/null 2>&1 || true
+sudo docker run -d --name mu-gate --restart unless-stopped --network container:openmu --memory 40m \
+  -v "$APP":/app:ro -v "$DATA":/var/lib/mu-admin -w /app/admin/service oven/bun:1.4.2-slim bun gate-sidecar.ts >/dev/null
 sudo docker rm -f mu-admin >/dev/null 2>&1 || true
 sudo docker run -d --name mu-admin --restart unless-stopped --network openmu_default --memory 80m \
   -p 127.0.0.1:3200:3200 --env-file "$CFG/env" -e ADMIN_KEY_FILE=/run/key \
-  -v "$APP":/app:ro -v "$CFG/key":/run/key:ro -v "$DATA":/var/lib/mu-admin "${MOUNTS[@]}" \
+  -v "$APP":/app:ro -v "$CFG/key":/run/key:ro -v "$DATA":/var/lib/mu-admin \
   -w /app/admin/service oven/bun:1.4.2-slim bun main.ts >/dev/null
 sleep 3
 

@@ -1,43 +1,35 @@
 // "Is anybody connected to a game server?" OpenMU keeps a player's data in memory while he is online, so no
-// character is written then. It has no online list, so the connections to the game ports are counted instead.
+// character is written then. OpenMU has no online list, so the sockets of its own container are counted: a sidecar
+// that shares the OpenMU network namespace (gate-sidecar.ts) writes the count to a file every two seconds.
 import { readFileSync } from 'node:fs';
 
 export const GAME_PORTS = [45901, 45902, 45903, 45904, 45905, 45906];
+export const MAX_AGE_MS = 15_000;
 
-/** Connections to a game port in the text of /proc/net/nf_conntrack or /proc/net/tcp. Null when it is neither. */
-export function countConnected(text: string, ports: number[] = GAME_PORTS): number | null {
-  const lines = text.split('\n').filter(l => l.trim());
-  if (lines.length === 0) return 0;
-  let n = 0;
-  if (/^\s*sl\s+local_address/.test(lines[0] ?? '')) {
-    for (const l of lines.slice(1)) {
-      const f = l.trim().split(/\s+/);
-      const port = (a?: string) => parseInt((a ?? '').split(':')[1] ?? '', 16);
-      if (f[3] === '01' && (ports.includes(port(f[2])) || ports.includes(port(f[1])))) n++;
-    }
-    return n;
+export type Sockets = { listening: number; established: number };
+
+/** Sockets on the game ports in the text of /proc/net/tcp (or tcp6): state 0A listens, 01 is a connected player. */
+export function countSockets(text: string, ports: number[] = GAME_PORTS): Sockets {
+  const out: Sockets = { listening: 0, established: 0 };
+  for (const l of text.split('\n').slice(1)) {
+    const f = l.trim().split(/\s+/);
+    const port = parseInt((f[1] ?? '').split(':')[1] ?? '', 16);
+    if (!ports.includes(port)) continue;
+    if (f[3] === '0A') out.listening++;
+    else if (f[3] === '01') out.established++;
   }
-  if (!/^(ipv4|ipv6)\s/.test(lines[0] ?? '')) return null;
-  for (const l of lines) {
-    if (!/\stcp\s/.test(l) || !l.includes(' ESTABLISHED ')) continue;
-    const d = /\sdport=(\d+)/.exec(l);
-    if (d && ports.includes(Number(d[1]))) n++;
-  }
-  return n;
+  return out;
 }
 
 export class GateError extends Error {}
 
-/** Throws unless the sources can be read and show nobody connected (fails closed). */
-export function assertNobodyConnected(paths: string[], read: (p: string) => string = p => readFileSync(p, 'utf8')): void {
-  let checked = 0;
-  for (const p of paths) {
-    let text: string;
-    try { text = read(p); } catch { continue; }
-    const n = countConnected(text);
-    if (n === null) continue;
-    checked++;
-    if (n > 0) throw new GateError(`${n} connection(s) to the game servers: no player may be connected while editing`);
-  }
-  if (checked === 0) throw new GateError('cannot check who is connected, so nothing is written');
+export type GateFile = { at: number; listening: number; established: number };
+
+/** Throws unless the sidecar's file is fresh, shows the game ports listening and nobody connected (fails closed). */
+export function assertNobodyConnected(file: string, now = Date.now(), read: (p: string) => string = p => readFileSync(p, 'utf8')): void {
+  let g: GateFile;
+  try { g = JSON.parse(read(file)) as GateFile; } catch { throw new GateError('cannot check who is connected (no gate file), so nothing is written'); }
+  if (typeof g.at !== 'number' || now - g.at > MAX_AGE_MS) throw new GateError('the connection check is stale, so nothing is written');
+  if (g.listening < 1) throw new GateError('the game servers are not listening: cannot tell who is connected, so nothing is written');
+  if (g.established > 0) throw new GateError(`${g.established} connection(s) to the game servers: no player may be connected while editing`);
 }
