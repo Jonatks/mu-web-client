@@ -243,3 +243,9 @@ Pickup tab: a single panel "Auto pickup" with the line "Zen stays automatic. Cho
 At level 1, skills lit besides the fist: Dark Wizard 1, Dark Knight 6 (of 7), Magic Gladiator 4 (of 21), Dark Lord 6 (of 12), Rage Fighter 4 (of 8), Summoner 0 (of 18). Elf was not recounted (deleted before; first look said 6).
 The page gives no skill names, only "Skill 1" to "Skill N" in tile order, so names must be matched by icon. Dark Knight and Magic Gladiator share two icons (a purple sword slash and a spear lunge).
 Corrects section 12, which overcounted by one or two.
+
+## 22. Checking the other chat's class lists against the icons (2026-11-12)
+- Dark Knight (6): the studied page shows lightning, spear, purple sword, fire burst, red shield and a blue sword. The list given (Crescent Moon Slash, Falling Slash, Lunge, Uppercut, Cyclone, Slash) is plausible except that the red shield looks like Defense (18), which was left out on purpose; one of the six may be Defense and Crescent Moon Slash may be the lightning-like icon. Unverified by name.
+- Magic Gladiator (4): shares the spear and the purple sword with the Dark Knight, so it must hold Lunge (20) and Uppercut (21); the other two icons are a red blade with a skull and a fire blade. The list given (Energy Ball, Power Slash, Spiral Slash, Mana Rays) does not match: it has no spear or purple-sword skill.
+- Dark Lord (6): the icons are birds and a rider (the Dark Raven commands and mount), plus a blue slash; the list given (Falling Slash, Lunge, Force, Earthshake, Force Wave, Fire Blast) has no bird commands. Probably wrong.
+- Rage Fighter (4) and Elf (6): no icon cross-check done yet.
