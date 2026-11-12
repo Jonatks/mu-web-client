@@ -156,7 +156,7 @@ function go(path) {
   PAGES[page](decodeURIComponent(rest.join('/')));
   scrollTo(0, 0);
 }
-$('#tabs').addEventListener('click', e => e.target.dataset.tab && go(e.target.dataset.tab));
+$('#tabs').addEventListener('click', e => { const b = e.target.closest('button'); if (b?.dataset.tab) go(b.dataset.tab); });
 
 const head = (title, sub, ...right) => h('div', { class: 'page-head' }, h('div', {}, h('h2', {}, title), sub ? h('p', {}, sub) : null), h('div', { class: 'row' }, ...right));
 

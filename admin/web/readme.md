@@ -15,3 +15,6 @@ Item icons: `public/items/<group>_<number>.webp` (72px) and `public/items/index.
 chips that come from `GET /items/categories`, so only kinds the server really has (for the character's class line and body slot) are offered.
 
 `public/server.js` is the `Servidor` page (tabs for rules, spots map, drops, monsters, shops, events, warps and plug-ins). It gets the page helpers from `app.js`. Every tab starts with summary tiles and shows "old -> new (+/-)" while a field is edited (`draftKit`, `stat`, `savebar` inside the file). `app.js` also holds the log cleaner dialog on the `Registro` page.
+
+## Look
+`public/app.css` ends with the "app look" layer: Android-style rounded surfaces, tonal buttons, a navigation drawer on wide screens, and on phones (860 px and below) a top bar plus a bottom navigation bar, dialogs that slide up as sheets, and a snackbar toast. The colours are tokens at the top of the file (dark and light), so a new component should use them and the `--r-*` radii instead of its own values. No inline `style` attributes (the page CSP forbids them).
