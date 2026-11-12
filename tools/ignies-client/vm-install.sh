@@ -40,15 +40,16 @@ unset GITHUB_TOKEN
 
 echo "== 2/6 verificacion"
 cat "$TMP"/ignies-assets.zip.part* > "$TMP/assets.zip"
-rm -f "$TMP"/ignies-assets.zip.part*
+sudo rm -f "$TMP"/ignies-assets.zip.part*
 ( cd "$TMP" && mv ignies-code.zip code.zip && sed -i 's/ ignies-code.zip/ code.zip/' SHA256SUMS && sha256sum -c SHA256SUMS )
 
 echo "== 3/6 armando el cliente nuevo en $NEW"
 sudo rm -rf "$NEW"; sudo mkdir -p "$NEW"; sudo chown "$(id -u):$(id -g)" "$NEW"
 unzip -q "$TMP/code.zip" -d "$NEW"
 unzip -q "$TMP/assets.zip" -d "$NEW"
-if [ -d "$OLD/items" ]; then cp -al "$OLD/items" "$NEW/items" 2>/dev/null || cp -a "$OLD/items" "$NEW/items"; else echo "AVISO: el cliente actual no tiene items/ (los iconos no se verian)"; fi
-rm -rf "$TMP"
+# Contents of items/, not the folder itself: if the package already has items/, copying the folder would nest items/items.
+if [ -d "$OLD/items" ]; then mkdir -p "$NEW/items"; cp -al "$OLD/items/." "$NEW/items/" 2>/dev/null || cp -a "$OLD/items/." "$NEW/items/"; else echo "AVISO: el cliente actual no tiene items/ (los iconos no se verian)"; fi
+sudo rm -rf "$TMP"
 for f in index.html server.json serverlist.md Data/gate.bmd game-assets/World1/EncTerrain1.att; do [ -e "$NEW/$f" ] || { echo "Falta $f en el paquete"; exit 1; }; done
 
 echo "== 4/6 nginx.conf (con respaldo)"
