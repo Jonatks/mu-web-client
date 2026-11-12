@@ -249,3 +249,10 @@ Corrects section 12, which overcounted by one or two.
 - Magic Gladiator (4): shares the spear and the purple sword with the Dark Knight, so it must hold Lunge (20) and Uppercut (21); the other two icons are a red blade with a skull and a fire blade. The list given (Energy Ball, Power Slash, Spiral Slash, Mana Rays) does not match: it has no spear or purple-sword skill.
 - Dark Lord (6): the icons are birds and a rider (the Dark Raven commands and mount), plus a blue slash; the list given (Falling Slash, Lunge, Force, Earthshake, Force Wave, Fire Blast) has no bird commands. Probably wrong.
 - Rage Fighter (4) and Elf (6): no icon cross-check done yet.
+
+## 23. Hanzo the Blacksmith's shop (Lorencia (115,140), 2026-11-12)
+- The Lorencia NPCs and their tiles come from the original `Data/World1/Minimap.bmd`: potion seller (125,86), Hanzo the Blacksmith (114,141), Pasi the Mage (116,112), the barmaid (121,135), vault keepers (146,145) and (144,109), Julia (139,138), card master (130,161).
+- The shop window "Merchant" is the classic one stretched like the inventory: x 373 to 643, y 0 to 368, with "Tax rate: 0% (changed in real time)" under the title, the stock grid, a wide "Vender todas las joyas" (sell all jewels) button and two repair hammers at the bottom. The inventory opens beside it. This client already draws both at the same place and size (372 to 644).
+- Tapping a shop item shows the classic tooltip on the left (purchase price in green "Purchasing price: 5,995,400", option lines in blue, class lines in red when the hero cannot use it) and picks the item up like a mouse click; tapping the inventory then tries to buy. With 0 zen nothing is bought and no message was seen.
+- Difference kept on purpose: this client shows a sheet with the picture, the tooltip and a gold Buy button instead of picking the item up, because a phone has no cursor to carry it (noted for the owner).
+- In the Helper the Dark Knight's red shield icon sits under Buffs, so one of its six level 1 skills is a buff (likely Swell Life), not an attack.
