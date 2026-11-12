@@ -228,3 +228,12 @@ The crowd options change almost nothing here, so they are not the lever. Draws a
 ## 19. Why the windows are 1.4 times wider (found by measuring the inventory)
 The inventory in Magdalena is 270 x 365 px at 915x412, the classic 190 x 429 window. Both ratios follow from stretching the 640x480 interface over the screen: 915/640 = 1.43 across and 412/480 = 0.86 down. The window sits at the top right (x 645 to 915, y 0 to 365). This client now does the same on phones (`windowStretch` in `src/controllers/interface/windowManager.ts`), desktop unchanged.
 The COMMANDS menu there has dark brown tiles with warm orange icons, a spaced muted-gold title and a round X; it has 8 entries (Move, Inventory, Allocate points, Ranking, Guild Clan, MU Helper, Settings, Change character, Sign out); a card "Top up by card" can open on top of it: only its OK button is safe to press.
+
+## 20. MU Helper window on a phone (measured from the page, 915x412)
+An HTML panel (`helper-panel`), 820 x 400 at (48,10), centred, over a dark veil (rgba(1,4,5,.76)); gold hairline frame.
+- Header (57 px): a green round mark with crossed swords (38 px), the title "MU HELPER" (15 px bold, #ffe4a3, spaced), a status pill "Stopped" (9 px, grey) and a round "?" and a round X (36 px).
+- Tabs (27 px): COMBAT and PICKUP, 116 x 25 each, centred; the active one has a lighter fill and gold text.
+- Combat page, two lanes 393 x 211 side by side, each with a small-caps title: "Attacks" (right side label "ROTATION") and "Buffs" (right side label "ONLY WHEN MISSING"). Top row of each lane: the chosen skills (the attack row has a skill with a small red x to remove; Buffs says "No buffs selected"); below a hairline: the skills that can be added, each with a small green plus badge; unavailable ones are grey with a grey plus.
+- Footer (87 px): "Attack range [1]" and "Loot range [1]" selects (48 x 30), an "Original position" toggle, a red "MANUAL" pill; a big green "START HELPER" button at the bottom right (about 150 x 36, green gradient, white bold text).
+- Potions row (32 px high): three tinted capsules, HP (red), Mana (blue), SD (purple), each a toggle plus a percent select (default 40%).
+This is the model for plan C8; the Pickup tab was not opened.
