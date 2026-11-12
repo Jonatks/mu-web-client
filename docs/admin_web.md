@@ -32,7 +32,7 @@ the schema, edits applied, tables compared), not by driving the panel. Result:
 | delete item | `data."Item"` (its links go with it; the saved copy also keeps `data."ItemItemOfItemSet"`) |
 
 Item options come from `config."ItemDefinitionItemOptionDefinition"` -> `config."IncreasableItemOption"` (type and number), so only options that
-item can really carry are accepted. Not built: creating a character (do it in the game), quests, letters, guild, unlocked classes.
+item can really carry are accepted. Master level and resets are counters (a StatAttribute row is created on the first edit). Class changes only swap the class: points, skills and items are not touched, and the in-game evolution is a quest the panel does not edit. Not built: creating a character (do it in the game), quests, letters, guild, unlocked classes.
 Vault slots are numbered from 0 (verify in game with the first inserted vault item).
 
 ## Rules that keep data safe
