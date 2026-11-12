@@ -10,7 +10,8 @@ Un "fotograma por segundo" aqui sirve para comparar entre filas, no para predeci
 | 2 | 2026-11-12 | Mi cliente, Lorencia sin conexion, vacio | 52 | 16 | 23.8k | n/d | no comparable (otra escena) | no comparable |
 | 3 | 2026-11-12 | Mi cliente, Lorencia sin conexion, 40 jugadores y 10 monstruos | 40 | 25 | 24.9k | n/d | igual de ligero que 2 (-12 fps por la multitud) | no comparable |
 | 3b | 2026-11-12 | Magdalena, mundo con unos 50 jugadores (referencia) | 57 | 44 | 8.6k | n/d | n/a | n/a |
+| 4 | 2026-11-12 | Mi cliente, mundo en linea, mismo metodo que la 1 (servidor local, cuenta test6) | 9.1 | n/d | n/d | 231 MB | frente a la 3: no comparable (otra escena) | fps +0.3 (8.8 a 9.1, dentro del ruido); memoria JS peor, +38 MB (193 a 231) |
 
 Lectura: no se ha cambiado todavia ningun codigo de rendimiento; los cambios publicados hasta ahora (anillo, ventanas, menu, lista de servidores) no tocan el dibujo del mundo.
 La unica medicion directamente comparable entre Magdalena y mi cliente en el mismo escenario es la 3 contra la 3b: mi cliente hace menos llamadas (25 contra 44), mas triangulos (24.9k contra 8.6k) y menos fotogramas (40 contra 57).
-Pendiente: medir en linea (mundo real) con el panel de rendimiento abierto, para repetir la fila 1 y saber si algo mejora de verdad.
+La fila 4 repite la 1: los fotogramas no cambiaron (no se toco el dibujo) y la memoria JS subio 38 MB; hay que averiguar que la ocupa antes de seguir (proximo paso: instantanea de memoria en el mundo).
