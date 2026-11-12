@@ -145,7 +145,7 @@ if helm:
     r = call('POST', '/characters/' + NAME + '/items', {'definitionId': helm['id'], 'slot': 2})
     check('helm worn in slot 2', 'undoId' in r, r)
     inv = call('GET', '/characters/' + NAME + '/items')
-    worn = next((i for i in inv['items'] if i['slot'] == 2), None)
+    worn = next((i for i in inv if i['slot'] == 2), None)
     check('helm listed in slot 2', worn is not None, inv)
     check('slot 2 taken', 'ERR' in call('POST', '/characters/' + NAME + '/items', {'definitionId': helm['id'], 'slot': 2}))
     if worn:
