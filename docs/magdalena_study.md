@@ -200,3 +200,10 @@ longer available to this session, so further study there waits for the owner to 
 - Mob look: the name ("Giant") sits above a red life bar about 100 px wide; the bar is drawn for every mob in range, not only the target.
 - Target look: an orange ring with four small tick marks under the targeted mob; the hit number is red and sits above the hero's head.
 - The HP orb turns grey-looking and the life number falls to 12 when low. Lesson for the next pass: level the hero near the spawn first, or use a high level character with GM-free safe tests.
+
+## 15. Movement and a Hound fight (level 1 Dark Knight, 2026-11-12)
+- Tapping the ground walks there (a path of a few tiles per tap, it stops at walls); the joystick holds a direction. Pressing the stick towards the screen up-left against the town walls does not slide along them.
+- A level 1 Dark Knight (128 HP) died to one Hound at (35,117): a hit of 23, three to five hits to die. West of Lorencia (x 35 to 60, y 105 to 125) holds Hounds and Giants, not spiders. Weak mobs for a new hero are elsewhere; this is why a second pass needs a few levels first.
+- Respawn is in the Lorencia town square (about (134,120)), with HP restored, no loss of items seen.
+- Tapping a mob attacks it: the hero walks up, a red damage number rises above the mob and the orange ring with four ticks stays under it.
+- Near an NPC a pill "Talk" (plus the NPC's role, e.g. "Daily Quest") appears above the bottom bar; tapping it opens the NPC's window as a 270 px wide column on the right edge, full height, dark metal frame, bold title, centred body text, section headings in gold and a wide gold-edged button ("Claim box"). The Daily Quest NPC asks for 250 resets and gives a Box of Reset (5 Jewel of Rare, Purge or Reroll, same chance); it shows account progress "0 / 250".
