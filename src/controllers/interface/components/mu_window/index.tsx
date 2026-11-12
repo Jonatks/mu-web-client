@@ -70,13 +70,16 @@ export const MuItemWindow = observer(
         className={`mu-item-window${className ? ` ${className}` : ''}`}
         onPointerDown={chrome.onPointerDown}
         style={{
-          right: column * WINDOW_WIDTH * chrome.scale,
+          right: column * WINDOW_WIDTH * chrome.scaleX,
           // A phone is short: like Mu Magdalena, the windows take the full height (the bar sits behind them) so the
           // title and the close button are never cut off.
-          bottom: isMobileDevice() ? 0 : bottomBarScreenHeight(),
+          ...(isMobileDevice()
+            ? { top: 0, bottom: 'auto' }
+            : { bottom: bottomBarScreenHeight() }),
           backgroundImage: back ? `url(${back.url})` : undefined,
           backgroundSize: '100% 100%',
           ...chrome.style,
+          ...(isMobileDevice() && chrome.anchored ? { transformOrigin: '100% 0' } : {}),
           ...style,
         }}
       >

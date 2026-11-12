@@ -31,6 +31,13 @@ const defaultScaleOf = (id: string): number =>
 /** At least this many screen pixels of a window stay reachable on every side. */
 const EDGE_MARGIN = 32;
 
+/** The 640x480 interface stretched over a width x height screen: the across scale over the down scale, kept between 1 and 1.7. */
+export function windowStretch(width: number, height: number): number {
+  if (!(width > 0) || !(height > 0)) return 1;
+
+  return Math.min(1.7, Math.max(1, width / 640 / (height / 480)));
+}
+
 /** Screen pixels kept free around a window when fitting its scale to the viewport. */
 const FIT_MARGIN = 12;
 
@@ -95,11 +102,19 @@ export const MuWindows = new (class _MuWindows {
     if (!size) return MAX_SCALE;
     const { width, height } = this.viewport;
     const fit = Math.min(
-      (width - FIT_MARGIN * 2) / size.width,
+      (width - FIT_MARGIN * 2) / (size.width * this.stretchOf()),
       // A phone gives a window the whole height, as Mu Magdalena does: the bar sits behind it.
       (height - (isMobileDevice() ? 0 : FIT_MARGIN * 2)) / size.height
     );
     return Math.min(MAX_SCALE, Math.max(fit, 0.25));
+  }
+
+  /**
+   * How much wider than tall a phone draws a window: Mu Magdalena stretches the 640x480 interface over the whole screen, so a
+   * 915x412 phone gets 1.43 across and 0.86 down. 1 on a desktop, where the ratio stays square.
+   */
+  stretchOf(): number {
+    return isMobileDevice() ? windowStretch(this.viewport.width, this.viewport.height) : 1;
   }
 
   /**
@@ -108,7 +123,9 @@ export const MuWindows = new (class _MuWindows {
    */
   scaleOf(id: string): number {
     const wanted = this.placement(id).scale * uiScaleFactor(GameOptions.uiScale);
-    return Math.min(wanted, this.fitScaleOf(id));
+    // A phone draws the 640x480 interface over the screen height, as Mu Magdalena does (a 429 unit window is 0.86 tall there).
+    const cap = isMobileDevice() && this.viewport.height > 0 ? this.viewport.height / 480 : Infinity;
+    return Math.min(wanted, this.fitScaleOf(id), cap);
   }
 
   /** Every window back to its default corner and size. */
@@ -266,7 +283,7 @@ export const MuWindows = new (class _MuWindows {
     }
     const scale = this.scaleOf(id);
     return {
-      x: Math.min(Math.max(x, 0), Math.max(0, width - size.width * scale)),
+      x: Math.min(Math.max(x, 0), Math.max(0, width - size.width * scale * this.stretchOf())),
       y: Math.min(Math.max(y, 0), Math.max(0, height - size.height * scale)),
     };
   }

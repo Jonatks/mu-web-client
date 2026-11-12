@@ -246,18 +246,21 @@ export function gridPointOf(
   grid: HTMLElement | null,
   columns: number,
   clientX: number,
-  clientY: number
+  clientY: number,
+  rows = 0
 ) {
   const rect = grid?.getBoundingClientRect();
   if (!rect) return null;
 
   const scale = rect.width / (columns * SQUARE);
   if (!scale) return null;
+  // A phone stretches the window across only, so down has its own scale.
+  const scaleY = rows > 0 && rect.height > 0 ? rect.height / (rows * SQUARE) : scale;
 
   return {
     rect,
     x: (clientX - rect.left) / scale,
-    y: (clientY - rect.top) / scale,
+    y: (clientY - rect.top) / scaleY,
   };
 }
 
@@ -356,7 +359,7 @@ export const ItemGrid = observer(
     latest.current = { squares, pickedSize };
 
     const squareAt = (clientX: number, clientY: number) => {
-      const point = gridPointOf(gridRef.current, columns, clientX, clientY);
+      const point = gridPointOf(gridRef.current, columns, clientX, clientY, rows);
       if (!point) return -1;
 
       const column = Math.floor(point.x / SQUARE);
@@ -371,7 +374,7 @@ export const ItemGrid = observer(
       const size = latest.current.pickedSize;
       if (!size) return null;
 
-      const point = gridPointOf(gridRef.current, columns, clientX, clientY);
+      const point = gridPointOf(gridRef.current, columns, clientX, clientY, rows);
       if (!point) return null;
 
       const { rect } = point;

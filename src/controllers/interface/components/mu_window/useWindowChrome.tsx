@@ -17,6 +17,8 @@ type WindowChrome = {
   /** Put on the window's root: joins the stack while the element is mounted. */
   ref: Ref<HTMLElement>;
   scale: number;
+  /** The across scale: the same as `scale` on a desktop, wider on a phone. */
+  scaleX: number;
   anchored: boolean;
 };
 
@@ -122,17 +124,20 @@ export function useWindowChrome(
   // The saved scale capped so the whole window fits the viewport, so a
   // resized window can never leave the screen bounds.
   const scale = MuWindows.scaleOf(id);
+  // Phones stretch the window across, like Mu Magdalena (`windowStretch`).
+  const stretch = MuWindows.stretchOf();
+  const scaleX = scale * stretch;
 
   const style: CSSProperties = {
     width,
     height,
     zIndex: MuWindows.zIndexOf(id),
-    transform: `scale(${scale})`,
+    transform: stretch === 1 ? `scale(${scale})` : `scale(${scaleX}, ${scale})`,
     transformOrigin: anchored ? '100% 100%' : '0 0',
     ...(anchored ? {} : { left: placement.x!, top: placement.y!, right: 'auto', bottom: 'auto' }),
   };
 
-  return { style, onPointerDown, ref, scale, anchored };
+  return { style, onPointerDown, ref, scale, scaleX, anchored };
 }
 
 export const MuResizeGrip = observer(

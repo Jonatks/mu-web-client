@@ -60,3 +60,13 @@ describe('MuWindows.closeAll', () => {
     runInAction(() => (AppState.hudHidden = false));
   });
 });
+
+describe('windowStretch', () => {
+  it('stretches a phone like Mu Magdalena and leaves a 4:3 screen square', async () => {
+    const { windowStretch } = await import('./windowManager');
+    expect(windowStretch(915, 412)).toBeCloseTo(1.667, 2);
+    expect(windowStretch(640, 480)).toBe(1);
+    expect(windowStretch(400, 800)).toBe(1);
+    expect(windowStretch(0, 0)).toBe(1);
+  });
+});
