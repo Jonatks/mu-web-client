@@ -1,6 +1,6 @@
 # Runs against the scratch copy (DB=openmu_probe), never the live game database.
 # sudo python3 ~/smoke_full.py CHARACTER   (reads /etc/mu-admin/key, never prints it; every write is undone or checked)
-import json, sys, urllib.request as u
+import json, sys, urllib.parse, urllib.request as u
 
 K = open('/etc/mu-admin/key').read().strip()
 NAME = sys.argv[1]
@@ -76,7 +76,7 @@ check('skill remove', 'undoId' in r3 and not any(e['id'] == sid for e in call('G
 undo(r3, 'skill remove'); undo(r2, 'skill level'); undo(r, 'skill add')
 
 # items: add, edit, move, transfer, delete
-sword = next(d for d in call('GET', '/items/definitions?q=Short Sword'))
+sword = next(d for d in call('GET', '/items/definitions?q=' + urllib.parse.quote('Short Sword')))
 r = call('POST', f'/characters/{NAME}/items', {'definitionId': sword['id'], 'level': 1})
 check('item add', 'undoId' in r, r)
 iid = r['result']['itemId']
