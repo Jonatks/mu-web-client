@@ -184,7 +184,7 @@ Method: create a character of the class, enter, open the Skills window and read 
 - **Dark Lord** (ClauDLo): starts in Lorencia (149,120); lit: fist plus 7 skills (all bird/pet-style icons: a bird head, a blue slash, three purple birds and a rider); 6 greyed. The Skills window has a centred title bar 'SKILLS' and a round X at the top right.
 - Creation card pills (x at y=338): Dark Wizard 198, Dark Knight 286, Elf 368, Magic Gladiator 460, Dark Lord 549, Summoner 627, Rage Fighter 716.
 - The 'Character deleted' dialog has its Accept button at (458,243); after Accept the list may focus another character, so read the name before each Delete.
-- Not yet studied: Summoner.
+- **Summoner** (ClauSu): starts in Elveland (53,224) (not Lorencia); lit: only the fist; all 18 other tiles greyed. So "all skills unlocked" is the class's learnable list by level, not a gift of every skill: Dark Wizard 1 lit of 24, Summoner 0 lit of 18 at level 1, while DK, Elf, MG, DL and RF start with 5 to 8.
 Consequence for this client: a new Dark Knight and Elf on this server have no skill, so the cast button only punches. Either the server gives the starting skills (plugin, plan F4)
 or the client lists them as locked until learned.
 
