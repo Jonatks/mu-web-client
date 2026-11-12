@@ -31,5 +31,13 @@ elif a[0] == 'item':
     print('items ahora', len(api('GET', f'/characters/{n}/items')), 'antes', before)
     r = api('POST', f'/characters/{n}/items', {'definitionId': d['id'], 'level': 3})
     print('borrar    ', api('DELETE', f"/characters/{n}/items/{r['result']['itemId']}"))
+elif a[0] == 'acct':
+    l = a[1]
+    print('crear   ', api('POST', '/accounts', {'login': l, 'password': 'abcd1234'}))
+    print('lista   ', [(x['login'], x['stateName']) for x in api('GET', '/accounts?q=' + l)])
+    print('clave   ', api('POST', f'/accounts/{l}/password', {'password': 'zzzz9999'}))
+    r = api('POST', f'/accounts/{l}/state', {'state': 'banned'}); print('ban     ', r, [x['stateName'] for x in api('GET', '/accounts?q=' + l)])
+    r2 = api('POST', f'/accounts/{l}/state', {'state': 'normal'}); print('unban   ', r2, [x['stateName'] for x in api('GET', '/accounts?q=' + l)])
+    print('mala    ', api('POST', '/accounts', {'login': 'a b', 'password': 'x'}), api('POST', f'/accounts/{l}/state', {'state': 'god'}))
 elif a[0] == 'account':
     print(api('POST', '/accounts', {'login': a[1], 'password': a[2]})); print([x for x in api('GET', '/accounts?q=' + a[1])])
