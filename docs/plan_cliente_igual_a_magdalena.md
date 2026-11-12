@@ -9,7 +9,7 @@ Estados: [hecho] [parcial] [pendiente] [solo el propietario].
 
 ## A. Estudio de Mu Magdalena (cuenta normal, personaje nuevo, celular horizontal 915x412)
 Para cada area: entrar, jugar, capturar, volcar el DOM (medidas, fuentes, colores), anotar comportamiento y pasos exactos. Resultado en `docs/magdalena_study.md`.
-A1. Clases y razas, una por una (DW, DK, Elf, MG, DL, Summoner, RF): donde nace, habilidad inicial, armas, como ataca (cerca, lejos, maná, AG), primeras 10 subidas de nivel. [hecho salvo Summoner: DW, DK, Elf, MG, DL y RF estudiados; falta liberar un hueco de personaje, ver seccion 12 del estudio]
+A1. Clases y razas, una por una (DW, DK, Elf, MG, DL, Summoner, RF): donde nace, habilidad inicial, armas, como ataca (cerca, lejos, maná, AG), primeras 10 subidas de nivel. [hecho: las 7 clases estudiadas, ver secciones 12 y 16 del estudio]
 A2. Mobs: cada familia (arana, dragon rojo, bull fighter, esqueleto...), tamano, barra de vida, daño, que sueltan, cuanto tardan en morir segun nivel. [parcial]
 A3. Peleas: apuntar, anillo del objetivo, golpe basico contra habilidad, numeros de daño, muerte del mob, muerte del jugador y reaparicion, experiencia y nivel. [parcial]
 A4. Botin: como cae, nombre en el suelo, oro, ítems especiales, mano de recoger, que pasa con varios ítems a la vez, inventario lleno. [parcial]
