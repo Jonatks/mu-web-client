@@ -109,18 +109,29 @@ export const listMaps = (sql: Sql) =>
               (SELECT count(*)::int FROM config."MonsterSpawnArea" s WHERE s."GameMapId" = m."Id") AS spawns,
               (SELECT coalesce(sum(s."Quantity"), 0)::int FROM config."MonsterSpawnArea" s WHERE s."GameMapId" = m."Id") AS monsters FROM config."GameMapDefinition" m ORDER BY "Number"`);
 
+type LogLine = { id?: unknown; action?: unknown; at?: unknown; detail?: unknown };
+
+/** Saved server changes the running game has not loaded yet. A change that was undone, with its undo line, counts as nothing. */
+export function pendingChanges(log: LogLine[]): { pending: number; lastRestart: string | null } {
+  let lastRestart: string | null = null;
+  const since: LogLine[] = [];
+  for (const e of log) {
+    if (String(e.action ?? '') === 'server.restart') { lastRestart = String(e.at ?? ''); break; }
+    if (/^(undo:)?server\./.test(String(e.action ?? ''))) since.push(e);
+  }
+  const ids = new Set(since.map(e => String(e.id ?? '')));
+  const undone = new Set(since.map(e => (e.detail as { undoes?: string } | null)?.undoes).filter(Boolean));
+  const pending = since.filter(e => (String(e.action).startsWith('undo:') ? !ids.has(String((e.detail as { undoes?: string } | null)?.undoes)) : !undone.has(String(e.id)))).length;
+  return { pending, lastRestart };
+}
+
 /** The numbers at the top of the page, and how many saved changes still wait for a restart (read from the log, newest first). */
-export async function overview(sql: Sql, log: { action?: unknown; at?: unknown }[]) {
+export async function overview(sql: Sql, log: LogLine[]) {
   const rules = await getRules(sql);
   const spots = (await sql`SELECT count(*)::int AS n, coalesce(sum("Quantity"), 0)::int AS q FROM config."MonsterSpawnArea"`)[0]!;
   const drops = (await sql`SELECT count(*)::int AS n, count(*) FILTER (WHERE "Chance" >= 1)::int AS always, coalesce(avg("Chance") FILTER (WHERE "ItemType" = 3), 0)::float8 AS avg FROM config."DropItemGroup"`)[0]!;
   const plug = (await sql`SELECT count(*) FILTER (WHERE "IsActive")::int AS active, count(*)::int AS total FROM config."PlugInConfiguration" WHERE "CustomConfiguration" IS NOT NULL`)[0]!;
-  let pending = 0, lastRestart: string | null = null;
-  for (const e of log) {
-    const a = String(e.action ?? '');
-    if (a === 'server.restart') { lastRestart = String(e.at ?? ''); break; }
-    if (/^(undo:)?server\./.test(a)) pending++;
-  }
+  const { pending, lastRestart } = pendingChanges(log);
   return { rules: rules.values, servers: rules.servers, spots: { count: spots.n, monsters: spots.q }, drops: { groups: drops.n, always: drops.always, avgRandom: drops.avg }, plugins: { active: plug.active, total: plug.total }, pending, lastRestart };
 }
 

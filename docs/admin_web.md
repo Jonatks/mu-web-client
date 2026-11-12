@@ -54,7 +54,7 @@ restarts OpenMU. A full start takes about three minutes on the 1 GB VM.
 
 The page is built to be read before it is edited. The top strip (`GET /server/overview`) shows experience, master experience, monsters in spots,
 the average chance of random drops, the player cap, and how many saved server changes still wait for a restart (counted from the audit log back to the last
-`server.restart` line), with a "Reiniciar ahora" button. Each tab opens with its own summary tiles. While a field is edited the page shows
+`server.restart` line; a change and its undo cancel out), with a "Reiniciar ahora" button. Each tab opens with its own summary tiles. While a field is edited the page shows
 `old -> new (+/-)` next to it, on the matching tile, and in a bar of pending changes with Descartar and Guardar. Nothing is sent until Guardar; drop scaling
 and spot creation are previewed in the browser from data already loaded.
 
