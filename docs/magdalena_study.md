@@ -216,3 +216,11 @@ longer available to this session, so further study there waits for the owner to 
 ## 17. Lorencia NPC seen near (141,140)
 "Market Union Member Julia": a player market NPC. Her window (right column, same frame as the Daily Quest one) offers a Warp button and three wide buttons: Sell, My items, View listings. Text: go to the market in Lorencia to buy items or sell yours. Not part of the classic game; skipped unless the owner asks for a market (the marketplace service in this repo is the equivalent).
 The chat Messages panel opens when the chat bubble is tapped: a centred modal with a round X and a "Write a message" field at the bottom.
+
+## 18. Same-method comparison, 15 s samples, software GPU, phone size (2026-11-12)
+| | draws/frame | triangles/frame | frames in 15 s |
+|---|---|---|---|
+| Magdalena, world with about 50 players in view | 44 | 8.6k | 856 (57 fps) |
+| This client, offline Lorencia, 40 players + 10 monsters (dev build) | 25 | 24.9k | 602 (40 fps) |
+| Same with other players' skill visuals, gear effects and pets off | 24 | 23.7k | 581 |
+The crowd options change almost nothing here, so they are not the lever. Draws are already lower than Magdalena's; triangles are about 3 times higher, frames about 30 percent lower. The 8.8 against 22 fps measured earlier was online with a real crowd and the full interface; the remaining gap is more likely interface and network objects than the scene. Next lever: measure online with the performance overlay open, and reduce triangles per character.
