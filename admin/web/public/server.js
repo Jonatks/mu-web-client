@@ -5,7 +5,7 @@ const TILE = 3;
 const SAVED = 'Guardado. Se aplica al reiniciar el servidor.';
 
 export function serverPage(k) {
-  const { h, fill, act, api, openDialog, closeDialog, confirmBox, head, tabset, formKit, card, view, insertDialog, tile, iconOf, toast, debounce } = k;
+  const { h, fill, act, api, openDialog, closeDialog, confirmBox, head, tabset, formKit, card, view, insertDialog, tile, toast, debounce } = k;
 
   /** A box that fills itself when its data arrives. */
   const lazy = run => { const box = h('div', { class: 'lazy' }, h('p', { class: 'mute' }, 'Cargando...')); run(box).catch(e => fill(box, h('p', { class: 'empty' }, e.message))); return box; };
@@ -202,7 +202,7 @@ export function serverPage(k) {
         };
         function paint() {
           g.imageSmoothingEnabled = false; g.drawImage(img, 0, 0, 256 * TILE, 256 * TILE);
-          for (const s of spots) { const on = picked === s; box1(s.x1, s.y1, s.x2, s.y2, on ? 'rgba(255,200,60,.55)' : 'rgba(230,90,70,.45)', on ? '#ffd23c' : '#ff8a70'); }
+          for (const s of spots) { const on = picked === s; box1(s.x1, s.y1, s.x2, s.y2, on ? 'rgba(255,200,60,.5)' : 'rgba(230,90,70,.2)', on ? '#ffd23c' : '#ff8a70'); }
           if (rect) box1(rect.x1, rect.y1, rect.x2, rect.y2, 'rgba(90,200,255,.45)', '#7fe0ff', [4, 3]);
           if (hover) { g.strokeStyle = 'rgba(255,255,255,.8)'; g.setLineDash([]); g.lineWidth = 1; g.strokeRect(hover[0] * TILE + 0.5, hover[1] * TILE + 0.5, TILE - 1, TILE - 1); }
         }

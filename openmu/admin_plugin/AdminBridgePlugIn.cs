@@ -26,6 +26,7 @@ public class AdminBridgePlugIn : IPeriodicTaskPlugIn
     private static readonly ConcurrentDictionary<string, DateTime> Pending = new(StringComparer.OrdinalIgnoreCase);
     private static readonly ConcurrentDictionary<object, (DateTime At, List<Row> Rows)> Seen = new();
     private static long lastWriteTicks;
+    private static readonly object WriteLock = new();
 
     /// <inheritdoc />
     public async ValueTask ExecuteTaskAsync(GameContext gameContext)
@@ -113,8 +114,11 @@ public class AdminBridgePlugIn : IPeriodicTaskPlugIn
 
         var rows = Seen.Where(s => now - s.Value.At < TimeSpan.FromSeconds(6)).SelectMany(s => s.Value.Rows).ToList();
         var tmp = Path.Combine(Dir, "players.json.tmp");
-        File.WriteAllText(tmp, JsonSerializer.Serialize(new { at = now, players = rows }), new UTF8Encoding(false));
-        File.Move(tmp, Path.Combine(Dir, "players.json"), true);
+        lock (WriteLock)
+        {
+            File.WriteAllText(tmp, JsonSerializer.Serialize(new { at = now, players = rows }), new UTF8Encoding(false));
+            File.Move(tmp, Path.Combine(Dir, "players.json"), true);
+        }
     }
 
     private sealed record Row(string Login, string? Character, string? Map, int X, int Y);
