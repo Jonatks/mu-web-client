@@ -93,17 +93,18 @@ public class AddClassSkillsConfiguration
     /// Gets or sets the skill numbers a new character of each class starts with.
     /// </summary>
     /// <remarks>
-    /// The default is a starting point for a high exp server: only skills the classes learn early.
-    /// Skills a class cannot have are skipped with a warning in the log.
+    /// The default is what a new character of a 300x exp server starts with. The rule used: OpenMU's own
+    /// starting skill first, then skills with no requirement (class-only before shared ones), then the
+    /// lowest energy or level requirement. Skills a class cannot have are skipped with a log warning.
     /// </remarks>
     public Dictionary<int, List<int>> SkillsByClass { get; set; } = new()
     {
-        [0] = new() { 17 },
-        [4] = new() { 19, 20, 21, 22, 23 },
-        [8] = new() { 46, 24, 26, 27, 28 },
-        [12] = new() { 19, 20, 21, 22, 23, 57, 73 },
-        [16] = new() { 60, 74 },
-        [20] = new(),
-        [24] = new() { 269 },
+        [0] = new() { 17 },                       // Dark Wizard: Energy Ball
+        [4] = new() { 44, 19, 20, 21, 22, 23 },   // Dark Knight: Crescent Moon Slash, Falling Slash, Lunge, Uppercut, Cyclone, Slash
+        [8] = new() { 46, 24, 26, 27, 30, 28 },   // Fairy Elf: Starfall, Triple Shot, Heal, Greater Defense, Summon Goblin, Greater Damage
+        [12] = new() { 17, 56, 57, 73 },          // Magic Gladiator: Energy Ball, Power Slash, Spiral Slash, Mana Rays
+        [16] = new() { 19, 20, 60, 62, 66, 74 },  // Dark Lord: Falling Slash, Lunge, Force, Earthshake, Force Wave, Fire Blast
+        [20] = new(),                             // Summoner: none
+        [24] = new() { 260, 261, 269, 270 },      // Rage Fighter: Killing Blow, Beast Uppercut, Charge, Phoenix Shot
     };
 }

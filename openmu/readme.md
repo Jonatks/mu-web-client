@@ -42,8 +42,8 @@ same value the marketplace service has; without it every token is refused.
 Starting skills (`GameLogic/CharacterCreated/AddClassSkillsOnCreate.cs`): an `ICharacterCreatedPlugIn`, the hook
 `CreateCharacterAction` calls after it builds a new character. OpenMU's own "Add ... For ..." plugins give one skill
 each; this one reads `SkillsByClass` from its configuration (class number to skill numbers, `SkillNumber` in OpenMU),
-edited in the admin panel under the plugin "Add Class Skills On Create". Defaults: DW Energy Ball, DK 5, Elf 5,
-MG 7, DL 2, RF Charge, Summoner none. A skill the class cannot learn is skipped with a log warning, and one the
+edited in the admin panel under the plugin "Add Class Skills On Create". Defaults (a 300x exp server): DW 1, DK 6,
+Elf 6, MG 4, DL 6, RF 4, Summoner none (OpenMU's own starting skill first, then no requirement, then lowest). A skill the class cannot learn is skipped with a log warning, and one the
 character already has is never added twice, so OpenMU's own plugins can stay on. Not compiled here (no OpenMU
 assemblies outside the image): the Docker build compiles it.
 
