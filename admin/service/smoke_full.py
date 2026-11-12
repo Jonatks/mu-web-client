@@ -177,6 +177,16 @@ if av.get('chain', [None])[0] == 'Dark Wizard':
     check('wizard sees Pad Helm', 'Pad Helm' in names, names)
     check('wizard does not see Dragon Helm', 'Dragon Helm' not in names, names)
     check('all helms exist without the filter', 'Dragon Helm' in [d['name'] for d in call('GET', '/items/definitions?q=Helm')])
+# ---- categories
+allc = call('GET', '/items/categories')
+check('item categories listed', isinstance(allc, list) and any(c['key'] == 'wings' for c in allc) and all(c['count'] > 0 for c in allc), str(allc)[:200])
+check('categories follow the slot', [c['key'] for c in call('GET', '/items/categories?slot=7')] == ['wings'], call('GET', '/items/categories?slot=7'))
+helms = call('GET', '/items/definitions?cat=g7')
+check('category filter keeps one kind', len(helms) > 0 and all(d['group'] == 7 and d['cat'] == 'g7' for d in helms))
+wingsl = call('GET', '/items/definitions?cat=wings')
+check('wings category has wings', len(wingsl) > 0 and all(d['group'] == 12 for d in wingsl))
+mine = call('GET', '/items/categories?character=' + NAME)
+check('categories for a class line are not wider', sum(c['count'] for c in mine) <= sum(c['count'] for c in allc), str(mine)[:200])
 qq = call('GET', '/characters/' + NAME + '/quests')
 check('quests only of the class line', all(x['class'] is None or x['class'] in av.get('chain', []) for x in qq.get('quests', [])), str(qq)[:160])
 

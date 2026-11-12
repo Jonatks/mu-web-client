@@ -223,3 +223,25 @@ td .glyph { width: 22px; height: 22px; font-size: 12px; vertical-align: middle; 
 .slot > i { z-index: 1; pointer-events: none; }
 @media (max-width: 860px) { .fields .wide { grid-column: auto; } .cards { grid-template-columns: 1fr; } }
 .fields { align-items: start; }
+
+/* ------------------------------------------------------------ item icons and picker */
+.ico, .tile-ico, .pick-ico { object-fit: contain; image-rendering: auto; }
+.tile.has-ico { padding: 2px; display: grid; place-items: center; }
+.tile-ico { position: absolute; inset: 3px; width: calc(100% - 6px); height: calc(100% - 6px); }
+.tile.has-ico .nm { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.picker { display: grid; gap: 8px; }
+.cats { display: flex; flex-wrap: wrap; gap: 6px; }
+.cats .chip small { opacity: .65; }
+.picks { display: grid; grid-template-columns: repeat(auto-fill, minmax(116px, 1fr)); gap: 6px; max-height: 280px; overflow: auto; padding: 2px; }
+.pick { display: grid; grid-template-rows: 52px auto auto; justify-items: center; gap: 2px; padding: 6px 4px; text-align: center; background: var(--raise); }
+.pick .pn { font-size: 12px; line-height: 1.2; overflow-wrap: anywhere; }
+.pick .pn mark { background: none; color: var(--gold); font-weight: 600; }
+.pick .meta { font-size: 11px; color: var(--mute); }
+.pick-ico { width: 52px; height: 52px; }
+.pick-ico.none { display: grid; place-items: center; color: var(--mute); border: 1px dashed var(--line-hi); border-radius: 4px; }
+.chosen { display: flex; align-items: center; gap: 12px; padding: 8px 10px; background: var(--raise); border: 1px solid var(--gold-dim); border-radius: 4px; }
+.chosen .pick-ico { flex: none; }
+.chosen > div { flex: 1; min-width: 0; }
+.chosen .meta { color: var(--mute); font-size: 12px; }
+.cats .chip.on { border-color: var(--gold); color: var(--gold); background: color-mix(in srgb, var(--gold) 14%, var(--raise)); }
+.detail-ico { width: 64px; height: 64px; object-fit: contain; float: right; margin: 0 0 6px 10px; }

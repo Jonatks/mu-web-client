@@ -14,6 +14,8 @@ function h(tag, attrs = {}, ...kids) {
   for (const c of kids.flat(Infinity)) if (c != null && c !== false) e.append(c.nodeType ? c : document.createTextNode(String(c)));
   return e;
 }
+/** replaceChildren that skips null and false, which the native one would print as text. */
+const fill = (el, ...kids) => el.replaceChildren(...kids.flat(Infinity).filter(c => c != null && c !== false));
 const debounce = (fn, ms) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };
 const num = n => Number(n ?? 0).toLocaleString('es');
 
@@ -46,7 +48,7 @@ async function act(fn, ok) {
 
 /* ----------------------------------------------------------------- dialogs */
 const dlg = $('#dlg');
-function openDialog(...content) { dlg.replaceChildren(h('div', { class: 'dlg' }, ...content)); if (!dlg.open) dlg.showModal(); }
+function openDialog(...content) { fill(dlg, h('div', { class: 'dlg' }, ...content)); if (!dlg.open) dlg.showModal(); }
 function closeDialog() { if (dlg.open) dlg.close(); }
 
 /** Asks yes/no inside the page. Resolves true only on the confirm button. */
@@ -123,7 +125,7 @@ function go(path) {
   const page = PAGES[name] ? name : 'accounts';
   setHash(page === name ? path : page);
   for (const b of document.querySelectorAll('#tabs button')) b.classList.toggle('on', b.dataset.tab === (page === 'account' ? 'accounts' : page));
-  view.replaceChildren();
+  fill(view, );
   PAGES[page](decodeURIComponent(rest.join('/')));
   scrollTo(0, 0);
 }
@@ -138,7 +140,7 @@ function tabset(items, start, onShow) {
   const pane = h('div', { class: 'pane' });
   const show = key => {
     for (const b of bar.children) { b.classList.toggle('on', b.dataset.t === key); b.setAttribute('aria-selected', String(b.dataset.t === key)); }
-    pane.replaceChildren((items.find(i => i[0] === key) ?? items[0])[2]());
+    fill(pane, (items.find(i => i[0] === key) ?? items[0])[2]());
     onShow?.(key);
   };
   bar.append(...items.map(([k, label]) => h('button', { 'data-t': k, role: 'tab', onclick: () => show(k) }, label)));
@@ -178,8 +180,8 @@ function accounts() {
     const my = ++seq;
     const rows = await act(() => api('GET', '/accounts?q=' + encodeURIComponent(q.value.trim())));
     if (!rows || my !== seq) return;
-    if (!rows.length) return list.replaceChildren(h('p', { class: 'empty' }, q.value ? 'Ninguna cuenta se llama así.' : 'Todavía no hay cuentas. Crea la primera arriba.'));
-    list.replaceChildren(h('table', {},
+    if (!rows.length) return fill(list, h('p', { class: 'empty' }, q.value ? 'Ninguna cuenta se llama así.' : 'Todavía no hay cuentas. Crea la primera arriba.'));
+    fill(list, h('table', {},
       h('thead', {}, h('tr', {}, ['Cuenta', 'Estado', 'Personajes', 'Registro', ''].map(t => h('th', {}, t)))),
       h('tbody', {}, rows.map(a => h('tr', {},
         h('td', {}, h('button', { class: 'link mono', onclick: () => go('account/' + a.login) }, a.login)),
@@ -267,7 +269,7 @@ function accountData(a) {
     if (Object.keys(patch).length) ok = !!(await act(() => api('PATCH', '/accounts/' + login, patch)));
     if (ok && _password) ok = !!(await act(() => api('POST', `/accounts/${login}/password`, { password: _password })));
     if (ok && state) ok = !!(await act(() => api('POST', `/accounts/${login}/state`, { state })));
-    if (ok) { toast('Cuenta guardada'); view.replaceChildren(); account(patch.login ?? login); if (patch.login) setHash('account/' + patch.login); }
+    if (ok) { toast('Cuenta guardada'); fill(view, ); account(patch.login ?? login); if (patch.login) setHash('account/' + patch.login); }
   });
   return body;
 }
@@ -303,7 +305,7 @@ function cashPanel(login) {
     if (!rows) return;
     const product = h('input', { type: 'number', min: 0, placeholder: 'Número del producto' });
     const price = h('input', { type: 'number', min: 0, value: 0 });
-    box.replaceChildren(h('h3', {}, 'Tienda cash: ítems guardados'),
+    fill(box, h('h3', {}, 'Tienda cash: ítems guardados'),
       h('p', { class: 'hint' }, 'Son compras o regalos que el jugador aún no recogió. El número del producto es el del catálogo de la tienda del juego.'),
       rows.length ? h('table', {}, h('thead', {}, h('tr', {}, ['Producto', 'Precio', 'Regalo', 'Fecha', ''].map(t => h('th', {}, t)))),
         h('tbody', {}, rows.map(r => h('tr', {}, h('td', {}, r.product), h('td', {}, r.price), h('td', {}, r.gift ? `de ${r.sender || '?'}${r.message ? ': ' + r.message : ''}` : 'No'), h('td', { class: 'mute' }, String(r.addedAt).slice(0, 10)),
@@ -321,6 +323,10 @@ const GROUPS = ['Espadas', 'Hachas', 'Mazas', 'Lanzas', 'Arcos', 'Bastones', 'Es
 // One hue per group: weapons warm, armour cool, wings violet, consumables green.
 const HUE = [8, 18, 28, 38, 100, 280, 215, 205, 195, 185, 175, 165, 265, 330, 135, 55];
 const tint = g => `hsl(${HUE[g] ?? 220} 55% 50%)`;
+// Small item icons (items/<group>_<number>.webp); the list says which exist, the rest show only the name.
+const ICONS = new Set();
+fetch('items/index.json').then(r => (r.ok ? r.json() : [])).then(l => l.forEach(k => ICONS.add(k))).catch(() => {});
+const iconOf = (it, cls = 'ico') => (ICONS.has(`${it.group}_${it.number}`) ? h('img', { class: cls, src: `items/${it.group}_${it.number}.webp`, alt: '', loading: 'lazy', draggable: 'false' }) : null);
 const isExc = i => i.options.some(o => /^Excellent/.test(o.type));
 const isAnc = i => i.options.some(o => /Ancient/i.test(o.type));
 const hasLuck = i => i.options.some(o => /^Luck/.test(o.type));
@@ -334,8 +340,9 @@ function optionText(o) {
 }
 
 function tile(item, onclick, selected) {
-  const t = h('button', { class: 'tile' + (isExc(item) ? ' exc' : '') + (isAnc(item) ? ' anc' : '') + (selected ? ' sel' : ''), title: item.name, onclick },
-    h('span', { class: 'nm' }, item.name),
+  const ic = iconOf(item, 'tile-ico');
+  const t = h('button', { class: 'tile' + (ic ? ' has-ico' : '') + (isExc(item) ? ' exc' : '') + (isAnc(item) ? ' anc' : '') + (selected ? ' sel' : ''), title: item.name, onclick },
+    ic, h('span', { class: 'nm' }, item.name),
     item.level ? h('span', { class: 'lvl' }, '+' + item.level) : null,
     hasLuck(item) || item.skill ? h('span', { class: 'flags' }, (hasLuck(item) ? 'S' : '') + (item.skill ? ' H' : '')) : null);
   t.style.setProperty('--tint', tint(item.group));
@@ -352,44 +359,48 @@ function marked(text, q) {
   return i < 0 || !q ? text : [text.slice(0, i), h('mark', {}, text.slice(i, i + q.length)), text.slice(i + q.length)];
 }
 
-/** A text box that suggests items (or skills) from the first letter, keyboard friendly. */
-function suggest(onPick, kind = 'items', extra = {}) {
+/** Item picker: category chips (only what this server has for the class and slot), a search box and a grid with icons. */
+function itemPicker(onPick, extra = {}) {
   const slotMode = extra.slot !== undefined && extra.slot !== null;
-  const who = () => (extra.character ? '&character=' + encodeURIComponent(extra.character()) : '');
+  const who = () => (extra.character ? '&character=' + encodeURIComponent(extra.character() ?? '') : '');
+  const slotQ = slotMode ? '&slot=' + extra.slot : '';
   const need = d => (d.needsEvolve ? ` · requiere ${d.requires}` : '');
-  const skillsMode = kind === 'skills';
-  const input = h('input', { placeholder: skillsMode ? 'Escribe el nombre de la habilidad' : 'Escribe el nombre del ítem (Sword, Wing, Jewel...)', autocomplete: 'off', role: 'combobox', 'aria-expanded': 'false', 'aria-label': skillsMode ? 'Buscar habilidad' : 'Buscar ítem' });
-  const list = h('ul', { class: 'sug-list', role: 'listbox', hidden: true });
-  let found = [], on = -1, ctl;
-  function draw() {
-    const q = input.value.trim();
-    list.hidden = !found.length && q === '';
-    input.setAttribute('aria-expanded', String(!list.hidden));
-    list.replaceChildren(...(found.length ? found.map((d, i) => h('li', {
-      class: i === on ? 'on' : '', role: 'option',
-      onmousedown: e => { e.preventDefault(); pick(d); },
-    }, h('span', {}, marked(d.name, q)), h('span', { class: 'meta' }, skillsMode ? `n.º ${d.number}${need(d)}` : `${GROUPS[d.group] ?? 'Grupo ' + d.group} · ${d.w}x${d.h}${need(d)}`))) : [h('li', { class: 'meta' }, 'Nada coincide.')]));
+  const input = h('input', { placeholder: 'Busca por nombre, o elige una categoría', autocomplete: 'off', 'aria-label': 'Buscar ítem' });
+  const chips = h('div', { class: 'chips cats', role: 'group', 'aria-label': 'Categorías' });
+  const grid = h('div', { class: 'picks', role: 'listbox' });
+  const chosen = h('div', { class: 'chosen', hidden: true });
+  const browse = h('div', {}, chips, input, grid);
+  let cat = '', found = [], ctl, cats = [];
+  function drawChips() {
+    const mk = (key, name, n) => h('button', { type: 'button', class: 'chip' + (cat === key ? ' on' : ''), 'aria-pressed': String(cat === key), onclick: () => { cat = key; drawChips(); search(); } }, name, n === undefined ? null : h('small', {}, ` ${n}`));
+    fill(chips, mk('', 'Todo'), ...cats.map(c => mk(c.key, c.name, c.count)));
   }
-  function pick(d) { input.value = d.name; list.hidden = true; found = []; onPick(d); }
+  function draw() {
+    fill(grid, ...(found.length ? found.map(d => h('button', { type: 'button', class: 'pick', role: 'option', title: d.name, onmousedown: e => e.preventDefault(), onclick: () => pick(d) },
+      iconOf(d, 'pick-ico') ?? h('span', { class: 'pick-ico none' }, '?'), h('span', { class: 'pn' }, marked(d.name, input.value.trim())),
+      h('span', { class: 'meta' }, `${d.w}x${d.h}${need(d)}`))) : [h('p', { class: 'meta' }, 'Nada coincide.')]));
+  }
+  function pick(d) {
+    browse.hidden = true; chosen.hidden = false;
+    fill(chosen, iconOf(d, 'pick-ico'), h('div', {}, h('strong', {}, d.name), h('div', { class: 'meta' }, `${(cats.find(c => c.key === d.cat) ?? {}).name ?? ''} · ${d.w}x${d.h}${need(d)}`)),
+      h('button', { type: 'button', class: 'small', onclick: () => { chosen.hidden = true; browse.hidden = false; onPick(null); input.focus(); } }, 'Cambiar'));
+    onPick(d);
+  }
   const search = debounce(async () => {
+    ctl?.abort(); ctl = new AbortController();
     const q = input.value.trim();
-    ctl?.abort();
-    if (!q && !slotMode) { found = []; return draw(); }
-    ctl = new AbortController();
-    const r = await act(() => api('GET', (skillsMode ? '/skills/definitions?q=' : '/items/definitions?q=') + encodeURIComponent(q) + (slotMode ? '&slot=' + extra.slot : '') + who(), undefined, ctl.signal));
-    if (!r) return;
-    found = rank(r, q).slice(0, slotMode ? 40 : 14); on = found.length ? 0 : -1; draw();
+    const r = await act(() => api('GET', '/items/definitions?q=' + encodeURIComponent(q) + (cat ? '&cat=' + cat : '') + slotQ + who(), undefined, ctl.signal));
+    if (r) { found = rank(r, q); draw(); }
   }, 120);
-  input.addEventListener('input', () => { onPick(null); search(); });
-  input.addEventListener('keydown', e => {
-    if (e.key === 'ArrowDown' && found.length) { on = (on + 1) % found.length; draw(); e.preventDefault(); }
-    else if (e.key === 'ArrowUp' && found.length) { on = (on - 1 + found.length) % found.length; draw(); e.preventDefault(); }
-    else if (e.key === 'Enter' && found[on]) { pick(found[on]); e.preventDefault(); }
-    else if (e.key === 'Escape' && !list.hidden) { list.hidden = true; e.stopPropagation(); e.preventDefault(); }
-  });
-  input.addEventListener('focus', () => { if (slotMode && !input.value) search(); });
-  input.addEventListener('blur', () => setTimeout(() => { list.hidden = true; }, 120));
-  return { el: h('div', { class: 'suggest' }, input, list), input };
+  async function refresh() {
+    const c = await act(() => api('GET', '/items/categories?' + (slotQ + who()).replace(/^&/, '')));
+    cats = c ?? []; if (cat && !cats.some(x => x.key === cat)) cat = '';
+    drawChips(); search();
+  }
+  input.addEventListener('input', search);
+  input.addEventListener('keydown', e => { if (e.key === 'Enter' && found[0]) { pick(found[0]); e.preventDefault(); } });
+  refresh();
+  return { el: h('div', { class: 'picker' }, browse, chosen), input, refresh };
 }
 
 /* ---------------------------------------------------------- insert dialog */
@@ -407,7 +418,7 @@ function insertDialog(where, slot, done) {
 
   async function configure(d) {
     def = d; go.disabled = !d;
-    if (!d) return form.replaceChildren();
+    if (!d) return fill(form, );
     const opts = (await act(() => api('GET', '/items/definitions/' + d.id))) ?? [];
     if (def !== d) return;
     const level = h('input', { type: 'number', min: 0, max: d.maxLevel, value: 0 });
@@ -416,7 +427,7 @@ function insertDialog(where, slot, done) {
     const option = h('select', {}, [0, 1, 2, 3, 4].map(n => h('option', { value: n }, n ? `+${n * 4}` : 'Sin opción')));
     const exc = opts.filter(o => /^Excellent/.test(o.type)).map(o => ({ o, on: false }));
     const chips = exc.map(x => h('button', { type: 'button', class: 'chip', 'aria-pressed': 'false', onclick: e => { x.on = !x.on; e.currentTarget.classList.toggle('on', x.on); e.currentTarget.setAttribute('aria-pressed', String(x.on)); } }, x.o.label ?? `Opción ${x.o.number}`));
-    form.replaceChildren(
+    fill(form, h('div', {},
       h('p', { class: 'mute' }, `${GROUPS[d.group] ?? ''} · ocupa ${d.w}x${d.h}`),
       d.needsEvolve ? h('p', {}, h('span', { class: 'pill warn' }, `Requiere ser ${d.requires}: ${where.kind === 'inventory' ? where.id : where.forChar} aún no puede usarlo`)) : null,
       h('div', { class: 'fields' },
@@ -426,7 +437,7 @@ function insertDialog(where, slot, done) {
       h('div', { class: 'chips' },
         opts.some(o => /^Luck/.test(o.type)) ? h('label', { class: 'inline' }, luck, 'Suerte') : null,
         d.hasSkill ? h('label', { class: 'inline' }, skill, 'Con habilidad') : null),
-      exc.length ? h('div', {}, h('p', { class: 'mute' }, 'Opciones excelentes'), h('div', { class: 'chips' }, chips)) : null);
+      exc.length ? h('div', {}, h('p', { class: 'mute' }, 'Opciones excelentes'), h('div', { class: 'chips' }, chips)) : null));
     form._read = () => {
       const body = { definitionId: d.id, level: Number(level.value) };
       if (dur.value) body.durability = Number(dur.value);
@@ -439,7 +450,7 @@ function insertDialog(where, slot, done) {
       return body;
     };
   }
-  const s = suggest(configure, 'items', { slot: worn ? slot : null, character: () => classOf.current });
+  const s = itemPicker(configure, { slot: worn ? slot : null, character: () => classOf.current });
   go.addEventListener('click', async () => {
     if (!def || !form._read) return;
     go.disabled = true;
@@ -451,7 +462,7 @@ function insertDialog(where, slot, done) {
   openDialog(
     h('h3', {}, worn ? `Equipar ítem: ${bodySlot}` : `Insertar ítem en ${dest}`),
     h('p', { class: 'mute' }, worn ? `Se equipa directo en la ranura «${bodySlot}». Solo salen los ítems que se pueden llevar ahí.` : slot === null ? 'Va al primer hueco libre.' : `Va a la casilla ${isInv ? slot - 11 : slot + 1}.`),
-    where.forChar ? h('label', { class: 'inline' }, Object.assign(h('input', { type: 'checkbox' }), { onchange: e => { classOf.current = e.target.checked ? null : where.forChar; s.input.dispatchEvent(new Event('input')); } }), 'Ver también ítems de otras clases (el baúl es de toda la cuenta)') : null,
+    where.forChar ? h('label', { class: 'inline' }, Object.assign(h('input', { type: 'checkbox' }), { onchange: e => { classOf.current = e.target.checked ? null : where.forChar; s.refresh(); } }), 'Ver también ítems de otras clases (el baúl es de toda la cuenta)') : null,
     s.el, form,
     h('div', { class: 'actions' }, h('button', { onclick: closeDialog }, 'Cancelar'), go));
   s.input.focus();
@@ -557,6 +568,7 @@ function storagePanel(kind, id, forChar) {
     if (!it) return h('div', { class: 'detail panel' }, h('h3', {}, 'Ítem'), h('p', { class: 'hint' }, 'Toca un ítem para ver sus datos. Toca una casilla vacía (+) para insertar uno justo ahí.'),
       isInv ? h('p', { class: 'hint' }, 'Las casillas del cuerpo (cabeza, manos, anillos, alas...) muestran lo que lleva puesto. Toca una vacía (+) para equipar un ítem directo ahí.') : null);
     return h('div', { class: 'detail panel' },
+      iconOf(it, 'detail-ico'),
       h('h3', {}, it.name, it.level ? ` +${it.level}` : ''),
       h('p', { class: 'mute' }, `${GROUPS[it.group] ?? ''} · ${it.w}x${it.h} · durabilidad ${it.durability}${it.skill ? ' · con habilidad' : ''}`),
       it.options.length ? h('ul', {}, it.options.map(o => h('li', { class: /^Excellent/.test(o.type) ? 'exc' : /^Luck/.test(o.type) ? 'luck' : '' }, optionText(o)))) : h('p', { class: 'hint' }, 'Sin opciones.'),
@@ -598,7 +610,7 @@ function storagePanel(kind, id, forChar) {
       zenRow = h('div', { class: 'row' }, h('label', {}, 'Zen del baúl', zen), h('button', { onclick: async () => { if (await act(() => api('PATCH', `/accounts/${id}/vault`, { zen: Number(zen.value) }), 'Zen del baúl guardado')) load(); } }, 'Guardar zen'));
     }
     const banner = moving ? h('p', { class: 'banner' }, 'Toca la casilla vacía de destino (sirve también una ranura del cuerpo). Esc cancela.') : null;
-    box.replaceChildren(...[bar, banner, zenRow, h('div', { class: 'bench' }, ...[isInv ? doll() : null, grid(), detail()].filter(Boolean))].filter(Boolean));
+    fill(box, ...[bar, banner, zenRow, h('div', { class: 'bench' }, ...[isInv ? doll() : null, grid(), detail()].filter(Boolean))].filter(Boolean));
   }
   load();
   return box;
@@ -637,7 +649,7 @@ function skillsPanel(name) {
     const draw = () => {
       term = q.value;
       const rows = av.skills.filter(s => s.name.toLowerCase().includes(term.trim().toLowerCase()));
-      grid.replaceChildren(...(rows.length ? rows.map(s => {
+      fill(grid, ...(rows.length ? rows.map(s => {
         const [label] = skillKind(s.skillType, s.damageType);
         return h('div', { class: 'skill-card' + (s.has ? ' has' : '') + (s.needsEvolve ? ' locked' : '') },
           glyph(s.skillType, s.damageType),
@@ -652,7 +664,7 @@ function skillsPanel(name) {
     q.addEventListener('input', draw);
     draw();
 
-    box.replaceChildren(
+    fill(box, 
       learned,
       h('section', { class: 'panel' }, h('h3', {}, 'Habilidades de su clase'),
         h('div', { class: 'chain' }, av.chain.map((c, i) => [i ? h('span', { class: 'arrow' }, '→') : null, h('span', { class: 'chip' + (c === av.current ? ' on' : '') }, c)])),
@@ -690,7 +702,7 @@ function questsPanel(name) {
             if (await act(() => api('POST', `/characters/${name}/quests/${g}`, { lastFinished: lf.value || null, active: ac.value || null }), 'Misión guardada')) load(); } }, 'Guardar'),
           st ? h('button', { class: 'small danger', onclick: async () => { if (await confirmBox(`¿Reiniciar el grupo ${g}?`, 'Empieza esas misiones de nuevo. Se puede deshacer desde Registro.', 'Reiniciar', true) && (await act(() => api('DELETE', `/characters/${name}/quests/${g}`), 'Grupo reiniciado'))) load(); } }, 'Reiniciar') : null));
     });
-    box.replaceChildren(
+    fill(box, 
       h('section', { class: 'panel' }, h('div', { class: 'row bar' },
         h('div', {}, h('h3', {}, 'Misiones'), h('p', { class: 'hint' }, 'Solo salen las misiones de su clase (y sus evoluciones) y las generales, por grupo. Elige cuál terminó por última vez y cuál tiene activa.')),
         d.states.length ? h('button', { class: 'danger', onclick: async () => { if (await confirmBox('¿Reiniciar todas las misiones?', 'Pierde todo su progreso de misiones. Se puede deshacer desde Registro.', 'Reiniciar todo', true) && (await act(() => api('DELETE', `/characters/${name}/quests`), 'Misiones reiniciadas'))) load(); } }, 'Reiniciar todas') : null),
@@ -709,7 +721,7 @@ function lettersPanel(name) {
     const sender = h('input', { value: 'Admin', maxlength: 10 });
     const subject = h('input', { maxlength: 32, placeholder: 'Asunto' });
     const message = h('textarea', { rows: 4, maxlength: 1000, placeholder: 'Mensaje' });
-    box.replaceChildren(
+    fill(box, 
       h('section', { class: 'panel' }, h('h3', {}, 'Enviar una carta'),
         h('div', { class: 'fields' }, h('label', {}, 'Remitente', sender), h('label', { class: 'wide' }, 'Asunto', subject)),
         h('label', {}, 'Mensaje', message),
@@ -737,7 +749,7 @@ function gensPanel(name) {
     const con = h('input', { type: 'number', min: 0, value: g.contribution });
     const rank = h('input', { type: 'number', min: 0, max: 255, value: g.rank });
     const pos = h('input', { type: 'number', min: 0, value: g.rankingPosition });
-    box.replaceChildren(h('h3', {}, 'Gens'),
+    fill(box, h('h3', {}, 'Gens'),
       h('p', { class: 'hint' }, g.gens ? `Es de la familia ${g.family}.` : 'No pertenece a ninguna familia Gens. Al guardar, entra a la que elijas.'),
       h('div', { class: 'fields' }, h('label', {}, 'Familia', fam), h('label', {}, 'Contribución', con), h('label', {}, 'Rango', rank), h('label', {}, 'Posición en el ranking', pos)),
       h('div', { class: 'savebar' },
@@ -767,8 +779,8 @@ function characters(selected) {
     if (!byName || my !== seq) return;
     const seen = new Set();
     const rows = [...byName, ...(byAcc ?? [])].filter(c => !seen.has(c.id) && seen.add(c.id));
-    if (!rows.length) return roster.replaceChildren(h('p', { class: 'empty' }, term ? 'Ningún personaje coincide.' : 'Todavía no hay personajes.'));
-    roster.replaceChildren(...rows.map(c => h('button', { class: 'char' + (c.name === current ? ' on' : ''), onclick: () => open(c.name) },
+    if (!rows.length) return fill(roster, h('p', { class: 'empty' }, term ? 'Ningún personaje coincide.' : 'Todavía no hay personajes.'));
+    fill(roster, ...rows.map(c => h('button', { class: 'char' + (c.name === current ? ' on' : ''), onclick: () => open(c.name) },
       h('div', { class: 'lv' }, c.level),
       h('div', {}, h('b', {}, c.name), h('span', {}, `${c.class} · ${c.account}`)))));
   }
@@ -831,7 +843,7 @@ function characters(selected) {
       card('Zona de peligro', 'Se borran sus stats, habilidades, inventario e ítems. Se puede deshacer desde Registro mientras no haya nadie conectado.',
         h('button', { class: 'danger', onclick: async () => {
           if (!(await typedConfirm(`Borrar a ${name}`, 'Esta acción borra al personaje completo.', name))) return;
-          if (await act(() => api('DELETE', '/characters/' + name, { confirm: name }), 'Personaje borrado')) { current = null; sheet.replaceChildren(h('p', { class: 'empty' }, 'Personaje borrado. Elige otro de la lista.')); load(); }
+          if (await act(() => api('DELETE', '/characters/' + name, { confirm: name }), 'Personaje borrado')) { current = null; fill(sheet, h('p', { class: 'empty' }, 'Personaje borrado. Elige otro de la lista.')); load(); }
         } }, 'Borrar personaje')),
       sticky(save, note));
 
@@ -841,7 +853,7 @@ function characters(selected) {
       if (await act(() => api('PATCH', '/characters/' + name, body), 'Personaje guardado')) { await open(body.name ?? name); load(); }
     });
 
-    sheet.replaceChildren(
+    fill(sheet, 
       h('div', { class: 'sheet-head' },
         h('div', {}, h('h2', {}, c.name), h('div', { class: 'facts' }, h('span', {}, `${c.class} · nivel ${c.level}`), h('span', {}, 'Cuenta ', h('button', { class: 'link', onclick: () => go('account/' + c.account) }, c.account)), h('span', {}, c.map ?? 'sin mapa')))),
       tabset([
@@ -875,7 +887,7 @@ async function audit() {
         h('td', { class: 'mono mute' }, a.detail ? JSON.stringify(a.detail) : ''),
         h('td', { class: 'actions' }, can.has(a.id) ? h('button', { class: 'small', onclick: async () => {
           if (!(await confirmBox('¿Deshacer este cambio?', `${a.action} en ${a.target}`, 'Deshacer'))) return;
-          if (await act(() => api('POST', '/undo/' + a.id), 'Cambio deshecho')) { view.replaceChildren(); audit(); }
+          if (await act(() => api('POST', '/undo/' + a.id), 'Cambio deshecho')) { fill(view, ); audit(); }
         } }, 'Deshacer') : null))))) : h('p', { class: 'empty' }, 'Aún no hay cambios registrados.')));
 }
 

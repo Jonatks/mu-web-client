@@ -9,27 +9,59 @@ type OptionRow = { optionId: string; type: string; number: number; label: string
 
 const NAME = `split_part(d."Name", '||', 1)`;
 
-/** Items by name; `slot` (0-11) keeps only what can be worn in that body slot. */
-export async function searchDefinitions(sql: Sql, q = '', group = '', slot = '', character = '') {
+/** Category labels in the order the picker shows them. Keys come from `CAT` below. */
+export const CATEGORIES: [string, string][] = [
+  ['g0', 'Espadas'], ['g1', 'Hachas'], ['g2', 'Mazas'], ['g3', 'Lanzas'], ['g4', 'Arcos y ballestas'], ['g5', 'Bastones'], ['g6', 'Escudos'],
+  ['g7', 'Cascos'], ['g8', 'Armaduras'], ['g9', 'Pantalones'], ['g10', 'Guantes'], ['g11', 'Botas'],
+  ['wings', 'Alas y capas'], ['pets', 'Mascotas'], ['pendants', 'Collares'], ['rings', 'Anillos'], ['orbs', 'Orbes y piedras'],
+  ['other13', 'Otros especiales'], ['g14', 'Pociones, jewels y cajas'], ['g15', 'Pergaminos'],
+];
+
+const SLOTS = `regexp_split_to_array(trim(both ',' from regexp_replace(t."ItemSlots", '\\D+', ',', 'g')), ',')`;
+/** The category of a definition (needs `t` = its ItemSlotType, left-joined). */
+const CAT = `(CASE WHEN d."Group" = 12 AND '7' = ANY (${SLOTS}) THEN 'wings' WHEN d."Group" = 12 THEN 'orbs'
+  WHEN d."Group" = 13 AND '8' = ANY (${SLOTS}) THEN 'pets' WHEN d."Group" = 13 AND '9' = ANY (${SLOTS}) THEN 'pendants'
+  WHEN d."Group" = 13 AND ('10' = ANY (${SLOTS}) OR '11' = ANY (${SLOTS})) THEN 'rings' WHEN d."Group" = 13 THEN 'other13'
+  ELSE 'g' || d."Group" END)`;
+
+/** The shared filters: body slot (0-11) and, with a character, only what its class line can use. */
+const FROM = `FROM config."ItemDefinition" d LEFT JOIN config."ItemSlotType" t ON t."Id" = d."ItemSlotId"`;
+const FILTER = `($1 = -1 OR EXISTS (SELECT 1 WHERE $1::text = ANY (${SLOTS})))
+  AND ($2::uuid[] IS NULL OR NOT EXISTS (SELECT 1 FROM config."ItemDefinitionCharacterClass" ic WHERE ic."ItemDefinitionId" = d."Id")
+       OR EXISTS (SELECT 1 FROM config."ItemDefinitionCharacterClass" ic WHERE ic."ItemDefinitionId" = d."Id" AND ic."CharacterClassId" = ANY($2::uuid[])))`;
+
+async function filterArgs(sql: Sql, slot: string, character: string) {
   const line = character ? await lineOfCharacter(sql, character) : null;
-  const g = group === '' ? -1 : Number(group);
   const s = slot === '' ? -1 : Number(slot);
+  return { line, args: [Number.isInteger(s) ? s : -1, line ? `{${line.ids.join(',')}}` : null] };
+}
+
+/** Items by name; `cat` is a category key, `slot` (0-11) keeps only what can be worn there. */
+export async function searchDefinitions(sql: Sql, q = '', group = '', slot = '', character = '', cat = '') {
+  const { line, args } = await filterArgs(sql, slot, character);
+  const g = group === '' ? -1 : Number(group);
+  const clean = q.replace(/[%_\\]/g, '');
   const rows = await sql.unsafe(
-    `SELECT d."Id" AS id, d."Group" AS "group", d."Number" AS number, ${NAME} AS name, d."Width" AS w, d."Height" AS h,
+    `SELECT d."Id" AS id, d."Group" AS "group", d."Number" AS number, ${NAME} AS name, d."Width" AS w, d."Height" AS h, ${CAT} AS cat,
             d."MaximumItemLevel" AS "maxLevel", d."Durability" AS durability, d."SkillId" IS NOT NULL AS "hasSkill",
             ARRAY(SELECT ic."CharacterClassId"::text FROM config."ItemDefinitionCharacterClass" ic WHERE ic."ItemDefinitionId" = d."Id") AS classes
-     FROM config."ItemDefinition" d WHERE ${NAME} ILIKE $1 AND ($2 = -1 OR d."Group" = $2)
-       AND ($4 = -1 OR EXISTS (SELECT 1 FROM config."ItemSlotType" t WHERE t."Id" = d."ItemSlotId" AND $4::text = ANY (regexp_split_to_array(trim(both ',' from regexp_replace(t."ItemSlots", '\\D+', ',', 'g')), ','))))
-       AND ($5::uuid[] IS NULL OR NOT EXISTS (SELECT 1 FROM config."ItemDefinitionCharacterClass" ic WHERE ic."ItemDefinitionId" = d."Id")
-            OR EXISTS (SELECT 1 FROM config."ItemDefinitionCharacterClass" ic WHERE ic."ItemDefinitionId" = d."Id" AND ic."CharacterClassId" = ANY($5::uuid[])))
-     ORDER BY (${NAME} ILIKE $3) DESC, d."Group", d."Number" LIMIT 150`,
-    ['%' + q.replace(/[%_\\]/g, '') + '%', Number.isInteger(g) ? g : -1, q.replace(/[%_\\]/g, '') + '%', Number.isInteger(s) ? s : -1, line ? `{${line.ids.join(',')}}` : null]
+     ${FROM} WHERE ${FILTER} AND ${NAME} ILIKE $3 AND ($4 = -1 OR d."Group" = $4) AND ($6 = '' OR ${CAT} = $6)
+     ORDER BY (${NAME} ILIKE $5) DESC, d."Group", d."Number" LIMIT 150`,
+    [...args, '%' + clean + '%', Number.isInteger(g) ? g : -1, clean + '%', cat]
   );
   return rows.map(r => {
     const g = line ? gate(line, r.classes as string[]) : null;
     const { classes: _c, ...rest } = r;
     return { ...rest, requires: g?.requires ?? null, needsEvolve: g?.needsEvolve ?? false };
   });
+}
+
+/** The categories this server has items in (for the character's class line and body slot), with counts. */
+export async function itemCategories(sql: Sql, slot = '', character = '') {
+  const { args } = await filterArgs(sql, slot, character);
+  const rows = await sql.unsafe(`SELECT ${CAT} AS cat, count(*)::int AS n ${FROM} WHERE ${FILTER} GROUP BY 1`, args);
+  const n = new Map(rows.map(r => [r.cat as string, r.n as number]));
+  return CATEGORIES.filter(([k]) => n.has(k)).map(([key, name]) => ({ key, name, count: n.get(key)! }));
 }
 
 /** Options an item can carry: the increasable options of its option definitions, by type. */

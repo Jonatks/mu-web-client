@@ -108,9 +108,10 @@ export function createApp(cfg: Config) {
       if (m === 'PATCH' && p.length === 2) { needAdmin(); const b = await body(); return gated(() => items.editItem(sql, admin, p[1]!, b as items.ItemEdit)); }
       if (m === 'POST' && p[2] === 'move') { needAdmin(); const b = await body(); return gated(() => items.moveItem(sql, admin, p[1]!, b as items.ItemMove)); }
     }
+    if (p[0] === 'items' && p[1] === 'categories' && m === 'GET') return items.itemCategories(sql, q.get('slot') ?? '', q.get('character') ?? '');
     if (p[0] === 'items' && p[1] === 'definitions' && m === 'GET') {
       if (p[2]) return items.definitionOptions(sql, p[2]);
-      return items.searchDefinitions(sql, q.get('q') ?? '', q.get('group') ?? '', q.get('slot') ?? '', q.get('character') ?? '');
+      return items.searchDefinitions(sql, q.get('q') ?? '', q.get('group') ?? '', q.get('slot') ?? '', q.get('character') ?? '', q.get('cat') ?? '');
     }
     if (p[0] === 'audit' && m === 'GET') return auditTail(Number(q.get('limit') ?? 100));
     if (p[0] === 'undo' && m === 'GET') return recentUndo();
