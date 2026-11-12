@@ -1421,3 +1421,291 @@ body:has(.mu-item-window) .mobile-controls .mobile-book {
     font-size: 10px;
   }
 }
+
+// ---- MU Helper on a phone, after Mu Magdalena's panel (docs/magdalena_study.md section 20) -------------------------------
+.hlp-panel {
+  width: min(820px, 92vw);
+  // One height for both tabs, as Mu Magdalena's 400 px panel.
+  height: min(400px, 97vh);
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(217, 180, 90, 0.55);
+  border-radius: 12px;
+  background: linear-gradient(#141d17, #0b100d);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.75);
+  color: #f8e7bf;
+  font-size: 11px;
+
+  .hlp-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px 6px 16px;
+
+    .hlp-mark {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(29, 104, 53, 0.55);
+      border: 1px solid rgba(120, 220, 150, 0.6);
+      color: #dfffe7;
+      font-size: 16px;
+    }
+
+    strong {
+      flex: 1;
+      font-size: 15px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #ffe4a3;
+    }
+
+    .hlp-status {
+      padding: 4px 10px;
+      border-radius: 12px;
+      border: 1px solid rgba(217, 197, 158, 0.5);
+      background: rgba(0, 0, 0, 0.32);
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #d8c59e;
+
+      &.is-on {
+        color: #8dffb0;
+        border-color: #5ed48a;
+      }
+    }
+  }
+
+  .hlp-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    border-bottom: 1px solid rgba(217, 180, 90, 0.3);
+
+    .hlp-tab {
+      width: 116px;
+      height: 25px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px 6px 0 0;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(247, 229, 189, 0.52);
+      pointer-events: auto;
+      touch-action: none;
+
+      &.is-active {
+        color: #ffe3a0;
+        background: linear-gradient(#3a2c18, #20180e);
+        border: 1px solid rgba(217, 180, 90, 0.55);
+        border-bottom: 0;
+      }
+    }
+  }
+
+  .hlp-lanes {
+    display: flex;
+    gap: 8px;
+    padding: 8px 12px;
+    min-height: 0;
+    flex: 1;
+  }
+
+  .hlp-lane,
+  .hlp-pickup {
+    flex: 1;
+    min-width: 0;
+    border: 1px solid rgba(217, 180, 90, 0.25);
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.25);
+    overflow-y: auto;
+  }
+
+  .hlp-pickup {
+    margin: 8px 12px;
+  }
+
+  .hlp-lane-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 6px 10px;
+    color: #f6dca2;
+
+    b {
+      font-size: 12px;
+    }
+
+    small {
+      font-size: 8px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      opacity: 0.7;
+    }
+  }
+
+  .hlp-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 4px 10px 8px;
+    min-height: 52px;
+
+    &.hlp-offer {
+      border-top: 1px solid rgba(217, 180, 90, 0.18);
+      padding-top: 8px;
+    }
+  }
+
+  .hlp-empty {
+    align-self: center;
+    font-size: 9px;
+    opacity: 0.6;
+  }
+
+  .hlp-skill {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    border-radius: 6px;
+    border: 1px solid rgba(217, 180, 90, 0.6);
+    overflow: visible;
+    pointer-events: auto;
+    touch-action: none;
+
+    &.is-taken {
+      opacity: 0.45;
+    }
+
+    .hlp-badge {
+      position: absolute;
+      right: -5px;
+      bottom: -5px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-style: normal;
+      font-size: 12px;
+      font-weight: 700;
+      color: #fff;
+      background: #2f9a55;
+
+      &.is-remove {
+        top: -5px;
+        bottom: auto;
+        background: #b8332a;
+      }
+    }
+  }
+
+  .hlp-tiles {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 6px;
+    padding: 4px 10px 10px;
+
+    .hlp-tile {
+      height: 62px;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      border: 1px solid rgba(217, 180, 90, 0.3);
+      background: rgba(0, 0, 0, 0.35);
+      pointer-events: auto;
+      touch-action: none;
+
+      b {
+        font-size: 10px;
+      }
+
+      small {
+        font-size: 8px;
+        font-weight: 700;
+        opacity: 0.7;
+      }
+
+      &.is-on {
+        border-color: #5ed48a;
+        background: linear-gradient(rgba(40, 110, 60, 0.55), rgba(10, 40, 20, 0.6));
+
+        small {
+          color: #8dffb0;
+          opacity: 1;
+        }
+      }
+    }
+  }
+
+  .hlp-foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+    padding: 8px 14px 10px;
+    border-top: 1px solid rgba(217, 180, 90, 0.3);
+    background: rgba(0, 0, 0, 0.22);
+
+    select {
+      height: 30px;
+      min-width: 48px;
+      border-radius: 6px;
+      border: 1px solid rgba(217, 180, 90, 0.5);
+      background: #17110c;
+      color: #ffe5a7;
+    }
+
+    .hlp-range,
+    .hlp-toggle,
+    .hlp-potion {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 9px;
+      color: rgba(247, 229, 189, 0.74);
+    }
+
+    .hlp-potion {
+      padding: 0 8px;
+      height: 32px;
+      border-radius: 16px;
+      border: 1px solid rgba(220, 80, 70, 0.7);
+      background: rgba(18, 10, 7, 0.48);
+    }
+
+    .hlp-start {
+      margin-left: auto;
+      min-width: 150px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #fff;
+      background: linear-gradient(#2f9a55, #1b5e33);
+      border: 1px solid #5ed48a;
+      pointer-events: auto;
+      touch-action: none;
+
+      &.is-stop {
+        background: linear-gradient(#a8392f, #5e1b1b);
+        border-color: #e07a6a;
+      }
+    }
+  }
+}

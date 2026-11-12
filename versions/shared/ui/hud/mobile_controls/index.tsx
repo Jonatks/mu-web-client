@@ -17,6 +17,7 @@ import { StatsModal } from './statsModal';
 import { ChatBubble } from './chatBubble';
 import { MessagesPanel } from './messagesPanel';
 import { SettingsModal } from './settingsModal';
+import { HelperSheet } from './helperSheet';
 import { MonsterBars } from './monsterBars';
 import { installPlayerLongPress } from './playerLongPress';
 import { installFireLoop } from './fireControl';
@@ -71,6 +72,7 @@ export const MobileControls = observer(() => {
       <StatsModal />
       <MessagesPanel />
       <SettingsModal />
+      <HelperSheet />
     </div>
   );
 });

@@ -1,3 +1,4 @@
+/* global process, WebSocket, setTimeout, clearTimeout, Buffer, console */
 // Comprobación desde FUERA de la VM (p. ej. Cloud Shell), sin cuentas ni contraseñas:
 // que el proxy abre el servidor de conexión y el de juego con la IP publica, y rechaza el resto.
 //   node check-remote.js [ws://IP:8090] [IP]       (Node 22 o superior: WebSocket integrado)
@@ -10,7 +11,7 @@ const probe = (host, port) =>
     const ws = new WebSocket(`${base}/?host=${host}&port=${port}`);
     ws.binaryType = 'arraybuffer';
     let finished = false;
-    const done = () => { if (finished) return; finished = true; clearTimeout(timer); try { ws.close(); } catch {} resolve({ state, first }); };
+    const done = () => { if (finished) return; finished = true; clearTimeout(timer); try { ws.close(); } catch { /* already closed */ } resolve({ state, first }); };
     const timer = setTimeout(() => { if (state === 'open') state = 'open (sin datos)'; done(); }, 3500);
     ws.onopen = () => { state = 'open'; };
     ws.onmessage = e => { first = Buffer.from(e.data).subarray(0, 8).toString('hex'); state = 'open+datos'; done(); };

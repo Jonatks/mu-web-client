@@ -41,7 +41,7 @@ C4. Ventanas en columnas, cierre con X grande, tocar fuera para cerrar. [parcial
 C5. Tienda: comprar y vender con la hoja de detalle, precio, falta de zen, impuesto. Probar completo. [parcial]
 C6. NPC: hablar, dialogos con opciones numeradas, misiones (aceptar, seguir, entregar), buffs, evolucion, baul. Probar completo. [pendiente]
 C7. Habilidades: cada clase empieza con su primera habilidad; el boton repite la habilidad; verificar con cada clase; sin mana vuelve al golpe. [parcial: el codigo ya vuelve al golpe sin mana (fireControl); falta que el servidor de las habilidades, ver F4]
-C8. Helper tactil: pestañas Combate y Recoger, rotacion, buffs, rangos, pociones con umbral, boton Start. [pendiente]
+C8. Helper tactil: pestañas Combate y Recoger, rotacion, buffs, rangos, pociones con umbral, boton Start. [hecho: `helperSheet.tsx`, mismo borrador y guardado que la ventana clasica; las fichas de Recoger son las del protocolo (todo, joyas, zen, excelentes, ancient, por nombre), no una por joya como Magdalena]
 C9. Pociones: automaticas (no hay botones). [hecho]
 C10. Barra de vida y nombre sobre todos los mobs visibles (con tope por rendimiento), anillo naranja del objetivo, numeros de daño. [hecho: barras para los 5 mas cercanos y anillo naranja con 4 marcas, publicado]
 C11. Drops: pastilla de nombre, oro con "Zen N", mano. Verificar varios a la vez. [parcial]

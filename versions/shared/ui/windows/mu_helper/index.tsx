@@ -19,6 +19,7 @@ import { MuButton } from '@/controllers/interface/components/mu_button';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
 import { MuItemWindow } from '@/controllers/interface/components/mu_window';
 import { SkillIcon } from '../../components/skill_icon';
+import { isMobileDevice } from '@/controllers/interface/mobile';
 import { GameOptions, setGameOption } from '@/controllers/settings';
 import { MAX_FILTERED_ITEM_CHARS } from '@/modules/mu_helper/itemFilters';
 import {
@@ -142,7 +143,7 @@ const Stepper = ({
 );
 
 /** `FilterByAttackSkills`: what an attack slot may hold. */
-function isAttackSkill(def: SkillDefinition): boolean {
+export function isAttackSkill(def: SkillDefinition): boolean {
   return (
     (def.type === 'DirectHit' ||
       def.type === 'AreaSkillAutomaticHits' ||
@@ -152,7 +153,7 @@ function isAttackSkill(def: SkillDefinition): boolean {
 }
 
 /** `FilterByBuffSkills`: what a buff slot may hold. */
-function isBuffSkill(def: SkillDefinition): boolean {
+export function isBuffSkill(def: SkillDefinition): boolean {
   return def.type === 'Buff' || def.type === 'Regeneration';
 }
 
@@ -682,7 +683,8 @@ export const MuHelperWindow = observer(() => {
     if (!open) setPicker(null);
   }, [open]);
 
-  if (!open) return null;
+  // A phone gets the touch panel (`hud/mobile_controls/helperSheet.tsx`) over the same draft.
+  if (!open || isMobileDevice()) return null;
 
   const close = () => toggleMuHelperWindow(false);
 

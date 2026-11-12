@@ -20,10 +20,11 @@ export type ImmersiveResult = 'locked' | 'fullscreen' | 'unsupported' | 'denied'
 /** Fullscreen first, then landscape. A refused lock still leaves the fullscreen it got. */
 export async function enterImmersive(env: ImmersiveEnv): Promise<ImmersiveResult> {
   const already = env.isFullscreen();
-  if (!already && !env.requestFullscreen) return 'unsupported';
-  if (!already) {
+  const request = env.requestFullscreen;
+  if (!already && !request) return 'unsupported';
+  if (!already && request) {
     try {
-      await env.requestFullscreen!();
+      await request();
     } catch {
       return 'denied';
     }
@@ -71,7 +72,7 @@ function browserEnv(): ImmersiveEnv {
   return {
     isFullscreen: () => !!(doc.fullscreenElement ?? doc.webkitFullscreenElement),
     requestFullscreen: standard ?? (webkit ? async () => void (await webkit()) : undefined),
-    lockLandscape: orientation?.lock ? () => orientation.lock!('landscape') : undefined,
+    lockLandscape: orientation?.lock ? () => orientation.lock?.('landscape') ?? Promise.resolve() : undefined,
   };
 }
 
