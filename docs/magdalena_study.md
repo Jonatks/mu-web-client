@@ -180,8 +180,11 @@ Method: create a character of the class, enter, open the Skills window and read 
 - **Elf** (ClauElf, High Elf line): starts in Noria (172,112); the HUD shows the arrow counter ("Arrows 255 (0)") under the name; lit: fist plus 6 skills (a golden figure,
   red arrows, a blue figure, two blue arrow bursts); 11 greyed.
 - **Magic Gladiator** (ClauMG, Dual Master line): starts in Lorencia (139,120); lit: fist plus 5 skills; 16 greyed.
-- **Rage Fighter** (ClauDL by mistake of the class pill, shows Fist Master): starts in Lorencia (135,118), HUD like the others; the skill window did not open from the book position used before, so its tiles are not counted yet.
-- Not yet studied: Dark Lord, Summoner (the creation pills are offset from my notes; read the class text on the card before pressing Create).
+- **Rage Fighter** (ClauDL by mistake of the class pill, shows Fist Master): starts in Lorencia (135,118), HUD like the others; skill window (book at the bottom right, (879,372)): fist plus 4 lit skills (a white-blue burst, a slash, a fire burst, a blue vortex) and 4 greyed. The window is a full-width panel with the six boxes on the left (2 rows x 3) and the skill tiles on the right, 'Clear' first, a MANUAL/auto toggle at the bottom and the hint 'Tap a skill to place it in the selected slot'.
+- **Dark Lord** (ClauDLo): starts in Lorencia (149,120); lit: fist plus 7 skills (all bird/pet-style icons: a bird head, a blue slash, three purple birds and a rider); 6 greyed. The Skills window has a centred title bar 'SKILLS' and a round X at the top right.
+- Creation card pills (x at y=338): Dark Wizard 198, Dark Knight 286, Elf 368, Magic Gladiator 460, Dark Lord 549, Summoner 627, Rage Fighter 716.
+- The 'Character deleted' dialog has its Accept button at (458,243); after Accept the list may focus another character, so read the name before each Delete.
+- Not yet studied: Summoner.
 Consequence for this client: a new Dark Knight and Elf on this server have no skill, so the cast button only punches. Either the server gives the starting skills (plugin, plan F4)
 or the client lists them as locked until learned.
 
