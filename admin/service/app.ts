@@ -3,9 +3,11 @@ import type { Sql } from 'postgres';
 import * as accounts from './accounts';
 import { isBrowserRequest, keyMatches } from './auth';
 import * as characters from './characters';
+import * as extras from './extras';
 import { HttpError, bad, missing } from './errors';
 import { GateError, assertNobodyConnected } from './gate';
 import * as items from './items';
+import { kickAll } from './kick';
 import * as skills from './skills';
 import { auditTail, recentUndo, undo } from './undo';
 
@@ -39,6 +41,7 @@ export function createApp(cfg: Config) {
       const n = await sql`SELECT (SELECT count(*)::int FROM data."Account") AS accounts, (SELECT count(*)::int FROM data."Character") AS characters`;
       return { gate, ...n[0] };
     }
+    if (p[0] === 'players' && p[1] === 'disconnect' && m === 'POST') { needAdmin(); return kickAll(cfg.gateFile, admin); }
     if (p[0] === 'accounts') {
       if (m === 'GET' && p.length === 1) return accounts.listAccounts(sql, q.get('q') ?? '');
       if (m === 'POST' && p.length === 1) { needAdmin(); const b = await body(); return accounts.createAccount(sql, admin, b.login, b.password, b.state); }
@@ -53,6 +56,15 @@ export function createApp(cfg: Config) {
         if (m === 'POST' && p[3] === 'items') { needAdmin(); const b = await body(); return gated(() => items.addItem(sql, admin, { kind: 'vault', login }, b as items.NewItem)); }
         if (m === 'DELETE' && p[3] === 'items' && p[4]) { needAdmin(); return gated(() => items.deleteItem(sql, admin, { kind: 'vault', login }, p[4]!)); }
       }
+      if (p[2] === 'classes') {
+        if (m === 'GET') return extras.listUnlockedClasses(sql, login);
+        if (m === 'POST') { needAdmin(); const b = await body(); return gated(() => extras.setUnlockedClasses(sql, admin, login, b.classIds)); }
+      }
+      if (p[2] === 'cashshop') {
+        if (m === 'GET') return extras.listCashShop(sql, login);
+        if (m === 'POST') { needAdmin(); const b = await body(); return gated(() => extras.addCashShopItem(sql, admin, login, b)); }
+        if (m === 'DELETE' && p[3]) { needAdmin(); return gated(() => extras.deleteCashShopItem(sql, admin, login, p[3]!)); }
+      }
       if (m === 'POST' && p[2] === 'state') { needAdmin(); const b = await body(); return gated(() => accounts.setState(sql, admin, login, b.state)); }
     }
     if (p[0] === 'maps' && m === 'GET') return characters.listMaps(sql);
@@ -64,7 +76,23 @@ export function createApp(cfg: Config) {
       if (m === 'GET' && p.length === 2) return characters.getCharacter(sql, name);
       if (m === 'PATCH' && p.length === 2) { needAdmin(); const b = await body(); return gated(() => characters.patchCharacter(sql, admin, name, b)); }
       if (m === 'DELETE' && p.length === 2) { needAdmin(); const b = await body(); return gated(() => characters.deleteCharacter(sql, admin, name, b.confirm)); }
+      if (p[2] === 'quests') {
+        if (m === 'GET') return extras.listQuests(sql, name);
+        if (m === 'POST' && p[3]) { needAdmin(); const b = await body(); return gated(() => extras.setQuestState(sql, admin, name, p[3], b)); }
+        if (m === 'DELETE') { needAdmin(); return gated(() => extras.resetQuests(sql, admin, name, p[3] === undefined ? undefined : Number(p[3]))); }
+      }
+      if (p[2] === 'letters') {
+        if (m === 'GET') return extras.listLetters(sql, name);
+        if (m === 'POST') { needAdmin(); const b = await body(); return gated(() => extras.sendLetter(sql, admin, name, b)); }
+        if (m === 'DELETE' && p[3]) { needAdmin(); return gated(() => extras.deleteLetter(sql, admin, name, p[3]!)); }
+      }
+      if (p[2] === 'gens') {
+        if (m === 'GET') return extras.getGens(sql, name);
+        if (m === 'POST') { needAdmin(); const b = await body(); return gated(() => extras.setGens(sql, admin, name, b)); }
+        if (m === 'DELETE') { needAdmin(); return gated(() => extras.leaveGens(sql, admin, name)); }
+      }
       if (p[2] === 'skills') {
+        if (m === 'GET' && p[3] === 'available') return skills.availableSkills(sql, name);
         if (m === 'GET') return skills.listSkills(sql, name);
         if (m === 'POST') { needAdmin(); const b = await body(); return gated(() => skills.addSkill(sql, admin, name, b.skillId, b.level)); }
         if (m === 'PATCH' && p[3]) { needAdmin(); const b = await body(); return gated(() => skills.setSkillLevel(sql, admin, name, p[3]!, b.level)); }
@@ -82,7 +110,7 @@ export function createApp(cfg: Config) {
     }
     if (p[0] === 'items' && p[1] === 'definitions' && m === 'GET') {
       if (p[2]) return items.definitionOptions(sql, p[2]);
-      return items.searchDefinitions(sql, q.get('q') ?? '', q.get('group') ?? '');
+      return items.searchDefinitions(sql, q.get('q') ?? '', q.get('group') ?? '', q.get('slot') ?? '');
     }
     if (p[0] === 'audit' && m === 'GET') return auditTail(Number(q.get('limit') ?? 100));
     if (p[0] === 'undo' && m === 'GET') return recentUndo();

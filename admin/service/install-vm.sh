@@ -32,7 +32,7 @@ CF
 }
 
 if [ "${1:-}" = "rollback" ]; then
-  sudo docker rm -f mu-admin mu-gate >/dev/null 2>&1 || true
+  sudo docker rm -f mu-admin mu-gate mu-kick >/dev/null 2>&1 || true
   write_caddy 0
   echo "mu-admin quitado y ruta /_admin fuera de Caddy"
   exit 0
@@ -59,6 +59,7 @@ GRANT INSERT, UPDATE, DELETE ON data."Character", data."StatAttribute", data."Sk
 GRANT DELETE ON data."Account" TO mu_admin;
 GRANT INSERT, UPDATE, DELETE ON data."ItemStorage" TO mu_admin;
 GRANT INSERT, UPDATE, DELETE ON data."Item", data."ItemOptionLink", data."ItemItemOfItemSet" TO mu_admin;
+GRANT INSERT, UPDATE, DELETE ON data."AccountCharacterClass", data."CharacterQuestState", data."QuestMonsterKillRequirementState", data."GensMember", data."LetterHeader", data."LetterBody", data."CashShopStorageItem" TO mu_admin;
 SQL
 
 # Codigo: el repo es publico.
@@ -72,6 +73,10 @@ sudo chmod 600 "$CFG/env"
 sudo docker rm -f mu-gate >/dev/null 2>&1 || true
 sudo docker run -d --name mu-gate --restart unless-stopped --network container:openmu --memory 40m \
   -v "$APP":/app:ro -v "$DATA":/var/lib/mu-admin -w /app/admin/service oven/bun:1.4.2-slim bun gate-sidecar.ts >/dev/null
+# Desconectar jugadores desde el panel: otro contenedor pequeno, con permiso solo de red, corta los sockets de los puertos de juego.
+sudo docker rm -f mu-kick >/dev/null 2>&1 || true
+sudo docker run -d --name mu-kick --restart unless-stopped --network container:openmu --cap-add NET_ADMIN --memory 24m \
+  -v "$APP":/app:ro -v "$DATA":/d alpine sh /app/admin/service/kick-sidecar.sh >/dev/null
 sudo docker rm -f mu-admin >/dev/null 2>&1 || true
 sudo docker run -d --name mu-admin --restart unless-stopped --network openmu_default --memory 80m \
   -p 127.0.0.1:3200:3200 --env-file "$CFG/env" -e ADMIN_KEY_FILE=/run/key \

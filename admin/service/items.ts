@@ -8,14 +8,17 @@ type OptionRow = { optionId: string; type: string; number: number; label: string
 
 const NAME = `split_part(d."Name", '||', 1)`;
 
-export async function searchDefinitions(sql: Sql, q = '', group = '') {
+/** Items by name; `slot` (0-11) keeps only what can be worn in that body slot. */
+export async function searchDefinitions(sql: Sql, q = '', group = '', slot = '') {
   const g = group === '' ? -1 : Number(group);
+  const s = slot === '' ? -1 : Number(slot);
   return sql.unsafe(
     `SELECT d."Id" AS id, d."Group" AS "group", d."Number" AS number, ${NAME} AS name, d."Width" AS w, d."Height" AS h,
             d."MaximumItemLevel" AS "maxLevel", d."Durability" AS durability, d."SkillId" IS NOT NULL AS "hasSkill"
      FROM config."ItemDefinition" d WHERE ${NAME} ILIKE $1 AND ($2 = -1 OR d."Group" = $2)
-     ORDER BY (${NAME} ILIKE $3) DESC, d."Group", d."Number" LIMIT 100`,
-    ['%' + q.replace(/[%_\\]/g, '') + '%', Number.isInteger(g) ? g : -1, q.replace(/[%_\\]/g, '') + '%']
+       AND ($4 = -1 OR EXISTS (SELECT 1 FROM config."ItemSlotType" t WHERE t."Id" = d."ItemSlotId" AND $4::text = ANY (regexp_split_to_array(trim(both ',' from regexp_replace(t."ItemSlots", '\\D+', ',', 'g')), ','))))
+     ORDER BY (${NAME} ILIKE $3) DESC, d."Group", d."Number" LIMIT 150`,
+    ['%' + q.replace(/[%_\\]/g, '') + '%', Number.isInteger(g) ? g : -1, q.replace(/[%_\\]/g, '') + '%', Number.isInteger(s) ? s : -1]
   );
 }
 
@@ -99,6 +102,21 @@ export function wantedLinks(opts: OptionRow[], b: Spec): Link[] {
   return links;
 }
 
+/** Equipment slots of the inventory (0-11): left hand, right hand, helm, armor, pants, gloves, boots, wings, pet, pendant, ring, ring. */
+export const EQUIP_SLOTS = 12;
+
+/** The body slots an item can be worn in, from its definition. Empty when it cannot be worn. */
+async function wearSlots(sql: Sql, definitionId: string): Promise<number[]> {
+  const r = await sql`SELECT t."ItemSlots" AS s FROM config."ItemDefinition" d JOIN config."ItemSlotType" t ON t."Id" = d."ItemSlotId" WHERE d."Id" = ${definitionId}::uuid`;
+  return String(r[0]?.s ?? '').split(/\D+/).filter(Boolean).map(Number);
+}
+
+/** Throws unless the item can be worn in `slot` and the slot is empty. */
+async function checkWear(sql: Sql, definitionId: string, slot: number, occupied: { slot: number }[]): Promise<void> {
+  if (!(await wearSlots(sql, definitionId)).includes(slot)) throw bad('That item cannot be worn in that slot.');
+  if (occupied.some(o => o.slot === slot)) throw bad('That slot already has an item. Take it off first.');
+}
+
 export type NewItem = { definitionId: string; level?: number; durability?: number; skill?: boolean; luck?: boolean; option?: number; excellent?: number[]; slot?: number };
 
 export async function addItem(sql: Sql, admin: string, t: Target, b: NewItem) {
@@ -116,7 +134,8 @@ export async function addItem(sql: Sql, admin: string, t: Target, b: NewItem) {
     ? ((await sql`SELECT i."ItemSlot" AS slot, d."Width" AS w, d."Height" AS h FROM data."Item" i JOIN config."ItemDefinition" d ON d."Id" = i."DefinitionId" WHERE i."ItemStorageId" = ${store.id}`) as unknown as { slot: number; w: number; h: number }[])
     : [];
   let slot: number | null;
-  if (b.slot === undefined) slot = freeSlot(bag, d.w as number, d.h as number, store.layout);
+  if (t.kind === 'inventory' && b.slot !== undefined && b.slot >= 0 && b.slot < EQUIP_SLOTS) { await checkWear(sql, d.id as string, b.slot, bag); slot = b.slot; }
+  else if (b.slot === undefined) slot = freeSlot(bag, d.w as number, d.h as number, store.layout);
   else slot = fits(bag, b.slot, d.w as number, d.h as number, store.layout) ? b.slot : null;
   if (slot === null) throw bad(b.slot === undefined ? 'There is no free space for that item.' : 'The item does not fit in that slot.');
   return write(sql, { admin, action: t.kind === 'vault' ? 'vault.item.add' : 'item.add', target: who, detail: { item: d.name, level, slot, links: links.length } }, async w => {
@@ -292,7 +311,8 @@ export async function moveItem(sql: Sql, admin: string, itemId: string, b: ItemM
   }
   const others = storage ? await placedIn(sql, storage, itemId) : [];
   let slot: number | null;
-  if (b.slot === undefined) {
+  if (to === 'inventory' && b.slot !== undefined && b.slot >= 0 && b.slot < EQUIP_SLOTS) { await checkWear(sql, it.def, b.slot, others); slot = b.slot; }
+  else if (b.slot === undefined) {
     if (storage === it.storage) throw bad('slot: the new slot, when the item stays in the same place.');
     slot = freeSlot(others, it.w, it.h, layout);
   } else slot = fits(others, b.slot, it.w, it.h, layout) ? b.slot : null;

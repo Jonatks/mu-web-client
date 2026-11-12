@@ -16,9 +16,16 @@ const TABLES: Record<string, string[]> = {
   Item: ['Id'],
   ItemOptionLink: ['Id'],
   ItemItemOfItemSet: ['ItemId', 'ItemOfItemSetId'],
+  AccountCharacterClass: ['AccountId', 'CharacterClassId'],
+  CharacterQuestState: ['Id'],
+  QuestMonsterKillRequirementState: ['Id'],
+  GensMember: ['Id'],
+  LetterHeader: ['Id'],
+  LetterBody: ['Id'],
+  CashShopStorageItem: ['Id'],
 };
 /** Restore parents before children; delete children before parents. */
-const ORDER = ['ItemStorage', 'Account', 'Character', 'Item', 'StatAttribute', 'SkillEntry', 'ItemOptionLink', 'ItemItemOfItemSet'];
+const ORDER = ['ItemStorage', 'Account', 'Character', 'Item', 'StatAttribute', 'SkillEntry', 'ItemOptionLink', 'ItemItemOfItemSet', 'AccountCharacterClass', 'CharacterQuestState', 'QuestMonsterKillRequirementState', 'GensMember', 'LetterHeader', 'LetterBody', 'CashShopStorageItem'];
 
 export const DIR = process.env.ADMIN_DATA_DIR ?? '/var/lib/mu-admin';
 const undoDir = () => join(DIR, 'undo');
@@ -131,6 +138,11 @@ export function recentUndo(limit = 30): { id: string; at: string; admin: string;
       const r = JSON.parse(readFileSync(join(undoDir(), f), 'utf8')) as Record_;
       return { id: r.id, at: r.at, admin: r.admin, action: r.action, target: r.target, undoable: r.undoable };
     });
+}
+
+/** One audit line for an action that changes no rows (so there is nothing to undo). */
+export function auditNote(n: { admin: string; action: string; target: string; detail?: unknown }): void {
+  appendFileSync(auditFile(), JSON.stringify({ id: crypto.randomUUID(), at: new Date().toISOString(), admin: n.admin, action: n.action, target: n.target, undoable: false, detail: n.detail ?? null }) + '\n', { mode: 0o600 });
 }
 
 export function auditTail(limit = 100): Row[] {

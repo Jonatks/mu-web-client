@@ -11,7 +11,7 @@ function h(tag, attrs = {}, ...kids) {
     else if (v === true) e.setAttribute(k, '');
     else if (v !== false && v != null) e.setAttribute(k, v);
   }
-  for (const c of kids.flat()) if (c != null && c !== false) e.append(c.nodeType ? c : document.createTextNode(String(c)));
+  for (const c of kids.flat(Infinity)) if (c != null && c !== false) e.append(c.nodeType ? c : document.createTextNode(String(c)));
   return e;
 }
 const debounce = (fn, ms) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };
@@ -41,7 +41,7 @@ async function api(method, path, body, signal) {
 
 /** Runs an action and tells the result; the error text comes from the service. */
 async function act(fn, ok) {
-  try { const r = await fn(); if (ok) toast(ok); return r; } catch (e) { if (e.name !== 'AbortError') { toast(e.message, true); refreshGate(); } }
+  try { const r = await fn(); if (ok) toast(ok); return r; } catch (e) { if (e.name !== 'AbortError') { toast(e.code === 'players_connected' ? e.message + '. Toca el aviso rojo de arriba para desconectarlos.' : e.message, true); refreshGate(); } }
 }
 
 /* ----------------------------------------------------------------- dialogs */
@@ -90,26 +90,39 @@ $('#loginForm').addEventListener('submit', async e => {
 });
 $('#logout').addEventListener('click', async () => { await fetch('/api/logout', { method: 'POST' }); showLogin(); });
 
+/** Closes every player's connection (OpenMU saves each one) so edits can proceed. */
+async function disconnectAll() {
+  if (!(await confirmBox('Desconectar a todos los jugadores', 'Se corta la conexión de todos los que estén en el juego (vuelven a la pantalla de entrada). El servidor guarda a cada personaje al salir. Tarda unos 20 segundos.', 'Desconectar', true))) return;
+  toast('Desconectando…');
+  const r = await act(() => api('POST', '/players/disconnect', {}));
+  await refreshGate();
+  if (r) toast(r.done ? (r.connected ? `Desconectados (${r.connected}). Ya puedes editar.` : 'No había nadie conectado.') : 'Aún quedan conexiones. Prueba otra vez en unos segundos.', !r.done);
+}
+
 async function refreshGate() {
   try {
     const s = await api('GET', '/status');
     const g = $('#gate');
-    g.textContent = s.gate.ok ? 'Servidor vacío: se puede editar' : 'Edición bloqueada';
-    g.className = 'pill ' + (s.gate.ok ? 'ok' : 'bad');
+    g.textContent = s.gate.ok ? 'Servidor vacío: se puede editar' : 'Edición bloqueada: toca para desconectar';
+    g.className = 'pill ' + (s.gate.ok ? 'ok' : 'bad') + (s.gate.ok ? '' : ' click');
     g.title = s.gate.message;
+    g.onclick = s.gate.ok ? null : disconnectAll;
+    g.onkeydown = s.gate.ok ? null : e => { if (e.key === 'Enter' || e.key === ' ') disconnectAll(); };
+    g.tabIndex = s.gate.ok ? -1 : 0;
+    g.setAttribute('role', s.gate.ok ? 'status' : 'button');
   } catch { $('#gate').textContent = 'Sin conexión con la VM'; $('#gate').className = 'pill warn'; }
 }
 setInterval(() => { if (!$('#app').hidden && !document.hidden) refreshGate(); }, 20_000);
 
 /* ------------------------------------------------------------------- pages */
-const PAGES = { accounts, characters, audit, vault };
+const PAGES = { accounts, account, characters, audit };
 let shown = '';
 const setHash = path => { shown = path; location.hash = path; };
 function go(path) {
   const [name, ...rest] = path.split('/');
   const page = PAGES[name] ? name : 'accounts';
   setHash(page === name ? path : page);
-  for (const b of document.querySelectorAll('#tabs button')) b.classList.toggle('on', b.dataset.tab === (page === 'vault' ? 'accounts' : page));
+  for (const b of document.querySelectorAll('#tabs button')) b.classList.toggle('on', b.dataset.tab === (page === 'account' ? 'accounts' : page));
   view.replaceChildren();
   PAGES[page](decodeURIComponent(rest.join('/')));
   scrollTo(0, 0);
@@ -117,6 +130,42 @@ function go(path) {
 $('#tabs').addEventListener('click', e => e.target.dataset.tab && go(e.target.dataset.tab));
 
 const head = (title, sub, ...right) => h('div', { class: 'page-head' }, h('div', {}, h('h2', {}, title), sub ? h('p', {}, sub) : null), h('div', { class: 'row' }, ...right));
+
+/* ------------------------------------------------------------ page helpers */
+/** A row of tabs over one pane. `items` is [[key, label, build]]; build() returns the pane content. */
+function tabset(items, start, onShow) {
+  const bar = h('div', { class: 'tabs', role: 'tablist' });
+  const pane = h('div', { class: 'pane' });
+  const show = key => {
+    for (const b of bar.children) { b.classList.toggle('on', b.dataset.t === key); b.setAttribute('aria-selected', String(b.dataset.t === key)); }
+    pane.replaceChildren((items.find(i => i[0] === key) ?? items[0])[2]());
+    onShow?.(key);
+  };
+  bar.append(...items.map(([k, label]) => h('button', { 'data-t': k, role: 'tab', onclick: () => show(k) }, label)));
+  show(items.some(i => i[0] === start) ? start : items[0][0]);
+  return h('div', {}, bar, pane);
+}
+
+/** Fields that remember what they started with, so only what changed is saved. */
+function formKit(onDirty) {
+  const reg = {};
+  const read = ({ el, orig }) => (el.type === 'checkbox' ? el.checked : typeof orig === 'number' ? Number(el.value) : el.value);
+  function field(key, label, el, orig, hint) {
+    reg[key] = { el, orig };
+    const box = el.type === 'checkbox' ? h('label', { class: 'f inline' }, el, label) : h('label', { class: 'f' }, label, el, hint ? h('small', {}, hint) : null);
+    const upd = () => { box.classList.toggle('dirty', read(reg[key]) !== orig); onDirty(); };
+    el.addEventListener('input', upd);
+    el.addEventListener('change', upd);
+    return box;
+  }
+  const changes = () => Object.fromEntries(Object.entries(reg).map(([k, r]) => [k, read(r)]).filter(([k, v]) => v !== reg[k].orig));
+  return { field, changes };
+}
+
+/** A titled group of fields. */
+const card = (title, note, ...body) => h('section', { class: 'card' }, h('h4', {}, title), note ? h('p', { class: 'hint' }, note) : null, ...body);
+const sticky = (...kids) => h('div', { class: 'savebar sticky' }, ...kids);
+const pillFor = s => h('span', { class: 'pill ' + (s === 'banned' ? 'bad' : s === 'gm' ? 'warn' : '') }, STATE_LABEL[s] ?? s);
 
 /* ---------------------------------------------------------------- accounts */
 const STATE_LABEL = { normal: 'Normal', gm: 'GM', banned: 'Baneada' };
@@ -133,77 +182,18 @@ function accounts() {
     list.replaceChildren(h('table', {},
       h('thead', {}, h('tr', {}, ['Cuenta', 'Estado', 'Personajes', 'Registro', ''].map(t => h('th', {}, t)))),
       h('tbody', {}, rows.map(a => h('tr', {},
-        h('td', { class: 'mono' }, a.login),
-        h('td', {}, h('span', { class: 'pill ' + (a.stateName === 'banned' ? 'bad' : a.stateName === 'gm' ? 'warn' : '') }, STATE_LABEL[a.stateName] ?? a.stateName)),
+        h('td', {}, h('button', { class: 'link mono', onclick: () => go('account/' + a.login) }, a.login)),
+        h('td', {}, pillFor(a.stateName)),
         h('td', {}, a.characters),
         h('td', { class: 'mute' }, String(a.registered).slice(0, 10)),
-        h('td', { class: 'actions' },
-          h('button', { class: 'small', onclick: () => go('vault/' + a.login) }, 'Baúl'),
-          h('button', { class: 'small', onclick: () => changePassword(a.login) }, 'Contraseña'),
-          a.stateName === 'banned'
-            ? h('button', { class: 'small', onclick: () => setState(a.login, 'normal', 'Cuenta desbaneada') }, 'Desbanear')
-            : h('button', { class: 'small danger', onclick: async () => (await confirmBox(`¿Banear ${a.login}?`, 'No podrá entrar al juego hasta que la desbanees.', 'Banear', true)) && setState(a.login, 'banned', 'Cuenta baneada') }, 'Banear'),
-          a.stateName === 'gm' ? h('button', { class: 'small', onclick: () => setState(a.login, 'normal', 'Ya no es GM') }, 'Quitar GM') : a.stateName === 'normal' ? h('button', { class: 'small', onclick: () => setState(a.login, 'gm', 'Ahora es GM') }, 'Hacer GM') : null,
-          h('button', { class: 'small', title: 'Correo, código de seguridad y clave del baúl', onclick: () => advancedAccount(a.login) }, 'Avanzado')))))));
+        h('td', { class: 'actions' }, h('button', { class: 'small', onclick: () => go('account/' + a.login) }, 'Abrir')))))));
   }
-  async function setState(login, state, ok) { if (await act(() => api('POST', `/accounts/${login}/state`, { state }), ok)) load(); }
-  function changePassword(login) {
-    const p = h('input', { type: 'password', maxlength: 10, autocomplete: 'new-password', placeholder: '4 a 10 caracteres' });
-    openDialog(h('h3', {}, `Nueva contraseña de ${login}`), h('label', {}, 'Contraseña', p), h('p', { class: 'hint' }, 'Sin espacios.'),
-      h('div', { class: 'actions' }, h('button', { onclick: closeDialog }, 'Cancelar'), h('button', {
-        class: 'primary', onclick: async () => { if (await act(() => api('POST', `/accounts/${login}/password`, { password: p.value }), 'Contraseña cambiada')) closeDialog(); },
-      }, 'Guardar')));
-    p.focus();
-  }
-  async function advancedAccount(login) {
-    const a = await act(() => api('GET', '/accounts/' + login));
-    if (!a) return;
-    const name = h('input', { value: a.login, maxlength: 10 });
-    const email = h('input', { type: 'email', value: a.email ?? '', maxlength: 120 });
-    const code = h('input', { inputmode: 'numeric', maxlength: 7, placeholder: a.hasSecurityCode ? 'Ya tiene (escribe otro para cambiarlo)' : 'Sin código' });
-    const ext = h('input', { type: 'checkbox' }); ext.checked = a.vaultExtended;
-    const clear = h('input', { type: 'checkbox' });
-    const num = (k, label, lo, hi) => (a[k] === undefined ? null : { k, label, el: h('input', { type: 'number', min: lo, max: hi, value: a[k] }) });
-    const nums = [num('wcoinC', 'WCoin C (cash)', 0, 2147483647), num('wcoinP', 'WCoin P (prepago)', 0, 2147483647), num('goblinPoints', 'Puntos Goblin', 0, 2147483647), num('timeZone', 'Zona horaria (-12 a 14)', -12, 14)].filter(Boolean);
-    const lang = a.language === undefined ? null : h('input', { value: a.language, maxlength: 3 });
-    const local = v => (v ? new Date(new Date(v).getTime() - new Date(v).getTimezoneOffset() * 60000).toISOString().slice(0, 16) : '');
-    const ban = a.chatBanUntil === undefined ? null : h('input', { type: 'datetime-local', value: local(a.chatBanUntil) });
-    openDialog(h('h3', {}, `Avanzado: ${login}`),
-      h('p', { class: 'mute' }, 'Cosas que casi nunca hacen falta. Se guardan solo los campos que cambies.'),
-      h('div', { class: 'fields' },
-        h('label', {}, 'Login', name), h('label', {}, 'Correo', email), h('label', {}, 'Código de seguridad (hasta 7 números)', code),
-        ...nums.map(n => h('label', {}, n.label, n.el)),
-        lang ? h('label', {}, 'Idioma (en, es, de...)', lang) : null,
-        ban ? h('label', {}, 'Chat silenciado hasta (vacío = no)', ban) : null),
-      h('label', { class: 'inline' }, ext, 'Baúl ampliado (el doble de espacio)'),
-      a.hasVaultPassword ? h('label', { class: 'inline' }, clear, 'Quitar la clave del baúl (si el jugador la olvidó)') : h('p', { class: 'hint' }, 'El baúl no tiene clave.'),
-      h('div', { class: 'actions' },
-        h('button', { class: 'danger', onclick: async () => {
-          if (!(await typedConfirm(`Borrar la cuenta ${login}`, 'Solo se puede si ya no tiene personajes. Se borra también su baúl. Se puede deshacer desde Registro.', login))) return;
-          if (await act(() => api('DELETE', '/accounts/' + login, { confirm: login }), 'Cuenta borrada')) { closeDialog(); load(); }
-        } }, 'Borrar cuenta'),
-        h('button', { onclick: closeDialog }, 'Cancelar'),
-        h('button', { class: 'primary', onclick: async () => {
-          const body = {};
-          if (name.value !== a.login) body.login = name.value;
-          if (email.value !== (a.email ?? '')) body.email = email.value;
-          if (code.value) body.securityCode = code.value;
-          if (ext.checked !== a.vaultExtended) body.vaultExtended = ext.checked;
-          if (clear.checked) body.clearVaultPassword = true;
-          for (const n of nums) if (Number(n.el.value) !== a[n.k]) body[n.k] = Number(n.el.value);
-          if (lang && lang.value !== a.language) body.language = lang.value;
-          if (ban && ban.value !== local(a.chatBanUntil)) body.chatBanUntil = ban.value ? new Date(ban.value).toISOString() : null;
-          if (!Object.keys(body).length) return toast('No cambiaste nada');
-          if (await act(() => api('PATCH', '/accounts/' + login, body), 'Cuenta guardada')) { closeDialog(); load(); }
-        } }, 'Guardar')));
-  }
-
   const login = h('input', { maxlength: 10, placeholder: '4-10 letras o números', autocomplete: 'off', 'aria-label': 'Login' });
   const pass = h('input', { type: 'password', maxlength: 10, placeholder: '4-10 caracteres', autocomplete: 'new-password', 'aria-label': 'Contraseña' });
   const state = h('select', { 'aria-label': 'Tipo' }, h('option', { value: 'normal' }, 'Jugador'), h('option', { value: 'gm' }, 'GM'));
   q.addEventListener('input', debounce(load, 200));
   view.append(
-    head('Cuentas', 'Crea cuentas y cuida las que ya existen.'),
+    head('Cuentas', 'Abre una cuenta para editar sus datos, su baúl, sus clases y su tienda cash.'),
     h('section', { class: 'panel' }, h('h3', {}, 'Crear cuenta'), h('div', { class: 'row' },
       h('label', {}, 'Login', login), h('label', {}, 'Contraseña', pass), h('label', {}, 'Tipo', state),
       h('button', { class: 'primary', onclick: async () => {
@@ -211,6 +201,119 @@ function accounts() {
       } }, 'Crear cuenta'))),
     h('section', { class: 'panel' }, h('div', { class: 'row' }, h('div', { class: 'suggest' }, q)), list));
   load();
+}
+
+let accountTab = 'data';
+
+/** One account: its data, vault, unlocked classes, cash shop storage and characters, each in its own tab. */
+async function account(login) {
+  if (!login) return go('accounts');
+  const a = await act(() => api('GET', '/accounts/' + login));
+  if (!a) return go('accounts');
+  view.append(
+    head(`Cuenta ${a.login}`, `Registrada el ${String(a.registered).slice(0, 10)}`, pillFor(a.stateName), h('button', { onclick: () => go('accounts') }, 'Volver a cuentas')),
+    tabset([
+      ['data', 'Datos', () => accountData(a)],
+      ['vault', 'Baúl', () => h('section', { class: 'panel' }, storagePanel('vault', a.login))],
+      ['classes', 'Clases', () => classesPanel(a.login)],
+      ['cash', 'Tienda cash', () => cashPanel(a.login)],
+      ['chars', 'Personajes', () => accountChars(a.login)],
+    ], accountTab, k => { accountTab = k; }));
+}
+
+function accountData(a) {
+  const login = a.login;
+  const dirty = () => { const n = Object.keys(kit.changes()).length; save.disabled = !n; note.textContent = n ? `${n} cambio(s) sin guardar` : 'Sin cambios'; };
+  const kit = formKit(dirty);
+  const save = h('button', { class: 'primary', disabled: true }, 'Guardar cambios');
+  const note = h('span', { class: 'hint' }, 'Sin cambios');
+  const nums = (k, label, lo, hi) => (a[k] === undefined ? null : kit.field(k, label, h('input', { type: 'number', min: lo, max: hi, value: a[k] }), a[k]));
+  const local = v => (v ? new Date(new Date(v).getTime() - new Date(v).getTimezoneOffset() * 60000).toISOString().slice(0, 16) : '');
+  const st = h('select', {}, [['normal', 'Jugador'], ['gm', 'GM (game master)'], ['banned', 'Baneada']].map(([v, t]) => h('option', { value: v }, t)));
+  st.value = a.stateName;
+  const bigCard = (...x) => h('div', { class: 'cards' }, ...x);
+  const body = h('div', {},
+    bigCard(
+      card('Acceso', 'Quién es y cómo entra.',
+        h('div', { class: 'fields' },
+          kit.field('login', 'Login', h('input', { value: a.login, maxlength: 10 }), a.login),
+          kit.field('email', 'Correo', h('input', { type: 'email', value: a.email ?? '', maxlength: 120 }), a.email ?? ''),
+          kit.field('state', 'Estado de la cuenta', st, a.stateName, 'Baneada: no puede entrar al juego.'),
+          kit.field('_password', 'Contraseña nueva', h('input', { type: 'password', maxlength: 10, autocomplete: 'new-password', placeholder: 'Vacío = no cambiar' }), ''),
+          kit.field('securityCode', 'Código de seguridad', h('input', { inputmode: 'numeric', maxlength: 7, placeholder: a.hasSecurityCode ? 'Ya tiene (escribe otro para cambiarlo)' : 'Sin código' }), ''))),
+      card('Monedas y juego', 'Cash shop y preferencias de la cuenta.',
+        h('div', { class: 'fields' },
+          nums('wcoinC', 'WCoin C (cash)', 0, 2147483647), nums('wcoinP', 'WCoin P (prepago)', 0, 2147483647), nums('goblinPoints', 'Puntos Goblin', 0, 2147483647),
+          nums('timeZone', 'Zona horaria (-12 a 14)', -12, 14),
+          a.language === undefined ? null : kit.field('language', 'Idioma (en, es, de...)', h('input', { value: a.language, maxlength: 3 }), a.language))),
+      card('Baúl y chat', 'Ajustes del almacén y del chat.',
+        h('div', { class: 'checks' },
+          kit.field('vaultExtended', 'Baúl ampliado (el doble de espacio)', Object.assign(h('input', { type: 'checkbox' }), { checked: a.vaultExtended }), a.vaultExtended),
+          a.hasVaultPassword ? kit.field('clearVaultPassword', 'Quitar la clave del baúl (si el jugador la olvidó)', h('input', { type: 'checkbox' }), false) : h('p', { class: 'hint' }, 'El baúl no tiene clave.')),
+        a.chatBanUntil === undefined ? null : h('div', { class: 'fields' }, kit.field('chatBanUntil', 'Chat silenciado hasta (vacío = no)', h('input', { type: 'datetime-local', value: local(a.chatBanUntil) }), local(a.chatBanUntil))))),
+    card('Zona de peligro', 'Solo se puede borrar una cuenta sin personajes. Se borra también su baúl. Se puede deshacer desde Registro.',
+      h('button', { class: 'danger', onclick: async () => {
+        if (!(await typedConfirm(`Borrar la cuenta ${login}`, 'Esta acción borra la cuenta y su baúl.', login))) return;
+        if (await act(() => api('DELETE', '/accounts/' + login, { confirm: login }), 'Cuenta borrada')) go('accounts');
+      } }, 'Borrar cuenta')),
+    sticky(save, note));
+  save.addEventListener('click', async () => {
+    const ch = kit.changes();
+    if (ch.state === 'banned' && !(await confirmBox(`¿Banear ${login}?`, 'No podrá entrar al juego hasta que la desbanees.', 'Banear', true))) return;
+    const { state, _password, ...patch } = ch;
+    if (patch.chatBanUntil !== undefined) patch.chatBanUntil = patch.chatBanUntil ? new Date(patch.chatBanUntil).toISOString() : null;
+    if (patch.securityCode === '') delete patch.securityCode;
+    let ok = true;
+    if (Object.keys(patch).length) ok = !!(await act(() => api('PATCH', '/accounts/' + login, patch)));
+    if (ok && _password) ok = !!(await act(() => api('POST', `/accounts/${login}/password`, { password: _password })));
+    if (ok && state) ok = !!(await act(() => api('POST', `/accounts/${login}/state`, { state })));
+    if (ok) { toast('Cuenta guardada'); view.replaceChildren(); account(patch.login ?? login); if (patch.login) setHash('account/' + patch.login); }
+  });
+  return body;
+}
+
+async function accountChars(login) {
+  const box = h('section', { class: 'panel' }, h('h3', {}, 'Personajes de la cuenta'));
+  const rows = await act(() => api('GET', '/characters?account=' + encodeURIComponent(login)));
+  box.append(rows?.length ? h('div', { class: 'roster' }, rows.map(c => h('button', { class: 'char', onclick: () => go('characters/' + c.name) }, h('div', { class: 'lv' }, c.level), h('div', {}, h('b', {}, c.name), h('span', {}, `${c.class} · ${c.map ?? 'sin mapa'}`))))) : h('p', { class: 'empty' }, 'Esta cuenta no tiene personajes. Se crean en el juego.'));
+  return box;
+}
+
+/** Base classes this account may create (the ones that need unlocking, like Summoner or Rage Fighter). */
+function classesPanel(login) {
+  const box = h('section', { class: 'panel' }, h('h3', {}, 'Clases desbloqueadas'), h('p', { class: 'hint' }, 'Marca las clases que esta cuenta puede crear. Las que ya se crean sin desbloqueo no necesitan marca.'));
+  (async () => {
+    const list = await act(() => api('GET', `/accounts/${login}/classes`));
+    if (!list) return;
+    const boxes = list.map(k => Object.assign(h('input', { type: 'checkbox' }), { checked: k.unlocked }));
+    const save = h('button', { class: 'primary', onclick: async () => {
+      const ids = list.filter((_, i) => boxes[i].checked).map(k => k.id);
+      if (await act(() => api('POST', `/accounts/${login}/classes`, { classIds: ids }), 'Clases guardadas')) { box.replaceWith(classesPanel(login)); }
+    } }, 'Guardar clases');
+    box.append(h('div', { class: 'checks grid' }, list.map((k, i) => h('label', { class: 'inline' }, boxes[i], k.name, k.createdByDefault ? h('small', { class: 'mute' }, ' (se crea sin desbloqueo)') : null))), h('div', { class: 'savebar' }, save));
+  })();
+  return box;
+}
+
+/** What the account has bought in the cash shop and not yet taken out. */
+function cashPanel(login) {
+  const box = h('section', { class: 'panel' }, h('h3', {}, 'Tienda cash: ítems guardados'));
+  async function load() {
+    const rows = await act(() => api('GET', `/accounts/${login}/cashshop`));
+    if (!rows) return;
+    const product = h('input', { type: 'number', min: 0, placeholder: 'Número del producto' });
+    const price = h('input', { type: 'number', min: 0, value: 0 });
+    box.replaceChildren(h('h3', {}, 'Tienda cash: ítems guardados'),
+      h('p', { class: 'hint' }, 'Son compras o regalos que el jugador aún no recogió. El número del producto es el del catálogo de la tienda del juego.'),
+      rows.length ? h('table', {}, h('thead', {}, h('tr', {}, ['Producto', 'Precio', 'Regalo', 'Fecha', ''].map(t => h('th', {}, t)))),
+        h('tbody', {}, rows.map(r => h('tr', {}, h('td', {}, r.product), h('td', {}, r.price), h('td', {}, r.gift ? `de ${r.sender || '?'}${r.message ? ': ' + r.message : ''}` : 'No'), h('td', { class: 'mute' }, String(r.addedAt).slice(0, 10)),
+          h('td', { class: 'actions' }, h('button', { class: 'small danger', onclick: async () => { if (await confirmBox('¿Quitar este ítem?', 'Se puede deshacer desde Registro.', 'Quitar', true) && (await act(() => api('DELETE', `/accounts/${login}/cashshop/${r.id}`), 'Ítem quitado'))) load(); } }, 'Quitar'))))))
+        : h('p', { class: 'empty' }, 'No hay ítems guardados.'),
+      h('div', { class: 'row bar' }, h('label', {}, 'Producto', product), h('label', {}, 'Precio', price),
+        h('button', { class: 'primary', onclick: async () => { if (await act(() => api('POST', `/accounts/${login}/cashshop`, { product: Number(product.value), price: Number(price.value) }), 'Ítem añadido')) load(); } }, 'Añadir ítem')));
+  }
+  load();
+  return box;
 }
 
 /* ------------------------------------------------------------- item looks */
@@ -250,7 +353,8 @@ function marked(text, q) {
 }
 
 /** A text box that suggests items (or skills) from the first letter, keyboard friendly. */
-function suggest(onPick, kind = 'items') {
+function suggest(onPick, kind = 'items', extra = {}) {
+  const slotMode = extra.slot !== undefined && extra.slot !== null;
   const skillsMode = kind === 'skills';
   const input = h('input', { placeholder: skillsMode ? 'Escribe el nombre de la habilidad' : 'Escribe el nombre del ítem (Sword, Wing, Jewel...)', autocomplete: 'off', role: 'combobox', 'aria-expanded': 'false', 'aria-label': skillsMode ? 'Buscar habilidad' : 'Buscar ítem' });
   const list = h('ul', { class: 'sug-list', role: 'listbox', hidden: true });
@@ -268,11 +372,11 @@ function suggest(onPick, kind = 'items') {
   const search = debounce(async () => {
     const q = input.value.trim();
     ctl?.abort();
-    if (!q) { found = []; return draw(); }
+    if (!q && !slotMode) { found = []; return draw(); }
     ctl = new AbortController();
-    const r = await act(() => api('GET', (skillsMode ? '/skills/definitions?q=' : '/items/definitions?q=') + encodeURIComponent(q), undefined, ctl.signal));
+    const r = await act(() => api('GET', (skillsMode ? '/skills/definitions?q=' : '/items/definitions?q=') + encodeURIComponent(q) + (slotMode ? '&slot=' + extra.slot : ''), undefined, ctl.signal));
     if (!r) return;
-    found = rank(r, q).slice(0, 14); on = found.length ? 0 : -1; draw();
+    found = rank(r, q).slice(0, slotMode ? 40 : 14); on = found.length ? 0 : -1; draw();
   }, 120);
   input.addEventListener('input', () => { onPick(null); search(); });
   input.addEventListener('keydown', e => {
@@ -281,6 +385,7 @@ function suggest(onPick, kind = 'items') {
     else if (e.key === 'Enter' && found[on]) { pick(found[on]); e.preventDefault(); }
     else if (e.key === 'Escape' && !list.hidden) { list.hidden = true; e.stopPropagation(); e.preventDefault(); }
   });
+  input.addEventListener('focus', () => { if (slotMode && !input.value) search(); });
   input.addEventListener('blur', () => setTimeout(() => { list.hidden = true; }, 120));
   return { el: h('div', { class: 'suggest' }, input, list), input };
 }
@@ -289,10 +394,12 @@ function suggest(onPick, kind = 'items') {
 /** Where: { kind: 'inventory'|'vault', id }. slot null = first free place. */
 function insertDialog(where, slot, done) {
   const isInv = where.kind === 'inventory';
-  const dest = isInv ? `el inventario de ${where.id}` : `el baúl de ${where.id}`;
+  const worn = isInv && slot !== null && slot < 12;
+  const bodySlot = worn ? DOLL.find(([n]) => n === slot)?.[1] : '';
+  const dest = worn ? `${where.id}: ${bodySlot.toLowerCase()}` : isInv ? `el inventario de ${where.id}` : `el baúl de ${where.id}`;
   const url = isInv ? `/characters/${where.id}/items` : `/accounts/${where.id}/vault/items`;
   const form = h('div');
-  const go = h('button', { class: 'primary', disabled: true }, `Insertar en ${isInv ? 'el inventario' : 'el baúl'}`);
+  const go = h('button', { class: 'primary', disabled: true }, worn ? 'Equipar' : `Insertar en ${isInv ? 'el inventario' : 'el baúl'}`);
   let def = null;
 
   async function configure(d) {
@@ -328,7 +435,7 @@ function insertDialog(where, slot, done) {
       return body;
     };
   }
-  const s = suggest(configure);
+  const s = suggest(configure, 'items', { slot: worn ? slot : null });
   go.addEventListener('click', async () => {
     if (!def || !form._read) return;
     go.disabled = true;
@@ -337,8 +444,8 @@ function insertDialog(where, slot, done) {
     if (r) { closeDialog(); done(); }
   });
   openDialog(
-    h('h3', {}, `Insertar ítem en ${dest}`),
-    h('p', { class: 'mute' }, slot === null ? 'Va al primer hueco libre.' : `Va a la casilla ${isInv ? slot - 11 : slot + 1}.`),
+    h('h3', {}, worn ? `Equipar ítem: ${bodySlot}` : `Insertar ítem en ${dest}`),
+    h('p', { class: 'mute' }, worn ? `Se equipa directo en la ranura «${bodySlot}». Solo salen los ítems que se pueden llevar ahí.` : slot === null ? 'Va al primer hueco libre.' : `Va a la casilla ${isInv ? slot - 11 : slot + 1}.`),
     s.el, form,
     h('div', { class: 'actions' }, h('button', { onclick: closeDialog }, 'Cancelar'), go));
   s.input.focus();
@@ -433,7 +540,8 @@ function storagePanel(kind, id) {
     const d = h('div', { class: 'doll' });
     for (const [slot, label] of DOLL) {
       const it = data.items.find(x => x.slot === slot);
-      d.append(h('div', { class: 'slot' }, h('i', {}, label), it ? tile(it, () => { sel = it.id; draw(); }, sel === it.id) : null));
+      d.append(h('div', { class: 'slot' }, h('i', {}, label), it ? tile(it, () => { sel = it.id; draw(); }, sel === it.id)
+        : h('button', { class: 'slot-add', title: `Poner un ítem en: ${label}`, 'aria-label': `Poner un ítem en ${label}`, onclick: () => (moving ? moveTo(slot) : insertDialog(where, slot, load)) }, '+')));
     }
     return d;
   }
@@ -441,7 +549,7 @@ function storagePanel(kind, id) {
   function detail() {
     const it = data.items.find(x => x.id === sel);
     if (!it) return h('div', { class: 'detail panel' }, h('h3', {}, 'Ítem'), h('p', { class: 'hint' }, 'Toca un ítem para ver sus datos. Toca una casilla vacía (+) para insertar uno justo ahí.'),
-      isInv ? h('p', { class: 'hint' }, 'Las casillas de equipo muestran lo que el personaje lleva puesto. Para equipar algo nuevo, insértalo en la mochila y póntelo en el juego.') : null);
+      isInv ? h('p', { class: 'hint' }, 'Las casillas del cuerpo (cabeza, manos, anillos, alas...) muestran lo que lleva puesto. Toca una vacía (+) para equipar un ítem directo ahí.') : null);
     return h('div', { class: 'detail panel' },
       h('h3', {}, it.name, it.level ? ` +${it.level}` : ''),
       h('p', { class: 'mute' }, `${GROUPS[it.group] ?? ''} · ${it.w}x${it.h} · durabilidad ${it.durability}${it.skill ? ' · con habilidad' : ''}`),
@@ -483,7 +591,7 @@ function storagePanel(kind, id) {
       const zen = h('input', { type: 'number', min: 0, max: 2147483647, value: data.zen });
       zenRow = h('div', { class: 'row' }, h('label', {}, 'Zen del baúl', zen), h('button', { onclick: async () => { if (await act(() => api('PATCH', `/accounts/${id}/vault`, { zen: Number(zen.value) }), 'Zen del baúl guardado')) load(); } }, 'Guardar zen'));
     }
-    const banner = moving ? h('p', { class: 'banner' }, 'Toca la casilla vacía de destino. Esc cancela.') : null;
+    const banner = moving ? h('p', { class: 'banner' }, 'Toca la casilla vacía de destino (sirve también una ranura del cuerpo). Esc cancela.') : null;
     box.replaceChildren(...[bar, banner, zenRow, h('div', { class: 'bench' }, ...[isInv ? doll() : null, grid(), detail()].filter(Boolean))].filter(Boolean));
   }
   load();
@@ -491,42 +599,155 @@ function storagePanel(kind, id) {
 }
 
 /* ------------------------------------------------------------------ skills */
+// What kind of skill it is, from the server data: label, glyph and colour class.
+const skillKind = (t, d) => (t === 20 ? ['Pasiva', '◆', 'pas'] : t === 30 ? ['Invocación', '♜', 'sum'] : t === 40 ? ['Apoyo', '✚', 'sup']
+  : d === 1 ? ['Magia', '✦', 'mag'] : d === 2 ? ['Maldición', '☠', 'cur'] : d === 4 ? ['Fenrir', '✧', 'mag'] : d === -1 ? ['Efecto', '●', 'sup'] : ['Ataque físico', '⚔', 'phy']);
+const glyph = (t, d) => { const [label, g, c] = skillKind(t, d); return h('span', { class: 'glyph g-' + c, title: label }, g); };
+
 function skillsPanel(name) {
   const box = h('div');
+  let term = '';
   async function load() {
-    const list = await act(() => api('GET', `/characters/${name}/skills`));
-    if (!list) return;
-    let picked = null;
-    const lvl = h('input', { type: 'number', min: 0, max: 255, value: 0 });
-    const add = h('button', { class: 'primary', disabled: true, onclick: async () => {
-      if (await act(() => api('POST', `/characters/${name}/skills`, { skillId: picked.id, level: Number(lvl.value) }), 'Habilidad añadida')) load();
-    } }, 'Añadir habilidad');
-    const s = suggest(d => { picked = d; add.disabled = !d; }, 'skills');
-    box.replaceChildren(
-      h('div', { class: 'row bar' }, s.el, h('label', {}, 'Nivel', lvl), add),
+    const [list, av] = await Promise.all([act(() => api('GET', `/characters/${name}/skills`)), act(() => api('GET', `/characters/${name}/skills/available`))]);
+    if (!list || !av) return;
+    const meta = new Map(av.skills.map(s => [s.id, s]));
+    const add = async (id, label, level = 0) => (await act(() => api('POST', `/characters/${name}/skills`, { skillId: id, level }), `${label} añadida`)) && load();
+
+    const learned = h('section', { class: 'panel' }, h('h3', {}, `Habilidades aprendidas (${list.length})`),
       list.length
         ? h('table', {}, h('thead', {}, h('tr', {}, ['Habilidad', 'N.º', 'Nivel', ''].map(t => h('th', {}, t)))),
           h('tbody', {}, list.map(e => {
             const l = h('input', { type: 'number', min: 0, max: 255, value: e.level, 'aria-label': `Nivel de ${e.name}` });
-            return h('tr', {}, h('td', {}, e.name), h('td', { class: 'mute' }, e.number), h('td', {}, l),
+            const m = meta.get(e.skillId);
+            return h('tr', {}, h('td', {}, m ? glyph(m.skillType, m.damageType) : h('span', { class: 'glyph' }, '•'), ' ', e.name), h('td', { class: 'mute' }, e.number), h('td', {}, l),
               h('td', { class: 'actions' },
                 h('button', { class: 'small', onclick: async () => { if (await act(() => api('PATCH', `/characters/${name}/skills/${e.id}`, { level: Number(l.value) }), 'Nivel guardado')) load(); } }, 'Guardar nivel'),
                 h('button', { class: 'small danger', onclick: async () => { if (await confirmBox(`¿Quitar ${e.name}?`, 'Se puede deshacer desde Registro.', 'Quitar', true) && (await act(() => api('DELETE', `/characters/${name}/skills/${e.id}`), 'Habilidad quitada'))) load(); } }, 'Quitar')));
           })))
-        : h('p', { class: 'empty' }, 'Este personaje no tiene habilidades aprendidas.'),
-      h('p', { class: 'hint' }, 'Las habilidades de las que ya depende otra (como las de Master) se añaden sueltas: el juego no revisa los requisitos aquí.'));
+        : h('p', { class: 'empty' }, 'Este personaje no tiene habilidades aprendidas.'));
+
+    const q = h('input', { type: 'search', placeholder: 'Filtrar por nombre...', 'aria-label': 'Filtrar habilidades', value: term });
+    const grid = h('div', { class: 'skill-grid' });
+    const draw = () => {
+      term = q.value;
+      const rows = av.skills.filter(s => s.name.toLowerCase().includes(term.trim().toLowerCase()));
+      grid.replaceChildren(...(rows.length ? rows.map(s => {
+        const [label] = skillKind(s.skillType, s.damageType);
+        return h('div', { class: 'skill-card' + (s.has ? ' has' : '') + (s.needsEvolve ? ' locked' : '') },
+          glyph(s.skillType, s.damageType),
+          h('div', { class: 'sk-main' }, h('b', {}, s.name), h('span', { class: 'mute' }, `${label} · n.º ${s.number}`),
+            s.needsEvolve ? h('span', { class: 'pill warn' }, `Requiere ${s.requires}`) : null),
+          s.has ? h('span', { class: 'mute' }, 'La tiene') : h('button', { class: 'small', onclick: async () => {
+            if (s.needsEvolve && !(await confirmBox(`${s.name} necesita ${s.requires}`, `${name} es ${av.current}. Puedes dársela ya, pero solo la podrá usar cuando evolucione a ${s.requires}.`, 'Añadir igual'))) return;
+            add(s.id, s.name);
+          } }, 'Añadir'));
+      }) : [h('p', { class: 'empty' }, 'Nada coincide.')]));
+    };
+    q.addEventListener('input', draw);
+    draw();
+
+    let picked = null;
+    const lvl = h('input', { type: 'number', min: 0, max: 255, value: 0 });
+    const addAny = h('button', { class: 'primary', disabled: true, onclick: () => add(picked.id, picked.name, Number(lvl.value)) }, 'Añadir habilidad');
+    const s = suggest(d => { picked = d; addAny.disabled = !d; }, 'skills');
+
+    box.replaceChildren(
+      learned,
+      h('section', { class: 'panel' }, h('h3', {}, 'Habilidades de su clase'),
+        h('div', { class: 'chain' }, av.chain.map((c, i) => [i ? h('span', { class: 'arrow' }, '→') : null, h('span', { class: 'chip' + (c === av.current ? ' on' : '') }, c)])),
+        h('p', { class: 'hint' }, 'Aquí salen todas las habilidades de la línea de su clase. Las marcadas con "Requiere" son de una evolución que todavía no tiene. Los iconos: ⚔ físico, ✦ magia, ☠ maldición, ✚ apoyo, ♜ invocación, ◆ pasiva.'),
+        h('div', { class: 'row bar' }, h('div', { class: 'suggest' }, q)), grid),
+      h('details', { class: 'adv' }, h('summary', {}, 'Buscar una habilidad de cualquier clase'),
+        h('div', { class: 'row bar' }, s.el, h('label', {}, 'Nivel', lvl), addAny),
+        h('p', { class: 'hint' }, 'Las habilidades de Master dependen unas de otras: aquí se añaden sueltas, el juego no revisa los requisitos.')));
   }
   load();
   return box;
 }
 
-/* ------------------------------------------------------------- vault page */
-function vault(login) {
-  if (!login) return go('accounts');
-  view.append(head(`Baúl de ${login}`, 'El almacén de la cuenta: lo comparten todos sus personajes.', h('button', { onclick: () => go('accounts') }, 'Volver a cuentas')), h('section', { class: 'panel' }, storagePanel('vault', login)));
+/* ------------------------------------------------------------------ quests */
+function questsPanel(name) {
+  const box = h('div');
+  async function load() {
+    const d = await act(() => api('GET', `/characters/${name}/quests`));
+    if (!d) return;
+    const groups = new Map();
+    for (const q of d.quests) { if (!groups.has(q.group)) groups.set(q.group, []); groups.get(q.group).push(q); }
+    const state = new Map(d.states.map(s => [s.group, s]));
+    const cards = [...groups].map(([g, qs]) => {
+      const st = state.get(g);
+      const opts = () => [h('option', { value: '' }, 'Ninguna'), ...qs.map(q => h('option', { value: q.id }, `${q.name}${q.class ? ` (${q.class})` : ''}`))];
+      const lf = h('select', {}, opts()), ac = h('select', {}, opts());
+      lf.value = st?.lastFinished ?? ''; ac.value = st?.active ?? '';
+      return h('section', { class: 'card' },
+        h('h4', {}, `Grupo ${g}`, ' ', h('span', { class: 'pill ' + (st ? 'ok' : '') }, st ? 'Con progreso' : 'Sin empezar')),
+        h('p', { class: 'hint' }, `${qs.length} misión(es) de este grupo.`),
+        h('div', { class: 'fields' }, h('label', {}, 'Última terminada', lf), h('label', {}, 'Activa ahora', ac)),
+        h('div', { class: 'row' },
+          h('button', { class: 'small primary', onclick: async () => { if (await act(() => api('POST', `/characters/${name}/quests/${g}`, { lastFinished: lf.value || null, active: ac.value || null }), 'Misión guardada')) load(); } }, 'Guardar'),
+          st ? h('button', { class: 'small danger', onclick: async () => { if (await confirmBox(`¿Reiniciar el grupo ${g}?`, 'Empieza esas misiones de nuevo. Se puede deshacer desde Registro.', 'Reiniciar', true) && (await act(() => api('DELETE', `/characters/${name}/quests/${g}`), 'Grupo reiniciado'))) load(); } }, 'Reiniciar') : null));
+    });
+    box.replaceChildren(
+      h('section', { class: 'panel' }, h('div', { class: 'row bar' },
+        h('div', {}, h('h3', {}, 'Misiones'), h('p', { class: 'hint' }, 'Las misiones de clase (evolución) y las generales, por grupo. Elige cuál terminó por última vez y cuál tiene activa.')),
+        d.states.length ? h('button', { class: 'danger', onclick: async () => { if (await confirmBox('¿Reiniciar todas las misiones?', 'Pierde todo su progreso de misiones. Se puede deshacer desde Registro.', 'Reiniciar todo', true) && (await act(() => api('DELETE', `/characters/${name}/quests`), 'Misiones reiniciadas'))) load(); } }, 'Reiniciar todas') : null),
+        cards.length ? h('div', { class: 'cards' }, cards) : h('p', { class: 'empty' }, 'No hay misiones definidas para esta clase.')));
+  }
+  load();
+  return box;
+}
+
+/* ------------------------------------------------------------------ letters */
+function lettersPanel(name) {
+  const box = h('div');
+  async function load() {
+    const rows = await act(() => api('GET', `/characters/${name}/letters`));
+    if (!rows) return;
+    const sender = h('input', { value: 'Admin', maxlength: 10 });
+    const subject = h('input', { maxlength: 32, placeholder: 'Asunto' });
+    const message = h('textarea', { rows: 4, maxlength: 1000, placeholder: 'Mensaje' });
+    box.replaceChildren(
+      h('section', { class: 'panel' }, h('h3', {}, 'Enviar una carta'),
+        h('div', { class: 'fields' }, h('label', {}, 'Remitente', sender), h('label', { class: 'wide' }, 'Asunto', subject)),
+        h('label', {}, 'Mensaje', message),
+        h('div', { class: 'savebar' }, h('button', { class: 'primary', onclick: async () => {
+          if (await act(() => api('POST', `/characters/${name}/letters`, { sender: sender.value, subject: subject.value, message: message.value }), 'Carta enviada')) load();
+        } }, 'Enviar carta'), h('span', { class: 'hint' }, 'Le llega en el buzón del juego la próxima vez que entre.'))),
+      h('section', { class: 'panel' }, h('h3', {}, `Buzón (${rows.length})`),
+        rows.length ? h('div', { class: 'letters' }, rows.map(r => h('article', { class: 'letter' + (r.read ? '' : ' unread') },
+          h('div', { class: 'row' }, h('b', {}, r.subject), h('span', { class: 'mute' }, `de ${r.sender} · ${String(r.date).slice(0, 16).replace('T', ' ')}${r.read ? '' : ' · sin leer'}`),
+            h('button', { class: 'small danger', onclick: async () => { if (await confirmBox('¿Borrar la carta?', 'Se puede deshacer desde Registro.', 'Borrar', true) && (await act(() => api('DELETE', `/characters/${name}/letters/${r.id}`), 'Carta borrada'))) load(); } }, 'Borrar')),
+          h('p', {}, r.message ?? '')))) : h('p', { class: 'empty' }, 'El buzón está vacío.')));
+  }
+  load();
+  return box;
+}
+
+/* --------------------------------------------------------------------- Gens */
+function gensPanel(name) {
+  const box = h('section', { class: 'panel' });
+  async function load() {
+    const g = await act(() => api('GET', `/characters/${name}/gens`));
+    if (!g) return;
+    const fam = h('select', {}, [[1, 'Duprian'], [2, 'Vanert']].map(([v, t]) => h('option', { value: v }, t)));
+    fam.value = String(g.gens || 1);
+    const con = h('input', { type: 'number', min: 0, value: g.contribution });
+    const rank = h('input', { type: 'number', min: 0, max: 255, value: g.rank });
+    const pos = h('input', { type: 'number', min: 0, value: g.rankingPosition });
+    box.replaceChildren(h('h3', {}, 'Gens'),
+      h('p', { class: 'hint' }, g.gens ? `Es de la familia ${g.family}.` : 'No pertenece a ninguna familia Gens. Al guardar, entra a la que elijas.'),
+      h('div', { class: 'fields' }, h('label', {}, 'Familia', fam), h('label', {}, 'Contribución', con), h('label', {}, 'Rango', rank), h('label', {}, 'Posición en el ranking', pos)),
+      h('div', { class: 'savebar' },
+        h('button', { class: 'primary', onclick: async () => { if (await act(() => api('POST', `/characters/${name}/gens`, { gens: Number(fam.value), contribution: Number(con.value), rank: Number(rank.value), rankingPosition: Number(pos.value) }), g.gens ? 'Gens guardado' : 'Ahora está en Gens')) load(); } }, g.gens ? 'Guardar' : 'Unir a Gens'),
+        g.gens ? h('button', { class: 'danger', onclick: async () => { if (await confirmBox('¿Sacarlo de Gens?', 'Pierde su familia, contribución y rango. Se puede deshacer desde Registro.', 'Sacar de Gens', true) && (await act(() => api('DELETE', `/characters/${name}/gens`), 'Ya no está en Gens'))) load(); } }, 'Sacar de Gens') : null));
+  }
+  load();
+  return box;
 }
 
 /* -------------------------------------------------------------- characters */
+let charTab = 'sheet';
+
 function characters(selected) {
   const roster = h('div', { class: 'roster' });
   const sheet = h('div', {});
@@ -553,93 +774,74 @@ function characters(selected) {
     current = name;
     setHash('characters/' + encodeURIComponent(name));
     for (const b of roster.children) b.classList.toggle('on', b.querySelector('b')?.textContent === name);
-    const c = await act(() => api('GET', '/characters/' + name));
+    const [c, maps, classes] = await Promise.all([act(() => api('GET', '/characters/' + name)), act(() => api('GET', '/maps')), act(() => api('GET', '/classes'))]);
     if (!c) return;
-    const f = {};
-    const stat = (key, label, max) => {
-      if (c[key] === null) return null;
-      const el = h('input', { type: 'number', min: key === 'level' ? 1 : 0, max, value: c[key], 'aria-label': label });
-      f[key] = el;
-      const box = h('label', { class: 'stat' }, label, el);
-      el.addEventListener('input', () => { box.classList.toggle('dirty', Number(el.value) !== c[key]); save.disabled = !Object.values(f).some(x => Number(x.value) !== c[x.dataset.k]); });
-      el.dataset.k = key;
-      return box;
-    };
-    const save = h('button', { class: 'primary', disabled: true, onclick: async () => {
-      const body = {};
-      for (const [k, el] of Object.entries(f)) if (Number(el.value) !== c[k]) body[k] = Number(el.value);
-      if (await act(() => api('PATCH', '/characters/' + name, body), 'Personaje guardado')) { open(name); load(); }
-    } }, 'Guardar cambios');
 
-    // Advanced: rarely needed, hidden until opened. Fields the installed OpenMU lacks are not shown.
-    const [maps, classes] = await Promise.all([act(() => api('GET', '/maps')), act(() => api('GET', '/classes'))]);
-    const adv = {};
-    const field = (key, label, el, orig) => { adv[key] = { el, orig }; return h('label', {}, label, el); };
+    const dirty = () => { const n = Object.keys(kit.changes()).length; save.disabled = !n; note.textContent = n ? `${n} cambio(s) sin guardar` : 'Sin cambios'; };
+    const kit = formKit(dirty);
+    const save = h('button', { class: 'primary', disabled: true }, 'Guardar cambios');
+    const note = h('span', { class: 'hint' }, 'Sin cambios');
+    const has = k => c[k] !== undefined && c[k] !== null;
+    const num = (k, label, max, hint) => (has(k) ? kit.field(k, label, h('input', { type: 'number', min: k === 'level' ? 1 : 0, max, value: c[k] }), Number(c[k]), hint) : null);
     const pick = (list, value) => { const s = h('select', {}, list.map(o => h('option', { value: o.id }, o.name))); s.value = value; return s; };
     const fixed = (pairs, value) => { const s = h('select', {}, pairs.map(([v, t]) => h('option', { value: v }, t))); s.value = String(value); return s; };
-    const numIn = (v, max) => h('input', { type: 'number', min: 0, max, value: v });
-    const has = k => c[k] !== undefined && c[k] !== null;
-    const fields = [
-      field('name', 'Nombre', h('input', { value: c.name, maxlength: 10 }), c.name),
-      field('classId', 'Clase', pick(classes ?? [], c.classId), c.classId),
-      field('mapId', 'Mapa', pick(maps ?? [], c.mapId), c.mapId),
-      field('x', 'Posición X', numIn(c.x, 255), c.x), field('y', 'Posición Y', numIn(c.y, 255), c.y),
-      has('status') ? field('status', 'Estado del personaje', fixed([[0, 'Normal'], [1, 'Baneado'], [32, 'Game master']], c.status), c.status) : null,
-      has('heroState') ? field('heroState', 'Marca de héroe o PK', fixed([[0, 'Nuevo'], [1, 'Héroe'], [2, 'Héroe leve'], [3, 'Normal'], [4, 'Aviso de PK'], [5, 'PK nivel 1'], [6, 'PK nivel 2']], c.heroState), c.heroState) : null,
-      has('heroSeconds') ? field('heroSeconds', 'Segundos que le quedan a la marca', numIn(c.heroSeconds, 2147483647), c.heroSeconds) : null,
-      field('pk', 'Muertes de jugadores (PK)', numIn(c.pk, 1000000), c.pk),
-      field('experience', 'Experiencia', numIn(c.experience, 9e15), Number(c.experience)),
-      has('masterExperience') ? field('masterExperience', 'Experiencia Master', numIn(c.masterExperience, 9e15), c.masterExperience) : null,
-      field('masterLevel', 'Nivel Master', numIn(c.masterLevel, 1000), c.masterLevel),
-      field('resets', 'Resets', numIn(c.resets, 1000000), c.resets),
-      field('masterPoints', 'Puntos de Master', numIn(c.masterPoints, 1000000), c.masterPoints),
-      has('fruitPoints') ? field('fruitPoints', 'Puntos de fruta usados', numIn(c.fruitPoints, 100000), c.fruitPoints) : null,
-      has('negFruitPoints') ? field('negFruitPoints', 'Puntos de fruta negativa usados', numIn(c.negFruitPoints, 100000), c.negFruitPoints) : null,
-      has('inventoryExtensions') ? field('inventoryExtensions', 'Ampliaciones de inventario', numIn(c.inventoryExtensions, 4), c.inventoryExtensions) : null,
-    ].filter(Boolean);
-    const advSave = h('button', { onclick: async () => {
-      const body = {};
-      for (const [k, { el, orig }] of Object.entries(adv)) {
-        const v = el.tagName === 'SELECT' && /^\d+$/.test(el.value) ? Number(el.value) : el.type === 'number' ? Number(el.value) : el.value;
-        if (v !== orig) body[k] = v;
-      }
-      if (!Object.keys(body).length) return toast('No cambiaste nada');
-      if (body.classId && !(await confirmBox('¿Cambiar la clase?', 'No cambia sus puntos, habilidades ni ítems. Solo la clase.', 'Cambiar clase'))) return;
-      if (await act(() => api('PATCH', '/characters/' + name, body), 'Cambios avanzados guardados')) { await open(body.name ?? name); load(); }
-    } }, 'Guardar avanzado');
-    const del = h('button', { class: 'danger', onclick: async () => {
-      if (!(await typedConfirm(`Borrar a ${name}`, 'Se borran sus stats, habilidades, inventario e ítems. Se puede deshacer desde Registro mientras no haya nadie conectado.', name))) return;
-      if (await act(() => api('DELETE', '/characters/' + name, { confirm: name }), 'Personaje borrado')) { current = null; sheet.replaceChildren(h('p', { class: 'empty' }, 'Personaje borrado. Elige otro de la lista.')); load(); }
-    } }, 'Borrar personaje');
 
-    const tabs = h('div', { class: 'tabs', role: 'tablist' });
-    const pane = h('div');
-    const show = which => {
-      for (const b of tabs.children) b.classList.toggle('on', b.dataset.t === which);
-      pane.replaceChildren(which === 'skills' ? skillsPanel(name) : storagePanel(which, which === 'inventory' ? name : c.account));
-    };
-    tabs.append(
-      h('button', { 'data-t': 'inventory', role: 'tab', onclick: () => show('inventory') }, 'Inventario'),
-      h('button', { 'data-t': 'vault', role: 'tab', onclick: () => show('vault') }, `Baúl de ${c.account}`),
-      h('button', { 'data-t': 'skills', role: 'tab', onclick: () => show('skills') }, 'Habilidades'));
+    // The class line (e.g. Dark Wizard -> Soul Master -> Grand Master): tap a step to evolve or go back.
+    const classSel = pick(classes ?? [], c.classId);
+    const byId = new Map((classes ?? []).map(k => [k.id, k]));
+    let root = c.classId;
+    for (let i = 0; i < 10; i++) { const prev = (classes ?? []).find(k => k.next === root); if (!prev) break; root = prev.id; }
+    const line = [];
+    for (let cur = root; cur && line.length < 10; cur = byId.get(cur)?.next ?? null) line.push(byId.get(cur));
+    const chips = line.filter(Boolean).map(k => h('button', { type: 'button', class: 'chip', 'data-id': k.id, onclick: () => { classSel.value = k.id; classSel.dispatchEvent(new Event('change')); } }, k.name));
+    const paintChips = () => { for (const b of chips) b.classList.toggle('on', b.dataset.id === classSel.value); };
+    classSel.addEventListener('change', paintChips);
+    paintChips();
+
+    const sheetTab = () => h('div', {},
+      h('div', { class: 'cards' },
+        card('Progreso', 'Cambiar el nivel ajusta la experiencia para que coincida.', h('div', { class: 'fields' }, num('level', 'Nivel', 400), num('zen', 'Zen', 2147483647), num('levelUpPoints', 'Puntos libres', 1000000), num('experience', 'Experiencia', 9e15))),
+        card('Atributos', null, h('div', { class: 'fields' }, num('strength', 'Fuerza', 32767), num('agility', 'Agilidad', 32767), num('vitality', 'Vitalidad', 32767), num('energy', 'Energía', 32767), num('leadership', 'Mando', 32767))),
+        card('Clase y evolución', 'Toca un paso de la línea de la clase para evolucionarlo (o devolverlo). Cambia solo la clase: no toca puntos, habilidades ni ítems.',
+          h('div', { class: 'chain' }, chips.map((b, i) => [i ? h('span', { class: 'arrow' }, '→') : null, b])),
+          h('div', { class: 'fields' }, kit.field('classId', 'Clase', classSel, c.classId))),
+        card('Master y resets', 'Para clases Master y servidores con resets.', h('div', { class: 'fields' }, num('masterLevel', 'Nivel Master', 1000), num('masterPoints', 'Puntos de Master', 1000000), num('masterExperience', 'Experiencia Master', 9e15), num('resets', 'Resets', 1000000))),
+        card('Ubicación', 'Dónde aparece cuando entra. Sirve para rescatar a alguien atascado.', h('div', { class: 'fields' }, kit.field('mapId', 'Mapa', pick(maps ?? [], c.mapId), c.mapId), num('x', 'Posición X', 255), num('y', 'Posición Y', 255))),
+        card('Estado y PK', 'Marca de héroe o asesino y estado del personaje.', h('div', { class: 'fields' },
+          has('status') ? kit.field('status', 'Estado del personaje', fixed([[0, 'Normal'], [1, 'Baneado'], [32, 'Game master']], c.status), c.status) : null,
+          has('heroState') ? kit.field('heroState', 'Marca de héroe o PK', fixed([[0, 'Nuevo'], [1, 'Héroe'], [2, 'Héroe leve'], [3, 'Normal'], [4, 'Aviso de PK'], [5, 'PK nivel 1'], [6, 'PK nivel 2']], c.heroState), c.heroState) : null,
+          num('heroSeconds', 'Segundos que le quedan a la marca', 2147483647), num('pk', 'Muertes de jugadores (PK)', 1000000))),
+        card('Otros', 'Nombre, frutas e inventario.', h('div', { class: 'fields' }, kit.field('name', 'Nombre', h('input', { value: c.name, maxlength: 10 }), c.name),
+          num('fruitPoints', 'Puntos de fruta usados', 100000), num('negFruitPoints', 'Puntos de fruta negativa usados', 100000), num('inventoryExtensions', 'Ampliaciones de inventario', 4)))),
+      card('Zona de peligro', 'Se borran sus stats, habilidades, inventario e ítems. Se puede deshacer desde Registro mientras no haya nadie conectado.',
+        h('button', { class: 'danger', onclick: async () => {
+          if (!(await typedConfirm(`Borrar a ${name}`, 'Esta acción borra al personaje completo.', name))) return;
+          if (await act(() => api('DELETE', '/characters/' + name, { confirm: name }), 'Personaje borrado')) { current = null; sheet.replaceChildren(h('p', { class: 'empty' }, 'Personaje borrado. Elige otro de la lista.')); load(); }
+        } }, 'Borrar personaje')),
+      sticky(save, note));
+
+    save.addEventListener('click', async () => {
+      const body = kit.changes();
+      if (body.classId && !(await confirmBox('¿Cambiar la clase?', 'Cambia solo la clase: no toca sus puntos, habilidades ni ítems.', 'Cambiar clase'))) return;
+      if (await act(() => api('PATCH', '/characters/' + name, body), 'Personaje guardado')) { await open(body.name ?? name); load(); }
+    });
 
     sheet.replaceChildren(
       h('div', { class: 'sheet-head' },
-        h('div', {}, h('h2', {}, c.name), h('div', { class: 'facts' }, h('span', {}, c.class), h('span', {}, `Cuenta ${c.account}`), h('span', {}, c.map ?? 'sin mapa')))),
-      h('section', { class: 'panel' },
-        h('div', { class: 'stats' }, stat('level', 'Nivel', 400), stat('zen', 'Zen', 2147483647), stat('levelUpPoints', 'Puntos libres', 1000000),
-          stat('strength', 'Fuerza', 32767), stat('agility', 'Agilidad', 32767), stat('vitality', 'Vitalidad', 32767), stat('energy', 'Energía', 32767), stat('leadership', 'Mando', 32767)),
-        h('div', { class: 'savebar' }, save, h('span', { class: 'hint' }, 'Solo se guarda lo que cambies. Cambiar el nivel ajusta la experiencia. Todo se puede deshacer en Registro.')),
-        h('details', { class: 'adv' }, h('summary', {}, 'Opciones avanzadas'),
-          h('p', { class: 'hint' }, 'Para casos raros: rescatar a alguien atascado, limpiar una marca de PK, renombrar o cambiar de clase.'),
-          h('div', { class: 'fields' }, fields),
-          h('div', { class: 'savebar' }, advSave, del))),
-      h('section', { class: 'panel' }, tabs, pane));
-    show('inventory');
+        h('div', {}, h('h2', {}, c.name), h('div', { class: 'facts' }, h('span', {}, `${c.class} · nivel ${c.level}`), h('span', {}, 'Cuenta ', h('button', { class: 'link', onclick: () => go('account/' + c.account) }, c.account)), h('span', {}, c.map ?? 'sin mapa')))),
+      tabset([
+        ['sheet', 'Ficha', sheetTab],
+        ['inventory', 'Inventario', () => h('section', { class: 'panel' }, storagePanel('inventory', name))],
+        ['vault', 'Baúl', () => h('section', { class: 'panel' }, h('p', { class: 'hint' }, `Es el baúl de la cuenta ${c.account}: lo comparten todos sus personajes.`), storagePanel('vault', c.account))],
+        ['skills', 'Habilidades', () => skillsPanel(name)],
+        ['quests', 'Misiones', () => questsPanel(name)],
+        ['letters', 'Cartas', () => lettersPanel(name)],
+        ['gens', 'Gens', () => gensPanel(name)],
+      ], charTab, k => { charTab = k; }));
   }
 
   q.addEventListener('input', debounce(load, 200));
-  view.append(head('Personajes', 'Elige uno para ver y editar su ficha, su inventario y el baúl de su cuenta.'),
+  view.append(head('Personajes', 'Elige uno de la lista. Su ficha, inventario, habilidades, misiones, cartas y Gens están en pestañas.'),
     h('div', { class: 'split' }, h('div', {}, h('div', { class: 'suggest' }, q), roster), sheet));
   load();
   if (selected) open(selected);

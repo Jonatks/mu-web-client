@@ -155,7 +155,7 @@ export async function patchCharacter(sql: Sql, admin: string, name: string, body
 }
 
 export async function listClasses(sql: Sql) {
-  return sql`SELECT "Id" AS id, split_part("Name", '||', 1) AS name FROM config."CharacterClass" ORDER BY 2`;
+  return sql`SELECT "Id" AS id, split_part("Name", '||', 1) AS name, "NextGenerationClassId" AS next, "IsMasterClass" AS master FROM config."CharacterClass" ORDER BY 2`;
 }
 
 /** Deletes a character with its stats, skills, inventory and items. Refuses when anything this panel does not know still points at it. */

@@ -61,3 +61,32 @@ export async function removeSkill(sql: Sql, admin: string, name: string, entryId
     await w.tx`DELETE FROM data."SkillEntry" WHERE "Id" = ${entryId}::uuid`;
   });
 }
+
+/** Skills of the character's whole class line (e.g. Dark Wizard, Soul Master, Grand Master), each with the class that first gets it. */
+export async function availableSkills(sql: Sql, name: string) {
+  const c = (await sql`SELECT "Id" AS id, "CharacterClassId" AS cls FROM data."Character" WHERE "Name" = ${name}`)[0];
+  if (!c) throw missing('No such character.');
+  const classes = await sql`SELECT "Id" AS id, "NextGenerationClassId" AS next, split_part("Name", '||', 1) AS name FROM config."CharacterClass"`;
+  const byId = new Map(classes.map(k => [k.id as string, k]));
+  let root = c.cls as string;
+  for (let hop = 0; hop < 10; hop++) {
+    const prev = classes.find(k => k.next === root);
+    if (!prev) break;
+    root = prev.id as string;
+  }
+  const chain: { id: string; name: string }[] = [];
+  for (let cur: string | null = root; cur && chain.length < 10; cur = (byId.get(cur)?.next as string | null) ?? null) chain.push({ id: cur, name: byId.get(cur)!.name as string });
+  const mine = chain.findIndex(k => k.id === c.cls);
+  const rows = await sql`
+    SELECT s."Id" AS id, s."Number" AS number, split_part(s."Name", '||', 1) AS name, s."SkillType" AS "skillType", s."DamageType" AS "damageType",
+           array_agg(sc."CharacterClassId") AS classes,
+           EXISTS (SELECT 1 FROM data."SkillEntry" e WHERE e."CharacterId" = ${c.id as string} AND e."SkillId" = s."Id") AS has
+    FROM config."Skill" s JOIN config."SkillCharacterClass" sc ON sc."SkillId" = s."Id"
+    WHERE sc."CharacterClassId" = ANY(${chain.map(k => k.id)}::uuid[])
+    GROUP BY s."Id" ORDER BY s."Number"`;
+  const skills = rows.map(r => {
+    const first = Math.min(...(r.classes as string[]).map(id => chain.findIndex(k => k.id === id)).filter(i => i >= 0));
+    return { id: r.id, number: r.number, name: r.name, skillType: r.skillType, damageType: r.damageType, has: r.has, requires: chain[first]!.name, needsEvolve: first > mine };
+  });
+  return { chain: chain.map(k => k.name), current: chain[mine]?.name ?? null, skills };
+}
