@@ -77,7 +77,10 @@ export async function definitionOptions(sql: Sql, definitionId: string): Promise
   return rows as unknown as OptionRow[];
 }
 
-type Target = { kind: 'inventory'; name: string } | { kind: 'vault'; login: string };
+type Target = { kind: 'inventory'; name: string } | { kind: 'vault'; login: string } | { kind: 'shop'; monsterId: string };
+export const SHOP: Layout = { first: 0, cols: 8, rows: 15 };
+const who = (t: Target) => (t.kind === 'inventory' ? t.name : t.kind === 'vault' ? `${t.login} (vault)` : `shop ${t.monsterId}`);
+const act = (t: Target, what: 'add' | 'delete') => `${t.kind === 'inventory' ? 'item' : t.kind === 'vault' ? 'vault.item' : 'shop.item'}.${what}`;
 type Store = { id: string | null; layout: Layout; accountId?: string };
 
 async function storeOf(sql: Sql, t: Target): Promise<Store> {
@@ -85,6 +88,11 @@ async function storeOf(sql: Sql, t: Target): Promise<Store> {
     const r = await sql`SELECT "InventoryId" AS inv FROM data."Character" WHERE "Name" = ${t.name}`;
     if (!r[0]) throw missing('No such character.');
     return { id: r[0].inv as string, layout: INVENTORY };
+  }
+  if (t.kind === 'shop') {
+    const r = await sql`SELECT "MerchantStoreId" AS store FROM config."MonsterDefinition" WHERE "Id" = ${t.monsterId}::uuid`;
+    if (!r[0]?.store) throw missing('That NPC has no shop.');
+    return { id: r[0].store as string, layout: SHOP };
   }
   const r = await sql`SELECT "Id" AS id, "VaultId" AS vault, "IsVaultExtended" AS ext FROM data."Account" WHERE "LoginName" = ${t.login}`;
   if (!r[0]) throw missing('No such account.');
@@ -117,6 +125,13 @@ export async function getVault(sql: Sql, login: string) {
   const s = await storeOf(sql, { kind: 'vault', login });
   const money = s.id ? (await sql`SELECT "Money" AS zen FROM data."ItemStorage" WHERE "Id" = ${s.id}`)[0]?.zen : 0;
   return { zen: Number(money ?? 0), rows: s.layout.rows, cols: s.layout.cols, items: await listStorage(sql, s.id) };
+}
+
+/** What an NPC sells: the items of its merchant store. */
+export async function getShop(sql: Sql, monsterId: string) {
+  const s = await storeOf(sql, { kind: 'shop', monsterId });
+  const name = (await sql`SELECT split_part("Designation", '||', 1) AS name FROM config."MonsterDefinition" WHERE "Id" = ${monsterId}::uuid`)[0]?.name;
+  return { name, rows: s.layout.rows, cols: s.layout.cols, items: await listStorage(sql, s.id) };
 }
 
 type Spec = { luck?: boolean; option?: number; excellent?: number[] };
@@ -163,7 +178,6 @@ export type NewItem = { definitionId: string; level?: number; durability?: numbe
 
 export async function addItem(sql: Sql, admin: string, t: Target, b: NewItem) {
   const store = await storeOf(sql, t);
-  const who = t.kind === 'inventory' ? t.name : `${t.login} (vault)`;
   const d = (await sql`SELECT "Id" AS id, "Width" AS w, "Height" AS h, "MaximumItemLevel" AS "maxLevel", "Durability" AS durability, "SkillId" AS skill, split_part("Name", '||', 1) AS name FROM config."ItemDefinition" WHERE "Id" = ${String(b.definitionId)}`.catch(() => []))[0];
   if (!d) throw bad('Unknown item definition.');
   const level = b.level ?? 0;
@@ -180,7 +194,7 @@ export async function addItem(sql: Sql, admin: string, t: Target, b: NewItem) {
   else if (b.slot === undefined) slot = freeSlot(bag, d.w as number, d.h as number, store.layout);
   else slot = fits(bag, b.slot, d.w as number, d.h as number, store.layout) ? b.slot : null;
   if (slot === null) throw bad(b.slot === undefined ? 'There is no free space for that item.' : 'The item does not fit in that slot.');
-  return write(sql, { admin, action: t.kind === 'vault' ? 'vault.item.add' : 'item.add', target: who, detail: { item: d.name, level, slot, links: links.length } }, async w => {
+  return write(sql, { admin, action: act(t, 'add'), target: who(t), detail: { item: d.name, level, slot, links: links.length } }, async w => {
     let storage = store.id;
     if (!storage) {
       // First use of this vault: OpenMU makes it lazily, so it is made here the same way (an empty storage the account points to).
@@ -207,7 +221,7 @@ export async function deleteItem(sql: Sql, admin: string, t: Target, itemId: str
   const store = await storeOf(sql, t);
   const it = store.id ? (await sql`SELECT "Id" FROM data."Item" WHERE "Id" = ${itemId}::uuid AND "ItemStorageId" = ${store.id}`.catch(() => []))[0] : undefined;
   if (!it) throw missing('That item is not in this storage.');
-  return write(sql, { admin, action: t.kind === 'vault' ? 'vault.item.delete' : 'item.delete', target: t.kind === 'vault' ? t.login : t.name, detail: { itemId } }, async w => {
+  return write(sql, { admin, action: act(t, 'delete'), target: who(t), detail: { itemId } }, async w => {
     await w.save('Item', 'Id', [itemId]);
     await w.save('ItemOptionLink', 'ItemId', [itemId]);
     await w.save('ItemItemOfItemSet', 'ItemId', [itemId]);

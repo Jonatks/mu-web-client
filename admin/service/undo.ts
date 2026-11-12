@@ -6,8 +6,19 @@ import type { Sql } from 'postgres';
 
 export type Row = Record<string, unknown>;
 
-/** Tables the service may write, with their primary key. Anything else is refused. */
+/** Tables the service may write, with their primary key. Anything else is refused. A name without a schema is in `data`, `config.X` is the game configuration. */
 const TABLES: Record<string, string[]> = {
+  'config.GameConfiguration': ['Id'],
+  'config.GameServerDefinition': ['Id'],
+  'config.GameServerConfiguration': ['Id'],
+  'config.GameMapDefinition': ['Id'],
+  'config.DropItemGroup': ['Id'],
+  'config.MonsterSpawnArea': ['Id'],
+  'config.MonsterDefinition': ['Id'],
+  'config.MonsterAttribute': ['Id'],
+  'config.MiniGameDefinition': ['Id'],
+  'config.PlugInConfiguration': ['Id'],
+  'config.WarpInfo': ['Id'],
   Account: ['Id'],
   Character: ['Id'],
   ItemStorage: ['Id'],
@@ -25,7 +36,7 @@ const TABLES: Record<string, string[]> = {
   CashShopStorageItem: ['Id'],
 };
 /** Restore parents before children; delete children before parents. */
-const ORDER = ['ItemStorage', 'Account', 'Character', 'Item', 'StatAttribute', 'SkillEntry', 'ItemOptionLink', 'ItemItemOfItemSet', 'AccountCharacterClass', 'CharacterQuestState', 'QuestMonsterKillRequirementState', 'GensMember', 'LetterHeader', 'LetterBody', 'CashShopStorageItem'];
+const ORDER = ['config.GameConfiguration', 'config.GameServerConfiguration', 'config.GameServerDefinition', 'config.GameMapDefinition', 'config.MonsterDefinition', 'config.MonsterAttribute', 'config.MonsterSpawnArea', 'config.DropItemGroup', 'config.MiniGameDefinition', 'config.PlugInConfiguration', 'config.WarpInfo', 'ItemStorage', 'Account', 'Character', 'Item', 'StatAttribute', 'SkillEntry', 'ItemOptionLink', 'ItemItemOfItemSet', 'AccountCharacterClass', 'CharacterQuestState', 'QuestMonsterKillRequirementState', 'GensMember', 'LetterHeader', 'LetterBody', 'CashShopStorageItem'];
 
 export const DIR = process.env.ADMIN_DATA_DIR ?? '/var/lib/mu-admin';
 const undoDir = () => join(DIR, 'undo');
@@ -51,9 +62,11 @@ export type Writer = {
   created(table: string, rows: Row[]): void;
 };
 
+const split = (table: string): [string, string] => (table.includes('.') ? (table.split('.') as [string, string]) : ['data', table]);
 const ident = (table: string) => {
   if (!TABLES[table]) throw new Error(`table not allowed: ${table}`);
-  return `data."${table}"`;
+  const [schema, name] = split(table);
+  return `${schema}."${name}"`;
 };
 
 export async function write<T>(
@@ -106,7 +119,8 @@ export async function undo(sql: Sql, id: string, admin: string): Promise<{ undoI
   const { undoId } = await write(sql, { admin, action: `undo:${rec.action}`, target: rec.target, undoable: false, detail: { undoes: id } }, async w => {
     for (const table of ORDER) {
       const pk = TABLES[table]!;
-      const cols = (await w.tx.unsafe(`SELECT column_name FROM information_schema.columns WHERE table_schema='data' AND table_name=$1`, [table])).map(r => r.column_name as string);
+      const [schema, name] = split(table);
+      const cols = (await w.tx.unsafe(`SELECT column_name FROM information_schema.columns WHERE table_schema=$1 AND table_name=$2`, [schema, name])).map(r => r.column_name as string);
       const sets = cols.filter(c => !pk.includes(c)).map(c => `"${c}" = r."${c}"`).join(', ');
       for (const row of rec.before[table] ?? []) {
         const hit = await w.tx.unsafe(

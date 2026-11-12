@@ -58,6 +58,8 @@ GRANT SELECT ON ALL TABLES IN SCHEMA data, config TO mu_admin;
 GRANT INSERT, UPDATE ON data."Account" TO mu_admin;
 GRANT INSERT, UPDATE, DELETE ON data."Character", data."StatAttribute", data."SkillEntry" TO mu_admin;
 GRANT DELETE ON data."Account" TO mu_admin;
+GRANT UPDATE ON config."GameConfiguration", config."GameServerDefinition", config."GameServerConfiguration", config."GameMapDefinition", config."DropItemGroup", config."MonsterDefinition", config."MonsterAttribute", config."MiniGameDefinition", config."PlugInConfiguration", config."WarpInfo" TO mu_admin;
+GRANT INSERT, UPDATE, DELETE ON config."MonsterSpawnArea" TO mu_admin;
 GRANT INSERT, UPDATE, DELETE ON data."ItemStorage" TO mu_admin;
 GRANT INSERT, UPDATE, DELETE ON data."Item", data."ItemOptionLink", data."ItemItemOfItemSet" TO mu_admin;
 GRANT INSERT, UPDATE, DELETE ON data."AccountCharacterClass", data."CharacterQuestState", data."QuestMonsterKillRequirementState", data."GensMember", data."LetterHeader", data."LetterBody", data."CashShopStorageItem" TO mu_admin;

@@ -7,6 +7,7 @@ import * as extras from './extras';
 import { HttpError, bad, missing } from './errors';
 import { GateError, assertNobodyConnected } from './gate';
 import * as items from './items';
+import * as server from './server';
 import { disconnectAccount, readOnline } from './bridge';
 import { kickAll } from './kick';
 import * as skills from './skills';
@@ -27,9 +28,9 @@ export function createApp(cfg: Config) {
     const p = url.pathname.split('/').filter(Boolean).map(decodeURIComponent);
     const q = url.searchParams;
     const m = req.method;
-    const body = async (): Promise<Record<string, unknown>> => {
+    const body = async (max = 16_384): Promise<Record<string, unknown>> => {
       const t = await req.text();
-      if (t.length > 16_384) throw new HttpError(413, 'Body too large.');
+      if (t.length > max) throw new HttpError(413, 'Body too large.');
       try { return t ? (JSON.parse(t) as Record<string, unknown>) : {}; } catch { throw bad('Body is not JSON.'); }
     };
     const needAdmin = () => {
@@ -118,6 +119,54 @@ export function createApp(cfg: Config) {
     if (p[0] === 'items' && p[1] === 'definitions' && m === 'GET') {
       if (p[2]) return items.definitionOptions(sql, p[2]);
       return items.searchDefinitions(sql, q.get('q') ?? '', q.get('group') ?? '', q.get('slot') ?? '', q.get('character') ?? '', q.get('cat') ?? '');
+    }
+    if (p[0] === 'server') {
+      const id = p[2] ?? '';
+      switch (p[1]) {
+        case 'rules':
+          if (m === 'GET') return server.getRules(sql);
+          if (m === 'POST') { needAdmin(); return server.setRules(sql, admin, await body()); }
+          break;
+        case 'maps':
+          if (m === 'GET' && p.length === 2) return server.listMaps(sql);
+          if (m === 'GET' && p[3] === 'terrain') return server.terrain(sql, id);
+          if (m === 'POST' && p.length === 3) { needAdmin(); return server.setMap(sql, admin, id, await body()); }
+          break;
+        case 'drops':
+          if (m === 'GET') return server.listDrops(sql);
+          if (m === 'POST' && p[2] === 'scale') { needAdmin(); return server.scaleDrops(sql, admin, await body()); }
+          if (m === 'POST' && p.length === 3) { needAdmin(); return server.setDrop(sql, admin, id, await body()); }
+          break;
+        case 'monsters':
+          if (m === 'GET' && p.length === 2) return server.listMonsters(sql, q.get('q') ?? '', q.get('kind') ?? '');
+          if (m === 'GET' && p.length === 3) return server.getMonster(sql, id);
+          if (m === 'POST' && p.length === 3) { needAdmin(); return server.setMonster(sql, admin, id, await body()); }
+          break;
+        case 'spawns':
+          if (m === 'GET') return server.listSpawns(sql, q.get('map') ?? '', q.get('monster') ?? '');
+          if (m === 'POST' && p.length === 2) { needAdmin(); return server.addSpawn(sql, admin, await body()); }
+          if (m === 'POST' && p.length === 3) { needAdmin(); return server.editSpawn(sql, admin, id, await body()); }
+          if (m === 'DELETE' && p.length === 3) { needAdmin(); return server.deleteSpawn(sql, admin, id); }
+          break;
+        case 'shops':
+          if (m === 'GET' && p.length === 2) return server.listShops(sql);
+          if (m === 'GET' && p.length === 3) return items.getShop(sql, id);
+          if (m === 'POST' && p[3] === 'items') { needAdmin(); const b = await body(); return items.addItem(sql, admin, { kind: 'shop', monsterId: id }, b as items.NewItem); }
+          if (m === 'DELETE' && p[3] === 'items' && p[4]) { needAdmin(); return items.deleteItem(sql, admin, { kind: 'shop', monsterId: id }, p[4]); }
+          break;
+        case 'events':
+          if (m === 'GET') return server.listEvents(sql);
+          if (m === 'POST' && p.length === 3) { needAdmin(); return server.setEvent(sql, admin, id, await body()); }
+          break;
+        case 'warps':
+          if (m === 'GET') return server.listWarps(sql);
+          if (m === 'POST' && p.length === 3) { needAdmin(); return server.setWarp(sql, admin, id, await body()); }
+          break;
+        case 'plugins':
+          if (m === 'GET') return server.listPlugins(sql, q.get('all') === '1');
+          if (m === 'POST' && p.length === 3) { needAdmin(); return server.setPlugin(sql, admin, id, await body(200_500)); }
+          break;
+      }
     }
     if (p[0] === 'audit' && m === 'GET') return auditTail(Number(q.get('limit') ?? 100));
     if (p[0] === 'undo' && m === 'GET') return recentUndo();
