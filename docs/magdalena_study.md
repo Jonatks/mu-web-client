@@ -170,3 +170,17 @@ lower the render resolution on a phone, cull the login scene, and look at the he
 - Plan for performance without changing the look: (1) measure frame time per system inside this client (terrain, objects, characters, effects, post-processing) with the engine's own
   instrumentation; (2) instance repeated objects and grass; (3) compress textures (KTX2); (4) free models and textures kept in JS memory; (5) only then touch quality options, and
   only to values that look the same on a phone-size screen.
+
+## 12. A1: how each class is born in Mu Magdalena (new level 1 characters, 2026-11-12)
+Method: create a character of the class, enter, open the Skills window and read which tiles are lit and which are greyed.
+- All classes: slot 1 of the six boxes holds the FIST (plain attack) at birth and the other five are empty; nothing is auto-placed. The player places skills.
+- **Dark Wizard** (ClauDW, Grand Master line): starts in Lorencia (147,120); lit: fist and Energy Ball only; 22 more tiles greyed.
+- **Dark Knight** (ClauDK, Blade Master line): starts in Lorencia (140,118); lit: fist plus 7 skills (a purple blade, a fire burst, a blue lunge with a sword, a dagger strike,
+  a red shield, a blue lightning) and a further one lit; 1 greyed. The server gives a new Dark Knight its basic sword skills at once (OpenMU gives none).
+- **Elf** (ClauElf, High Elf line): starts in Noria (172,112); the HUD shows the arrow counter ("Arrows 255 (0)") under the name; lit: fist plus 6 skills (a golden figure,
+  red arrows, a blue figure, two blue arrow bursts); 11 greyed.
+- **Magic Gladiator** (ClauMG, Dual Master line): starts in Lorencia (139,120); lit: fist plus 5 skills; 16 greyed.
+- **Rage Fighter** (ClauDL by mistake of the class pill, shows Fist Master): starts in Lorencia (135,118), HUD like the others; the skill window did not open from the book position used before, so its tiles are not counted yet.
+- Not yet studied: Dark Lord, Summoner (the creation pills are offset from my notes; read the class text on the card before pressing Create).
+Consequence for this client: a new Dark Knight and Elf on this server have no skill, so the cast button only punches. Either the server gives the starting skills (plugin, plan F4)
+or the client lists them as locked until learned.
