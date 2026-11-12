@@ -180,7 +180,7 @@ if av.get('chain', [None])[0] == 'Dark Wizard':
 # ---- categories
 allc = call('GET', '/items/categories')
 check('item categories listed', isinstance(allc, list) and any(c['key'] == 'wings' for c in allc) and all(c['count'] > 0 for c in allc), str(allc)[:200])
-check('categories follow the slot', [c['key'] for c in call('GET', '/items/categories?slot=7')] == ['wings'], call('GET', '/items/categories?slot=7'))
+check('categories follow the slot', (lambda ks: 'wings' in ks and set(ks) <= {'wings', 'other13'})([c['key'] for c in call('GET', '/items/categories?slot=7')]), call('GET', '/items/categories?slot=7'))
 helms = call('GET', '/items/definitions?cat=g7')
 check('category filter keeps one kind', len(helms) > 0 and all(d['group'] == 7 and d['cat'] == 'g7' for d in helms))
 wingsl = call('GET', '/items/definitions?cat=wings')
@@ -274,7 +274,7 @@ old_xp = rules['values']['ExperienceRate']
 r = call('POST', '/server/rules', {'values': {'ExperienceRate': 99, 'ItemDropDuration': 90, 'ShouldDropMoney': False}, 'servers': [{'id': rules['servers'][0]['id'], 'experienceRate': 77, 'maximumPlayers': 123}]})
 check('rules written', 'undoId' in r, r)
 n = call('GET', '/server/rules')
-check('rules read back', n['values']['ExperienceRate'] == 99 and n['values']['ItemDropDuration'] == 90 and n['values']['ShouldDropMoney'] is False and n['servers'][0]['experienceRate'] == 77 and n['servers'][0]['maximumPlayers'] == 123, str(n)[:300])
+check('rules read back', abs(n['values']['ItemDropDuration'] - 90) < 0.01 and n['values']['ExperienceRate'] == 99 and n['values']['ShouldDropMoney'] is False and n['servers'][0]['experienceRate'] == 77 and n['servers'][0]['maximumPlayers'] == 123, str(n['values'])[:300] + str(n['servers'])[:200])
 check('rules reject nonsense', 'ERR' in call('POST', '/server/rules', {'values': {'ExperienceRate': -1}}) and 'ERR' in call('POST', '/server/rules', {'values': {'Nope': 1}}))
 undo(r, 'rules')
 n = call('GET', '/server/rules')

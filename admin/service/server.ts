@@ -32,7 +32,7 @@ async function patch(w: Writer, table: string, id: string, cols: [string, unknow
 
 /* ------------------------------------------------------------------ rules */
 
-type Field = { key: string; label: string; help: string; kind: 'float' | 'int' | 'bool'; min?: number; max?: number };
+type Field = { key: string; label: string; help: string; kind: 'float' | 'int' | 'bool' | 'seconds'; min?: number; max?: number };
 export const RULE_FIELDS: Field[] = [
   { key: 'ExperienceRate', label: 'Experiencia', help: 'Multiplica la experiencia de todo el servidor. 1 es normal, 99 es «exp 99x».', kind: 'float', min: 0, max: 100000 },
   { key: 'MasterExperienceRate', label: 'Experiencia Master', help: 'Lo mismo, para la experiencia de nivel Master.', kind: 'float', min: 0, max: 100000 },
@@ -43,7 +43,7 @@ export const RULE_FIELDS: Field[] = [
   { key: 'MaximumInventoryMoney', label: 'Zen máximo en el inventario', help: 'Tope de zen que puede llevar un personaje.', kind: 'int', min: 0, max: 2147483647 },
   { key: 'MaximumVaultMoney', label: 'Zen máximo en el baúl', help: 'Tope de zen que cabe en el baúl.', kind: 'int', min: 0, max: 2147483647 },
   { key: 'ShouldDropMoney', label: 'Los monstruos sueltan zen', help: 'Si está apagado, los monstruos no sueltan zen.', kind: 'bool' },
-  { key: 'ItemDropDuration', label: 'Tiempo que dura un ítem en el suelo', help: 'En segundos. Pasado ese tiempo el ítem desaparece.', kind: 'int', min: 1, max: 86400 },
+  { key: 'ItemDropDuration', label: 'Tiempo que dura un ítem en el suelo', help: 'En segundos. Pasado ese tiempo el ítem desaparece.', kind: 'seconds', min: 1, max: 86400 },
   { key: 'MaximumItemOptionLevelDrop', label: 'Opción adicional máxima en drops', help: 'Nivel más alto de la opción adicional (+4 por nivel) que puede traer un ítem caído.', kind: 'int', min: 0, max: 4 },
   { key: 'ExcellentItemDropLevelDelta', label: 'Diferencia de nivel para excelentes', help: 'Cuántos niveles por debajo del monstruo se consideran para ítems excelentes.', kind: 'int', min: 0, max: 255 },
   { key: 'LetterSendPrice', label: 'Precio de enviar una carta', help: 'Zen que cuesta mandar una carta.', kind: 'int', min: 0, max: 2147483647 },
@@ -53,7 +53,7 @@ export const RULE_FIELDS: Field[] = [
   { key: 'PreventExperienceOverflow', label: 'Evitar que la experiencia se pase del nivel', help: 'Si está activo, no se puede subir dos niveles de un solo golpe de experiencia.', kind: 'bool' },
 ];
 
-const selectRule = (f: Field) => `"${f.key}" AS "${f.key}"`;
+const selectRule = (f: Field) => (f.kind === 'seconds' ? `EXTRACT(EPOCH FROM "${f.key}")::float8 AS "${f.key}"` : `"${f.key}" AS "${f.key}"`);
 
 export async function getRules(sql: Sql) {
   const cfg = (await sql.unsafe(`SELECT "Id" AS id, ${RULE_FIELDS.map(selectRule).join(', ')} FROM config."GameConfiguration" LIMIT 1`))[0];
@@ -75,6 +75,7 @@ export async function setRules(sql: Sql, admin: string, b: { values?: Record<str
     const f = RULE_FIELDS.find(x => x.key === key);
     if (!f) throw bad(`Unknown setting: ${key}.`);
     if (f.kind === 'bool') cols.push([key, bool(v, f.label)]);
+    else if (f.kind === 'seconds') cols.push([key, num(v, f.label, f.min!, f.max!, false), 'make_interval(secs => $$::float8)']);
     else cols.push([key, num(v, f.label, f.min!, f.max!, f.kind === 'int')]);
   }
   const servers = b.servers ?? [];

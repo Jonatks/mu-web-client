@@ -1,5 +1,6 @@
 // Admin page: plain JS, no build. Every call goes through /api/mu (the Vercel function that holds the key).
 // The page CSP forbids inline styles, so every style here is set through the CSSOM (el.style), never as an attribute.
+import { serverPage } from './server.js';
 const $ = s => document.querySelector(s);
 const view = $('#view');
 let toastTimer;
@@ -142,7 +143,8 @@ async function refreshGate() {
 setInterval(() => { if (!$('#app').hidden && !document.hidden) refreshGate(); }, 20_000);
 
 /* ------------------------------------------------------------------- pages */
-const PAGES = { accounts, account, characters, audit };
+const server = () => serverPage({ h, fill, act, api, openDialog, closeDialog, confirmBox, head, tabset, formKit, card, view, insertDialog, tile, toast, debounce, refreshGate });
+const PAGES = { accounts, account, characters, server, audit };
 let shown = '';
 const setHash = path => { shown = path; location.hash = path; };
 function go(path) {
@@ -432,13 +434,14 @@ function itemPicker(onPick, extra = {}) {
 /** Where: { kind: 'inventory'|'vault', id }. slot null = first free place. */
 function insertDialog(where, slot, done) {
   const classOf = { current: where.kind === 'inventory' ? where.id : where.forChar ?? null };
-  const isInv = where.kind === 'inventory';
+  const isInv = where.kind === 'inventory', isShop = where.kind === 'shop';
   const worn = isInv && slot !== null && slot < 12;
   const bodySlot = worn ? DOLL.find(([n]) => n === slot)?.[1] : '';
-  const dest = worn ? `${where.id}: ${bodySlot.toLowerCase()}` : isInv ? `el inventario de ${where.id}` : `el baúl de ${where.id}`;
-  const url = isInv ? `/characters/${where.id}/items` : `/accounts/${where.id}/vault/items`;
+  const dest = worn ? `${where.id}: ${bodySlot.toLowerCase()}` : isInv ? `el inventario de ${where.id}` : isShop ? `la tienda de ${where.label}` : `el baúl de ${where.id}`;
+  const url = isInv ? `/characters/${where.id}/items` : isShop ? `/server/shops/${where.id}/items` : `/accounts/${where.id}/vault/items`;
+  const place = isInv ? 'el inventario' : isShop ? 'la tienda' : 'el baúl';
   const form = h('div');
-  const go = h('button', { class: 'primary', disabled: true }, worn ? 'Equipar' : `Insertar en ${isInv ? 'el inventario' : 'el baúl'}`);
+  const go = h('button', { class: 'primary', disabled: true }, worn ? 'Equipar' : `Insertar en ${place}`);
   let def = null;
 
   async function configure(d) {
@@ -480,7 +483,7 @@ function insertDialog(where, slot, done) {
     if (!def || !form._read) return;
     go.disabled = true;
     if (def.needsEvolve && !(await confirmBox(`${def.name} necesita ${def.requires}`, 'Lo puedes poner igual, pero solo lo podrá usar cuando evolucione a esa clase.', 'Poner igual'))) { go.disabled = false; return; }
-    const r = await act(() => api('POST', url, form._read()), `Ítem insertado en ${isInv ? 'el inventario' : 'el baúl'}`);
+    const r = await act(() => api('POST', url, form._read()), `Ítem insertado en ${place}`);
     go.disabled = false;
     if (r) { closeDialog(); done(); }
   });
