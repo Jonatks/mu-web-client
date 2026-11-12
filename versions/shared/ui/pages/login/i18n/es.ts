@@ -4,6 +4,9 @@ import type en from './en';
 
 export default {
   'login.enterCredentials': 'Escribe tu cuenta y tu contraseña',
+  'login.m.account': 'CUENTA DE {world}',
+  'login.m.signIn': 'INICIAR SESIÓN',
+  'login.m.show': 'Mostrar contraseña',
   'login.createAccount': 'Crear cuenta',
   'login.rememberMe': '¿Recordarme?',
 

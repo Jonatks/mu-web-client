@@ -1,3 +1,4 @@
+import { isMobileDevice } from './mobile';
 import { makeAutoObservable, reaction, runInAction } from 'mobx';
 import { LocalStorage } from '@/core/localStorage';
 import { getUiViewport, onUiViewportChanged } from './components/ui_stage';
@@ -95,7 +96,8 @@ export const MuWindows = new (class _MuWindows {
     const { width, height } = this.viewport;
     const fit = Math.min(
       (width - FIT_MARGIN * 2) / size.width,
-      (height - FIT_MARGIN * 2) / size.height
+      // A phone gives a window the whole height, as Mu Magdalena does: the bar sits behind it.
+      (height - (isMobileDevice() ? 0 : FIT_MARGIN * 2)) / size.height
     );
     return Math.min(MAX_SCALE, Math.max(fit, 0.25));
   }

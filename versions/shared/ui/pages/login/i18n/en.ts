@@ -2,6 +2,9 @@
 
 const en = {
   'login.enterCredentials': 'Enter your account name and password',
+  'login.m.account': '{world} ACCOUNT',
+  'login.m.signIn': 'SIGN IN',
+  'login.m.show': 'Show password',
   'login.createAccount': 'Create account',
   'login.rememberMe': 'Remember me?',
 

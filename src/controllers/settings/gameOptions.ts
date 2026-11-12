@@ -820,6 +820,22 @@ const MOBILE_PROFILES: readonly Partial<GameOptions>[] = [
   { fxaa: true, sharpness: 3, dropTooltips: false },
   // v2: the potions drink themselves (mana, and the Elf's arrows), as on Mu Magdalena; needs the world's server.json to allow it.
   { autoManaPotion: true, autoQuiver: true },
+  // v3, measured (docs/magdalena_study.md, resources): a phone draws about 6 times faster with no post-processing, no real-time shadows
+  // or lights, the classic lighting and materials, and less grass. Everything stays in Options to turn back on.
+  {
+    postProcessing: false,
+    shadows: false,
+    dynamicLights: false,
+    msaa: 0,
+    sunShafts: 0,
+    bloom: 0,
+    glow: 0,
+    fxaa: false,
+    sharpness: 0,
+    lightingQuality: 0,
+    materialQuality: 0,
+    grassDensity: 2,
+  },
 ];
 export const MOBILE_PROFILE_VERSION = MOBILE_PROFILES.length;
 const MOBILE_PROFILE_KEY = '_mu_mobile_profile';

@@ -141,7 +141,7 @@ export const CharactersPage = observer(() => {
     <div className="characters-page">
       <CharacterList source={CharSelect} look="lineup" onList={() => setSelecting(false)} />
 
-      {isMobileDevice() && (
+      {isMobileDevice() && !creating && (
         <MobilePanel
           selecting={selecting}
           onConnect={onConnect}

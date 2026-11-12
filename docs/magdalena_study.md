@@ -139,3 +139,22 @@ Taken: the pick-up hand (`hud/mobile_controls/topButtons.tsx`, the original's ow
 - Taken from this pass: the item sheet as a framed panel with the picture, Use and Move (`hud/mobile_controls/itemSheet.tsx`).
 - Not taken: Magdalena's inventory and merchant windows are drawn about 1.4x larger than the original's width (cells about 29 px). Here they keep the original size that
   fits the height (cells about 18 px), which is smaller for a thumb. Worth doing next, it needs the window frame redrawn taller than 429 units.
+
+## 10. Resources: Mu Magdalena against this client (2026-11-12)
+Same machine and browser for both (Chromium with a software GPU, phone landscape 915x412 at 1x; the GPU makes the frame rates far lower than on a phone,
+so they only compare the two). Mu Magdalena in its real world; this client against the local OpenMU (normal account `test6`, Lorencia).
+
+| | Mu Magdalena | this client before | this client after (phone profile v3) |
+|---|---|---|---|
+| downloaded before the login | 563 MB (it downloads everything first) | about 5 MB (assets on demand) | same |
+| requests in the world | 257 | about 1150 | same |
+| JS heap in the world | 19 MB | about 290 MB (offline Lorencia) | 193 MB |
+| DOM nodes in the world | 20 531 | about 830 | same |
+| frames per second, login screen | 29 | 0.6 | 2.8 |
+| frames per second, world | 22 | 1.3 (offline Lorencia) | 8.8 |
+
+What the frame rate depends on here (offline Lorencia, frames per second): every Image and Quality effect on 1.3; post-processing, shadows, dynamic lights, MSAA,
+sun shafts, bloom and glow off 4.3; plus classic lighting and materials 5.1; plus grass at 2 of 9: 8.1; with no grass at all 10.2. Grass is the biggest cost.
+Phone profile v3 takes those values (post-processing, shadows, lights, MSAA, sun shafts, bloom, glow, FXAA and sharpening off, classic lighting and
+materials, grass 2); all of it can be turned back on in Options. Still heavier than Mu Magdalena: its scene is lighter and its JS heap far smaller. Next steps:
+lower the render resolution on a phone, cull the login scene, and look at the heap (models and textures kept in JS memory).

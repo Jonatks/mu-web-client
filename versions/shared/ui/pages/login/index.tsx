@@ -13,6 +13,8 @@ import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
 import { MuText, TEXT_COLOR } from '@/controllers/interface/components/mu_text';
 import { MuLogo } from '@/controllers/interface/components/mu_logo';
 import { MuButton } from '@/controllers/interface/components/mu_button';
+import { isMobileDevice } from '@/controllers/interface/mobile';
+import { MobileLogin } from './MobileLogin';
 import { RegisterWindow } from './registerWindow';
 
 const WIN_WIDTH = 329;
@@ -116,7 +118,9 @@ export const LoginPage = observer(() => {
       } else if (!Session.loginProcessing) {
         playUiSound('click');
         // Through the form, so a password manager still sees a login submitted.
-        form.current?.requestSubmit();
+        // The touch card has no ref here: it is the same login.
+        if (form.current) form.current.requestSubmit();
+        else onLoginClicked();
       }
     };
 
@@ -140,6 +144,19 @@ export const LoginPage = observer(() => {
             setRegistering(false);
           }}
           onCancel={() => setRegistering(false)}
+        />
+      </div>
+    );
+  }
+
+  if (isMobileDevice()) {
+    return (
+      <div className="login-page">
+        <MobileLogin
+          onSubmit={onLoginClicked}
+          onRegister={signupApi ? openRegister : undefined}
+          signupPage={signupPage || undefined}
+          notice={notice}
         />
       </div>
     );

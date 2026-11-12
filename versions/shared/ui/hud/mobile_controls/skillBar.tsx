@@ -5,7 +5,8 @@ import { Hero } from '@/modules/hero';
 import { skills, HeroSkills } from '@/modules/skills';
 import { onCooldownTick } from '@/modules/skills/cooldowns';
 import { isAttackSkill, isHotbarSkill } from '@/modules/skills/skillCasting';
-import { skillDefinition } from '@versions/shared/skills/skillsDatabase';
+import { skillDefinition, SKILL_DEFINITIONS } from '@versions/shared/skills/skillsDatabase';
+import { skillUsability } from '@/modules/skills/usability';
 import { MobileSkillSlots, MOBILE_SKILL_SLOTS } from '@/modules/options/mobileSkillSlots';
 import { SkillIcon } from '../../components/skill_icon';
 import { MobileButton } from './mobileButton';
@@ -152,6 +153,17 @@ export const SkillPicker = observer(() => {
                     </div>
                   )}
                 </MobileButton>
+              ))}
+              {/* Mu Magdalena lists the class's other skills too, greyed and locked: what a book or an orb will teach later. */}
+              {SKILL_DEFINITIONS.filter(
+                d => d.num < 300 && isHotbarSkill(d.num) && !learned.includes(d.num) && !skillUsability(d.num).blocks.includes('class')
+              ).map(d => (
+                <div key={d.num} className="mobile-pick-skill is-locked is-unlearned" title={d.name}>
+                  <div className="mobile-skill-art">
+                    <SkillIcon number={d.num} disabled />
+                  </div>
+                  <span className="mobile-lock">🔒</span>
+                </div>
               ))}
             </div>
             <div className="mobile-picker-hint">{learned.length ? t('mobile.pickHint') : t('skills.empty')}</div>
