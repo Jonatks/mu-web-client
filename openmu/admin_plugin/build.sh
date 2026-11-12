@@ -10,6 +10,6 @@ W=$HOME/ab; rm -rf "$W"; mkdir -p "$W"; cd "$W"
 for f in AdminBridge.csproj StartupHook.cs AdminBridgePlugIn.cs build.Dockerfile; do
   curl -fsSL "https://raw.githubusercontent.com/Jonatks/mu-web-client/$SHA/openmu/admin_plugin/$f" -o "$f"
 done
-docker build -q -f build.Dockerfile --build-arg OPENMU_IMAGE="$DIGEST" --target out -o out .
+docker build -f build.Dockerfile --build-arg OPENMU_IMAGE="$DIGEST" --target out -o out .
 scp -i "$KEY" out/MUnique.OpenMU.MuAdminBridge.dll "$VM":~/
 echo "DLL listo en la VM: ~/MUnique.OpenMU.MuAdminBridge.dll (compilado contra $DIGEST)"

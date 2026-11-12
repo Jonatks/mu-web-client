@@ -9,6 +9,7 @@
     <OpenMuDir Condition="'$(OpenMuDir)' == ''">/openmu</OpenMuDir>
   </PropertyGroup>
   <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <Reference Include="$(OpenMuDir)/MUnique.OpenMU.*.dll" Private="false" />
     <Reference Include="$(OpenMuDir)/Nito.*.dll" Private="false" />
     <Using Include="System.ComponentModel.DataAnnotations" />
