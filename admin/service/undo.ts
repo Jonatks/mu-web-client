@@ -107,12 +107,11 @@ export async function undo(sql: Sql, id: string, admin: string): Promise<{ undoI
       const cols = (await w.tx.unsafe(`SELECT column_name FROM information_schema.columns WHERE table_schema='data' AND table_name=$1`, [table])).map(r => r.column_name as string);
       const sets = cols.filter(c => !pk.includes(c)).map(c => `"${c}" = r."${c}"`).join(', ');
       for (const row of rec.before[table] ?? []) {
-        const json = JSON.stringify(row);
         const hit = await w.tx.unsafe(
           `UPDATE ${ident(table)} t SET ${sets} FROM jsonb_populate_record(NULL::${ident(table)}, $${pk.length + 1}::jsonb) r WHERE ${keyWhere(pk)}`,
-          [...pk.map(c => row[c] as string), json]
+          [...pk.map(c => row[c] as string), row as never]
         );
-        if (hit.count === 0) await w.tx.unsafe(`INSERT INTO ${ident(table)} SELECT * FROM jsonb_populate_record(NULL::${ident(table)}, $1::jsonb)`, [json]);
+        if (hit.count === 0) await w.tx.unsafe(`INSERT INTO ${ident(table)} SELECT * FROM jsonb_populate_record(NULL::${ident(table)}, $1::jsonb)`, [row as never]);
       }
     }
   });
