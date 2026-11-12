@@ -2,5 +2,5 @@
   "name": "mu-admin-web",
   "private": true,
   "type": "module",
-  "engines": { "node": "20.x" }
+  "engines": { "node": "24.x" }
 }
