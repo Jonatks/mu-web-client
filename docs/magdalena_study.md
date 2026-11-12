@@ -184,3 +184,9 @@ Method: create a character of the class, enter, open the Skills window and read 
 - Not yet studied: Dark Lord, Summoner (the creation pills are offset from my notes; read the class text on the card before pressing Create).
 Consequence for this client: a new Dark Knight and Elf on this server have no skill, so the cast button only punches. Either the server gives the starting skills (plugin, plan F4)
 or the client lists them as locked until learned.
+
+## 13. Draw cost of this client in Lorencia (offline, phone profile, 915x412, software GPU, 2026-11-12)
+15 s sample: 784 frames (about 52 fps), 16 draw calls, 23.8k triangles, 4 program switches and 37 texture binds per frame. Resolution is already 1 device pixel per CSS pixel
+without antialiasing (same as Magdalena's canvas). So draw calls and triangles are not the bottleneck; the gap measured online (8.8 against 22 fps) must come from CPU work per
+frame (entities, effects, interface updates) or JS memory, so the next step is a per-system timer, not fewer draws. Magdalena could not be sampled again: its test login is no
+longer available to this session, so further study there waits for the owner to provide it again.
