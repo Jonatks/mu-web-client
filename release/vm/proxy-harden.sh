@@ -20,8 +20,17 @@ RULES="127.0.0.1:44405,127.0.0.1:44406,127.0.0.1:45901,127.0.0.1:45902,127.0.0.1
 
 # Con --network host el trafico no pasa por el DNAT de Docker: el INPUT de la imagen de Oracle solo deja entrar el 22 y rechaza el resto.
 # Se abre el 8090 antes del REJECT y se guarda para que sobreviva un reinicio.
-fw_open() { sudo iptables -C INPUT -p tcp --dport "$PORT" -j ACCEPT 2>/dev/null || sudo iptables -I INPUT 5 -p tcp --dport "$PORT" -j ACCEPT; sudo netfilter-persistent save >/dev/null; }
-fw_close() { while sudo iptables -D INPUT -p tcp --dport "$PORT" -j ACCEPT 2>/dev/null; do :; done; sudo netfilter-persistent save >/dev/null; }
+# Se edita rules.v4 a mano: "netfilter-persistent save" volcaria tambien las reglas temporales de Docker (IPs de contenedores).
+RV4=/etc/iptables/rules.v4
+RULE="-A INPUT -p tcp -m tcp --dport $PORT -j ACCEPT"
+fw_open() {
+  sudo iptables -C INPUT -p tcp --dport "$PORT" -j ACCEPT 2>/dev/null || sudo iptables -I INPUT 5 -p tcp --dport "$PORT" -j ACCEPT
+  sudo grep -qxF -- "$RULE" "$RV4" || sudo sed -i "/^-A INPUT -j REJECT --reject-with icmp-host-prohibited/i $RULE" "$RV4"
+}
+fw_close() {
+  while sudo iptables -D INPUT -p tcp --dport "$PORT" -j ACCEPT 2>/dev/null; do :; done
+  sudo sed -i "\\#^$RULE\$#d" "$RV4"
+}
 
 if [ "${1:-}" = "rollback" ]; then
   sudo docker rm -f "$NAME" >/dev/null 2>&1 || true
@@ -58,7 +67,7 @@ start_new() {
     oven/bun:1.4.2-slim bun proxy/main.ts >/dev/null
 }
 
-command -v netfilter-persistent >/dev/null || { echo "falta netfilter-persistent (sudo apt-get install -y iptables-persistent)"; exit 1; }
+[ -f "$RV4" ] || { echo "falta $RV4 (sudo apt-get install -y iptables-persistent)"; exit 1; }
 fw_open
 [ -n "$OLD" ] && sudo docker stop "$OLD" >/dev/null
 start_new
