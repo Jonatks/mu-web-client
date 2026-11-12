@@ -12,6 +12,7 @@ import { disconnectAccount, readOnline } from './bridge';
 import { kickAll, restartServer } from './kick';
 import * as skills from './skills';
 import { auditTail, recentUndo, undo } from './undo';
+import { cleanLog, logStats } from './logclean';
 
 export type Config = { key: string; gateFile: string; bridgeDir: string; sql: Sql };
 
@@ -123,6 +124,9 @@ export function createApp(cfg: Config) {
     if (p[0] === 'server') {
       const id = p[2] ?? '';
       switch (p[1]) {
+        case 'overview':
+          if (m === 'GET') return server.overview(sql, auditTail(1000));
+          break;
         case 'restart':
           if (m === 'POST') { needAdmin(); return restartServer(cfg.gateFile, admin); }
           break;
@@ -170,6 +174,14 @@ export function createApp(cfg: Config) {
           if (m === 'POST' && p.length === 3) { needAdmin(); return server.setPlugin(sql, admin, id, await body(200_500)); }
           break;
       }
+    }
+    if (p[0] === 'audit' && p[1] === 'stats' && m === 'GET') return logStats();
+    if (p[0] === 'audit' && p[1] === 'clean' && m === 'POST') {
+      needAdmin();
+      const b = await body();
+      const days = b.days === null || b.days === undefined ? null : Number(b.days);
+      if (days !== null && (!Number.isFinite(days) || days < 0 || days > 3650)) throw bad('days: 0 to 3650, or null for everything.');
+      return cleanLog(undefined, { before: days === null ? null : Date.now() - days * 86_400_000, undo: b.undo === true, dryRun: b.dryRun === true, admin });
     }
     if (p[0] === 'audit' && m === 'GET') return auditTail(Number(q.get('limit') ?? 100));
     if (p[0] === 'undo' && m === 'GET') return recentUndo();

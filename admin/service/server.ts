@@ -106,7 +106,23 @@ export async function setRules(sql: Sql, admin: string, b: { values?: Record<str
 
 export const listMaps = (sql: Sql) =>
   sql.unsafe(`SELECT "Id" AS id, "Number" AS number, ${NAME('"Name"')} AS name, "ExpMultiplier"::float8 AS "expMultiplier",
-              (SELECT count(*)::int FROM config."MonsterSpawnArea" s WHERE s."GameMapId" = m."Id") AS spawns FROM config."GameMapDefinition" m ORDER BY "Number"`);
+              (SELECT count(*)::int FROM config."MonsterSpawnArea" s WHERE s."GameMapId" = m."Id") AS spawns,
+              (SELECT coalesce(sum(s."Quantity"), 0)::int FROM config."MonsterSpawnArea" s WHERE s."GameMapId" = m."Id") AS monsters FROM config."GameMapDefinition" m ORDER BY "Number"`);
+
+/** The numbers at the top of the page, and how many saved changes still wait for a restart (read from the log, newest first). */
+export async function overview(sql: Sql, log: { action?: unknown; at?: unknown }[]) {
+  const rules = await getRules(sql);
+  const spots = (await sql`SELECT count(*)::int AS n, coalesce(sum("Quantity"), 0)::int AS q FROM config."MonsterSpawnArea"`)[0]!;
+  const drops = (await sql`SELECT count(*)::int AS n, count(*) FILTER (WHERE "Chance" >= 1)::int AS always, coalesce(avg("Chance") FILTER (WHERE "ItemType" = 3), 0)::float8 AS avg FROM config."DropItemGroup"`)[0]!;
+  const plug = (await sql`SELECT count(*) FILTER (WHERE "IsActive")::int AS active, count(*)::int AS total FROM config."PlugInConfiguration" WHERE "CustomConfiguration" IS NOT NULL`)[0]!;
+  let pending = 0, lastRestart: string | null = null;
+  for (const e of log) {
+    const a = String(e.action ?? '');
+    if (a === 'server.restart') { lastRestart = String(e.at ?? ''); break; }
+    if (/^(undo:)?server\./.test(a)) pending++;
+  }
+  return { rules: rules.values, servers: rules.servers, spots: { count: spots.n, monsters: spots.q }, drops: { groups: drops.n, always: drops.always, avgRandom: drops.avg }, plugins: { active: plug.active, total: plug.total }, pending, lastRestart };
+}
 
 export async function setMap(sql: Sql, admin: string, id: string, b: { expMultiplier?: unknown }) {
   uuid(id, 'map');

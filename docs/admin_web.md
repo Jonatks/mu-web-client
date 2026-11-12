@@ -52,8 +52,20 @@ restarts OpenMU. A full start takes about three minutes on the 1 GB VM.
 | Teletransportes | `config."WarpInfo"` | cost and level of each `/move` destination |
 | Avanzado | `config."PlugInConfiguration"` | active flag and JSON (`CustomConfiguration`: Happy Hour, invasions, event schedules); names come from OpenMU's resources (`admin/service/plugin_names.json`) |
 
+The page is built to be read before it is edited. The top strip (`GET /server/overview`) shows experience, master experience, monsters in spots,
+the average chance of random drops, the player cap, and how many saved server changes still wait for a restart (counted from the audit log back to the last
+`server.restart` line), with a "Reiniciar ahora" button. Each tab opens with its own summary tiles. While a field is edited the page shows
+`old -> new (+/-)` next to it, on the matching tile, and in a bar of pending changes with Descartar and Guardar. Nothing is sent until Guardar; drop scaling
+and spot creation are previewed in the browser from data already loaded.
+
 Every change goes through the same copy-before-write and undo as player edits. Column types were read from the real database (several `integer`
 look-alikes are `interval`, so durations are sent as seconds through `make_interval`).
+
+## Log cleaner (the "Registro" page)
+`GET /audit/stats` gives the number of lines, the oldest date and the sizes of the log and the undo copies. `POST /audit/clean` (`{days, undo, dryRun}`, admin only)
+removes lines older than `days` (`null` is everything) and the undo copies that go with them. The dialog asks for a dry run first and shows how many lines and
+copies would go. It always keeps server changes saved since the last restart and the last restart line (the page counts them as "waiting for a restart"), and
+unless "undo" is ticked it keeps every change that can still be undone. The clean writes one `log.clean` line. Code: `admin/service/logclean.ts`.
 
 ## Rules that keep data safe
 1. **Nobody connected.** OpenMU keeps a player's data in memory while he is online, so a write under a connected player is lost or overwrites

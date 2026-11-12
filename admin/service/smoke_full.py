@@ -386,4 +386,13 @@ if pj:
     undo(r, 'plugin')
     check('plugin restored', next(p for p in call('GET', '/server/plugins') if p['id'] == pj['id'])['isActive'] == pj['isActive'])
 
+# ---- overview and log cleaner (the real log is only read and dry-run here, never cleaned)
+ov = call('GET', '/server/overview')
+check('overview answers', isinstance(ov.get('rules'), dict) and ov['spots']['monsters'] > 0 and ov['drops']['groups'] > 0 and isinstance(ov['pending'], int) and 'avgRandom' in ov['drops'], str(ov)[:300])
+st = call('GET', '/audit/stats')
+check('log stats answer', all(k in st for k in ('entries', 'bytes', 'undoable', 'undone', 'undoBytes')), st)
+dry = call('POST', '/audit/clean', {'days': None, 'undo': True, 'dryRun': True})
+check('log clean dry run changes nothing', 'removedEntries' in dry and call('GET', '/audit/stats')['entries'] == st['entries'], dry)
+check('log clean rejects nonsense', 'ERR' in call('POST', '/audit/clean', {'days': -3, 'dryRun': True}) and 'ERR' in call('POST', '/audit/clean', {'days': 'x', 'dryRun': True}))
+
 print('ALL OK' if ok_all else 'SOME FAILED')

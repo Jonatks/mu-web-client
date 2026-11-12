@@ -908,19 +908,64 @@ function characters(selected) {
 }
 
 /* ------------------------------------------------------------------- audit */
+const bytesText = n => (n < 1024 ? `${n} B` : n < 1048576 ? `${(n / 1024).toFixed(1)} KB` : `${(n / 1048576).toFixed(1)} MB`);
+const dayText = iso => (iso ? iso.replace('T', ' ').slice(0, 10) : 'sin datos');
+const statTile = (label, value, hint) => h('div', { class: 'stat' }, h('div', { class: 'l' }, label), h('div', { class: 'v' }, value), h('div', { class: 'h' }, hint ?? ''));
+
+/** The log cleaner: pick how far back to clean, see what would go (dry run), confirm, run. */
+function cleanDialog(stats, done) {
+  let days = 30, withUndo = false;
+  const out = h('div', { class: 'impact' });
+  const go = h('button', { class: 'primary danger-fill' }, 'Limpiar');
+  const opts = [[7, 'Más de 7 días'], [30, 'Más de 30 días'], [90, 'Más de 90 días'], [null, 'Todo']];
+  const chips = h('div', { class: 'chips' });
+  const check = h('input', { type: 'checkbox' });
+  const body = () => ({ days, undo: withUndo });
+  const preview = debounce(async () => {
+    const r = await act(() => api('POST', '/audit/clean', { ...body(), dryRun: true }));
+    if (!r) return;
+    go.disabled = r.removedEntries === 0 && r.removedUndoFiles === 0;
+    fill(out, h('p', {}, 'Se borrarían ', h('b', { class: 'gold' }, num(r.removedEntries)), ' líneas del registro y ', h('b', { class: 'gold' }, num(r.removedUndoFiles)), ' copias de seguridad.'),
+      h('p', { class: 'mute' }, `Quedan ${num(r.keptEntries)} líneas. Siempre se conservan los cambios del servidor que esperan un reinicio y el último reinicio.`));
+  }, 120);
+  const draw = () => { fill(chips, opts.map(([d, t]) => h('button', { type: 'button', class: 'chip' + (d === days ? ' on' : ''), onclick: () => { days = d; draw(); preview(); } }, t))); };
+  check.addEventListener('change', () => { withUndo = check.checked; preview(); });
+  go.addEventListener('click', async () => {
+    go.disabled = true;
+    const r = await act(() => api('POST', '/audit/clean', body()), 'Registro limpiado');
+    if (r) { closeDialog(); done(); } else go.disabled = false;
+  });
+  draw(); preview();
+  openDialog(h('h3', {}, 'Limpiar registro'),
+    h('p', { class: 'mute' }, `Hoy hay ${num(stats.entries)} líneas (${bytesText(stats.bytes)}) y ${num(stats.undoable + stats.undone)} copias de seguridad (${bytesText(stats.undoBytes)}). Las copias de cambios ya deshechos se borran junto con su línea.`),
+    h('div', { class: 'fields' }, h('div', { class: 'f' }, h('span', { class: 'ft' }, 'Qué borrar'), chips)),
+    h('label', { class: 'f inline' }, check, `También borrar las copias de ${num(stats.undoable)} cambios que aún se podrían deshacer (ya no podrás deshacerlos)`),
+    out, h('div', { class: 'actions' }, h('button', { onclick: closeDialog }, 'Cancelar'), go));
+}
+
 async function audit() {
-  const [log, undos] = await Promise.all([act(() => api('GET', '/audit?limit=100')), act(() => api('GET', '/undo'))]);
+  const [log, undos, stats] = await Promise.all([act(() => api('GET', '/audit?limit=200')), act(() => api('GET', '/undo')), act(() => api('GET', '/audit/stats'))]);
   if (!log) return;
   const can = new Set((undos ?? []).filter(u => u.undoable).map(u => u.id));
-  view.append(head('Registro de cambios', 'Deshacer devuelve las filas a como estaban antes del cambio. Exige el servidor vacío; si el jugador jugó después, perdería ese progreso.'),
-    h('section', { class: 'panel' }, log.length ? h('table', {}, h('thead', {}, h('tr', {}, ['Fecha', 'Admin', 'Acción', 'Objetivo', 'Detalle', ''].map(t => h('th', {}, t)))),
-      h('tbody', {}, log.map(a => h('tr', {},
-        h('td', { class: 'mute' }, a.at.replace('T', ' ').slice(0, 19)), h('td', {}, a.admin), h('td', { class: 'mono' }, a.action), h('td', { class: 'mono' }, a.target),
-        h('td', { class: 'mono mute' }, a.detail ? JSON.stringify(a.detail) : ''),
-        h('td', { class: 'actions' }, can.has(a.id) ? h('button', { class: 'small', onclick: async () => {
-          if (!(await confirmBox('¿Deshacer este cambio?', `${a.action} en ${a.target}`, 'Deshacer'))) return;
-          if (await act(() => api('POST', '/undo/' + a.id), 'Cambio deshecho')) { fill(view, ); audit(); }
-        } }, 'Deshacer') : null))))) : h('p', { class: 'empty' }, 'Aún no hay cambios registrados.')));
+  const q = h('input', { placeholder: 'Buscar en el registro (acción, objetivo, admin)', 'aria-label': 'Buscar' });
+  const rows = h('tbody');
+  const draw = () => {
+    const t = q.value.trim().toLowerCase();
+    const list = log.filter(a => !t || `${a.action} ${a.target} ${a.admin}`.toLowerCase().includes(t));
+    fill(rows, list.map(a => h('tr', {},
+      h('td', { class: 'mute' }, a.at.replace('T', ' ').slice(0, 19)), h('td', {}, a.admin), h('td', { class: 'mono' }, a.action), h('td', { class: 'mono' }, a.target),
+      h('td', { class: 'mono mute' }, a.detail ? JSON.stringify(a.detail) : ''),
+      h('td', { class: 'actions' }, can.has(a.id) ? h('button', { class: 'small', onclick: async () => {
+        if (!(await confirmBox('¿Deshacer este cambio?', `${a.action} en ${a.target}`, 'Deshacer'))) return;
+        if (await act(() => api('POST', '/undo/' + a.id), 'Cambio deshecho')) { fill(view, ); audit(); }
+      } }, 'Deshacer') : null))), list.length ? null : h('tr', {}, h('td', { colspan: 6, class: 'empty' }, 'Nada coincide.')));
+  };
+  q.addEventListener('input', debounce(draw, 100)); draw();
+  const clean = () => { if (stats) cleanDialog(stats, () => { fill(view, ); audit(); }); };
+  view.append(head('Registro de cambios', 'Deshacer devuelve las filas a como estaban antes del cambio. Exige el servidor vacío; si el jugador jugó después, perdería ese progreso.', h('button', { onclick: clean, disabled: !stats }, 'Limpiar registro')),
+    stats ? h('div', { class: 'summary' }, statTile('Líneas en el registro', num(stats.entries), `desde ${dayText(stats.oldest)}`), statTile('Tamaño', bytesText(stats.bytes + stats.undoBytes), 'registro y copias'),
+      statTile('Se pueden deshacer', num(stats.undoable), 'cambios con copia guardada'), statTile('Ya deshechos', num(stats.undone), 'copias que se pueden borrar')) : null,
+    h('section', { class: 'panel' }, log.length ? [h('div', { class: 'row' }, q), h('table', {}, h('thead', {}, h('tr', {}, ['Fecha', 'Admin', 'Acción', 'Objetivo', 'Detalle', ''].map(t => h('th', {}, t)))), rows)] : h('p', { class: 'empty' }, 'Aún no hay cambios registrados.')));
 }
 
 /* ------------------------------------------------------------------- start */

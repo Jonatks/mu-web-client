@@ -14,4 +14,4 @@ Item icons: `public/items/<group>_<number>.webp` (72px) and `public/items/index.
 `python3 admin/web/tools/item_icons.py` (run from the repo root; it needs `public/items` built by the client). The item picker shows them next to category
 chips that come from `GET /items/categories`, so only kinds the server really has (for the character's class line and body slot) are offered.
 
-`public/server.js` is the `Servidor` page (tabs for rules, spots map, drops, monsters, shops, events, warps and plug-ins). It gets the page helpers from `app.js`.
+`public/server.js` is the `Servidor` page (tabs for rules, spots map, drops, monsters, shops, events, warps and plug-ins). It gets the page helpers from `app.js`. Every tab starts with summary tiles and shows "old -> new (+/-)" while a field is edited (`draftKit`, `stat`, `savebar` inside the file). `app.js` also holds the log cleaner dialog on the `Registro` page.
