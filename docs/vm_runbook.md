@@ -26,3 +26,11 @@ port it publishes and stop with a message if they cannot find it. Run them once 
 ## Rules that stay
 - The OpenMU admin panel (55980) is never published. Use an SSH tunnel: `ssh -L 55980:127.0.0.1:55980 ubuntu@155.181.133.84`.
 - GitHub tokens used for installs are read-only, short-lived, and deleted afterwards.
+
+## Estado (2026-11-12, aplicado por la otra sesion con la extension de Chrome)
+- Copia diaria de la base de datos: activa (03:30 UTC, 7 dias).
+- Proxy endurecido en el 8090: activo, verificado desde fuera de la VM y tras reiniciar. Permite 44405, 44406 y 45901-45906 de 127.0.0.1 y de la IP publica.
+- HTTPS: `https://155-181-133-84.sslip.io` con certificado de Let's Encrypt; `wss://ws.155-181-133-84.sslip.io` abre hacia el 44405.
+- `serverlist.md` publicado con `wss://`; `https://mu-valhalla.vercel.app` redirige a ese HTTPS.
+- Pendiente tuyo: revocar el token `mu-vm-install`, borrar `mu-assets` cuando no se necesite, quitar las cuentas de prueba antes de abrir al publico y borrar
+  `client-old-20261110-1940` de la VM.
