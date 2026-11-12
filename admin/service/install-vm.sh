@@ -81,6 +81,30 @@ sudo docker rm -f mu-kick >/dev/null 2>&1 || true
 printf 'FROM alpine\nRUN apk add --no-cache iproute2-ss\n' | sudo docker build -q -t mu-kick - >/dev/null
 sudo docker run -d --name mu-kick --restart unless-stopped --network container:openmu --cap-add NET_ADMIN --memory 24m \
   -v "$APP":/app:ro -v "$DATA":/d mu-kick sh /app/admin/service/kick-sidecar.sh >/dev/null
+# Reiniciar OpenMU desde el panel: el panel solo deja un archivo; esta unidad del sistema (que no se puede alimentar con nada mas) reinicia el juego.
+sudo tee /usr/local/sbin/mu-restart.sh >/dev/null <<'EOS'
+#!/bin/sh
+rm -f /var/lib/mu-admin/restart
+docker restart openmu
+sleep 25
+docker restart mu-gate mu-kick
+EOS
+sudo chmod 755 /usr/local/sbin/mu-restart.sh
+sudo tee /etc/systemd/system/mu-restart.service >/dev/null <<'EOS'
+[Unit]
+Description=Restart OpenMU when the admin panel asks
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/mu-restart.sh
+EOS
+sudo tee /etc/systemd/system/mu-restart.path >/dev/null <<'EOS'
+[Path]
+PathExists=/var/lib/mu-admin/restart
+[Install]
+WantedBy=multi-user.target
+EOS
+sudo systemctl daemon-reload
+sudo systemctl enable --now mu-restart.path >/dev/null 2>&1
 sudo docker rm -f mu-admin >/dev/null 2>&1 || true
 sudo docker run -d --name mu-admin --restart unless-stopped --network openmu_default --memory 80m \
   -p 127.0.0.1:3200:3200 --env-file "$CFG/env" -e ADMIN_KEY_FILE=/run/key \

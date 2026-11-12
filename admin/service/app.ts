@@ -9,7 +9,7 @@ import { GateError, assertNobodyConnected } from './gate';
 import * as items from './items';
 import * as server from './server';
 import { disconnectAccount, readOnline } from './bridge';
-import { kickAll } from './kick';
+import { kickAll, restartServer } from './kick';
 import * as skills from './skills';
 import { auditTail, recentUndo, undo } from './undo';
 
@@ -123,6 +123,9 @@ export function createApp(cfg: Config) {
     if (p[0] === 'server') {
       const id = p[2] ?? '';
       switch (p[1]) {
+        case 'restart':
+          if (m === 'POST') { needAdmin(); return restartServer(cfg.gateFile, admin); }
+          break;
         case 'rules':
           if (m === 'GET') return server.getRules(sql);
           if (m === 'POST') { needAdmin(); return server.setRules(sql, admin, await body()); }
