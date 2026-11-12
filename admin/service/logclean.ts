@@ -40,12 +40,20 @@ export function cleanLog(dir = DIR, o: { before: number | null; undo: boolean; d
   const lastRestart = restarts.length ? Math.max(...restarts) : 0;
   const waiting = (e: Line) => /^(undo:)?server\./.test(e.action ?? '') && Date.parse(e.at ?? '') > lastRestart;
   const isLastRestart = (e: Line) => e.action === 'server.restart' && Date.parse(e.at ?? '') === lastRestart;
-  const keep = (e: Line | null) => !e || waiting(e) || isLastRestart(e) || (o.before !== null && Date.parse(e.at ?? '') >= o.before) || (!o.undo && !!e.id && live.has(e.id));
-  const kept = lines.filter(l => keep(l.e));
+  const why = (e: Line | null): 'drop' | 'waiting' | 'newer' | 'undoable' => {
+    if (!e) return 'waiting';
+    if (waiting(e) || isLastRestart(e)) return 'waiting';
+    if (o.before !== null && Date.parse(e.at ?? '') >= o.before) return 'newer';
+    if (!o.undo && !!e.id && live.has(e.id)) return 'undoable';
+    return 'drop';
+  };
+  const kept = lines.filter(l => why(l.e) !== 'drop');
+  const keptBecause = { waiting: 0, newer: 0, undoable: 0 };
+  for (const l of kept) keptBecause[why(l.e) as 'waiting' | 'newer' | 'undoable']++;
   const keptIds = new Set(kept.map(l => l.e?.id).filter(Boolean) as string[]);
   const cutoff = o.before ?? Infinity;
   const doomed = undoFiles(dir).filter(f => !keptIds.has(idOf(f)) && idTime(idOf(f)) < cutoff && (f.endsWith('.done') || o.undo));
-  const result = { removedEntries: lines.length - kept.length, removedUndoFiles: doomed.length, keptEntries: kept.length };
+  const result = { removedEntries: lines.length - kept.length, removedUndoFiles: doomed.length, keptEntries: kept.length, keptBecause };
   if (o.dryRun || (result.removedEntries === 0 && doomed.length === 0)) return result;
   const tmp = audit(dir) + '.tmp';
   writeFileSync(tmp, kept.map(l => l.raw + '\n').join(''), { mode: 0o600 });

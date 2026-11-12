@@ -49,3 +49,10 @@ test('a dry run changes nothing', () => {
   expect(cleanLog(d, { before: null, undo: true, dryRun: true }).removedEntries).toBe(2);
   expect(logStats(d).entries).toBe(2);
 });
+
+test('says why the lines that stay were kept', () => {
+  const d = setup([{ ago: 1, action: 'item.add', undo: 'live' }, { ago: 1, action: 'item.add' }, { ago: 50, action: 'server.rules' }]);
+  const r = cleanLog(d, { before: null, undo: false, dryRun: true });
+  expect(r.keptBecause).toEqual({ waiting: 1, newer: 0, undoable: 1 });
+  expect(r.removedEntries).toBe(1);
+});

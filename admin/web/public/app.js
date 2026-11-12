@@ -914,7 +914,7 @@ const statTile = (label, value, hint) => h('div', { class: 'stat' }, h('div', { 
 
 /** The log cleaner: pick how far back to clean, see what would go (dry run), confirm, run. */
 function cleanDialog(stats, done) {
-  let days = 30, withUndo = false;
+  let days = null, withUndo = false;
   const out = h('div', { class: 'impact' });
   const go = h('button', { class: 'primary danger-fill' }, 'Limpiar');
   const opts = [[7, 'Más de 7 días'], [30, 'Más de 30 días'], [90, 'Más de 90 días'], [null, 'Todo']];
@@ -926,7 +926,7 @@ function cleanDialog(stats, done) {
     if (!r) return;
     go.disabled = r.removedEntries === 0 && r.removedUndoFiles === 0;
     fill(out, h('p', {}, 'Se borrarían ', h('b', { class: 'gold' }, num(r.removedEntries)), ' líneas del registro y ', h('b', { class: 'gold' }, num(r.removedUndoFiles)), ' copias de seguridad.'),
-      h('p', { class: 'mute' }, `Quedan ${num(r.keptEntries)} líneas. Siempre se conservan los cambios del servidor que esperan un reinicio y el último reinicio.`));
+      r.keptEntries ? h('p', { class: 'mute' }, `Quedan ${num(r.keptEntries)} líneas: `, [[r.keptBecause.undoable, 'se pueden deshacer (marca la casilla de abajo para borrarlas)'], [r.keptBecause.waiting, 'esperan un reinicio o son el último reinicio (siempre se guardan)'], [r.keptBecause.newer, 'son más recientes que el corte']].filter(x => x[0]).map(x => `${num(x[0])} ${x[1]}`).join('; '), '.') : h('p', { class: 'mute' }, 'El registro quedaría vacío.'));
   }, 120);
   const draw = () => { fill(chips, opts.map(([d, t]) => h('button', { type: 'button', class: 'chip' + (d === days ? ' on' : ''), onclick: () => { days = d; draw(); preview(); } }, t))); };
   check.addEventListener('change', () => { withUndo = check.checked; preview(); });
@@ -944,15 +944,18 @@ function cleanDialog(stats, done) {
 }
 
 async function audit() {
-  const [log, undos, stats] = await Promise.all([act(() => api('GET', '/audit?limit=200')), act(() => api('GET', '/undo')), act(() => api('GET', '/audit/stats'))]);
+  const [log, undos, stats] = await Promise.all([act(() => api('GET', '/audit?limit=1000')), act(() => api('GET', '/undo')), act(() => api('GET', '/audit/stats'))]);
   if (!log) return;
   const can = new Set((undos ?? []).filter(u => u.undoable).map(u => u.id));
   const q = h('input', { placeholder: 'Buscar en el registro (acción, objetivo, admin)', 'aria-label': 'Buscar' });
-  const rows = h('tbody');
+  const only = h('input', { type: 'checkbox' });
+  const rows = h('tbody'), more = h('p', { class: 'mute' });
+  let shownRows = 40;
   const draw = () => {
     const t = q.value.trim().toLowerCase();
-    const list = log.filter(a => !t || `${a.action} ${a.target} ${a.admin}`.toLowerCase().includes(t));
-    fill(rows, list.map(a => h('tr', {},
+    const list = log.filter(a => (!only.checked || can.has(a.id)) && (!t || `${a.action} ${a.target} ${a.admin}`.toLowerCase().includes(t)));
+    fill(more, list.length > shownRows ? [`Mostrando ${shownRows} de ${num(list.length)}. `, h('button', { class: 'link', onclick: () => { shownRows += 100; draw(); } }, 'Mostrar más')] : `${num(list.length)} ${list.length === 1 ? 'línea' : 'líneas'}.`);
+    fill(rows, list.slice(0, shownRows).map(a => h('tr', {},
       h('td', { class: 'mute' }, a.at.replace('T', ' ').slice(0, 19)), h('td', {}, a.admin), h('td', { class: 'mono' }, a.action), h('td', { class: 'mono' }, a.target),
       h('td', { class: 'mono mute' }, a.detail ? JSON.stringify(a.detail) : ''),
       h('td', { class: 'actions' }, can.has(a.id) ? h('button', { class: 'small', onclick: async () => {
@@ -960,12 +963,12 @@ async function audit() {
         if (await act(() => api('POST', '/undo/' + a.id), 'Cambio deshecho')) { fill(view, ); audit(); }
       } }, 'Deshacer') : null))), list.length ? null : h('tr', {}, h('td', { colspan: 6, class: 'empty' }, 'Nada coincide.')));
   };
-  q.addEventListener('input', debounce(draw, 100)); draw();
+  q.addEventListener('input', debounce(() => { shownRows = 40; draw(); }, 100)); only.addEventListener('change', () => { shownRows = 40; draw(); }); draw();
   const clean = () => { if (stats) cleanDialog(stats, () => { fill(view, ); audit(); }); };
   view.append(head('Registro de cambios', 'Deshacer devuelve las filas a como estaban antes del cambio. Exige el servidor vacío; si el jugador jugó después, perdería ese progreso.', h('button', { onclick: clean, disabled: !stats }, 'Limpiar registro')),
     stats ? h('div', { class: 'summary' }, statTile('Líneas en el registro', num(stats.entries), `desde ${dayText(stats.oldest)}`), statTile('Tamaño', bytesText(stats.bytes + stats.undoBytes), 'registro y copias'),
       statTile('Se pueden deshacer', num(stats.undoable), 'cambios con copia guardada'), statTile('Ya deshechos', num(stats.undone), 'copias que se pueden borrar')) : null,
-    h('section', { class: 'panel' }, log.length ? [h('div', { class: 'row' }, q), h('table', {}, h('thead', {}, h('tr', {}, ['Fecha', 'Admin', 'Acción', 'Objetivo', 'Detalle', ''].map(t => h('th', {}, t)))), rows)] : h('p', { class: 'empty' }, 'Aún no hay cambios registrados.')));
+    h('section', { class: 'panel' }, log.length ? [h('div', { class: 'row' }, q, h('label', { class: 'inline' }, only, 'Solo los que se pueden deshacer')), h('table', {}, h('thead', {}, h('tr', {}, ['Fecha', 'Admin', 'Acción', 'Objetivo', 'Detalle', ''].map(t => h('th', {}, t)))), rows), more] : h('p', { class: 'empty' }, 'Aún no hay cambios registrados.')));
 }
 
 /* ------------------------------------------------------------------- start */
