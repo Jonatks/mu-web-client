@@ -18,8 +18,14 @@ PUBIP=155.181.133.84
 # El cliente pide al proxy host=<IP publica> (es la IP que OpenMU anuncia y la de serverlist.md), no 127.0.0.1: se permiten las dos.
 RULES="127.0.0.1:44405,127.0.0.1:44406,127.0.0.1:45901,127.0.0.1:45902,127.0.0.1:45903,127.0.0.1:45904,127.0.0.1:45905,127.0.0.1:45906,$PUBIP:44405,$PUBIP:44406,$PUBIP:45901,$PUBIP:45902,$PUBIP:45903,$PUBIP:45904,$PUBIP:45905,$PUBIP:45906"
 
+# Con --network host el trafico no pasa por el DNAT de Docker: el INPUT de la imagen de Oracle solo deja entrar el 22 y rechaza el resto.
+# Se abre el 8090 antes del REJECT y se guarda para que sobreviva un reinicio.
+fw_open() { sudo iptables -C INPUT -p tcp --dport "$PORT" -j ACCEPT 2>/dev/null || sudo iptables -I INPUT 5 -p tcp --dport "$PORT" -j ACCEPT; sudo netfilter-persistent save >/dev/null; }
+fw_close() { while sudo iptables -D INPUT -p tcp --dport "$PORT" -j ACCEPT 2>/dev/null; do :; done; sudo netfilter-persistent save >/dev/null; }
+
 if [ "${1:-}" = "rollback" ]; then
   sudo docker rm -f "$NAME" >/dev/null 2>&1 || true
+  fw_close
   OLD=$(cat "$OLD_NAME_FILE" 2>/dev/null || true)
   [ -n "$OLD" ] || { echo "no hay respaldo del proxy anterior"; exit 1; }
   sudo docker start "$OLD"
@@ -52,6 +58,8 @@ start_new() {
     oven/bun:1.4.2-slim bun proxy/main.ts >/dev/null
 }
 
+command -v netfilter-persistent >/dev/null || { echo "falta netfilter-persistent (sudo apt-get install -y iptables-persistent)"; exit 1; }
+fw_open
 [ -n "$OLD" ] && sudo docker stop "$OLD" >/dev/null
 start_new
 sleep 4
@@ -68,6 +76,7 @@ if sudo docker run --rm --network host -v "$CHECK":/c.ts oven/bun:1.4.2-slim bun
 else
   echo "la comprobacion fallo: se revierte"
   sudo docker rm -f "$NAME" >/dev/null 2>&1 || true
+  fw_close
   [ -n "$OLD" ] && sudo docker start "$OLD"
   exit 1
 fi
