@@ -41,6 +41,7 @@ fi
 command -v docker >/dev/null || { echo "falta docker"; exit 1; }
 sudo docker ps --format '{{.Names}}' | grep -qx database || { echo "no encuentro el contenedor database"; exit 1; }
 sudo install -d -m 700 "$CFG" "$DATA"
+sudo install -d -m 777 "$DATA/bridge"   # shared with the OpenMU container when the admin bridge plugin is installed
 
 # Clave larga (solo si no existe) y clave del rol de base de datos.
 [ -s "$CFG/key" ] || { head -c 48 /dev/urandom | od -An -tx1 | tr -d ' \n' | sudo tee "$CFG/key" >/dev/null; sudo chmod 600 "$CFG/key"; }

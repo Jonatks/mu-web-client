@@ -7,7 +7,7 @@ if (key.length < 32) throw new Error('ADMIN_KEY_FILE (or ADMIN_KEY) must hold a 
 if (!process.env.DATABASE_URL) throw new Error('DATABASE_URL is required');
 
 const sql = postgres(process.env.DATABASE_URL, { max: 3, idle_timeout: 20, onnotice: () => {} });
-const handle = createApp({ key, sql, gateFile: process.env.GATE_FILE ?? '/var/lib/mu-admin/online.json' });
+const handle = createApp({ key, sql, gateFile: process.env.GATE_FILE ?? '/var/lib/mu-admin/online.json', bridgeDir: process.env.BRIDGE_DIR ?? '/var/lib/mu-admin/bridge' });
 const port = Number(process.env.PORT ?? 3200);
 Bun.serve({ port, hostname: '0.0.0.0', maxRequestBodySize: 32_768, fetch: handle });
 console.info(`mu-admin service on :${port}`);

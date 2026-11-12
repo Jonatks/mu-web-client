@@ -94,24 +94,49 @@ $('#logout').addEventListener('click', async () => { await fetch('/api/logout', 
 
 /** Closes every player's connection (OpenMU saves each one) so edits can proceed. */
 async function disconnectAll() {
-  if (!(await confirmBox('Desconectar a todos los jugadores', 'Se corta la conexión de todos los que estén en el juego (vuelven a la pantalla de entrada). El servidor guarda a cada personaje al salir. Tarda unos 20 segundos.', 'Desconectar', true))) return;
+  if (!(await confirmBox('Desconectar a todos los jugadores', 'Se corta la conexión de todos los que estén en el juego (vuelven a la pantalla de entrada). El servidor guarda a cada personaje al salir. Tarda unos 20 segundos.', 'Desconectar a todos', true))) return false;
   toast('Desconectando…');
   const r = await act(() => api('POST', '/players/disconnect', {}));
   await refreshGate();
   if (r) toast(r.done ? (r.connected ? `Desconectados (${r.connected}). Ya puedes editar.` : 'No había nadie conectado.') : 'Aún quedan conexiones. Prueba otra vez en unos segundos.', !r.done);
+  return !!r?.done;
+}
+
+/** Closes one account's connection (needs the bridge plugin). */
+async function disconnectOne(login, who = login) {
+  if (!(await confirmBox(`Desconectar a ${who}`, 'Solo se corta la conexión de esta cuenta (vuelve a la pantalla de entrada). El servidor guarda al personaje al salir. Tarda unos 15 segundos.', 'Desconectar', true))) return false;
+  toast('Desconectando…');
+  const r = await act(() => api('POST', '/players/disconnect', { login }));
+  await refreshGate();
+  if (r) toast(r.done ? (r.connected ? `${who} desconectado.` : `${who} ya no estaba conectado.`) : 'Sigue conectado. Prueba otra vez en unos segundos.', !r.done);
+  return !!r?.done;
+}
+
+/** Who is online, with a button per player when the bridge plugin runs. */
+async function onlineDialog() {
+  const o = await act(() => api('GET', '/players/online'));
+  if (!o) return;
+  const again = () => { closeDialog(); onlineDialog(); };
+  openDialog(h('h3', {}, 'Jugadores conectados'),
+    o.bridge ? null : h('p', { class: 'mute' }, 'El plugin de desconexión no está instalado: no se ve quién está conectado y solo se puede desconectar a todos.'),
+    o.bridge && !o.players.length ? h('p', { class: 'empty' }, 'No hay nadie conectado.') : null,
+    o.players.length ? h('table', {}, h('thead', {}, h('tr', {}, ['Cuenta', 'Personaje', 'Mapa', ''].map(t => h('th', {}, t)))),
+      h('tbody', {}, o.players.map(p => h('tr', {}, h('td', {}, p.login), h('td', {}, p.character ?? '-'), h('td', { class: 'mute' }, p.map ? `${p.map} ${p.x},${p.y}` : '-'),
+        h('td', { class: 'actions' }, h('button', { class: 'small danger', onclick: async () => { if (await disconnectOne(p.login, p.character ?? p.login)) again(); } }, 'Desconectar')))))) : null,
+    h('div', { class: 'actions' }, h('button', { onclick: closeDialog }, 'Cerrar'), h('button', { class: 'danger', onclick: async () => { if (await disconnectAll()) again(); } }, 'Desconectar a todos')));
 }
 
 async function refreshGate() {
   try {
     const s = await api('GET', '/status');
     const g = $('#gate');
-    g.textContent = s.gate.ok ? 'Servidor vacío: se puede editar' : 'Edición bloqueada: toca para desconectar';
-    g.className = 'pill ' + (s.gate.ok ? 'ok' : 'bad') + (s.gate.ok ? '' : ' click');
+    g.textContent = s.gate.ok ? 'Servidor vacío: se puede editar' : 'Edición bloqueada: toca para ver quién está';
+    g.className = 'pill click ' + (s.gate.ok ? 'ok' : 'bad');
     g.title = s.gate.message;
-    g.onclick = s.gate.ok ? null : disconnectAll;
-    g.onkeydown = s.gate.ok ? null : e => { if (e.key === 'Enter' || e.key === ' ') disconnectAll(); };
-    g.tabIndex = s.gate.ok ? -1 : 0;
-    g.setAttribute('role', s.gate.ok ? 'status' : 'button');
+    g.onclick = onlineDialog;
+    g.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onlineDialog(); } };
+    g.tabIndex = 0;
+    g.setAttribute('role', 'button');
   } catch { $('#gate').textContent = 'Sin conexión con la VM'; $('#gate').className = 'pill warn'; }
 }
 setInterval(() => { if (!$('#app').hidden && !document.hidden) refreshGate(); }, 20_000);
@@ -853,7 +878,11 @@ function characters(selected) {
       if (await act(() => api('PATCH', '/characters/' + name, body), 'Personaje guardado')) { await open(body.name ?? name); load(); }
     });
 
+    const online = await act(() => api('GET', '/players/online'));
+    const isOn = online?.players.some(p => p.login.toLowerCase() === c.account.toLowerCase());
     fill(sheet, 
+      isOn ? h('div', { class: 'online-bar' }, h('span', { class: 'pill bad' }, 'Conectado ahora'), h('span', { class: 'mute' }, 'No se puede editar a este jugador mientras esté dentro del juego.'),
+        h('button', { class: 'small danger', onclick: async () => { if (await disconnectOne(c.account, c.name)) { await open(name); load(); } } }, 'Desconectar a este jugador')) : null,
       h('div', { class: 'sheet-head' },
         h('div', {}, h('h2', {}, c.name), h('div', { class: 'facts' }, h('span', {}, `${c.class} · nivel ${c.level}`), h('span', {}, 'Cuenta ', h('button', { class: 'link', onclick: () => go('account/' + c.account) }, c.account)), h('span', {}, c.map ?? 'sin mapa')))),
       tabset([

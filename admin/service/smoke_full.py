@@ -261,4 +261,9 @@ undo(r, 'cash add')
 # ---- kick refuses non-admins and answers when nobody is connected
 k = call('POST', '/players/disconnect', {})
 check('disconnect answers', k.get('done') is True, k)
+on = call('GET', '/players/online')
+check('online list answers', isinstance(on.get('players'), list) and isinstance(on.get('bridge'), bool), on)
+if not on.get('bridge'):
+    check('one-account disconnect refuses without the plugin', 'ERR' in call('POST', '/players/disconnect', {'login': 'nobody1'}))
+check('bad login refused', 'ERR' in call('POST', '/players/disconnect', {'login': 'a b;c'}))
 print('ALL OK' if ok_all else 'SOME FAILED')

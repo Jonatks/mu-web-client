@@ -7,11 +7,12 @@ import * as extras from './extras';
 import { HttpError, bad, missing } from './errors';
 import { GateError, assertNobodyConnected } from './gate';
 import * as items from './items';
+import { disconnectAccount, readOnline } from './bridge';
 import { kickAll } from './kick';
 import * as skills from './skills';
 import { auditTail, recentUndo, undo } from './undo';
 
-export type Config = { key: string; gateFile: string; sql: Sql };
+export type Config = { key: string; gateFile: string; bridgeDir: string; sql: Sql };
 
 const json = (data: unknown, status = 200) => Response.json(data, { status, headers: { 'cache-control': 'no-store' } });
 
@@ -41,7 +42,12 @@ export function createApp(cfg: Config) {
       const n = await sql`SELECT (SELECT count(*)::int FROM data."Account") AS accounts, (SELECT count(*)::int FROM data."Character") AS characters`;
       return { gate, ...n[0] };
     }
-    if (p[0] === 'players' && p[1] === 'disconnect' && m === 'POST') { needAdmin(); return kickAll(cfg.gateFile, admin); }
+    if (p[0] === 'players' && p[1] === 'online' && m === 'GET') { const o = readOnline(cfg.bridgeDir); return { bridge: o !== null, players: o?.players ?? [] }; }
+    if (p[0] === 'players' && p[1] === 'disconnect' && m === 'POST') {
+      needAdmin();
+      const b = await body();
+      return typeof b.login === 'string' && b.login ? disconnectAccount(cfg.bridgeDir, b.login, admin) : kickAll(cfg.gateFile, admin);
+    }
     if (p[0] === 'accounts') {
       if (m === 'GET' && p.length === 1) return accounts.listAccounts(sql, q.get('q') ?? '');
       if (m === 'POST' && p.length === 1) { needAdmin(); const b = await body(); return accounts.createAccount(sql, admin, b.login, b.password, b.state); }
