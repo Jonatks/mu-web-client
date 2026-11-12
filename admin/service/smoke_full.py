@@ -56,6 +56,12 @@ check('extra fields', 'undoId' in r, r)
 g = call('GET', '/characters/' + NAME)
 check('extra values', g['pk'] == 5 and g['x'] == 100 and g['masterPoints'] == 3 and int(g['experience']) == 999, g)
 undo(r, 'extra')
+r = call('PATCH', '/characters/' + NAME, {'masterLevel': 12, 'resets': 3})
+g = call('GET', '/characters/' + NAME)
+check('counters set', g['masterLevel'] == 12 and g['resets'] == 3, g)
+undo(r, 'counters')
+g = call('GET', '/characters/' + NAME)
+check('counters undone', g['masterLevel'] == 0 or g['masterLevel'] == c.get('masterLevel', 0), g)
 for k, v in [('status', 32), ('heroState', 1), ('fruitPoints', 7), ('inventoryExtensions', 1)]:
     if k in c:
         r = call('PATCH', '/characters/' + NAME, {k: v})

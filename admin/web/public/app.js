@@ -590,6 +590,8 @@ function characters(selected) {
       field('pk', 'Muertes de jugadores (PK)', numIn(c.pk, 1000000), c.pk),
       field('experience', 'Experiencia', numIn(c.experience, 9e15), Number(c.experience)),
       has('masterExperience') ? field('masterExperience', 'Experiencia Master', numIn(c.masterExperience, 9e15), c.masterExperience) : null,
+      field('masterLevel', 'Nivel Master', numIn(c.masterLevel, 1000), c.masterLevel),
+      field('resets', 'Resets', numIn(c.resets, 1000000), c.resets),
       field('masterPoints', 'Puntos de Master', numIn(c.masterPoints, 1000000), c.masterPoints),
       has('fruitPoints') ? field('fruitPoints', 'Puntos de fruta usados', numIn(c.fruitPoints, 100000), c.fruitPoints) : null,
       has('negFruitPoints') ? field('negFruitPoints', 'Puntos de fruta negativa usados', numIn(c.negFruitPoints, 100000), c.negFruitPoints) : null,

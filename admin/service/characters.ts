@@ -6,6 +6,8 @@ import { columnsOf, refuseIfUsed } from './schema';
 import { write } from './undo';
 
 const STATS = { strength: 'Base Strength', agility: 'Base Agility', vitality: 'Base Vitality', energy: 'Base Energy', leadership: 'Base Leadership' } as const;
+/** Counters that a character may not have a row for yet; they are created on the first edit. */
+const COUNTERS = { masterLevel: 'Master Level', resets: 'Resets' } as const;
 export const MAX_LEVEL = 400;
 export const MAX_STAT = 32767;
 export const MAX_ZEN = 2147483647;
@@ -44,10 +46,11 @@ export async function getCharacter(sql: Sql, name: string) {
   if (!c) throw missing('No such character.');
   const stats = await sql`
     SELECT d."Designation" AS d, sa."Value"::int AS v FROM data."StatAttribute" sa JOIN config."AttributeDefinition" d ON d."Id" = sa."DefinitionId"
-    WHERE sa."CharacterId" = ${c.id as string} AND d."Designation" IN ${sql(Object.values(STATS))}`;
+    WHERE sa."CharacterId" = ${c.id as string} AND d."Designation" IN ${sql([...Object.values(STATS), ...Object.values(COUNTERS)])}`;
   const by = new Map(stats.map(s => [s.d as string, s.v as number]));
   const out: Record<string, number | null> = {};
   for (const [k, des] of Object.entries(STATS)) out[k] = by.get(des) ?? null;
+  for (const [k, des] of Object.entries(COUNTERS)) out[k] = by.get(des) ?? 0;
   return { ...c, ...out };
 }
 
@@ -59,7 +62,7 @@ const int = (v: unknown, name: string, min: number, max: number): number => {
 /** Edits only the fields sent. The caller has already checked that nobody is connected. */
 export async function patchCharacter(sql: Sql, admin: string, name: string, body: Record<string, unknown>) {
   const c = await getCharacter(sql, name);
-  const known = ['level', 'zen', 'levelUpPoints', 'mapId', 'x', 'y', 'pk', 'masterPoints', 'name', 'classId', 'experience', ...Object.keys(OPTIONAL), ...Object.keys(STATS)];
+  const known = ['level', 'zen', 'levelUpPoints', 'mapId', 'x', 'y', 'pk', 'masterPoints', 'name', 'classId', 'experience', ...Object.keys(OPTIONAL), ...Object.keys(STATS), ...Object.keys(COUNTERS)];
   const keys = Object.keys(body);
   if (keys.length === 0 || keys.some(k => !known.includes(k))) throw bad(`Editable fields: ${known.join(', ')}.`);
   const detail: Record<string, unknown> = {};
@@ -99,6 +102,7 @@ export async function patchCharacter(sql: Sql, admin: string, name: string, body
     if (c[k] === null) throw bad(`${name} has no ${k} (that class does not use it).`);
     return [k, int(body[k], k, 0, MAX_STAT)] as const;
   });
+  const counters = Object.keys(COUNTERS).filter(k => body[k] !== undefined).map(k => [k, int(body[k], k, 0, k === 'masterLevel' ? 1000 : 1_000_000)] as const);
   return write(sql, { admin, action: 'character.edit', target: name, detail: { ...body } }, async w => {
     await w.save('Character', 'Id', [c.id as string]);
     await w.save('StatAttribute', 'Id', (await w.tx`SELECT "Id" FROM data."StatAttribute" WHERE "CharacterId" = ${c.id as string}`).map(r => r.Id));
@@ -117,6 +121,15 @@ export async function patchCharacter(sql: Sql, admin: string, name: string, body
       detail.experience = experienceFor(level);
     }
     for (const [k, v] of stats) await setStat(STATS[k as keyof typeof STATS], v);
+    for (const [k, v] of counters) {
+      const des = COUNTERS[k as keyof typeof COUNTERS];
+      const r = await w.tx`UPDATE data."StatAttribute" sa SET "Value" = ${v} FROM config."AttributeDefinition" d WHERE d."Id" = sa."DefinitionId" AND sa."CharacterId" = ${c.id as string} AND d."Designation" = ${des}`;
+      if (r.count === 0) {
+        const n = await w.tx`INSERT INTO data."StatAttribute" ("Id","CharacterId","DefinitionId","Value") SELECT gen_random_uuid(), ${c.id as string}, d."Id", ${v} FROM config."AttributeDefinition" d WHERE d."Designation" = ${des} LIMIT 1 RETURNING "Id"`;
+        if (!n.length) throw bad(`${k}: this OpenMU version has no such stat.`);
+        w.created('StatAttribute', n as never);
+      }
+    }
     if (lup !== null) await w.tx`UPDATE data."Character" SET "LevelUpPoints" = ${lup} WHERE "Id" = ${c.id as string}`;
     if (mapId !== null) await w.tx`UPDATE data."Character" SET "CurrentMapId" = ${mapId} WHERE "Id" = ${c.id as string}`;
     if (x !== null) await w.tx`UPDATE data."Character" SET "PositionX" = ${x} WHERE "Id" = ${c.id as string}`;
