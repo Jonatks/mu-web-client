@@ -5,7 +5,7 @@ FROM ${OPENMU_IMAGE} AS openmu
 FROM mcr.microsoft.com/dotnet/sdk:10.0-alpine AS build
 COPY --from=openmu /app /openmu
 WORKDIR /src
-COPY AdminBridge.csproj StartupHook.cs AdminBridgePlugIn.cs ./
+COPY AdminBridge.csproj StartupHook.cs AdminBridgePlugIn.cs AddClassSkillsOnCreate.cs ./
 RUN dotnet publish AdminBridge.csproj -c Release -o /out -p:OpenMuDir=/openmu
 
 FROM scratch AS out

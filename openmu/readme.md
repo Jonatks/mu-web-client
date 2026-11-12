@@ -112,6 +112,6 @@ Every second (`IPeriodicTaskPlugIn`) it writes `players.json` (login, character,
 the admin service (`MU_ADMIN_DIR`, default `/mu-admin`), and when a `disconnect` file shows up there (one login per line) it calls
 `Player.DisconnectAsync()` for those accounts, so OpenMU saves them as when a player leaves.
 
-- `admin_plugin/build.sh <commit>` compiles the DLL in Cloud Shell against the digest of the image the VM runs (the VM is too small to compile) and copies it to the VM.
+- `admin_plugin/build.sh <commit>` compiles the DLL (this one also holds the starting skills plugin, `AddClassSkillsOnCreate`) in Cloud Shell against the digest of the image the VM runs (the VM is too small to compile) and copies it to the VM.
 - `admin/service/install-bridge.sh <dll>` builds a thin image (`mu-openmu-admin`: the running image plus the DLL and `DOTNET_STARTUP_HOOKS`), adds
   `docker-compose.bridge.yml` (new image and the shared folder) and recreates `openmu`. It refuses while anybody is connected. `rollback` puts the stock image back.

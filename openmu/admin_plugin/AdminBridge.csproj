@@ -13,5 +13,7 @@
     <Reference Include="$(OpenMuDir)/MUnique.OpenMU.*.dll" Private="false" />
     <Reference Include="$(OpenMuDir)/Nito.*.dll" Private="false" />
     <Using Include="System.ComponentModel.DataAnnotations" />
+    <!-- The starting skills plugin lives with our other plugins; build.sh puts a copy next to this file in the Docker build. -->
+    <Compile Include="../plugins/GameLogic/CharacterCreated/AddClassSkillsOnCreate.cs" Condition="Exists('../plugins/GameLogic/CharacterCreated/AddClassSkillsOnCreate.cs')" />
   </ItemGroup>
 </Project>
