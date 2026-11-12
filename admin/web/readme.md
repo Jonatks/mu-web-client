@@ -13,3 +13,5 @@ Environment variables (Vercel project settings, never in the repo): `MU_ADMIN_UR
 Item icons: `public/items/<group>_<number>.webp` (72px) and `public/items/index.json` (which ones exist) are made from the client's pre-rendered icons by
 `python3 admin/web/tools/item_icons.py` (run from the repo root; it needs `public/items` built by the client). The item picker shows them next to category
 chips that come from `GET /items/categories`, so only kinds the server really has (for the character's class line and body slot) are offered.
+
+`public/server.js` is the `Servidor` page (tabs for rules, spots map, drops, monsters, shops, events, warps and plug-ins). It gets the page helpers from `app.js`.

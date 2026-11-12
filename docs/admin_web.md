@@ -35,6 +35,26 @@ Item options come from `config."ItemDefinitionItemOptionDefinition"` -> `config.
 item can really carry are accepted. Master level and resets are counters (a StatAttribute row is created on the first edit). Class changes only swap the class: points, skills and items are not touched, and the in-game evolution is a quest the panel does not edit. Not built: creating a character (do it in the game), quests, letters, guild, unlocked classes.
 Vault slots are numbered from 0 (verify in game with the first inserted vault item).
 
+## Server settings (the "Servidor" page)
+These edit the game configuration (`config` schema), not a player, so they do not need the server empty. OpenMU reads them at start: the page's
+"Reiniciar servidor" disconnects everybody (each character is saved), leaves a `restart` file and a system unit on the VM (`mu-restart.path`)
+restarts OpenMU. A full start takes about three minutes on the 1 GB VM.
+
+| Tab | Tables written | Notes |
+|---|---|---|
+| Experiencia y reglas | `config."GameConfiguration"`, `GameServerDefinition`, `GameServerConfiguration` | `ExperienceRate`, `MasterExperienceRate`, limits, money caps, drop time (an interval), per-server rate, PvP, player cap. Final experience is rules x server x map |
+| Mapas | `config."GameMapDefinition"."ExpMultiplier"` | the terrain (`TerrainData`, 3 header bytes then 256 x 256 tiles) is read to draw the spot picker |
+| Drops | `config."DropItemGroup"` | chance 0 to 1 (100% = always), monster level range; "scale" multiplies the chance of the chosen kinds, never above 1 |
+| Mobs y spots | `config."MonsterSpawnArea"` (insert, update, delete) | rectangle, quantity, direction; a rectangle with no walkable tile (terrain byte 0) is refused |
+| Monstruos | `config."MonsterDefinition"`, `MonsterAttribute` | respawn, move and attack delays (intervals), ranges, max drops, stats |
+| Tiendas | `data."Item"` of the NPC's `MerchantStoreId` | same item picker and checks as a vault (8 x 15 grid) |
+| Eventos | `config."MiniGameDefinition"` | durations (intervals), players, levels, entrance fee |
+| Teletransportes | `config."WarpInfo"` | cost and level of each `/move` destination |
+| Avanzado | `config."PlugInConfiguration"` | active flag and JSON (`CustomConfiguration`: Happy Hour, invasions, event schedules); names come from OpenMU's resources (`admin/service/plugin_names.json`) |
+
+Every change goes through the same copy-before-write and undo as player edits. Column types were read from the real database (several `integer`
+look-alikes are `interval`, so durations are sent as seconds through `make_interval`).
+
 ## Rules that keep data safe
 1. **Nobody connected.** OpenMU keeps a player's data in memory while he is online, so a write under a connected player is lost or overwrites
    him. OpenMU has no online list and no kick, so the service refuses every write (except creating an account) while any socket is
@@ -55,6 +75,8 @@ Vault slots are numbered from 0 (verify in game with the first inserted vault it
   `node admin/web/mkhash.mjs NAME` and paste the line it prints.
 
 ## Known limits
-- A raw-TCP client that stays connected blocks edits until it leaves; there is no kick (OpenMU has none without a plugin).
-- Banning a connected player is therefore also refused; ban when the server is empty.
+- A raw-TCP client that stays connected blocks player edits until it leaves; "Desconectar" closes every game socket, and with the admin bridge
+  plugin one account can be disconnected on its own (`openmu/readme.md`).
+- Banning a connected player is refused; disconnect them first.
+- Server settings apply after a restart; undoing one needs the server empty like any other undo.
 - Experience is set to OpenMU's table value when the level changes.
