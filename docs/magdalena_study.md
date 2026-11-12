@@ -193,3 +193,10 @@ or the client lists them as locked until learned.
 without antialiasing (same as Magdalena's canvas). So draw calls and triangles are not the bottleneck; the gap measured online (8.8 against 22 fps) must come from CPU work per
 frame (entities, effects, interface updates) or JS memory, so the next step is a per-system timer, not fewer draws. Magdalena could not be sampled again: its test login is no
 longer available to this session, so further study there waits for the owner to provide it again.
+
+## 14. First fight observed (level 1 Dark Knight, Lorencia west field around (39,79), 2026-11-12)
+- Walking: the joystick pushed to the screen left moves the hero towards lower x and y; from the spawn (140,118) to (39,79) took about 40 s of holding.
+- The west field holds Giants (not the weak spiders and dragons expected); two Giants closed in on a level 1 hero and one hit for 57 against 128 HP, so a new hero dies there in 3 hits.
+- Mob look: the name ("Giant") sits above a red life bar about 100 px wide; the bar is drawn for every mob in range, not only the target.
+- Target look: an orange ring with four small tick marks under the targeted mob; the hit number is red and sits above the hero's head.
+- The HP orb turns grey-looking and the life number falls to 12 when low. Lesson for the next pass: level the hero near the spawn first, or use a high level character with GM-free safe tests.
