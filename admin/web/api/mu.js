@@ -3,8 +3,9 @@ import { sameOrigin, userOf } from '../lib/auth.js';
 
 const ROUTES = [
   /^\/status$/, /^\/audit$/, /^\/undo(\/[a-z0-9-]+)?$/,
-  /^\/accounts(\/[A-Za-z0-9]{1,10}(\/(password|state|vault))?)?$/, /^\/maps$/, /^\/accounts\/[A-Za-z0-9]{1,10}\/vault\/items(\/[0-9a-f-]{36})?$/,
-  /^\/characters(\/[A-Za-z0-9_]{1,10}(\/items(\/[0-9a-f-]{36})?)?)?$/,
+  /^\/accounts(\/[A-Za-z0-9]{1,10}(\/(password|state|vault))?)?$/, /^\/accounts\/[A-Za-z0-9]{1,10}\/vault\/items(\/[0-9a-f-]{36})?$/,
+  /^\/characters(\/[A-Za-z0-9_]{1,10}(\/(items|skills)(\/[0-9a-f-]{36})?)?)?$/,
+  /^\/(classes|maps)$/, /^\/skills\/definitions$/, /^\/items\/[0-9a-f-]{36}(\/move)?$/,
   /^\/items\/definitions(\/[0-9a-f-]{36})?$/,
 ];
 

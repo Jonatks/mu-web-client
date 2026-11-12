@@ -55,7 +55,8 @@ SELECT format('ALTER ROLE mu_admin PASSWORD %L', :'pw') \gexec
 GRANT USAGE ON SCHEMA data, config TO mu_admin;
 GRANT SELECT ON ALL TABLES IN SCHEMA data, config TO mu_admin;
 GRANT INSERT, UPDATE ON data."Account" TO mu_admin;
-GRANT UPDATE ON data."Character", data."StatAttribute" TO mu_admin;
+GRANT INSERT, UPDATE, DELETE ON data."Character", data."StatAttribute", data."SkillEntry" TO mu_admin;
+GRANT DELETE ON data."Account" TO mu_admin;
 GRANT INSERT, UPDATE, DELETE ON data."ItemStorage" TO mu_admin;
 GRANT INSERT, UPDATE, DELETE ON data."Item", data."ItemOptionLink", data."ItemItemOfItemSet" TO mu_admin;
 SQL

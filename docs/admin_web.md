@@ -23,12 +23,16 @@ the schema, edits applied, tables compared), not by driving the panel. Result:
 | zen | `data."ItemStorage"."Money"` of the character's inventory storage |
 | insert item | `data."Item"` plus `data."ItemOptionLink"` (luck: link level 0; additional option: link level 1-4; excellent: link level 0), into the bag grid (slots 12-75) or the account vault (slots 0-119, 0-239 if extended); a chosen slot must fit, else the first free place |
 | vault | `data."ItemStorage"` (`Money`); a vault that never existed is created and `Account."VaultId"` set (undo restores `VaultId` before deleting the storage, because the key cascades) |
-| advanced character | `data."Character"` (`CurrentMapId`, `PositionX`, `PositionY`, `PlayerKillCount`, `MasterLevelUpPoints`) |
-| advanced account | `data."Account"` (`EMail`, `SecurityCode`, `VaultPassword` cleared, `IsVaultExtended`) |
+| edit placed item | `data."Item"` (`Level`, `Durability`, `HasSkill`, `SocketCount`, `PetExperience`) and its luck / additional / excellent `data."ItemOptionLink"` rows; ancient, socket and harmony links are kept |
+| move item | `data."Item"` (`ItemSlot`, `ItemStorageId`): inside its storage, or between a character inventory and the vault of the same account; equipment slots are never targets |
+| skills | `data."SkillEntry"` (add, level, remove) |
+| delete character / account | the rows of the character (stats, skills, inventory storage and items) or of an account without characters (and its vault); refused when a table the panel does not know still points at the row |
+| advanced character | `data."Character"` (`Name`, `CharacterClassId`, `CurrentMapId`, `PositionX`, `PositionY`, `PlayerKillCount`, `Experience`, `MasterLevelUpPoints`, and when the version has them `CharacterStatus`, `State`, `StateRemainingSeconds`, `UsedFruitPoints`, `UsedNegFruitPoints`, `InventoryExtensions`, `MasterExperience`) |
+| advanced account | `data."Account"` (`LoginName`, `EMail`, `SecurityCode`, `VaultPassword` cleared, `IsVaultExtended`, and when the version has them `LanguageIsoCode`, `TimeZone`, `ChatBanUntil`, `WCoinC`, `WCoinP`, `GoblinPoints`) |
 | delete item | `data."Item"` (its links go with it; the saved copy also keeps `data."ItemItemOfItemSet"`) |
 
 Item options come from `config."ItemDefinitionItemOptionDefinition"` -> `config."IncreasableItemOption"` (type and number), so only options that
-item can really carry are accepted. Not built yet: learned skills, rename, class change, moving or editing items already placed.
+item can really carry are accepted. Not built: creating a character (do it in the game), quests, letters, guild, unlocked classes.
 Vault slots are numbered from 0 (verify in game with the first inserted vault item).
 
 ## Rules that keep data safe
@@ -53,4 +57,4 @@ Vault slots are numbered from 0 (verify in game with the first inserted vault it
 ## Known limits
 - A raw-TCP client that stays connected blocks edits until it leaves; there is no kick (OpenMU has none without a plugin).
 - Banning a connected player is therefore also refused; ban when the server is empty.
-- Experience is set to OpenMU's table value when the level changes; master level and skills are untouched.
+- Experience is set to OpenMU's table value when the level changes.

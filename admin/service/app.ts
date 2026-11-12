@@ -6,6 +6,7 @@ import * as characters from './characters';
 import { HttpError, bad, missing } from './errors';
 import { GateError, assertNobodyConnected } from './gate';
 import * as items from './items';
+import * as skills from './skills';
 import { auditTail, recentUndo, undo } from './undo';
 
 export type Config = { key: string; gateFile: string; sql: Sql };
@@ -43,6 +44,7 @@ export function createApp(cfg: Config) {
       if (m === 'POST' && p.length === 1) { needAdmin(); const b = await body(); return accounts.createAccount(sql, admin, b.login, b.password, b.state); }
       const login = p[1] ?? '';
       if (m === 'GET' && p.length === 2) return accounts.getAccount(sql, login);
+      if (m === 'DELETE' && p.length === 2) { needAdmin(); const b = await body(); return gated(() => accounts.deleteAccount(sql, admin, login, b.confirm)); }
       if (m === 'PATCH' && p.length === 2) { needAdmin(); const b = await body(); return gated(() => accounts.patchAccount(sql, admin, login, b)); }
       if (m === 'POST' && p[2] === 'password') { needAdmin(); const b = await body(); return gated(() => accounts.setPassword(sql, admin, login, b.password)); }
       if (p[2] === 'vault') {
@@ -54,16 +56,29 @@ export function createApp(cfg: Config) {
       if (m === 'POST' && p[2] === 'state') { needAdmin(); const b = await body(); return gated(() => accounts.setState(sql, admin, login, b.state)); }
     }
     if (p[0] === 'maps' && m === 'GET') return characters.listMaps(sql);
+    if (p[0] === 'classes' && m === 'GET') return characters.listClasses(sql);
+    if (p[0] === 'skills' && p[1] === 'definitions' && m === 'GET') return skills.searchSkills(sql, q.get('q') ?? '');
     if (p[0] === 'characters') {
       if (m === 'GET' && p.length === 1) return characters.listCharacters(sql, q.get('q') ?? '', q.get('account') ?? '');
       const name = p[1] ?? '';
       if (m === 'GET' && p.length === 2) return characters.getCharacter(sql, name);
       if (m === 'PATCH' && p.length === 2) { needAdmin(); const b = await body(); return gated(() => characters.patchCharacter(sql, admin, name, b)); }
+      if (m === 'DELETE' && p.length === 2) { needAdmin(); const b = await body(); return gated(() => characters.deleteCharacter(sql, admin, name, b.confirm)); }
+      if (p[2] === 'skills') {
+        if (m === 'GET') return skills.listSkills(sql, name);
+        if (m === 'POST') { needAdmin(); const b = await body(); return gated(() => skills.addSkill(sql, admin, name, b.skillId, b.level)); }
+        if (m === 'PATCH' && p[3]) { needAdmin(); const b = await body(); return gated(() => skills.setSkillLevel(sql, admin, name, p[3]!, b.level)); }
+        if (m === 'DELETE' && p[3]) { needAdmin(); return gated(() => skills.removeSkill(sql, admin, name, p[3]!)); }
+      }
       if (p[2] === 'items') {
         if (m === 'GET') return items.listItems(sql, name);
         if (m === 'POST') { needAdmin(); const b = await body(); return gated(() => items.addItem(sql, admin, { kind: 'inventory', name }, b as items.NewItem)); }
         if (m === 'DELETE' && p[3]) { needAdmin(); return gated(() => items.deleteItem(sql, admin, { kind: 'inventory', name }, p[3]!)); }
       }
+    }
+    if (p[0] === 'items' && p[1] && p[1] !== 'definitions') {
+      if (m === 'PATCH' && p.length === 2) { needAdmin(); const b = await body(); return gated(() => items.editItem(sql, admin, p[1]!, b as items.ItemEdit)); }
+      if (m === 'POST' && p[2] === 'move') { needAdmin(); const b = await body(); return gated(() => items.moveItem(sql, admin, p[1]!, b as items.ItemMove)); }
     }
     if (p[0] === 'items' && p[1] === 'definitions' && m === 'GET') {
       if (p[2]) return items.definitionOptions(sql, p[2]);

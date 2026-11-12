@@ -4,6 +4,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import type { Sql } from 'postgres';
 import { bad, missing } from './errors';
+import { columnsOf, refuseIfUsed } from './schema';
 import { DIR, write } from './undo';
 
 export const STATES = { normal: 0, gm: 2, banned: 4 } as const;
@@ -85,33 +86,83 @@ export async function setState(sql: Sql, admin: string, login: string, state: un
   });
 }
 
-/** What the Advanced panel shows. Secrets are reported as present or not, never returned. */
+const OPTIONAL = { language: 'LanguageIsoCode', timeZone: 'TimeZone', chatBanUntil: 'ChatBanUntil', wcoinC: 'WCoinC', wcoinP: 'WCoinP', goblinPoints: 'GoblinPoints' } as const;
+
+/** What the Advanced panel shows. Secrets are reported as present or not, never returned. Fields this OpenMU version lacks are left out. */
 export async function getAccount(sql: Sql, login: string) {
-  const r = await sql`
-    SELECT "LoginName" AS login, "State" AS state, "EMail" AS email, "RegistrationDate" AS registered,
-           ("SecurityCode" <> '') AS "hasSecurityCode", ("VaultPassword" <> '') AS "hasVaultPassword", "IsVaultExtended" AS "vaultExtended"
-    FROM data."Account" WHERE "LoginName" = ${login}`;
+  const cols = await columnsOf(sql, 'Account');
+  const extra = Object.entries(OPTIONAL).filter(([, c]) => cols.has(c)).map(([k, c]) => `, "${c}" AS "${k}"`).join('');
+  const r = await sql.unsafe(
+    `SELECT "LoginName" AS login, "State" AS state, "EMail" AS email, "RegistrationDate" AS registered,
+            ("SecurityCode" <> '') AS "hasSecurityCode", ("VaultPassword" <> '') AS "hasVaultPassword", "IsVaultExtended" AS "vaultExtended"${extra}
+     FROM data."Account" WHERE "LoginName" = $1`, [login]);
   if (!r[0]) throw missing('No such account.');
   return { ...r[0], stateName: stateName(r[0].state as number) };
 }
 
-/** Advanced edits: email, security code, remove the vault password, extend the vault. Only the fields sent change. */
+const whole = (v: unknown, name: string, lo: number, hi: number): number => {
+  if (typeof v !== 'number' || !Number.isInteger(v) || v < lo || v > hi) throw bad(`${name}: a whole number from ${lo} to ${hi}.`);
+  return v;
+};
+
+/** Advanced edits: login, email, security code, vault password, extended vault, language, time zone, chat ban, cash shop coins. Only the fields sent change. */
 export async function patchAccount(sql: Sql, admin: string, login: string, body: Record<string, unknown>) {
-  const known = ['email', 'securityCode', 'clearVaultPassword', 'vaultExtended'];
+  const known = ['login', 'email', 'securityCode', 'clearVaultPassword', 'vaultExtended', ...Object.keys(OPTIONAL)];
   const keys = Object.keys(body);
   if (keys.length === 0 || keys.some(k => !known.includes(k))) throw bad(`Editable fields: ${known.join(', ')}.`);
   const a = await idOf(sql, login);
+  const cols = await columnsOf(sql, 'Account');
   const email = body.email === undefined ? null : String(body.email);
   if (email !== null && email !== '' && !/^[^\s@]{1,64}@[^\s@]{1,120}$/.test(email)) throw bad('email: not a valid address (or empty).');
   const code = body.securityCode === undefined ? null : String(body.securityCode);
   if (code !== null && !/^[0-9]{0,7}$/.test(code)) throw bad('securityCode: up to 7 digits (or empty).');
   if (body.clearVaultPassword !== undefined && body.clearVaultPassword !== true) throw bad('clearVaultPassword: true.');
   if (body.vaultExtended !== undefined && typeof body.vaultExtended !== 'boolean') throw bad('vaultExtended: true or false.');
+  const newLogin = body.login === undefined ? null : checkLogin(body.login);
+  if (newLogin !== null && newLogin.toLowerCase() !== login.toLowerCase() && (await sql`SELECT 1 FROM data."Account" WHERE lower("LoginName") = lower(${newLogin})`).length) throw bad('That login is taken.');
+  const set: [string, unknown][] = [];
+  for (const [k, col] of Object.entries(OPTIONAL)) {
+    if (body[k] === undefined) continue;
+    if (!cols.has(col)) throw bad(`${k}: this OpenMU version has no such field.`);
+    let v: unknown;
+    if (k === 'language') { if (typeof body[k] !== 'string' || !/^[a-z]{2,3}$/.test(body[k] as string)) throw bad('language: 2 or 3 lowercase letters (en, es, de).'); v = body[k]; }
+    else if (k === 'chatBanUntil') { v = body[k] === null ? null : new Date(String(body[k])).toISOString(); }
+    else if (k === 'timeZone') v = whole(body[k], k, -12, 14);
+    else v = whole(body[k], k, 0, 2147483647);
+    set.push([col, v]);
+  }
   return write(sql, { admin, action: 'account.edit', target: login, detail: { fields: keys } }, async w => {
     await w.save('Account', 'Id', [a.id]);
     if (email !== null) await w.tx`UPDATE data."Account" SET "EMail" = ${email} WHERE "Id" = ${a.id}`;
     if (code !== null) await w.tx`UPDATE data."Account" SET "SecurityCode" = ${code} WHERE "Id" = ${a.id}`;
     if (body.clearVaultPassword === true) await w.tx`UPDATE data."Account" SET "VaultPassword" = '' WHERE "Id" = ${a.id}`;
     if (typeof body.vaultExtended === 'boolean') await w.tx`UPDATE data."Account" SET "IsVaultExtended" = ${body.vaultExtended} WHERE "Id" = ${a.id}`;
+    if (newLogin !== null) await w.tx`UPDATE data."Account" SET "LoginName" = ${newLogin} WHERE "Id" = ${a.id}`;
+    for (const [col, v] of set) await w.tx.unsafe(`UPDATE data."Account" SET "${col}" = $1 WHERE "Id" = $2`, [v as never, a.id]);
+  });
+}
+
+/** Deletes an account that has no characters left, with its vault. Delete its characters first (each one can be undone). */
+export async function deleteAccount(sql: Sql, admin: string, login: string, confirm: unknown) {
+  if (confirm !== login) throw bad('confirm: send the exact login to delete the account.');
+  const a = await idOf(sql, login);
+  if ((await sql`SELECT 1 FROM data."Character" WHERE "AccountId" = ${a.id} LIMIT 1`).length) throw bad('The account still has characters. Delete them first.');
+  const vault = (await sql`SELECT "VaultId" AS v FROM data."Account" WHERE "Id" = ${a.id}`)[0]?.v as string | null;
+  const items = vault ? (await sql`SELECT "Id" FROM data."Item" WHERE "ItemStorageId" = ${vault}`).map(r => r.Id as string) : [];
+  await refuseIfUsed(sql, 'Account', [a.id], [], login);
+  if (items.length) await refuseIfUsed(sql, 'Item', items, ['ItemOptionLink.ItemId', 'ItemItemOfItemSet.ItemId'], `An item of ${login}`);
+  return write(sql, { admin, action: 'account.delete', target: login, detail: { items: items.length } }, async w => {
+    await w.save('Account', 'Id', [a.id]);
+    if (vault) {
+      await w.save('ItemStorage', 'Id', [vault]);
+      await w.save('Item', 'ItemStorageId', [vault]);
+      await w.save('ItemOptionLink', 'ItemId', items);
+      await w.save('ItemItemOfItemSet', 'ItemId', items);
+    }
+    await w.tx`DELETE FROM data."ItemOptionLink" WHERE "ItemId" = ANY(${items}::uuid[])`;
+    await w.tx`DELETE FROM data."ItemItemOfItemSet" WHERE "ItemId" = ANY(${items}::uuid[])`;
+    await w.tx`DELETE FROM data."Item" WHERE "Id" = ANY(${items}::uuid[])`;
+    await w.tx`DELETE FROM data."Account" WHERE "Id" = ${a.id}`;
+    if (vault) await w.tx`DELETE FROM data."ItemStorage" WHERE "Id" = ${vault}`;
   });
 }

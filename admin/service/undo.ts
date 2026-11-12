@@ -12,12 +12,13 @@ const TABLES: Record<string, string[]> = {
   Character: ['Id'],
   ItemStorage: ['Id'],
   StatAttribute: ['Id'],
+  SkillEntry: ['Id'],
   Item: ['Id'],
   ItemOptionLink: ['Id'],
   ItemItemOfItemSet: ['ItemId', 'ItemOfItemSetId'],
 };
 /** Restore parents before children; delete children before parents. */
-const ORDER = ['Account', 'ItemStorage', 'Character', 'Item', 'StatAttribute', 'ItemOptionLink', 'ItemItemOfItemSet'];
+const ORDER = ['ItemStorage', 'Account', 'Character', 'Item', 'StatAttribute', 'SkillEntry', 'ItemOptionLink', 'ItemItemOfItemSet'];
 
 export const DIR = process.env.ADMIN_DATA_DIR ?? '/var/lib/mu-admin';
 const undoDir = () => join(DIR, 'undo');
