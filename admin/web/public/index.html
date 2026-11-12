@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>MU Admin</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<main id="login" hidden>
+  <form id="loginForm" class="card narrow">
+    <h1>MU Admin</h1>
+    <label>Usuario <input name="user" autocomplete="username" required></label>
+    <label>Contraseña <input name="password" type="password" autocomplete="current-password" required></label>
+    <button class="primary">Entrar</button>
+    <p class="err" id="loginErr"></p>
+  </form>
+</main>
+<div id="app" hidden>
+  <header>
+    <strong>MU Admin</strong>
+    <nav id="tabs">
+      <button data-tab="accounts">Cuentas</button>
+      <button data-tab="characters">Personajes</button>
+      <button data-tab="audit">Registro</button>
+    </nav>
+    <span id="gate" class="pill" title="Con jugadores conectados no se edita nada"></span>
+    <span id="who"></span>
+    <button id="logout">Salir</button>
+  </header>
+  <section id="view"></section>
+</div>
+<div id="toast" role="status"></div>
+<script src="app.js" type="module"></script>
+</body>
+</html>

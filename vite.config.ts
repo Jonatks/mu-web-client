@@ -100,6 +100,6 @@ export default defineConfig(({ command }) => ({
     // The marketplace service stores its listings in `bun:sqlite`, which
     // vitest runs under node and cannot import. Those tests are run by
     // `bun test` instead (`bun run test:server`).
-    exclude: ['**/node_modules/**', '**/dist/**', 'marketplace/server/**', 'admin/service/**'],
+    exclude: ['**/node_modules/**', '**/dist/**', 'marketplace/server/**', 'admin/service/**', 'admin/web/**'],
   },
 }));
