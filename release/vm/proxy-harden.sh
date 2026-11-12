@@ -14,7 +14,9 @@ NAME=mu-proxy
 OLD_NAME_FILE=/var/lib/mu-proxy-harden/old-name
 DIR=/opt/mu-proxy
 PORT=8090
-RULES="127.0.0.1:44405,127.0.0.1:44406,127.0.0.1:45901,127.0.0.1:45902,127.0.0.1:45903,127.0.0.1:45904,127.0.0.1:45905,127.0.0.1:45906"
+PUBIP=155.181.133.84
+# El cliente pide al proxy host=<IP publica> (es la IP que OpenMU anuncia y la de serverlist.md), no 127.0.0.1: se permiten las dos.
+RULES="127.0.0.1:44405,127.0.0.1:44406,127.0.0.1:45901,127.0.0.1:45902,127.0.0.1:45903,127.0.0.1:45904,127.0.0.1:45905,127.0.0.1:45906,$PUBIP:44405,$PUBIP:44406,$PUBIP:45901,$PUBIP:45902,$PUBIP:45903,$PUBIP:45904,$PUBIP:45905,$PUBIP:45906"
 
 if [ "${1:-}" = "rollback" ]; then
   sudo docker rm -f "$NAME" >/dev/null 2>&1 || true
@@ -58,7 +60,7 @@ sleep 4
 CHECK=$(mktemp)
 cat >"$CHECK" <<'EOF'
 const t = (h: string, p: number) => new Promise<string>(r => { const w = new WebSocket(`ws://127.0.0.1:8090/?host=${h}&port=${p}`); const x = setTimeout(() => { r("timeout"); w.close(); }, 4000); w.onopen = () => { clearTimeout(x); r("open"); w.close(); }; w.onerror = () => { clearTimeout(x); r("refused"); }; });
-const ok = (await t("127.0.0.1", 44405)) === "open" && (await t("127.0.0.1", 22)) === "refused" && (await t("127.0.0.1", 5432)) === "refused" && (await t("8.8.8.8", 53)) === "refused";
+const ok = (await t("155.181.133.84", 44405)) === "open" && (await t("155.181.133.84", 22)) === "refused" && (await t("127.0.0.1", 22)) === "refused" && (await t("127.0.0.1", 5432)) === "refused" && (await t("8.8.8.8", 53)) === "refused";
 console.log(ok ? "OK" : "FALLO"); process.exit(ok ? 0 : 1);
 EOF
 if sudo docker run --rm --network host -v "$CHECK":/c.ts oven/bun:1.4.2-slim bun /c.ts; then
