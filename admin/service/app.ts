@@ -1,0 +1,87 @@
+// HTTP routes of the admin service. Every request needs the key; every write needs a named admin and an empty server.
+import type { Sql } from 'postgres';
+import * as accounts from './accounts';
+import { isBrowserRequest, keyMatches } from './auth';
+import * as characters from './characters';
+import { HttpError, bad, missing } from './errors';
+import { GateError, assertNobodyConnected } from './gate';
+import * as items from './items';
+import { auditTail, recentUndo, undo } from './undo';
+
+export type Config = { key: string; gateSources: string[]; sql: Sql };
+
+const json = (data: unknown, status = 200) => Response.json(data, { status, headers: { 'cache-control': 'no-store' } });
+
+export function createApp(cfg: Config) {
+  const { sql } = cfg;
+  const gated = <T>(fn: () => Promise<T>) => {
+    assertNobodyConnected(cfg.gateSources);
+    return fn();
+  };
+
+  async function route(req: Request, url: URL, admin: string): Promise<unknown> {
+    const p = url.pathname.split('/').filter(Boolean).map(decodeURIComponent);
+    const q = url.searchParams;
+    const m = req.method;
+    const body = async (): Promise<Record<string, unknown>> => {
+      const t = await req.text();
+      if (t.length > 16_384) throw new HttpError(413, 'Body too large.');
+      try { return t ? (JSON.parse(t) as Record<string, unknown>) : {}; } catch { throw bad('Body is not JSON.'); }
+    };
+    const needAdmin = () => {
+      if (!/^[A-Za-z0-9_.-]{1,32}$/.test(admin)) throw bad('x-admin-user is required for writes.');
+    };
+
+    if (p[0] === 'status' && m === 'GET') {
+      let gate: { ok: boolean; message: string } = { ok: true, message: 'nobody connected' };
+      try { assertNobodyConnected(cfg.gateSources); } catch (e) { gate = { ok: false, message: (e as Error).message }; }
+      const n = await sql`SELECT (SELECT count(*)::int FROM data."Account") AS accounts, (SELECT count(*)::int FROM data."Character") AS characters`;
+      return { gate, ...n[0] };
+    }
+    if (p[0] === 'accounts') {
+      if (m === 'GET' && p.length === 1) return accounts.listAccounts(sql, q.get('q') ?? '');
+      if (m === 'POST' && p.length === 1) { needAdmin(); const b = await body(); return accounts.createAccount(sql, admin, b.login, b.password, b.state); }
+      const login = p[1] ?? '';
+      if (m === 'POST' && p[2] === 'password') { needAdmin(); const b = await body(); return gated(() => accounts.setPassword(sql, admin, login, b.password)); }
+      if (m === 'POST' && p[2] === 'state') { needAdmin(); const b = await body(); return gated(() => accounts.setState(sql, admin, login, b.state)); }
+    }
+    if (p[0] === 'characters') {
+      if (m === 'GET' && p.length === 1) return characters.listCharacters(sql, q.get('q') ?? '', q.get('account') ?? '');
+      const name = p[1] ?? '';
+      if (m === 'GET' && p.length === 2) return characters.getCharacter(sql, name);
+      if (m === 'PATCH' && p.length === 2) { needAdmin(); const b = await body(); return gated(() => characters.patchCharacter(sql, admin, name, b)); }
+      if (p[2] === 'items') {
+        if (m === 'GET') return items.listItems(sql, name);
+        if (m === 'POST') { needAdmin(); const b = await body(); return gated(() => items.addItem(sql, admin, name, b as items.NewItem)); }
+        if (m === 'DELETE' && p[3]) { needAdmin(); return gated(() => items.deleteItem(sql, admin, name, p[3]!)); }
+      }
+    }
+    if (p[0] === 'items' && p[1] === 'definitions' && m === 'GET') {
+      if (p[2]) return items.definitionOptions(sql, p[2]);
+      return items.searchDefinitions(sql, q.get('q') ?? '', q.get('group') ?? '');
+    }
+    if (p[0] === 'audit' && m === 'GET') return auditTail(Number(q.get('limit') ?? 100));
+    if (p[0] === 'undo' && m === 'GET') return recentUndo();
+    if (p[0] === 'undo' && m === 'POST' && p[1]) { needAdmin(); return gated(() => undo(sql, p[1]!, admin)); }
+    throw missing('No such route.');
+  }
+
+  return async function handle(req: Request): Promise<Response> {
+    const url = new URL(req.url);
+    if (url.pathname === '/health') return json({ ok: true });
+    if (isBrowserRequest(req.headers)) return json({ error: 'forbidden' }, 403);
+    if (!keyMatches(req.headers.get('x-admin-key'), cfg.key)) {
+      await Bun.sleep(300);
+      return json({ error: 'unauthorized' }, 401);
+    }
+    try {
+      return json(await route(req, url, req.headers.get('x-admin-user') ?? ''));
+    } catch (e) {
+      if (e instanceof HttpError) return json({ error: e.message }, e.status);
+      if (e instanceof GateError) return json({ error: e.message, code: 'players_connected' }, 409);
+      if ((e as { code?: string }).code === '22P02') return json({ error: 'Malformed id.' }, 400);
+      console.error('request failed', req.method, url.pathname, (e as Error).message);
+      return json({ error: 'internal error' }, 500);
+    }
+  };
+}
