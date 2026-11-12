@@ -12,6 +12,7 @@ plugins/            MuPlugins.csproj: one DLL with every plugin, compiled agains
   GameLogic/        marketplace escrow: token check, item and Zen moves (EscrowToken, MarketplaceEscrowAction);
                     Modules/IModulePacketPlugIn and Views/Modules/IModulePacketViewPlugIn (module packets);
                     LoginTokens/: the token table, issue and token login, the upkeep task; Views/LoginTokens
+                    CharacterCreated/AddClassSkillsOnCreate: the skills a new character starts with, per class (JSON config);
   GameServer/       packet group 0xE7: the group handler, the escrow request handler, the result view,
                     the login token handlers (03, 05) and view (04);
                     the module packet 0xE8: ModulePacketHandlerPlugIn and ModulePacketViewPlugIn
@@ -37,6 +38,14 @@ The plugin checks signature, expiry, account and character, then moves an item b
 an escrow box (an `ItemStorage` owned by nobody), or pays out the Zen waiting in a box. It answers
 `C1 len E7 02 op status listingId boxId amount itemLen item`. Config: `MARKETPLACE_ESCROW_SECRET`, the
 same value the marketplace service has; without it every token is refused.
+
+Starting skills (`GameLogic/CharacterCreated/AddClassSkillsOnCreate.cs`): an `ICharacterCreatedPlugIn`, the hook
+`CreateCharacterAction` calls after it builds a new character. OpenMU's own "Add ... For ..." plugins give one skill
+each; this one reads `SkillsByClass` from its configuration (class number to skill numbers, `SkillNumber` in OpenMU),
+edited in the admin panel under the plugin "Add Class Skills On Create". Defaults: DW Energy Ball, DK 5, Elf 5,
+MG 7, DL 2, RF Charge, Summoner none. A skill the class cannot learn is skipped with a log warning, and one the
+character already has is never added twice, so OpenMU's own plugins can stay on. Not compiled here (no OpenMU
+assemblies outside the image): the Docker build compiles it.
 
 Module packets (phase 4 of [docs/module_streaming.md](../docs/module_streaming.md)): a client module's
 packets travel inside one code, `0xE8`, in both directions: `C1 len E8 idLength id payload`, or C2
