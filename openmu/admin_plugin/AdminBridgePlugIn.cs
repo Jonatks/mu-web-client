@@ -113,7 +113,7 @@ public class AdminBridgePlugIn : IPeriodicTaskPlugIn
 
         var rows = Seen.Where(s => now - s.Value.At < TimeSpan.FromSeconds(6)).SelectMany(s => s.Value.Rows).ToList();
         var tmp = Path.Combine(Dir, "players.json.tmp");
-        File.WriteAllText(tmp, JsonSerializer.Serialize(new { at = now, players = rows }), Encoding.UTF8);
+        File.WriteAllText(tmp, JsonSerializer.Serialize(new { at = now, players = rows }), new UTF8Encoding(false));
         File.Move(tmp, Path.Combine(Dir, "players.json"), true);
     }
 

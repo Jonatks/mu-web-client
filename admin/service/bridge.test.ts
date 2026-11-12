@@ -23,3 +23,9 @@ test('an old or missing file means the plugin is not running', async () => {
 test('refuses names that are not accounts', async () => {
   await expect(disconnectAccount(dir(), 'a b;c', 'me')).rejects.toThrow();
 });
+
+test('a file that starts with a byte order mark still reads', () => {
+  const d = dir();
+  writeFileSync(join(d, 'players.json'), '\uFEFF' + JSON.stringify({ at: new Date().toISOString(), players: [] }));
+  expect(readOnline(d)?.players).toEqual([]);
+});

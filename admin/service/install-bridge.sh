@@ -8,7 +8,11 @@ STACK=/opt/openmu; DATA=/var/lib/mu-admin; BRIDGE=$DATA/bridge
 cd "$STACK"
 BASE=(-f docker-compose.yml -f docker-compose.override.yml)
 
-restart_sidecars() { docker restart mu-gate mu-kick >/dev/null 2>&1 || true; }
+# mu-gate and mu-kick share OpenMU's network, so a recreated openmu needs them recreated too (install-admin.sh does it).
+restart_sidecars() {
+  local here; here=$(dirname "$(readlink -f "$0")")
+  if [ -f "$here/install-admin.sh" ]; then DB=${DB:-openmu} bash "$here/install-admin.sh" >/dev/null; else echo "Falta recrear mu-gate y mu-kick: sudo DB=openmu bash ~/install-admin.sh"; fi
+}
 
 if [ "${1:-}" = rollback ]; then
   rm -f docker-compose.bridge.yml

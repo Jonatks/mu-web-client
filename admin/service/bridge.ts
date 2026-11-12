@@ -12,7 +12,7 @@ const SAVE_MARGIN_MS = 4000;
 /** The online list, or null when the plugin is not running (no file, or an old one). */
 export function readOnline(dir: string): { at: number; players: OnlinePlayer[] } | null {
   try {
-    const f = JSON.parse(readFileSync(join(dir, 'players.json'), 'utf8')) as { at: string; players: Record<string, unknown>[] };
+    const f = JSON.parse(readFileSync(join(dir, 'players.json'), 'utf8').replace(/^\uFEFF/, '')) as { at: string; players: Record<string, unknown>[] };
     const at = Date.parse(f.at);
     if (!(Date.now() - at < FRESH_MS)) return null;
     return { at, players: f.players.map(p => ({ login: String(p.login ?? p.Login), character: (p.character ?? p.Character ?? null) as string | null, map: (p.map ?? p.Map ?? null) as string | null, x: Number(p.x ?? p.X ?? 0), y: Number(p.y ?? p.Y ?? 0) })) };
