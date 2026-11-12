@@ -1,24 +1,52 @@
-# Admin web ("webmaster"), phase 4: design and what is not built
+# Admin web ("webmaster"): what is built and how it stays safe
 
-Goal: an admin signs in with its own user and password and manages accounts, characters and items (a MU Editor of our own).
+An admin signs in with its own user and password and manages accounts, characters and items (a small MU Editor of our own).
+Code: [admin/](../admin/readme.md). Live page: `https://mu-valhalla-admin.vercel.app` (Vercel, free).
 
-## Status
-Not built. It needs a service on the VM (the only thing allowed near the database), and this session has no access to the VM. A Vercel
-page with a login and nothing behind it would be decoration, so none was published.
+## Parts
+- `admin/web/` on Vercel: the page, its sign-in (admins in the `ADMIN_USERS` env variable, scrypt hashes) and `api/mu.js`, the only route to the VM.
+- `admin/service/` on the VM, behind Caddy at `https://155-181-133-84.sslip.io/_admin/` (container `mu-admin`, 80 MB limit): the only code that
+  touches OpenMU data. It needs the `x-admin-key` header (key in `/etc/mu-admin/key`, root only, also the Vercel variable `MU_ADMIN_KEY`).
+- The database port and the OpenMU panel (55980) are never published. The service reaches PostgreSQL over the Docker network with its own
+  role `mu_admin`, which can only write the tables listed below.
 
-## Design that was settled
-- Vercel (free) hosts the UI and its admin login (a list of admin users kept as Vercel environment variables, passwords hashed).
-- A small service on the VM (HTTPS through the same Caddy, a long random API key) is the only code that touches OpenMU data. The database port is never published.
-- OpenMU keeps a player's data in memory while the player is connected, so editing the database under a connected player is lost or
-  overwritten. Rule for every write: kick the player first (OpenMU admin API or `/disconnect`), edit, never edit a connected account.
-- Reuse before writing: `register/` (account sign-up), `ops/` (event reader), `marketplace/` (item moves with a signed token). The OpenMU
-  admin panel (Blazor, port 55980, SSH tunnel only) already edits accounts, characters, inventory and skills; the web should wrap the safe
-  subset, not replace it.
+## Probe: what an edit touches (write surface)
+The OpenMU panel needs a login only its owner can type, so the probe was done on a scratch copy of the database (rows and foreign keys read from
+the schema, edits applied, tables compared), not by driving the panel. Result:
 
-## MVP order
-1. Admin sign-in. 2. Create and list accounts, change password. 3. Ban and unban (account State). 4. List characters.
-5. Edit level, stats, zen. 6. View and insert items. Later: vault, skills, maps, logs.
+| Action | Tables written |
+|---|---|
+| create account, password, ban | `data."Account"` (`LoginName`, `PasswordHash` bare BCrypt `$2a$11$`, `State` 0 normal, 2 GM, 4 banned) |
+| level | `data."StatAttribute"` row "Level" and `data."Character"."Experience"` (set from OpenMU's formula for the level) |
+| strength, agility, vitality, energy, leadership | `data."StatAttribute"` rows "Base Strength" ... |
+| free points | `data."Character"."LevelUpPoints"` |
+| zen | `data."ItemStorage"."Money"` of the character's inventory storage |
+| insert item | `data."Item"` plus `data."ItemOptionLink"` (luck: link level 0; additional option: link level 1-4; excellent: link level 0), only in the bag grid, slots 12-75 |
+| delete item | `data."Item"` (its links go with it; the saved copy also keeps `data."ItemItemOfItemSet"`) |
 
-## First step to take when the VM is reachable
-Run the OpenMU admin panel through the tunnel, create an account, edit a character with the player offline, and note which tables the
-panel touches (`data."Account"`, `data."Character"`, `data."ItemStorage"`). That list is the service's whole write surface.
+Item options come from `config."ItemDefinitionItemOptionDefinition"` -> `config."IncreasableItemOption"` (type and number), so only options that
+item can really carry are accepted. Not built yet: vault, skills, maps, logs.
+
+## Rules that keep data safe
+1. **Nobody connected.** OpenMU keeps a player's data in memory while he is online, so a write under a connected player is lost or overwrites
+   him. OpenMU has no online list and no kick, so the service refuses every write (except creating an account) while any socket is
+   established on the game ports 45901-45906, and when it cannot tell. The check is the container `mu-gate`: it shares OpenMU's network
+   namespace and writes the counts to `online.json` every 2 s (the host's own socket table does not see players who connect directly, so it is not used).
+   A stale or missing file blocks writes. The page shows the state at the top.
+2. **Copy before every write.** `undo.ts` saves the affected rows as JSON before each change; `POST /undo/:id` puts them back (also behind the gate).
+   Undo overwrites newer progress of that row, so use it soon. A nightly full dump already exists (`backup-db.sh`).
+3. **Audit.** One line per write in `/var/lib/mu-admin/audit.jsonl` (who, what, when; never passwords).
+4. **Least privilege.** Role `mu_admin`: SELECT on `data` and `config`; INSERT/UPDATE on `Account`; UPDATE on `Character`, `StatAttribute`,
+   `ItemStorage`; INSERT/UPDATE/DELETE on `Item`, `ItemOptionLink`, `ItemItemOfItemSet`.
+5. **No secrets in the repo.** `MU_ADMIN_KEY`, `ADMIN_USERS` and the role password live in Vercel variables and root-only files on the VM.
+   Sessions are an HttpOnly, Secure, SameSite=Strict cookie signed with a key derived from `MU_ADMIN_KEY`, 8 hours; writes need a same-origin request.
+
+## Setting it up (owner steps)
+- VM: `bash install-vm.sh` (see `admin/service/readme.md`). `DB=<name>` picks the database; `bash install-vm.sh rollback` removes it.
+- Vercel project `mu-valhalla-admin` (root directory `admin/web`): set `MU_ADMIN_URL`, `MU_ADMIN_KEY`, `ADMIN_USERS`. Make an admin entry with
+  `node admin/web/mkhash.mjs NAME` and paste the line it prints.
+
+## Known limits
+- A raw-TCP client that stays connected blocks edits until it leaves; there is no kick (OpenMU has none without a plugin).
+- Banning a connected player is therefore also refused; ban when the server is empty.
+- Experience is set to OpenMU's table value when the level changes; master level and skills are untouched.
