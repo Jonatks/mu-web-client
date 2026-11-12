@@ -123,3 +123,19 @@ Taken: the pick-up hand (`hud/mobile_controls/topButtons.tsx`, the original's ow
 - A brand new level 1 Dark Wizard (`cdwtest`, created with the touch creation card) enters with Energy Ball on slot 1 and on the cast button; it dies to a Bull Fighter or a
   Skeleton in a few seconds, as a level 1 character does in the original, so the first levels are on weaker monsters. The cast packet itself was seen only with a GM.
 - Lorencia from the terrain file: the town is walled; the only exits are the two bridge corridors at x 131-134 (north y 147-165, south y 90-105). The east wall is x 153.
+
+## 9. West exit of Lorencia, new Dark Wizard (Mu Magdalena, 2026-11-12)
+- Exit: the west bridge (x 94-119, y 126-129); a Shadow Phantom Soldier and a Guard stand at the far end. Talking to the soldier opens the ORIGINAL NPC dialog docked on
+  the right with numbered choices ("1. Receive damage and defense increase", "2. Accept a quest"); choosing 1 gives a buff whose icon appears at the top of the screen.
+- Monsters there are Elite Bull Fighters (strong for level 1): a level 1 Dark Wizard with the buff died in a few seconds and came back in the town (Lorencia 139,118),
+  HP full, Zen kept. No spiders or red dragons were in view at this hour.
+- Targeting: an orange ring with a small crosshair lies on the ground under the monster being attacked; "Miss" and red numbers float over it.
+- Drops: an item lies on the ground with its name over it (gold "Devil's Key +1"); Zen lies as a small pile of gold coins with a "Zen 149" pill under it. Tapping the pill
+  walks the hero to it and picks it up; the money goes straight to the Zen line of the inventory (530 after).
+- Inventory: the original window, full height on the right. A tap on an item opens a centred dark panel (about 455x365) with the item picture at the top, the whole
+  tooltip in the middle and two gold buttons at the bottom: "Usar" and "Mover". Mover lifts the item; the next tap on a cell puts it there.
+- Shops: talking to Pasi the Mage opens the original Merchant window to the left of the inventory, both full height. Occupied shop cells are teal as in the original.
+  A tap on a shop item shows its tooltip with the purchasing price ("Purchasing price: 2,694,300"), red lines for what the hero lacks.
+- Taken from this pass: the item sheet as a framed panel with the picture, Use and Move (`hud/mobile_controls/itemSheet.tsx`).
+- Not taken: Magdalena's inventory and merchant windows are drawn about 1.4x larger than the original's width (cells about 29 px). Here they keep the original size that
+  fits the height (cells about 18 px), which is smaller for a thumb. Worth doing next, it needs the window frame redrawn taller than 429 units.
