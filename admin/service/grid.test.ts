@@ -22,3 +22,21 @@ test('a full bag returns null', () => {
 test('equipment and extension slots are ignored', () => {
   expect(freeSlot([{ slot: 3, w: 2, h: 3 }, { slot: 100, w: 1, h: 1 }], 1, 1)).toBe(12);
 });
+
+import { fits, vaultLayout } from './grid';
+
+test('the vault starts at slot 0 and is 8x15', () => {
+  const v = vaultLayout(false);
+  expect(freeSlot([], 1, 1, v)).toBe(0);
+  expect(freeSlot([{ slot: 0, w: 8, h: 15 }], 1, 1, v)).toBeNull();
+  expect(freeSlot([{ slot: 0, w: 8, h: 15 }], 1, 1, vaultLayout(true))).toBe(120);
+});
+
+test('fits checks the corner, the edges and the neighbours', () => {
+  const bag = [{ slot: 12, w: 2, h: 2 }];
+  expect(fits(bag, 14, 2, 2)).toBe(true);
+  expect(fits(bag, 13, 1, 1)).toBe(false);
+  expect(fits(bag, 19, 2, 1)).toBe(false); // would cross the right edge
+  expect(fits(bag, 11, 1, 1)).toBe(false); // equipment slot
+  expect(fits(bag, 76, 1, 1)).toBe(false); // past the bag
+});

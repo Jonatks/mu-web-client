@@ -4,34 +4,38 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
+<meta name="color-scheme" content="dark light">
 <title>MU Admin</title>
 <link rel="stylesheet" href="app.css">
 </head>
 <body>
 <main id="login" hidden>
-  <form id="loginForm" class="card narrow">
+  <form id="loginForm" class="login">
     <h1>MU Admin</h1>
+    <p class="sub">Panel del servidor</p>
     <label>Usuario <input name="user" autocomplete="username" required></label>
     <label>Contraseña <input name="password" type="password" autocomplete="current-password" required></label>
     <button class="primary">Entrar</button>
-    <p class="err" id="loginErr"></p>
+    <p class="err" id="loginErr" role="alert"></p>
   </form>
 </main>
-<div id="app" hidden>
-  <header>
-    <strong>MU Admin</strong>
+<div id="app" class="shell" hidden>
+  <aside>
+    <div class="brand">MU Admin</div>
     <nav id="tabs">
       <button data-tab="accounts">Cuentas</button>
       <button data-tab="characters">Personajes</button>
       <button data-tab="audit">Registro</button>
     </nav>
-    <span id="gate" class="pill" title="Con jugadores conectados no se edita nada"></span>
-    <span id="who"></span>
-    <button id="logout">Salir</button>
-  </header>
-  <section id="view"></section>
+    <div class="side-foot">
+      <span id="gate" class="pill" title=""></span>
+      <div class="who"><span id="who"></span><button id="logout" class="link">Salir</button></div>
+    </div>
+  </aside>
+  <main id="view"></main>
 </div>
-<div id="toast" role="status"></div>
+<dialog id="dlg"></dialog>
+<div id="toast" role="status" popover="manual"></div>
 <script src="app.js" type="module"></script>
 </body>
 </html>

@@ -21,11 +21,15 @@ the schema, edits applied, tables compared), not by driving the panel. Result:
 | strength, agility, vitality, energy, leadership | `data."StatAttribute"` rows "Base Strength" ... |
 | free points | `data."Character"."LevelUpPoints"` |
 | zen | `data."ItemStorage"."Money"` of the character's inventory storage |
-| insert item | `data."Item"` plus `data."ItemOptionLink"` (luck: link level 0; additional option: link level 1-4; excellent: link level 0), only in the bag grid, slots 12-75 |
+| insert item | `data."Item"` plus `data."ItemOptionLink"` (luck: link level 0; additional option: link level 1-4; excellent: link level 0), into the bag grid (slots 12-75) or the account vault (slots 0-119, 0-239 if extended); a chosen slot must fit, else the first free place |
+| vault | `data."ItemStorage"` (`Money`); a vault that never existed is created and `Account."VaultId"` set (undo restores `VaultId` before deleting the storage, because the key cascades) |
+| advanced character | `data."Character"` (`CurrentMapId`, `PositionX`, `PositionY`, `PlayerKillCount`, `MasterLevelUpPoints`) |
+| advanced account | `data."Account"` (`EMail`, `SecurityCode`, `VaultPassword` cleared, `IsVaultExtended`) |
 | delete item | `data."Item"` (its links go with it; the saved copy also keeps `data."ItemItemOfItemSet"`) |
 
 Item options come from `config."ItemDefinitionItemOptionDefinition"` -> `config."IncreasableItemOption"` (type and number), so only options that
-item can really carry are accepted. Not built yet: vault, skills, maps, logs.
+item can really carry are accepted. Not built yet: learned skills, rename, class change, moving or editing items already placed.
+Vault slots are numbered from 0 (verify in game with the first inserted vault item).
 
 ## Rules that keep data safe
 1. **Nobody connected.** OpenMU keeps a player's data in memory while he is online, so a write under a connected player is lost or overwrites

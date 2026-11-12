@@ -42,9 +42,18 @@ export function createApp(cfg: Config) {
       if (m === 'GET' && p.length === 1) return accounts.listAccounts(sql, q.get('q') ?? '');
       if (m === 'POST' && p.length === 1) { needAdmin(); const b = await body(); return accounts.createAccount(sql, admin, b.login, b.password, b.state); }
       const login = p[1] ?? '';
+      if (m === 'GET' && p.length === 2) return accounts.getAccount(sql, login);
+      if (m === 'PATCH' && p.length === 2) { needAdmin(); const b = await body(); return gated(() => accounts.patchAccount(sql, admin, login, b)); }
       if (m === 'POST' && p[2] === 'password') { needAdmin(); const b = await body(); return gated(() => accounts.setPassword(sql, admin, login, b.password)); }
+      if (p[2] === 'vault') {
+        if (m === 'GET' && p.length === 3) return items.getVault(sql, login);
+        if (m === 'PATCH' && p.length === 3) { needAdmin(); const b = await body(); return gated(() => items.setVaultZen(sql, admin, login, b.zen)); }
+        if (m === 'POST' && p[3] === 'items') { needAdmin(); const b = await body(); return gated(() => items.addItem(sql, admin, { kind: 'vault', login }, b as items.NewItem)); }
+        if (m === 'DELETE' && p[3] === 'items' && p[4]) { needAdmin(); return gated(() => items.deleteItem(sql, admin, { kind: 'vault', login }, p[4]!)); }
+      }
       if (m === 'POST' && p[2] === 'state') { needAdmin(); const b = await body(); return gated(() => accounts.setState(sql, admin, login, b.state)); }
     }
+    if (p[0] === 'maps' && m === 'GET') return characters.listMaps(sql);
     if (p[0] === 'characters') {
       if (m === 'GET' && p.length === 1) return characters.listCharacters(sql, q.get('q') ?? '', q.get('account') ?? '');
       const name = p[1] ?? '';
@@ -52,8 +61,8 @@ export function createApp(cfg: Config) {
       if (m === 'PATCH' && p.length === 2) { needAdmin(); const b = await body(); return gated(() => characters.patchCharacter(sql, admin, name, b)); }
       if (p[2] === 'items') {
         if (m === 'GET') return items.listItems(sql, name);
-        if (m === 'POST') { needAdmin(); const b = await body(); return gated(() => items.addItem(sql, admin, name, b as items.NewItem)); }
-        if (m === 'DELETE' && p[3]) { needAdmin(); return gated(() => items.deleteItem(sql, admin, name, p[3]!)); }
+        if (m === 'POST') { needAdmin(); const b = await body(); return gated(() => items.addItem(sql, admin, { kind: 'inventory', name }, b as items.NewItem)); }
+        if (m === 'DELETE' && p[3]) { needAdmin(); return gated(() => items.deleteItem(sql, admin, { kind: 'inventory', name }, p[3]!)); }
       }
     }
     if (p[0] === 'items' && p[1] === 'definitions' && m === 'GET') {

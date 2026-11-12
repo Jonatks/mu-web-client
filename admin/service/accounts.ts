@@ -84,3 +84,34 @@ export async function setState(sql: Sql, admin: string, login: string, state: un
     await w.tx`UPDATE data."Account" SET "State" = ${value} WHERE "Id" = ${a.id}`;
   });
 }
+
+/** What the Advanced panel shows. Secrets are reported as present or not, never returned. */
+export async function getAccount(sql: Sql, login: string) {
+  const r = await sql`
+    SELECT "LoginName" AS login, "State" AS state, "EMail" AS email, "RegistrationDate" AS registered,
+           ("SecurityCode" <> '') AS "hasSecurityCode", ("VaultPassword" <> '') AS "hasVaultPassword", "IsVaultExtended" AS "vaultExtended"
+    FROM data."Account" WHERE "LoginName" = ${login}`;
+  if (!r[0]) throw missing('No such account.');
+  return { ...r[0], stateName: stateName(r[0].state as number) };
+}
+
+/** Advanced edits: email, security code, remove the vault password, extend the vault. Only the fields sent change. */
+export async function patchAccount(sql: Sql, admin: string, login: string, body: Record<string, unknown>) {
+  const known = ['email', 'securityCode', 'clearVaultPassword', 'vaultExtended'];
+  const keys = Object.keys(body);
+  if (keys.length === 0 || keys.some(k => !known.includes(k))) throw bad(`Editable fields: ${known.join(', ')}.`);
+  const a = await idOf(sql, login);
+  const email = body.email === undefined ? null : String(body.email);
+  if (email !== null && email !== '' && !/^[^\s@]{1,64}@[^\s@]{1,120}$/.test(email)) throw bad('email: not a valid address (or empty).');
+  const code = body.securityCode === undefined ? null : String(body.securityCode);
+  if (code !== null && !/^[0-9]{0,7}$/.test(code)) throw bad('securityCode: up to 7 digits (or empty).');
+  if (body.clearVaultPassword !== undefined && body.clearVaultPassword !== true) throw bad('clearVaultPassword: true.');
+  if (body.vaultExtended !== undefined && typeof body.vaultExtended !== 'boolean') throw bad('vaultExtended: true or false.');
+  return write(sql, { admin, action: 'account.edit', target: login, detail: { fields: keys } }, async w => {
+    await w.save('Account', 'Id', [a.id]);
+    if (email !== null) await w.tx`UPDATE data."Account" SET "EMail" = ${email} WHERE "Id" = ${a.id}`;
+    if (code !== null) await w.tx`UPDATE data."Account" SET "SecurityCode" = ${code} WHERE "Id" = ${a.id}`;
+    if (body.clearVaultPassword === true) await w.tx`UPDATE data."Account" SET "VaultPassword" = '' WHERE "Id" = ${a.id}`;
+    if (typeof body.vaultExtended === 'boolean') await w.tx`UPDATE data."Account" SET "IsVaultExtended" = ${body.vaultExtended} WHERE "Id" = ${a.id}`;
+  });
+}

@@ -96,12 +96,6 @@ export async function undo(sql: Sql, id: string, admin: string): Promise<{ undoI
   const rec = JSON.parse(readFileSync(file, 'utf8')) as Record_;
   if (!rec.undoable) throw new Error('that action cannot be undone');
   const { undoId } = await write(sql, { admin, action: `undo:${rec.action}`, target: rec.target, undoable: false, detail: { undoes: id } }, async w => {
-    for (const table of [...ORDER].reverse()) {
-      const pk = TABLES[table]!;
-      for (const row of rec.created[table] ?? []) {
-        await w.tx.unsafe(`DELETE FROM ${ident(table)} t WHERE ${keyWhere(pk)}`, pk.map(c => row[c] as string));
-      }
-    }
     for (const table of ORDER) {
       const pk = TABLES[table]!;
       const cols = (await w.tx.unsafe(`SELECT column_name FROM information_schema.columns WHERE table_schema='data' AND table_name=$1`, [table])).map(r => r.column_name as string);
@@ -112,6 +106,12 @@ export async function undo(sql: Sql, id: string, admin: string): Promise<{ undoI
           [...pk.map(c => row[c] as string), row as never]
         );
         if (hit.count === 0) await w.tx.unsafe(`INSERT INTO ${ident(table)} SELECT * FROM jsonb_populate_record(NULL::${ident(table)}, $1::jsonb)`, [row as never]);
+      }
+    }
+    for (const table of [...ORDER].reverse()) {
+      const pk = TABLES[table]!;
+      for (const row of rec.created[table] ?? []) {
+        await w.tx.unsafe(`DELETE FROM ${ident(table)} t WHERE ${keyWhere(pk)}`, pk.map(c => row[c] as string));
       }
     }
   });

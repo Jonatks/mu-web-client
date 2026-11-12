@@ -3,7 +3,7 @@ import { sameOrigin, userOf } from '../lib/auth.js';
 
 const ROUTES = [
   /^\/status$/, /^\/audit$/, /^\/undo(\/[a-z0-9-]+)?$/,
-  /^\/accounts(\/[A-Za-z0-9]{1,10}\/(password|state))?$/,
+  /^\/accounts(\/[A-Za-z0-9]{1,10}(\/(password|state|vault))?)?$/, /^\/maps$/, /^\/accounts\/[A-Za-z0-9]{1,10}\/vault\/items(\/[0-9a-f-]{36})?$/,
   /^\/characters(\/[A-Za-z0-9_]{1,10}(\/items(\/[0-9a-f-]{36})?)?)?$/,
   /^\/items\/definitions(\/[0-9a-f-]{36})?$/,
 ];
