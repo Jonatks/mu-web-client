@@ -28,7 +28,8 @@ export const MonsterBars = observer(() => {
 
     const scene = world.scene;
     const engine = scene.getEngine();
-    const slots = Array.from(container.children) as HTMLElement[];
+    const ring = container.lastElementChild as HTMLElement;
+    const slots = Array.from(container.children).slice(0, POOL) as HTMLElement[];
     const chosen: (Entity | null)[] = new Array(POOL).fill(null);
     const dist: number[] = new Array(POOL).fill(Infinity);
     const names: string[] = new Array(POOL).fill('');
@@ -105,6 +106,21 @@ export const MonsterBars = observer(() => {
         const bar = el.lastElementChild?.firstElementChild as HTMLElement | null;
         if (bar) bar.style.width = `${fraction * 100}%`;
       }
+
+      // The orange ring under the attack target (Mu Magdalena draws it at the feet).
+      const target = world.attackTarget;
+      if (!target || target.dying || !target.modelObject) {
+        if (ring.style.display !== 'none') ring.style.display = 'none';
+        return;
+      }
+      anchor.copyFrom(target.modelObject.node.getAbsolutePosition());
+      Vector3.ProjectToRef(anchor, Matrix.IdentityReadOnly, viewProjection, viewport, screen);
+      if (screen.z < 0 || screen.z > 1) {
+        ring.style.display = 'none';
+        return;
+      }
+      if (ring.style.display !== 'block') ring.style.display = 'block';
+      ring.style.transform = `translate(${screen.x * kx}px, ${screen.y * ky}px) translate(-50%, -50%)`;
     });
 
     return () => {
@@ -122,6 +138,7 @@ export const MonsterBars = observer(() => {
           </div>
         </div>
       ))}
+      <b className="mobile-target-ring" style={{ display: 'none' }} />
     </div>
   );
 });
