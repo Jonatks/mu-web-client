@@ -212,3 +212,7 @@ longer available to this session, so further study there waits for the owner to 
 - A centred card (about 685 x 230 px, dark purple, gold border, round X) with the server logo, the title "Welcome to MuMagdalenas!", and the line "You already have all skills unlocked. Level up and use /reset (at level 400) to grow stronger and stronger", three gold chips (EXP 300x, Reset level 400, All skills) and a wide gold PLAYER GUIDE button.
 - This is why every class shows its skills lit at level 1: the server grants all class skills at once. For our server this is the answer to plan F4: grant the class skills at character creation (plugin), not a client list.
 - Player Guide: reset at level 400 returns the hero to level 1 with 500 points per accumulated reset (625 for Dark Lord), limit 65,000 per stat, keeps evolution and gear; commands /reset, /agi /str /ene /sta (/vit) /cmd N, and /post message for global chat. Buttons: WhatsApp, Site, CLOSE.
+
+## 17. Lorencia NPC seen near (141,140)
+"Market Union Member Julia": a player market NPC. Her window (right column, same frame as the Daily Quest one) offers a Warp button and three wide buttons: Sell, My items, View listings. Text: go to the market in Lorencia to buy items or sell yours. Not part of the classic game; skipped unless the owner asks for a market (the marketplace service in this repo is the equivalent).
+The chat Messages panel opens when the chat bubble is tapped: a centred modal with a round X and a "Write a message" field at the bottom.

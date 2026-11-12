@@ -9,7 +9,7 @@ Estados: [hecho] [parcial] [pendiente] [solo el propietario].
 
 ## A. Estudio de Mu Magdalena (cuenta normal, personaje nuevo, celular horizontal 915x412)
 Para cada area: entrar, jugar, capturar, volcar el DOM (medidas, fuentes, colores), anotar comportamiento y pasos exactos. Resultado en `docs/magdalena_study.md`.
-A1. Clases y razas, una por una (DW, DK, Elf, MG, DL, Summoner, RF): donde nace, habilidad inicial, armas, como ataca (cerca, lejos, maná, AG), primeras 10 subidas de nivel. [parcial: DW y DK]
+A1. Clases y razas, una por una (DW, DK, Elf, MG, DL, Summoner, RF): donde nace, habilidad inicial, armas, como ataca (cerca, lejos, maná, AG), primeras 10 subidas de nivel. [hecho salvo Summoner: DW, DK, Elf, MG, DL y RF estudiados; falta liberar un hueco de personaje, ver seccion 12 del estudio]
 A2. Mobs: cada familia (arana, dragon rojo, bull fighter, esqueleto...), tamano, barra de vida, daño, que sueltan, cuanto tardan en morir segun nivel. [parcial]
 A3. Peleas: apuntar, anillo del objetivo, golpe basico contra habilidad, numeros de daño, muerte del mob, muerte del jugador y reaparicion, experiencia y nivel. [parcial]
 A4. Botin: como cae, nombre en el suelo, oro, ítems especiales, mano de recoger, que pasa con varios ítems a la vez, inventario lleno. [parcial]
@@ -40,10 +40,10 @@ C3. Ventanas del juego 1,4 veces mas grandes (inventario, tienda, personaje, bau
 C4. Ventanas en columnas, cierre con X grande, tocar fuera para cerrar. [parcial]
 C5. Tienda: comprar y vender con la hoja de detalle, precio, falta de zen, impuesto. Probar completo. [parcial]
 C6. NPC: hablar, dialogos con opciones numeradas, misiones (aceptar, seguir, entregar), buffs, evolucion, baul. Probar completo. [pendiente]
-C7. Habilidades: cada clase empieza con su primera habilidad; el boton repite la habilidad; verificar con cada clase; sin mana vuelve al golpe. [parcial]
+C7. Habilidades: cada clase empieza con su primera habilidad; el boton repite la habilidad; verificar con cada clase; sin mana vuelve al golpe. [parcial: el codigo ya vuelve al golpe sin mana (fireControl); falta que el servidor de las habilidades, ver F4]
 C8. Helper tactil: pestañas Combate y Recoger, rotacion, buffs, rangos, pociones con umbral, boton Start. [pendiente]
 C9. Pociones: automaticas (no hay botones). [hecho]
-C10. Barra de vida y nombre sobre todos los mobs visibles (con tope por rendimiento), anillo naranja del objetivo, numeros de daño. [parcial]
+C10. Barra de vida y nombre sobre todos los mobs visibles (con tope por rendimiento), anillo naranja del objetivo, numeros de daño. [hecho: barras para los 5 mas cercanos y anillo naranja con 4 marcas, publicado]
 C11. Drops: pastilla de nombre, oro con "Zen N", mano. Verificar varios a la vez. [parcial]
 C12. Comercio, fiesta, clan, amigos con la interfaz tactil. [pendiente]
 C13. Mapa y minimapa tactil. [pendiente]
@@ -76,7 +76,7 @@ E9. Optimizar al final, sin tocar lo que quedo igual; repetir las mediciones y g
 F1. Copia diaria, proxy endurecido, HTTPS con wss, dominio corto de Vercel, cuentas de prueba quitadas. [hecho]
 F2. Revocar el token `mu-vm-install`, borrar `mu-assets` cuando no haga falta y borrar `client-old-20261110-1940` de la VM. [solo el propietario / otro chat]
 F3. Web de administracion estilo MU Editor (otro chat, con la extension de Chrome): ingreso propio, crear y editar cuentas y personajes, ítems, baneos. Diseno en `docs/admin_web.md`. [otro chat]
-F4. Primera habilidad de las clases que no la reciben del servidor (DK, Elf): decidir si se da por plugin de OpenMU. [pendiente]
+F4. Habilidades de clase: Magdalena da TODAS al crear el personaje (lo dice su tarjeta de bienvenida). Decision: darlas al crear con un plugin de OpenMU (openmu/plugins), probado antes en el OpenMU local; no se publica codigo de servidor sin probar. [pendiente, decidido]
 F5. Comprobar que el cliente solo consulta nuestro mundo (sin servidores de terceros). [pendiente]
 
 ## G. Verificacion y entrega
