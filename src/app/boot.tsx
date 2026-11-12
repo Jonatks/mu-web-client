@@ -71,6 +71,7 @@ import { fpsLimitForStep, framePacer } from '../controllers/render/fpsLimit';
 import { csmCacheStats } from '@/controllers/render/shadows';
 import { refreshServerList } from '../modules/servers/serverList';
 import { checkDirectLogin } from '../modules/servers/directLogin';
+import { ServerConfig } from '../modules/servers/serverConfig';
 import { assetDownload, ensureCacheWorker } from '../controllers/assets/assetDownload';
 import { startBuildCheck } from './buildCheck';
 import { sceneCovered } from '../controllers/render/sceneCover';
@@ -426,11 +427,12 @@ preloadPregameSprites()
 
 // The published server list (`modules/servers/serverList.ts`), once per launch. Nothing
 // waits on it: it fills the picker when it lands, and the saved servers are
-// what the client uses until then - or instead, if it never lands.
-refreshServerList();
-
+// what the client uses until then - or instead, if it never lands. A world pinned by direct login needs no list, so
+// it asks nobody else (third-party hosts stay untouched).
 // The installer's direct login: a server.json beside the client may skip the worlds list (servers/directLogin.ts).
-void checkDirectLogin();
+void checkDirectLogin().then(() => {
+  if (!ServerConfig.pinned) refreshServerList();
+});
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

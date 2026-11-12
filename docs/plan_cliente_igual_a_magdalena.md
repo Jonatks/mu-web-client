@@ -77,7 +77,7 @@ F1. Copia diaria, proxy endurecido, HTTPS con wss, dominio corto de Vercel, cuen
 F2. Revocar el token `mu-vm-install`, borrar `mu-assets` cuando no haga falta y borrar `client-old-20261110-1940` de la VM. [solo el propietario / otro chat]
 F3. Web de administracion estilo MU Editor (otro chat, con la extension de Chrome): ingreso propio, crear y editar cuentas y personajes, ítems, baneos. Diseno en `docs/admin_web.md`. [otro chat]
 F4. Habilidades de clase: Magdalena da TODAS al crear el personaje (lo dice su tarjeta de bienvenida). Decision: darlas al crear con un plugin de OpenMU (openmu/plugins), probado antes en el OpenMU local; no se publica codigo de servidor sin probar. [pendiente, decidido]
-F5. Comprobar que el cliente solo consulta nuestro mundo (sin servidores de terceros). [pendiente]
+F5. Comprobar que el cliente solo consulta nuestro mundo. [hecho: al abrir contacta solo su propio origen, el wss de la VM y api.github.com (la ventana de creditos, que debe quedar); el listado publico de Ignies ya no se pide cuando el mundo esta fijado por direct login]
 
 ## G. Verificacion y entrega
 G1. Pruebas automaticas: tipos, estructura, pruebas de unidad, idiomas. [continuo]
