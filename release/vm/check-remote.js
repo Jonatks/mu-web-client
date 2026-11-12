@@ -9,7 +9,8 @@ const probe = (host, port) =>
     let state = 'refused', first = '';
     const ws = new WebSocket(`${base}/?host=${host}&port=${port}`);
     ws.binaryType = 'arraybuffer';
-    const done = () => { clearTimeout(timer); try { ws.close(); } catch {} resolve({ state, first }); };
+    let finished = false;
+    const done = () => { if (finished) return; finished = true; clearTimeout(timer); try { ws.close(); } catch {} resolve({ state, first }); };
     const timer = setTimeout(() => { if (state === 'open') state = 'open (sin datos)'; done(); }, 3500);
     ws.onopen = () => { state = 'open'; };
     ws.onmessage = e => { first = Buffer.from(e.data).subarray(0, 8).toString('hex'); state = 'open+datos'; done(); };
