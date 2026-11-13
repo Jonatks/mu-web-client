@@ -1717,3 +1717,173 @@ body:has(.mu-item-window) .mobile-controls .mobile-book {
     }
   }
 }
+
+// ---- MU-themed HUD, after Mu Magdalena's look (docs/magdalena_study.md section 25): bronze, bone and the original bar art -------
+@bronze-hi: #e3b766;
+@bronze: #8a5a22;
+@bronze-lo: #3c240e;
+
+.mobile-stick {
+  opacity: 0.85;
+  border: 0;
+  background: none;
+  box-shadow: none;
+
+  &::before {
+    display: none;
+  }
+
+  .mobile-stick-ring {
+    position: absolute;
+    inset: -6%;
+    width: 112%;
+    height: 112%;
+    pointer-events: none;
+    filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.6));
+  }
+
+  .mobile-stick-mark {
+    opacity: 0.9;
+
+    &.n {
+      top: 24%;
+      border-bottom-color: #d9772b;
+    }
+    &.s {
+      bottom: 24%;
+      border-top-color: #d9772b;
+    }
+    &.e {
+      right: 24%;
+      border-left-color: #d9772b;
+    }
+    &.w {
+      left: 24%;
+      border-right-color: #d9772b;
+    }
+  }
+
+  .mobile-stick-knob {
+    width: 42%;
+    height: 42%;
+    margin: -21% 0 0 -21%;
+    background: radial-gradient(circle at 40% 32%, rgba(120, 100, 70, 0.55), rgba(20, 14, 8, 0.55) 70%);
+    border: 2px solid rgba(227, 183, 102, 0.75);
+    box-shadow:
+      inset 0 0 0 3px rgba(0, 0, 0, 0.35),
+      0 0 0 1px rgba(0, 0, 0, 0.5);
+  }
+}
+
+// Round buttons: a bevelled bronze rim around a dark well, the icon in old gold.
+.mobile-round,
+.mobile-book {
+  border: 0;
+  background:
+    radial-gradient(circle at 50% 50%, #1b130b 0 58%, transparent 59%),
+    conic-gradient(from 200deg, @bronze-hi, @bronze, @bronze-lo, @bronze, @bronze-hi, @bronze, @bronze-lo, @bronze, @bronze-hi);
+  color: #f0c46a;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.7),
+    inset 0 0 0 1px rgba(255, 230, 170, 0.35),
+    0 3px 8px rgba(0, 0, 0, 0.6);
+}
+
+// The orbs: the original liquid inside a bronze rim.
+.mobile-orb {
+  border: 3px solid @bronze;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.7),
+    0 0 0 3px rgba(227, 183, 102, 0.35),
+    inset 0 0 0 2px rgba(0, 0, 0, 0.55),
+    inset 0 -8px 14px rgba(0, 0, 0, 0.45),
+    0 3px 10px rgba(0, 0, 0, 0.65);
+
+  // Glossy glass liquid, lit from the top left.
+  &.hp .mobile-orb-fill {
+    background: radial-gradient(circle at 38% 18%, #ff9a86 0%, #e0291c 32%, #9c0c08 62%, #4a0302 100%);
+  }
+  &.mp .mobile-orb-fill {
+    background: radial-gradient(circle at 38% 18%, #b4dcff 0%, #2f7cf0 32%, #1238a8 62%, #06144a 100%);
+  }
+  &.hp .mobile-orb-fill,
+  &.mp .mobile-orb-fill {
+    // The orb's own size: the gradient stays put while the level falls.
+    background-size: 100% 62px;
+    background-position: center bottom;
+  }
+}
+
+// The six boxes: the original skill box art, a thin bronze edge.
+.mobile-slot {
+  border-radius: 3px;
+  border: 1px solid rgba(138, 90, 34, 0.9);
+  background-size: 100% 100%;
+  background-color: #1a120b;
+
+  &::after {
+    display: none;
+  }
+}
+
+// One plate under the whole bar, dark with a bronze top edge, like the original's frame.
+.mobile-bar::before {
+  left: 18px;
+  right: 18px;
+  height: 46px;
+  border-radius: 4px;
+  background: linear-gradient(#2a1d10, #0d0905);
+  border: 1px solid @bronze;
+  border-top: 2px solid @bronze-hi;
+}
+
+// Mu Magdalena's right edge: the current skill in a 50 px bronze round, the skill book (44 px) under it.
+.mobile-attack {
+  bottom: 92px;
+  right: calc(@edge + 4px + env(safe-area-inset-right, 0px));
+  width: 52px;
+  height: 52px;
+  border: 0;
+  color: #f0c46a;
+  background:
+    radial-gradient(circle at 50% 50%, #1b130b 0 60%, transparent 61%),
+    conic-gradient(from 200deg, @bronze-hi, @bronze, @bronze-lo, @bronze, @bronze-hi, @bronze, @bronze-lo, @bronze, @bronze-hi);
+
+  .mobile-attack-skill {
+    transform: scale(1.05);
+  }
+
+  &::after {
+    left: 22%;
+    top: 12%;
+    width: 56%;
+    height: 30%;
+  }
+}
+
+.mobile-book {
+  bottom: 14px;
+  right: calc(@edge + 8px + env(safe-area-inset-right, 0px));
+  width: 44px;
+  height: 44px;
+}
+
+// The name, level and map, a size smaller, as on Mu Magdalena.
+.mobile-status {
+  transform: scale(0.82);
+  transform-origin: 0 0;
+}
+
+// Mu Magdalena's pad is 134 px with the ring, its centre 70 px above the bottom; the drawn ring here overflows the box by 6 %.
+.mobile-stick {
+  --stick: 120px;
+  bottom: 44px;
+
+  &.size-0 {
+    --stick: 100px;
+  }
+
+  &.size-2 {
+    --stick: 146px;
+  }
+}

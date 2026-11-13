@@ -25,7 +25,7 @@ export const AttackButton = observer(() => {
         title={t('skills.title')}
         onTap={() => (MobileMenu.picker = 0)}
       >
-        {() => <Icon name="skills" size={22} />}
+        {() => <Icon name="book" size={22} />}
       </MobileButton>
       <MobileButton
         className={`mobile-attack${auto ? ' is-auto' : ''}${MobileMenu.firing ? ' is-firing' : ''}`}

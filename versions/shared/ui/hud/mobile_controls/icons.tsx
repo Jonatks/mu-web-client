@@ -19,6 +19,7 @@ const PATHS: Record<string, string> = {
   hand: 'M8 12V6.500a1.500 1.500 0 0 1 3 0V11M11 10.500V4.500a1.500 1.500 0 0 1 3 0V11M14 10.500V5.500a1.500 1.500 0 0 1 3 0V12M17 10.500a1.500 1.500 0 0 1 3 0V15c0 4-2.500 6.500-6.500 6.500-3 0-4.500-1.500-6-4L4 13.500a1.500 1.500 0 0 1 2.500-1.500L8 14',
   menu: 'M4 7h16M4 12h16M4 17h16',
   close: 'M6 6l12 12M18 6L6 18',
+  book: 'M4 5c3-1 5.500-1 8 1v14c-2.500-2-5-2-8-1zM20 5c-3-1-5.500-1-8 1v14c2.500-2 5-2 8-1z',
 };
 
 export const Icon = observer(({ name, size = 26 }: { name: keyof typeof PATHS; size?: number }) => (

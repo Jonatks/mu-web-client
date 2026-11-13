@@ -9,6 +9,7 @@ import { skillDefinition, SKILL_DEFINITIONS } from '@versions/shared/skills/skil
 import { skillUsability } from '@/modules/skills/usability';
 import { MobileSkillSlots, MOBILE_SKILL_SLOTS } from '@/modules/options/mobileSkillSlots';
 import { SkillIcon } from '../../components/skill_icon';
+import { useMuSprite } from '@/controllers/interface/components/mu_sprite';
 import { MobileButton } from './mobileButton';
 import { useSkill } from './fireControl';
 import { MobileMenu } from './menuState';
@@ -22,6 +23,8 @@ const Slot = observer(({ slot }: { slot: number }) => {
   const usable = number >= 0 && skills.requirementsMet(number);
   const selected = number >= 0 && number === HeroSkills.currentSkill;
   const sweep = useRef<HTMLDivElement>(null);
+  // The original bar's skill box (`newui_skillbox`), so the six boxes read as MU's.
+  const box = useMuSprite('newui_skillbox.OZJ');
 
   // RenderSkillDelay: written straight to the element on the cooldown tick, so a running delay never re-renders React.
   useEffect(() => {
@@ -39,6 +42,7 @@ const Slot = observer(({ slot }: { slot: number }) => {
   return (
     <MobileButton
       className={`mobile-slot${selected ? ' is-selected' : ''}${number < 0 ? ' is-empty' : ''}`}
+      style={box ? { backgroundImage: `url(${box.url})` } : undefined}
       title={number >= 0 ? (skillDefinition(number)?.name ?? '') : t('skills.title')}
       onTap={() => (number >= 0 ? useSkill(number) : (MobileMenu.picker = slot))}
       onLongPress={() => (MobileMenu.picker = slot)}
