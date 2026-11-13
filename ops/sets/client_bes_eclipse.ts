@@ -20,13 +20,13 @@ let n = 0;
 for (const p of walk(root)) {
   const name = p.split('/').pop()!.toLowerCase();
   if (name.endsWith('.gz')) continue;
-  let bytes = new Uint8Array(readFileSync(p));
+  let bytes: Uint8Array = new Uint8Array(readFileSync(p));
   if (name === 'itemsettype.bmd') bytes = setItemSetNumber(setItemSetNumber(bytes, PANTS, 0, SET), STAFF, 0, SET);
   else if (/^itemsetoption(_[a-z]+)?\.bmd$/.test(name)) bytes = setSetOption(bytes, SET, record);
   else continue;
-  if (!existsSync(p + '.bak')) writeFileSync(p + '.bak', readFileSync(p));
+  if (!existsSync(p + '.bak')) writeFileSync(p + '.bak', new Uint8Array(readFileSync(p)));
   writeFileSync(p, bytes);
-  if (existsSync(p + '.gz')) writeFileSync(p + '.gz', gzipSync(bytes, { level: 9 }));
+  if (existsSync(p + '.gz')) writeFileSync(p + '.gz', new Uint8Array(gzipSync(bytes, { level: 9 })));
   console.log('ok', p, bytes.length);
   n++;
 }
