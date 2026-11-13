@@ -205,6 +205,68 @@ export async function scaleDrops(sql: Sql, admin: string, b: { factor?: unknown;
   });
 }
 
+/* -------------------------------------------------- boxes and objects (Kundun and the rest) */
+
+/** The drops of an item that opens (Box of Kundun +1..+5, Box of Luck...): each box level has an item group and, usually, a zen group that catches the rest. */
+export type BoxGroup = { id: string; key: string; name: string; description: string; chance: number; money: number };
+
+const BOX_FROM = `FROM config."ItemDropItemGroup" g JOIN config."ItemDefinition" d ON d."Id" = g."ItemDefinitionId"`;
+const boxGroups = async (sql: Sql): Promise<BoxGroup[]> =>
+  (await sql.unsafe(
+    `SELECT g."Id" AS id, d."Id"::text || ':' || g."SourceItemLevel"::text AS key, ${NAME('d."Name"')} AS name, ${NAME('g."Description"')} AS description,
+            g."Chance"::float8 AS chance, g."MoneyAmount" AS money ${BOX_FROM} ORDER BY d."Group", d."Number", g."SourceItemLevel", g."Chance"`
+  ).catch(() => {
+    throw bad('This server has no drops for boxes.');
+  })) as unknown as BoxGroup[];
+
+/** One row per box level: the chance of getting items (the rest is zen), and whether it can be changed (it needs both kinds of group). */
+export function boxSummary(groups: BoxGroup[]) {
+  const by = new Map<string, BoxGroup[]>();
+  for (const g of groups) by.set(g.key, [...(by.get(g.key) ?? []), g]);
+  return [...by].map(([key, gs]) => {
+    const items = gs.filter(g => g.money === 0);
+    const zen = gs.find(g => g.money > 0);
+    const description = items[0]?.description || gs[0]!.name;
+    return {
+      key, name: gs[0]!.name, description, zen: zen?.money ?? 0,
+      itemChance: Math.min(1, items.reduce((a, g) => a + g.chance, 0)),
+      adjustable: items.length > 0 && !!zen,
+      kundun: /kundun/i.test(`${description} ${gs[0]!.name}`),
+    };
+  });
+}
+
+/** The new chances so the item groups of one box add up to `chance` (their proportions stay). */
+export function boxPlan(groups: BoxGroup[], chance: number) {
+  const items = groups.filter(g => g.money === 0);
+  const total = items.reduce((a, g) => a + g.chance, 0);
+  if (items.length === 0 || !groups.some(g => g.money > 0)) throw bad('That box has no zen group to give the rest to.');
+  if (total <= 0) throw bad('That box has an item group with chance 0; set it with the drops list first.');
+  return items.map(g => ({ id: g.id, from: g.chance, to: Math.min(0.99, (g.chance * chance) / total) }));
+}
+
+export async function listBoxes(sql: Sql) {
+  return boxSummary(await boxGroups(sql));
+}
+
+/** Sets how often the chosen boxes give items instead of zen. 0.99 is the most: at 1 the zen group would tie with the items. */
+export async function setBoxItemChance(sql: Sql, admin: string, b: { chance?: unknown; keys?: unknown }) {
+  const chance = num(b.chance, 'chance', 0.01, 0.99, false);
+  const keys = Array.isArray(b.keys) ? b.keys.map(k => String(k)) : [];
+  if (keys.length === 0) throw bad('keys: choose at least one box.');
+  const all = await boxGroups(sql);
+  const plans = keys.flatMap(k => {
+    const gs = all.filter(g => g.key === k);
+    if (gs.length === 0) throw missing('No such box.');
+    return boxPlan(gs, chance);
+  });
+  return write(sql, { admin, action: 'server.boxes', target: 'box drops', detail: { chance, boxes: keys.length } }, async w => {
+    await w.save('config.ItemDropItemGroup', 'Id', plans.map(p => p.id));
+    for (const p of plans) await w.tx.unsafe(`UPDATE config."ItemDropItemGroup" SET "Chance" = $1::float8 WHERE "Id" = $2::uuid`, [p.to, p.id]);
+    return { boxes: keys.length, groups: plans.length };
+  });
+}
+
 /* --------------------------------------------------------------- monsters */
 
 const KINDS = ['Monstruo', 'NPC', 'Guardia', 'Trampa', 'Puerta', 'Estatua', 'Pelota', 'Destruible'];

@@ -13,6 +13,7 @@ const TABLES: Record<string, string[]> = {
   'config.GameServerConfiguration': ['Id'],
   'config.GameMapDefinition': ['Id'],
   'config.DropItemGroup': ['Id'],
+  'config.ItemDropItemGroup': ['Id'],
   'config.MonsterSpawnArea': ['Id'],
   'config.MonsterDefinition': ['Id'],
   'config.MonsterAttribute': ['Id'],
@@ -36,7 +37,7 @@ const TABLES: Record<string, string[]> = {
   CashShopStorageItem: ['Id'],
 };
 /** Restore parents before children; delete children before parents. */
-const ORDER = ['config.GameConfiguration', 'config.GameServerConfiguration', 'config.GameServerDefinition', 'config.GameMapDefinition', 'config.MonsterDefinition', 'config.MonsterAttribute', 'config.MonsterSpawnArea', 'config.DropItemGroup', 'config.MiniGameDefinition', 'config.PlugInConfiguration', 'config.WarpInfo', 'ItemStorage', 'Account', 'Character', 'Item', 'StatAttribute', 'SkillEntry', 'ItemOptionLink', 'ItemItemOfItemSet', 'AccountCharacterClass', 'CharacterQuestState', 'QuestMonsterKillRequirementState', 'GensMember', 'LetterHeader', 'LetterBody', 'CashShopStorageItem'];
+const ORDER = ['config.GameConfiguration', 'config.GameServerConfiguration', 'config.GameServerDefinition', 'config.GameMapDefinition', 'config.MonsterDefinition', 'config.MonsterAttribute', 'config.MonsterSpawnArea', 'config.DropItemGroup', 'config.ItemDropItemGroup', 'config.MiniGameDefinition', 'config.PlugInConfiguration', 'config.WarpInfo', 'ItemStorage', 'Account', 'Character', 'Item', 'StatAttribute', 'SkillEntry', 'ItemOptionLink', 'ItemItemOfItemSet', 'AccountCharacterClass', 'CharacterQuestState', 'QuestMonsterKillRequirementState', 'GensMember', 'LetterHeader', 'LetterBody', 'CashShopStorageItem'];
 
 export const DIR = process.env.ADMIN_DATA_DIR ?? '/var/lib/mu-admin';
 const undoDir = () => join(DIR, 'undo');

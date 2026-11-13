@@ -355,25 +355,50 @@ const ICONS = new Set();
 fetch('items/index.json').then(r => (r.ok ? r.json() : [])).then(l => l.forEach(k => ICONS.add(k))).catch(() => {});
 const iconOf = (it, cls = 'ico') => (ICONS.has(`${it.group}_${it.number}`) ? h('img', { class: cls, src: `items/${it.group}_${it.number}.webp`, alt: '', loading: 'lazy', draggable: 'false' }) : null);
 const isExc = i => i.options.some(o => /^Excellent/.test(o.type));
-const isAnc = i => i.options.some(o => /Ancient/i.test(o.type));
+const isAnc = i => !!i.ancient || i.options.some(o => /Ancient/i.test(o.type));
 const hasLuck = i => i.options.some(o => /^Luck/.test(o.type));
 
 function optionText(o) {
   if (/^Luck/.test(o.type)) return 'Suerte (+25% éxito en combinar, +5% crítico)';
   if (o.type === 'Option') return `Opción adicional +${o.level * 4}${o.label ? ` (${o.label})` : ''}`;
   if (/^Excellent/.test(o.type)) return o.label ? `Excelente: ${o.label}` : `Excelente ${o.number}`;
-  if (/Ancient/i.test(o.type)) return `Ancient${o.label ? ': ' + o.label : ''}`;
+  if (/Ancient/i.test(o.type)) return `Ancient${o.label ? ': ' + o.label : ''}${o.level ? ` +${o.level * 5}` : ''}`;
   return `${o.type} ${o.number}${o.level ? ` +${o.level}` : ''}${o.label ? ` (${o.label})` : ''}`;
 }
 
 function tile(item, onclick, selected) {
   const ic = iconOf(item, 'tile-ico');
-  const t = h('button', { class: 'tile' + (ic ? ' has-ico' : '') + (isExc(item) ? ' exc' : '') + (isAnc(item) ? ' anc' : '') + (selected ? ' sel' : ''), title: item.name, onclick },
+  const t = h('button', { class: 'tile' + (ic ? ' has-ico' : '') + (isExc(item) ? ' exc' : '') + (isAnc(item) ? ' anc' : '') + (selected ? ' sel' : ''), title: item.ancient ? `${item.name} (ancient: ${item.ancient.set})` : item.name, onclick },
     ic, h('span', { class: 'nm' }, item.name),
     item.level ? h('span', { class: 'lvl' }, '+' + item.level) : null,
     hasLuck(item) || item.skill ? h('span', { class: 'flags' }, (hasLuck(item) ? 'S' : '') + (item.skill ? ' H' : '')) : null);
   t.style.setProperty('--tint', tint(item.group));
   return t;
+}
+
+/* ------------------------------------------------------- ancient selector */
+const BONUS = [[1, '+5'], [2, '+10']];
+/** Ancient set chooser for one item definition: set, bonus level and a preview. null when the item is in no ancient set. read() gives the request part, or null for "not ancient". */
+async function ancientPicker(definitionId, current) {
+  const sets = (await act(() => api('GET', `/items/definitions/${definitionId}/ancient`))) ?? [];
+  if (!sets.length) return null;
+  const on = h('input', { type: 'checkbox' }); on.checked = !!current;
+  const set = h('select', {}, sets.map(x => h('option', { value: x.itemOfSetId }, x.set))); if (current) set.value = current.itemOfSetId;
+  const lvl = h('select', {}, BONUS.map(([n, t]) => h('option', { value: n }, t))); lvl.value = current?.bonusLevel || 1;
+  const view = h('p', { class: 'hint' });
+  const body = h('div', { class: 'fields' }, h('label', {}, 'Set', set), h('label', {}, 'Bonus del set', lvl));
+  const paint = () => {
+    const x = sets.find(v => v.itemOfSetId === set.value);
+    body.hidden = !on.checked; view.hidden = !on.checked;
+    lvl.parentElement.hidden = !x?.bonusOptionId;
+    view.textContent = x ? `Ancient «${x.set}»${x.bonusOptionId ? `: ${x.bonus ?? 'bonus'} ${BONUS.find(([n]) => n === Number(lvl.value))?.[1] ?? ''}` : ''}. Los efectos del set salen al juntar piezas.` : '';
+  };
+  for (const e of [on, set, lvl]) e.addEventListener('change', paint);
+  paint();
+  return {
+    el: h('div', { class: 'ancient' }, h('label', { class: 'inline' }, on, `Ítem ancient (${sets.length === 1 ? 'un set' : sets.length + ' sets'})`), body, view),
+    read: () => (on.checked ? { itemOfSetId: set.value, bonusLevel: Number(lvl.value) } : null),
+  };
 }
 
 /* ------------------------------------------------------ item autocomplete */
@@ -389,7 +414,7 @@ function marked(text, q) {
 /** Item picker: category chips (only what this server has for the class and slot), a search box and a grid with icons. */
 function itemPicker(onPick, extra = {}) {
   const slotMode = extra.slot !== undefined && extra.slot !== null;
-  const who = () => (extra.character ? '&character=' + encodeURIComponent(extra.character() ?? '') : '');
+  const who = () => (extra.filter ? extra.filter() : '');
   const slotQ = slotMode ? '&slot=' + extra.slot : '';
   const need = d => (d.needsEvolve ? ` · requiere ${d.requires}` : '');
   const input = h('input', { placeholder: 'Busca por nombre, o elige una categoría', autocomplete: 'off', 'aria-label': 'Buscar ítem' });
@@ -430,10 +455,12 @@ function itemPicker(onPick, extra = {}) {
   return { el: h('div', { class: 'picker' }, browse, chosen), input, refresh };
 }
 
+const LINES = [['0', 'Mago (Dark Wizard)'], ['4', 'Caballero (Dark Knight)'], ['8', 'Elfa (Fairy Elf)'], ['12', 'Gladiador (Magic Gladiator)'], ['16', 'Señor Oscuro (Dark Lord)'], ['20', 'Invocador (Summoner)'], ['24', 'Luchador (Rage Fighter)']];
 /* ---------------------------------------------------------- insert dialog */
 /** Where: { kind: 'inventory'|'vault', id }. slot null = first free place. */
 function insertDialog(where, slot, done) {
-  const classOf = { current: where.kind === 'inventory' ? where.id : where.forChar ?? null };
+  const own = where.kind === 'inventory' ? where.id : where.forChar ?? null;
+  const classOf = { char: own, line: '' };
   const isInv = where.kind === 'inventory', isShop = where.kind === 'shop';
   const worn = isInv && slot !== null && slot < 12;
   const bodySlot = worn ? DOLL.find(([n]) => n === slot)?.[1] : '';
@@ -448,6 +475,7 @@ function insertDialog(where, slot, done) {
     def = d; go.disabled = !d;
     if (!d) return fill(form, );
     const opts = (await act(() => api('GET', '/items/definitions/' + d.id))) ?? [];
+    const anc = await ancientPicker(d.id, null);
     if (def !== d) return;
     const level = h('input', { type: 'number', min: 0, max: d.maxLevel, value: 0 });
     const dur = h('input', { type: 'number', min: 0, max: 255, placeholder: String(d.durability) });
@@ -465,7 +493,8 @@ function insertDialog(where, slot, done) {
       h('div', { class: 'chips' },
         opts.some(o => /^Luck/.test(o.type)) ? h('label', { class: 'inline' }, luck, 'Suerte') : null,
         d.hasSkill ? h('label', { class: 'inline' }, skill, 'Con habilidad') : null),
-      exc.length ? h('div', {}, h('p', { class: 'mute' }, 'Opciones excelentes'), h('div', { class: 'chips' }, chips)) : null));
+      exc.length ? h('div', {}, h('p', { class: 'mute' }, 'Opciones excelentes'), h('div', { class: 'chips' }, chips)) : null,
+      anc?.el ?? null));
     form._read = () => {
       const body = { definitionId: d.id, level: Number(level.value) };
       if (dur.value) body.durability = Number(dur.value);
@@ -474,11 +503,13 @@ function insertDialog(where, slot, done) {
       if (Number(option.value)) body.option = Number(option.value);
       const ex = exc.filter(x => x.on).map(x => x.o.number);
       if (ex.length) body.excellent = ex;
+      const an = anc?.read();
+      if (an) body.ancient = an;
       if (slot !== null) body.slot = slot;
       return body;
     };
   }
-  const s = itemPicker(configure, { slot: worn ? slot : null, character: () => classOf.current });
+  const s = itemPicker(configure, { slot: worn ? slot : null, filter: () => (classOf.char ? '&character=' + encodeURIComponent(classOf.char) : classOf.line !== '' ? '&line=' + classOf.line : '') });
   go.addEventListener('click', async () => {
     if (!def || !form._read) return;
     go.disabled = true;
@@ -490,7 +521,8 @@ function insertDialog(where, slot, done) {
   openDialog(
     h('h3', {}, worn ? `Equipar ítem: ${bodySlot}` : `Insertar ítem en ${dest}`),
     h('p', { class: 'mute' }, worn ? `Se equipa directo en la ranura «${bodySlot}». Solo salen los ítems que se pueden llevar ahí.` : slot === null ? 'Va al primer hueco libre.' : `Va a la casilla ${isInv ? slot - 11 : slot + 1}.`),
-    where.forChar ? h('label', { class: 'inline' }, Object.assign(h('input', { type: 'checkbox' }), { onchange: e => { classOf.current = e.target.checked ? null : where.forChar; s.refresh(); } }), 'Ver también ítems de otras clases (el baúl es de toda la cuenta)') : null,
+    h('label', {}, 'Mostrar ítems de', Object.assign(h('select', {}, own ? h('option', { value: 'own' }, `Clase de ${own} (solo lo que puede usar)`) : null, ...LINES.map(([n, t]) => h('option', { value: n }, t)), h('option', { value: 'all' }, 'Todas las clases')),
+      { value: own ? 'own' : 'all', onchange: e => { const v = e.target.value; classOf.char = v === 'own' ? own : null; classOf.line = v === 'own' || v === 'all' ? '' : v; s.refresh(); } })),
     s.el, form,
     h('div', { class: 'actions' }, h('button', { onclick: closeDialog }, 'Cancelar'), go));
   s.input.focus();
@@ -500,6 +532,7 @@ function insertDialog(where, slot, done) {
 /** Edits an item that is already placed. Only the fields that changed are sent; unknown options (ancient, socket) are kept. */
 async function editItemDialog(it, done) {
   const opts = (await act(() => api('GET', '/items/definitions/' + it.definitionId))) ?? [];
+  const anc = await ancientPicker(it.definitionId, it.ancient);
   const level = h('input', { type: 'number', min: 0, max: it.maxLevel, value: it.level });
   const dur = h('input', { type: 'number', min: 0, max: 255, step: 'any', value: it.durability });
   const luck = h('input', { type: 'checkbox' }); luck.checked = hasLuck(it);
@@ -520,9 +553,10 @@ async function editItemDialog(it, done) {
       opts.some(o => o.type === 'Option') ? h('label', {}, 'Opción adicional', option) : null),
     h('div', { class: 'chips' }, canLuck ? h('label', { class: 'inline' }, luck, 'Suerte') : null, it.canSkill ? h('label', { class: 'inline' }, skill, 'Con habilidad') : null),
     exc.length ? h('div', {}, h('p', { class: 'mute' }, 'Opciones excelentes'), h('div', { class: 'chips' }, chips)) : null,
+    anc?.el ?? null,
     h('details', { class: 'adv' }, h('summary', {}, 'Más opciones'),
       h('div', { class: 'fields' }, h('label', {}, 'Ranuras (socket, 0-5)', sockets), it.group === 13 ? h('label', {}, 'Experiencia de mascota', pet) : null),
-      h('p', { class: 'hint' }, 'Las opciones ancient, socket y harmony que el ítem ya tenga se conservan.')),
+      h('p', { class: 'hint' }, 'Las opciones socket y harmony que el ítem ya tenga se conservan.')),
     h('div', { class: 'actions' }, h('button', { onclick: closeDialog }, 'Cancelar'), h('button', {
       class: 'primary', onclick: async () => {
         const body = {};
@@ -533,6 +567,11 @@ async function editItemDialog(it, done) {
         if (Number(option.value) !== curOpt) body.option = Number(option.value);
         const now = exc.filter(x => x.on).map(x => x.o.number);
         if (now.length !== was.size || now.some(n => !was.has(n))) body.excellent = now;
+        if (anc) {
+          const a = anc.read();
+          if (!a && it.ancient) body.ancient = null;
+          else if (a && (!it.ancient || a.itemOfSetId !== it.ancient.itemOfSetId || a.bonusLevel !== it.ancient.bonusLevel)) body.ancient = a;
+        }
         if (Number(sockets.value) !== it.socketCount) body.socketCount = Number(sockets.value);
         if (it.group === 13 && Number(pet.value) !== it.petExperience) body.petExperience = Number(pet.value);
         if (!Object.keys(body).length) return toast('No cambiaste nada');
@@ -599,7 +638,8 @@ function storagePanel(kind, id, forChar) {
       iconOf(it, 'detail-ico'),
       h('h3', {}, it.name, it.level ? ` +${it.level}` : ''),
       h('p', { class: 'mute' }, `${GROUPS[it.group] ?? ''} · ${it.w}x${it.h} · durabilidad ${it.durability}${it.skill ? ' · con habilidad' : ''}`),
-      it.options.length ? h('ul', {}, it.options.map(o => h('li', { class: /^Excellent/.test(o.type) ? 'exc' : /^Luck/.test(o.type) ? 'luck' : '' }, optionText(o)))) : h('p', { class: 'hint' }, 'Sin opciones.'),
+      it.ancient ? h('p', { class: 'anc-set' }, `Set ancient: ${it.ancient.set}`) : null,
+      it.options.length ? h('ul', {}, it.options.map(o => h('li', { class: /^Excellent/.test(o.type) ? 'exc' : /^Luck/.test(o.type) ? 'luck' : /Ancient/i.test(o.type) ? 'anc' : '' }, optionText(o)))) : h('p', { class: 'hint' }, 'Sin opciones.'),
       h('div', { class: 'row' },
         h('button', { onclick: () => editItemDialog(it, load) }, 'Editar'),
         h('button', { onclick: () => { moving = it.id; draw(); } }, 'Mover de casilla'),

@@ -9,7 +9,7 @@ Bun service, about 70 MB of RAM, that edits OpenMU's PostgreSQL data on behalf o
   `POST /undo/:id` puts them back (also gated). Passwords are never logged; undo files hold hashes, so the folder is root only.
 - The database role `mu_admin` is created by `install-vm.sh` with SELECT on `data` and `config` and write rights on only the tables in `undo.ts`.
 
-Routes: `GET /status`, `/accounts`, `/characters`, `/characters/:name`, `/characters/:name/items`, `/items/definitions[/:id]`, `/audit`, `/undo`;
+Routes: `GET /status`, `/accounts`, `/characters`, `/characters/:name`, `/characters/:name/items`, `/items/definitions[/:id[/ancient]]`, `/server/boxes`, `/audit`, `/undo`;
 `POST /accounts`, `/accounts/:login/password`, `/accounts/:login/state`, `/characters/:name/items`, `/undo/:id`; `PATCH /characters/:name`;
 `DELETE /characters/:name/items/:id`.
 

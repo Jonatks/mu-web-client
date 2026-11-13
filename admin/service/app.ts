@@ -116,10 +116,11 @@ export function createApp(cfg: Config) {
       if (m === 'PATCH' && p.length === 2) { needAdmin(); const b = await body(); return gated(() => items.editItem(sql, admin, p[1]!, b as items.ItemEdit)); }
       if (m === 'POST' && p[2] === 'move') { needAdmin(); const b = await body(); return gated(() => items.moveItem(sql, admin, p[1]!, b as items.ItemMove)); }
     }
-    if (p[0] === 'items' && p[1] === 'categories' && m === 'GET') return items.itemCategories(sql, q.get('slot') ?? '', q.get('character') ?? '');
+    if (p[0] === 'items' && p[1] === 'categories' && m === 'GET') return items.itemCategories(sql, q.get('slot') ?? '', q.get('character') ?? '', q.get('line') ?? '');
     if (p[0] === 'items' && p[1] === 'definitions' && m === 'GET') {
+      if (p[2] && p[3] === 'ancient') return items.ancientSetsOf(sql, p[2]);
       if (p[2]) return items.definitionOptions(sql, p[2]);
-      return items.searchDefinitions(sql, q.get('q') ?? '', q.get('group') ?? '', q.get('slot') ?? '', q.get('character') ?? '', q.get('cat') ?? '');
+      return items.searchDefinitions(sql, q.get('q') ?? '', q.get('group') ?? '', q.get('slot') ?? '', q.get('character') ?? '', q.get('cat') ?? '', q.get('line') ?? '');
     }
     if (p[0] === 'server') {
       const id = p[2] ?? '';
@@ -143,6 +144,10 @@ export function createApp(cfg: Config) {
           if (m === 'GET') return server.listDrops(sql);
           if (m === 'POST' && p[2] === 'scale') { needAdmin(); return server.scaleDrops(sql, admin, await body()); }
           if (m === 'POST' && p.length === 3) { needAdmin(); return server.setDrop(sql, admin, id, await body()); }
+          break;
+        case 'boxes':
+          if (m === 'GET') return server.listBoxes(sql);
+          if (m === 'POST') { needAdmin(); return server.setBoxItemChance(sql, admin, await body()); }
           break;
         case 'monsters':
           if (m === 'GET' && p.length === 2) return server.listMonsters(sql, q.get('q') ?? '', q.get('kind') ?? '');

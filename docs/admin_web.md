@@ -23,7 +23,9 @@ the schema, edits applied, tables compared), not by driving the panel. Result:
 | zen | `data."ItemStorage"."Money"` of the character's inventory storage |
 | insert item | `data."Item"` plus `data."ItemOptionLink"` (luck: link level 0; additional option: link level 1-4; excellent: link level 0), into the bag grid (slots 12-75) or the account vault (slots 0-119, 0-239 if extended); a chosen slot must fit, else the first free place |
 | vault | `data."ItemStorage"` (`Money`); a vault that never existed is created and `Account."VaultId"` set (undo restores `VaultId` before deleting the storage, because the key cascades) |
-| edit placed item | `data."Item"` (`Level`, `Durability`, `HasSkill`, `SocketCount`, `PetExperience`) and its luck / additional / excellent `data."ItemOptionLink"` rows; ancient, socket and harmony links are kept |
+| edit placed item | `data."Item"` (`Level`, `Durability`, `HasSkill`, `SocketCount`, `PetExperience`) and its luck / additional / excellent `data."ItemOptionLink"` rows; socket and harmony links are kept |
+| ancient item (add or edit) | `data."ItemItemOfItemSet"` (item to `config."ItemOfItemSet"`) plus the set's bonus `ItemOptionLink` at level 1 (+5) or 2 (+10); `GET /items/definitions/:id/ancient` lists the sets an item can be in (rings and pendants too); `ancient: null` on edit takes it out of its set |
+| class filter of the item picker | `?character=<name>` or `?line=<base class number>` on `/items/definitions` and `/items/categories`; the dialog shows which one is active |
 | move item | `data."Item"` (`ItemSlot`, `ItemStorageId`): inside its storage, or between a character inventory and the vault of the same account; equipment slots are never targets |
 | skills | `data."SkillEntry"` (add, level, remove) |
 | delete character / account | the rows of the character (stats, skills, inventory storage and items) or of an account without characters (and its vault); refused when a table the panel does not know still points at the row |
@@ -44,6 +46,7 @@ restarts OpenMU. A full start takes about three minutes on the 1 GB VM.
 |---|---|---|
 | Experiencia y reglas | `config."GameConfiguration"`, `GameServerDefinition`, `GameServerConfiguration` | `ExperienceRate`, `MasterExperienceRate`, limits, money caps, drop time (an interval), per-server rate, PvP, player cap. Final experience is rules x server x map |
 | Mapas | `config."GameMapDefinition"."ExpMultiplier"` | the terrain (`TerrainData`, 3 header bytes then 256 x 256 tiles) is read to draw the spot picker |
+| Cajas y objetos | `config."ItemDropItemGroup"` | one chance for how often a box (Kundun +1..+5, Box of Luck) gives items; its item groups keep their proportions, the zen group catches the rest; at most 99% (at 100% it ties with the zen group) |
 | Drops | `config."DropItemGroup"` | chance 0 to 1 (100% = always), monster level range; "scale" multiplies the chance of the chosen kinds, never above 1 |
 | Mobs y spots | `config."MonsterSpawnArea"` (insert, update, delete) | rectangle, quantity, direction; a rectangle with no walkable tile (terrain byte 0) is refused |
 | Monstruos | `config."MonsterDefinition"`, `MonsterAttribute` | respawn, move and attack delays (intervals), ranges, max drops, stats |

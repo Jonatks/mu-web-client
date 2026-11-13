@@ -306,11 +306,36 @@ const sign = (a, b, fmt = f.num) => `${b > a ? '+' : '−'}${fmt(Math.abs(b - a)
           h('div', { class: 'fields' }, kit.field('chance', 'Probabilidad (%)', chance, Math.round(d.chance * 10000) / 100, { fmt: pctOf }), kit.field('min', 'Nivel mínimo del monstruo', min, d.minLevel ?? ''), kit.field('max', 'Nivel máximo del monstruo', max, d.maxLevel ?? '')),
           bar2.el, h('div', { class: 'actions' }, h('button', { onclick: closeDialog }, 'Cerrar')));
       }
+      // Boxes that open (Kundun +1..+5, Box of Luck...): one control for how often they give items instead of zen.
+      const boxes = (await act(() => api('GET', '/server/boxes'))) ?? [];
+      const picked = new Set(boxes.filter(b => b.kundun && b.adjustable).map(b => b.key));
+      let want = 80;
+      const boxRows = h('tbody'), boxVerdict = h('p', { class: 'mute' });
+      const boxGo = h('button', { class: 'primary' }, 'Aplicar a las cajas marcadas');
+      const boxIn = numInput(want, { step: 1, min: 1, max: 99, label: 'Probabilidad de ítem (%)' });
+      const drawBoxes = () => {
+        fill(boxRows, boxes.map(b => h('tr', {},
+          h('td', {}, b.adjustable ? Object.assign(h('input', { type: 'checkbox', checked: picked.has(b.key), 'aria-label': 'Elegir ' + b.description }), { onchange: e => { e.target.checked ? picked.add(b.key) : picked.delete(b.key); drawBoxes(); } }) : null),
+          h('td', {}, b.description, b.description !== b.name ? h('span', { class: 'mute' }, ` (${b.name})`) : null),
+          h('td', {}, h('b', {}, f.pct(b.itemChance)), picked.has(b.key) && want / 100 !== b.itemChance ? [' → ', h('b', { class: 'gold' }, f.pct(want / 100))] : null),
+          h('td', { class: 'mute' }, b.adjustable ? `${nf.format(b.zen)} zen el resto` : 'siempre ítems, sin zen'))));
+        boxGo.disabled = picked.size === 0 || !(want >= 1 && want <= 99);
+        fill(boxVerdict, picked.size ? `${picked.size} ${picked.size === 1 ? 'caja cambia' : 'cajas cambian'}: darán ítem el ${want}% de las veces y zen el resto. Máximo 99%.` : 'Marca las cajas que quieres cambiar.');
+      };
+      boxIn.addEventListener('input', () => { want = Number(boxIn.value); drawBoxes(); });
+      boxGo.addEventListener('click', async () => {
+        if (!(await confirmBox('Cambiar lo que dan las cajas', `Las ${picked.size} cajas marcadas darán ítem el ${want}% de las veces y zen el resto. Se puede deshacer en «Registro».`, 'Aplicar'))) return;
+        if (await save('/server/boxes', { chance: want / 100, keys: [...picked] })) { fill(box, ); box.append(dropsTab()); }
+      });
+      drawBoxes();
       kind.addEventListener('change', draw); q.addEventListener('input', debounce(draw, 100)); draw(); drawBars();
       fill(box,
         strip(stat('Grupos de drop', drops.length), stat('Caen siempre (100%)', drops.filter(d => d.chance >= 1).length), stat('Ítems al azar (promedio)', avg(drops.filter(d => d.itemType === 3)), { fmt: f.pct }), stat('Excelentes (promedio)', avg(drops.filter(d => d.itemType === 2)), { fmt: f.pct })),
         section('Subir o bajar el drop de todo el servidor', 'Elige un multiplicador y los tipos de drop. Las barras muestran el promedio de hoy (relleno) y cómo quedaría (sombra).',
           chips, h('div', { class: 'row' }, h('label', { class: 'f' }, h('span', { class: 'ft' }, 'o escribe otro'), custom)), bars, verdict, h('div', { class: 'actions' }, apply)),
+        boxes.length ? section('Cajas y objetos', 'Lo que dan las cajas al abrirlas (Caja de Kundun, Caja de la suerte...). Cada caja tira primero por ítems y, si no sale, da zen. Aquí cambias esa probabilidad de una vez.',
+          h('table', {}, h('thead', {}, h('tr', {}, ['', 'Caja', 'Da ítem', 'Si no, da'].map(t => h('th', {}, t)))), boxRows),
+          h('div', { class: 'row' }, h('label', { class: 'f' }, h('span', { class: 'ft' }, 'Probabilidad de ítem (%)'), boxIn)), boxVerdict, h('div', { class: 'actions' }, boxGo)) : null,
         section('Grupos de drop', 'Cada grupo es una tirada con su probabilidad y los ítems que puede soltar.', h('div', { class: 'row' }, q, kind),
           h('table', {}, h('thead', {}, h('tr', {}, ['Grupo', 'Tipo', 'Probabilidad', 'Nivel del monstruo', 'Dónde', ''].map(t => h('th', {}, t)))), rows)));
     });
