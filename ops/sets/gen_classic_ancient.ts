@@ -9,11 +9,11 @@ SETS.forEach((s, i) => {
   const opts = [...s.standard, ...s.full];
   const piece = (g: number, n: number) => `'00000080-${hex(g)}-${hex(n)}-0000-000000000000'`;
   body += `  -- ${s.name} (set ${s.number})\n`;
-  body += `  PERFORM pg_temp.add_set(${i}, ${lit(s.name)}, ${lit('Total ' + { str: 'Strength', agi: 'Agility', ene: 'Energy', vit: 'Vitality' }[s.stat])},\n`;
-  body += `    ARRAY[${s.pieces.map(([g, n]) => piece(g, n)).join(', ')}],\n`;
-  body += `    ARRAY[${opts.map(([k]) => lit(KINDS[k].attr)).join(', ')}],\n`;
+  body += `  PERFORM pg_temp.add_set(${i}, ${lit(s.name)}::text, ${lit('Total ' + { str: 'Strength', agi: 'Agility', ene: 'Energy', vit: 'Vitality' }[s.stat])}::text,\n`;
+  body += `    ARRAY[${s.pieces.map(([g, n]) => piece(g, n)).join(', ')}]::uuid[],\n`;
+  body += `    ARRAY[${opts.map(([k]) => lit(KINDS[k].attr)).join(', ')}]::text[],\n`;
   body += `    ARRAY[${opts.map(([k, v]) => +(v * KINDS[k].scale + (KINDS[k].add ?? 0)).toFixed(6)).join(', ')}]::numeric[],\n`;
-  body += `    ARRAY[${opts.map(([k]) => KINDS[k].aggregate).join(', ')}]);\n`;
+  body += `    ARRAY[${opts.map(([k]) => KINDS[k].aggregate).join(', ')}]::int[]);\n`;
 });
 
 const sql = `-- Fase 1: los 11 sets ancient clasicos (Mahes, Bragi, Alvis, Serket, Apis, Tyr, Khone, Surt, Harpy, Horus, Magni).

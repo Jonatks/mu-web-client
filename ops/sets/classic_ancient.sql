@@ -59,71 +59,71 @@ END $f$;
 DO $$
 BEGIN
   -- Mahes (set 51)
-  PERFORM pg_temp.add_set(0, 'Mahes', 'Total Strength',
-    ARRAY['00000080-0009-0010-0000-000000000000', '00000080-0006-000c-0000-000000000000'],
-    ARRAY['Maximum Health', 'Defense Ignore Chance', 'Defense Increase Multiplier With Equipped Shield'],
+  PERFORM pg_temp.add_set(0, 'Mahes'::text, 'Total Strength'::text,
+    ARRAY['00000080-0009-0010-0000-000000000000', '00000080-0006-000c-0000-000000000000']::uuid[],
+    ARRAY['Maximum Health', 'Defense Ignore Chance', 'Defense Increase Multiplier With Equipped Shield']::text[],
     ARRAY[100, 0.06, 0.17]::numeric[],
-    ARRAY[0, 0, 0]);
+    ARRAY[0, 0, 0]::int[]);
   -- Bragi (set 52)
-  PERFORM pg_temp.add_set(1, 'Bragi', 'Total Strength',
-    ARRAY['00000080-0008-0011-0000-000000000000', '00000080-0009-0011-0000-000000000000', '00000080-0007-0011-0000-000000000000', '00000080-000b-0011-0000-000000000000', '00000080-0000-0011-0000-000000000000'],
-    ARRAY['Total Strength', 'Total Strength', 'Total Strength', 'Maximum Health', 'Minimum Physical Base Damage', 'Two-Handed Weapon Physical Damage Increase (Ancient Option)', 'Double Damage Chance', 'Skill Damage Bonus'],
+  PERFORM pg_temp.add_set(1, 'Bragi'::text, 'Total Strength'::text,
+    ARRAY['00000080-0008-0011-0000-000000000000', '00000080-0009-0011-0000-000000000000', '00000080-0007-0011-0000-000000000000', '00000080-000b-0011-0000-000000000000', '00000080-0000-0011-0000-000000000000']::uuid[],
+    ARRAY['Total Strength', 'Total Strength', 'Total Strength', 'Maximum Health', 'Minimum Physical Base Damage', 'Two-Handed Weapon Physical Damage Increase (Ancient Option)', 'Double Damage Chance', 'Skill Damage Bonus']::text[],
     ARRAY[10, 20, 30, 50, 30, 0.06, 0.03, 50]::numeric[],
-    ARRAY[0, 0, 0, 0, 0, 0, 0, 0]);
+    ARRAY[0, 0, 0, 0, 0, 0, 0, 0]::int[]);
   -- Alvis (set 53)
-  PERFORM pg_temp.add_set(2, 'Alvis', 'Total Energy',
-    ARRAY['00000080-0008-0012-0000-000000000000', '00000080-000a-0012-0000-000000000000', '00000080-000b-0012-0000-000000000000', '00000080-000d-001b-0000-000000000000', '00000080-0005-0009-0000-000000000000'],
-    ARRAY['Double Damage Chance', 'Double Damage Chance', 'Double Damage Chance', 'Total Energy', 'Defense Ignore Chance', 'Critical Damage Chance', 'Excellent Damage Chance', 'Defense Increase Multiplier With Equipped Shield'],
+  PERFORM pg_temp.add_set(2, 'Alvis'::text, 'Total Energy'::text,
+    ARRAY['00000080-0008-0012-0000-000000000000', '00000080-000a-0012-0000-000000000000', '00000080-000b-0012-0000-000000000000', '00000080-000d-001b-0000-000000000000', '00000080-0005-0009-0000-000000000000']::uuid[],
+    ARRAY['Double Damage Chance', 'Double Damage Chance', 'Double Damage Chance', 'Total Energy', 'Defense Ignore Chance', 'Critical Damage Chance', 'Excellent Damage Chance', 'Defense Increase Multiplier With Equipped Shield']::text[],
     ARRAY[0.01, 0.02, 0.03, 10, 0.01, 0.08, 0.08, 0.08]::numeric[],
-    ARRAY[0, 0, 0, 0, 0, 0, 0, 0]);
+    ARRAY[0, 0, 0, 0, 0, 0, 0, 0]::int[]);
   -- Serket (set 54)
-  PERFORM pg_temp.add_set(3, 'Serket', 'Total Agility',
-    ARRAY['00000080-0007-0024-0000-000000000000', '00000080-0009-0024-0000-000000000000'],
-    ARRAY['Total Agility', 'Total Agility', 'Total Agility'],
+  PERFORM pg_temp.add_set(3, 'Serket'::text, 'Total Agility'::text,
+    ARRAY['00000080-0007-0024-0000-000000000000', '00000080-0009-0024-0000-000000000000']::uuid[],
+    ARRAY['Total Agility', 'Total Agility', 'Total Agility']::text[],
     ARRAY[40, 90, 40]::numeric[],
-    ARRAY[0, 0, 0]);
+    ARRAY[0, 0, 0]::int[]);
   -- Apis (set 55)
-  PERFORM pg_temp.add_set(4, 'Apis', 'Total Strength',
-    ARRAY['00000080-000b-0025-0000-000000000000', '00000080-000d-000d-0000-000000000000'],
-    ARRAY['Maximum Physical Base Damage', 'Critical Damage Bonus', 'Excellent Damage Bonus'],
+  PERFORM pg_temp.add_set(4, 'Apis'::text, 'Total Strength'::text,
+    ARRAY['00000080-000b-0025-0000-000000000000', '00000080-000d-000d-0000-000000000000']::uuid[],
+    ARRAY['Maximum Physical Base Damage', 'Critical Damage Bonus', 'Excellent Damage Bonus']::text[],
     ARRAY[60, 40, 40]::numeric[],
-    ARRAY[0, 0, 0]);
+    ARRAY[0, 0, 0]::int[]);
   -- Tyr (set 56)
-  PERFORM pg_temp.add_set(5, 'Tyr', 'Total Strength',
-    ARRAY['00000080-0009-0014-0000-000000000000', '00000080-000a-0014-0000-000000000000', '00000080-000b-0014-0000-000000000000', '00000080-000d-000c-0000-000000000000', '00000080-0000-001f-0000-000000000000'],
-    ARRAY['Total Strength', 'Total Agility', 'Total Vitality', 'Total Energy', 'Double Damage Chance', 'Wizardry Base Damage Increase', 'Two-Handed Weapon Physical Damage Increase (Ancient Option)', 'Excellent Damage Chance'],
+  PERFORM pg_temp.add_set(5, 'Tyr'::text, 'Total Strength'::text,
+    ARRAY['00000080-0009-0014-0000-000000000000', '00000080-000a-0014-0000-000000000000', '00000080-000b-0014-0000-000000000000', '00000080-000d-000c-0000-000000000000', '00000080-0000-001f-0000-000000000000']::uuid[],
+    ARRAY['Total Strength', 'Total Agility', 'Total Vitality', 'Total Energy', 'Double Damage Chance', 'Wizardry Base Damage Increase', 'Two-Handed Weapon Physical Damage Increase (Ancient Option)', 'Excellent Damage Chance']::text[],
     ARRAY[20, 20, 20, 20, 0.01, 1.01, 0.06, 0.12]::numeric[],
-    ARRAY[0, 0, 0, 0, 0, 1, 0, 0]);
+    ARRAY[0, 0, 0, 0, 0, 1, 0, 0]::int[]);
   -- Khone (set 57)
-  PERFORM pg_temp.add_set(6, 'Khone', 'Total Strength',
-    ARRAY['00000080-000a-001b-0000-000000000000', '00000080-000b-001b-0000-000000000000'],
-    ARRAY['Maximum Health', 'Critical Damage Chance', 'Excellent Damage Chance'],
+  PERFORM pg_temp.add_set(6, 'Khone'::text, 'Total Strength'::text,
+    ARRAY['00000080-000a-001b-0000-000000000000', '00000080-000b-001b-0000-000000000000']::uuid[],
+    ARRAY['Maximum Health', 'Critical Damage Chance', 'Excellent Damage Chance']::text[],
     ARRAY[200, 0.03, 0.03]::numeric[],
-    ARRAY[0, 0, 0]);
+    ARRAY[0, 0, 0]::int[]);
   -- Surt (set 58)
-  PERFORM pg_temp.add_set(7, 'Surt', 'Total Strength',
-    ARRAY['00000080-0007-0026-0000-000000000000', '00000080-0008-0026-0000-000000000000', '00000080-000a-0026-0000-000000000000', '00000080-000b-0026-0000-000000000000', '00000080-0002-000b-0000-000000000000'],
-    ARRAY['Defense Increase Multiplier With Equipped Shield', 'Base Defense', 'Total Strength', 'Maximum Health', 'Skill Damage Bonus', 'Critical Damage Bonus', 'Critical Damage Chance', 'Total Energy'],
+  PERFORM pg_temp.add_set(7, 'Surt'::text, 'Total Strength'::text,
+    ARRAY['00000080-0007-0026-0000-000000000000', '00000080-0008-0026-0000-000000000000', '00000080-000a-0026-0000-000000000000', '00000080-000b-0026-0000-000000000000', '00000080-0002-000b-0000-000000000000']::uuid[],
+    ARRAY['Defense Increase Multiplier With Equipped Shield', 'Base Defense', 'Total Strength', 'Maximum Health', 'Skill Damage Bonus', 'Critical Damage Bonus', 'Critical Damage Chance', 'Total Energy']::text[],
     ARRAY[0.02, 20, 30, 70, 40, 80, 0.01, 60]::numeric[],
-    ARRAY[0, 2, 0, 0, 0, 0, 0, 0]);
+    ARRAY[0, 2, 0, 0, 0, 0, 0, 0]::int[]);
   -- Harpy (set 59)
-  PERFORM pg_temp.add_set(8, 'Harpy', 'Total Energy',
-    ARRAY['00000080-0008-0029-0000-000000000000', '00000080-000b-0029-0000-000000000000'],
-    ARRAY['Total Agility', 'Defense Ignore Chance', 'Base Defense'],
+  PERFORM pg_temp.add_set(8, 'Harpy'::text, 'Total Energy'::text,
+    ARRAY['00000080-0008-0029-0000-000000000000', '00000080-000b-0029-0000-000000000000']::uuid[],
+    ARRAY['Total Agility', 'Defense Ignore Chance', 'Base Defense']::text[],
     ARRAY[10, 0.01, 40]::numeric[],
-    ARRAY[0, 0, 2]);
+    ARRAY[0, 0, 2]::int[]);
   -- Horus (set 60)
-  PERFORM pg_temp.add_set(9, 'Horus', 'Total Vitality',
-    ARRAY['00000080-0000-0021-0000-000000000000', '00000080-000d-001c-0000-000000000000'],
-    ARRAY['Minimum Physical Base Damage', 'Skill Damage Bonus', 'Double Damage Chance'],
+  PERFORM pg_temp.add_set(9, 'Horus'::text, 'Total Vitality'::text,
+    ARRAY['00000080-0000-0021-0000-000000000000', '00000080-000d-001c-0000-000000000000']::uuid[],
+    ARRAY['Minimum Physical Base Damage', 'Skill Damage Bonus', 'Double Damage Chance']::text[],
     ARRAY[80, 60, 0.04]::numeric[],
-    ARRAY[0, 0, 0]);
+    ARRAY[0, 0, 0]::int[]);
   -- Magni (set 61)
-  PERFORM pg_temp.add_set(10, 'Magni', 'Total Vitality',
-    ARRAY['00000080-0007-003d-0000-000000000000', '00000080-0008-003d-0000-000000000000', '00000080-000b-003d-0000-000000000000', '00000080-000d-0017-0000-000000000000', '00000080-0000-0022-0000-000000000000'],
-    ARRAY['Maximum Physical Base Damage', 'Maximum Physical Base Damage', 'Maximum Physical Base Damage', 'Maximum Health', 'Base Defense', 'Excellent Damage Bonus', 'Excellent Damage Chance', 'Minimum Physical Base Damage'],
+  PERFORM pg_temp.add_set(10, 'Magni'::text, 'Total Vitality'::text,
+    ARRAY['00000080-0007-003d-0000-000000000000', '00000080-0008-003d-0000-000000000000', '00000080-000b-003d-0000-000000000000', '00000080-000d-0017-0000-000000000000', '00000080-0000-0022-0000-000000000000']::uuid[],
+    ARRAY['Maximum Physical Base Damage', 'Maximum Physical Base Damage', 'Maximum Physical Base Damage', 'Maximum Health', 'Base Defense', 'Excellent Damage Bonus', 'Excellent Damage Chance', 'Minimum Physical Base Damage']::text[],
     ARRAY[5, 10, 20, 100, 50, 10, 0.08, 60]::numeric[],
-    ARRAY[0, 0, 0, 0, 2, 0, 0, 0]);
+    ARRAY[0, 0, 0, 0, 2, 0, 0, 0]::int[]);
 END $$;
 \endif
 COMMIT;
