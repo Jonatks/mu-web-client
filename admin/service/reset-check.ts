@@ -14,7 +14,7 @@ const ok = (name: string, cond: boolean, extra = '') => console.log(`${cond ? 'o
 const rate = async () => Number((await sql`SELECT "ExperienceRate" AS v FROM config."GameConfiguration"`)[0]!.v);
 const spawns = async () => Number((await sql`SELECT count(*) AS n FROM config."MonsterSpawnArea"`)[0]!.n);
 const shopItems = async () => Number((await sql`SELECT count(*) AS n FROM data."Item" WHERE "ItemStorageId" IN (SELECT "MerchantStoreId" FROM config."MonsterDefinition" WHERE "MerchantStoreId" IS NOT NULL)`)[0]!.n);
-const drops = async () => Number((await sql`SELECT coalesce(sum("Chance"),0) AS s FROM config."DropItemGroup"`)[0]!.s);
+const drops = async () => Math.round(Number((await sql`SELECT coalesce(sum("Chance"),0) AS s FROM config."DropItemGroup"`)[0]!.s) * 1e6) / 1e6;
 const warps = async () => Number((await sql`SELECT coalesce(sum("Costs"),0) AS s FROM config."WarpInfo"`)[0]!.s);
 
 const before = { rate: await rate(), spawns: await spawns(), shop: await shopItems(), drops: await drops(), warps: await warps() };
