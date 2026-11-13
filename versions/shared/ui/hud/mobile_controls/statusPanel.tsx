@@ -36,8 +36,10 @@ export const StatusPanel = observer(() => {
         </span>
         <span className="mobile-name">{Hero.name}</span>
       </div>
-      <div className="mobile-place">{place}</div>
-      {safe && <div className="mobile-safe">{t('mobile.safeZone')}</div>}
+      <div className="mobile-status-row">
+        <div className="mobile-place">{place}</div>
+        {safe && <div className="mobile-safe">{t('mobile.safeZone')}</div>}
+      </div>
     </div>
   );
 });

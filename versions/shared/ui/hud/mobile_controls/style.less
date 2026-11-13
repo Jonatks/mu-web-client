@@ -2170,3 +2170,169 @@ body:has(.mu-item-window) .mobile-controls .mobile-book {
   border-top: 1px solid #8a5a22;
   background: linear-gradient(rgba(30, 20, 11, 0.9), rgba(10, 7, 4, 0.95));
 }
+
+// The top left block as on Mu Magdalena: a bronze-edged level badge, the name, then the place and a glossy zone pill on one row.
+.mobile-status {
+  gap: 5px;
+
+  .mobile-level {
+    padding: 2px 8px;
+    border: 1.5px solid #b98a3e;
+    border-radius: 5px;
+    background: linear-gradient(#3a2a14, #1a1208) padding-box,
+      conic-gradient(#ffd76a var(--xp, 0%), rgba(60, 48, 26, 0.9) 0) border-box;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.9), 0 0 6px rgba(255, 214, 108, 0.25);
+    font-size: 12px;
+    color: #f5e1b0;
+  }
+
+  .mobile-name {
+    font-size: 15px;
+    letter-spacing: 0.06em;
+  }
+
+  .mobile-place {
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .mobile-safe {
+    padding: 1px 9px;
+    border-radius: 6px;
+    background: linear-gradient(#2f9a55, #145a2c);
+    border: 1px solid #0a2a14;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 0 0 1px rgba(120, 230, 150, 0.55);
+    font-size: 10px;
+    color: #e8ffe8;
+  }
+}
+
+// The Talk pill: dark leather with a bronze hairline, like the studied one.
+.mobile-talk-pill {
+  padding: 8px 20px !important;
+  border-radius: 12px !important;
+  background: linear-gradient(rgba(52, 40, 24, 0.95), rgba(26, 20, 12, 0.95)) !important;
+  border: 1px solid rgba(214, 170, 96, 0.7) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 230, 170, 0.2), 0 4px 12px rgba(0, 0, 0, 0.6) !important;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-weight: 700;
+  color: #f3dcae;
+}
+
+// ---- every touch panel, as Mu Magdalena's: dark leather, bronze hairline frame, centred spaced serif title, round bronze X ----
+.mobile-panel {
+  border: 1px solid rgba(150, 110, 50, 0.85) !important;
+  border-radius: 10px !important;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(90, 64, 30, 0.25), transparent 60%),
+    linear-gradient(#1d150d, #0c0805) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.8),
+    inset 0 0 0 3px rgba(214, 170, 96, 0.12),
+    0 12px 40px rgba(0, 0, 0, 0.8) !important;
+
+  .mobile-panel-head {
+    position: relative;
+    justify-content: center !important;
+    padding: 10px 52px 8px !important;
+    border-bottom: 1px solid rgba(150, 110, 50, 0.35) !important;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 15px !important;
+    font-weight: 700;
+    letter-spacing: 0.32em !important;
+    text-transform: uppercase;
+    color: #cfae74 !important;
+
+    .mobile-close {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      margin-top: -18px;
+    }
+  }
+
+  .mobile-close {
+    width: 36px;
+    height: 36px;
+    border: 0 !important;
+    color: #f3dcae;
+    background:
+      radial-gradient(circle, #1b130b 0 60%, transparent 62%),
+      conic-gradient(from 200deg, @bronze-hi, @bronze, @bronze-lo, @bronze, @bronze-hi, @bronze, @bronze-lo, @bronze, @bronze-hi) !important;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.8), 0 2px 6px rgba(0, 0, 0, 0.6) !important;
+  }
+}
+
+// The two columns of the skills panel: framed sections with spaced small-caps headings, bigger boxes.
+.mobile-picker {
+  width: min(94vw, 860px) !important;
+
+  .mobile-picker-col {
+    border: 1px solid rgba(150, 110, 50, 0.4) !important;
+    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.25);
+  }
+
+  .mobile-picker-title {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #cfae74;
+  }
+
+  .mobile-pick-slot,
+  .mobile-pick-skill {
+    width: 50px !important;
+    height: 50px !important;
+    border-radius: 6px !important;
+    border: 1px solid #b98a3e !important;
+    background: radial-gradient(circle at 50% 35%, #2a1d10, #0a0705) !important;
+    box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.7), inset 0 0 0 3px rgba(240, 200, 122, 0.18), 0 3px 8px rgba(0, 0, 0, 0.6) !important;
+
+    &.is-active {
+      border-color: #ffd27a !important;
+      box-shadow: 0 0 0 1px #ffd27a, 0 0 10px rgba(255, 200, 100, 0.5) !important;
+    }
+  }
+}
+
+// The command tiles: icons in old gold with a warm glow, serif labels.
+.mobile-commands .mobile-tile {
+  color: #e8a84a;
+
+  svg {
+    filter: drop-shadow(0 0 4px rgba(255, 150, 50, 0.55));
+  }
+
+  span {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 11px;
+    color: #eadbb8;
+  }
+}
+
+.mobile-picker .mobile-picker-col.positions {
+  width: 200px !important;
+}
+
+.mobile-picker .mobile-picker-positions {
+  display: grid !important;
+  grid-template-columns: repeat(3, 50px);
+  gap: 12px 10px;
+  justify-content: center;
+}
+
+// The item sheet in the same leather and bronze as every other panel.
+.mobile-item-sheet .mobile-sheet-panel {
+  border: 1px solid rgba(150, 110, 50, 0.85) !important;
+  border-radius: 10px !important;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(90, 64, 30, 0.3), transparent 55%),
+    linear-gradient(#1d150d, #0c0805) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.8),
+    inset 0 0 0 3px rgba(214, 170, 96, 0.12),
+    0 12px 40px rgba(0, 0, 0, 0.8) !important;
+}
