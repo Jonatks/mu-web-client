@@ -41,7 +41,13 @@ for (const tab of ['rules', 'spawns', 'drops', 'warps', 'shops']) {
 const after = { rate: await rate(), spawns: await spawns(), shop: await shopItems(), drops: await drops(), warps: await warps() };
 console.log('after reset', after);
 ok('rate is the default', after.rate === Number((defaults.GameConfiguration![0] as { ExperienceRate: number }).ExperienceRate));
-ok('spawns count equals defaults', after.spawns === defaults.MonsterSpawnArea!.length);
+const maps = new Set((await sql`SELECT "Id" AS id FROM config."GameMapDefinition"`).map(r => r.id as string));
+const liveNumbers = new Set((await sql`SELECT "Number" AS n FROM config."MonsterDefinition"`).map(r => r.n as number));
+const numberOf = new Map(defaults.MonsterDefinition!.map(m => [m.Id as string, m.Number as number]));
+const expected = defaults.MonsterSpawnArea!.filter(a => maps.has(a.GameMapId as string) && liveNumbers.has(numberOf.get(a.MonsterDefinitionId as string) as number)).length;
+ok(`spawns count equals the defaults that fit this server (${expected})`, after.spawns === expected);
+const dw = defaults.WarpInfo!.reduce((s, r) => s + Number(r.Costs), 0);
+ok('warp costs are the default', after.warps === dw);
 for (const tab of ['rules', 'spawns', 'drops', 'warps', 'shops']) {
   const r = await resetTab(sql, 'check', tab, defaults);
   ok(`second reset of ${tab} changes nothing`, r.result.changed === 0, String(r.result.changed));

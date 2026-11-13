@@ -9,7 +9,8 @@ import { bad, missing } from './errors';
 import { EVENT_BOOLS, EVENT_INTS, EVENT_SECS, RULE_FIELDS } from './server';
 import { DIR, type Row, type Writer, write } from './undo';
 
-type Part = { table: string; cols: string[] };
+/** `key` names the columns that identify a row when its Id changes from one fresh database to the next. */
+type Part = { table: string; cols: string[]; key?: string[] };
 type Tab = { label: string; parts?: Part[]; replace?: 'spawns' | 'shops' };
 
 export const RESET_TABS: Record<string, Tab> = {
@@ -33,13 +34,13 @@ export const RESET_TABS: Record<string, Tab> = {
   drops: {
     label: 'Drops',
     parts: [
-      { table: 'DropItemGroup', cols: ['Chance', 'MinimumMonsterLevel', 'MaximumMonsterLevel', 'ItemLevel'] },
-      { table: 'ItemDropItemGroup', cols: ['Chance'] },
+      { table: 'DropItemGroup', cols: ['Chance', 'MinimumMonsterLevel', 'MaximumMonsterLevel', 'ItemLevel'], key: ['Description'] },
+      { table: 'ItemDropItemGroup', cols: ['Chance'], key: ['Description'] },
     ],
   },
   shops: { label: 'Tiendas', replace: 'shops' },
   events: { label: 'Eventos', parts: [{ table: 'MiniGameDefinition', cols: [...EVENT_SECS, ...EVENT_INTS.map(i => i[0]), ...EVENT_BOOLS.map(b => b[0])] }] },
-  warps: { label: 'Teletransportes', parts: [{ table: 'WarpInfo', cols: ['Costs', 'LevelRequirement'] }] },
+  warps: { label: 'Teletransportes', parts: [{ table: 'WarpInfo', cols: ['Costs', 'LevelRequirement'], key: ['Index'] }] },
   plugins: { label: 'Avanzado', parts: [{ table: 'PlugInConfiguration', cols: ['IsActive', 'CustomConfiguration'] }] },
 };
 
@@ -74,11 +75,27 @@ export function updateSql(table: string, cols: string[]): { find: string; set: s
   };
 }
 
+/** Gives each default row the Id of the live row it stands for: the same Id, or else the only live row with the same key. */
+export function rekey(want: Row[], live: Row[], key: string[]): Row[] {
+  const kf = (r: Row) => JSON.stringify(key.map(k => r[k]));
+  const ids = new Set(live.map(r => r.Id as string));
+  const count = (rows: Row[]) => rows.reduce((m, r) => m.set(kf(r), (m.get(kf(r)) ?? 0) + 1), new Map<string, number>());
+  const wantCount = count(want), liveCount = count(live);
+  const byKey = new Map(live.map(r => [kf(r), r.Id as string]));
+  return want.flatMap(r => {
+    if (ids.has(r.Id as string)) return [r];
+    const k = kf(r);
+    const id = wantCount.get(k) === 1 && liveCount.get(k) === 1 ? byKey.get(k) : undefined;
+    return id ? [{ ...r, Id: id }] : [];
+  });
+}
+
 async function resetParts(w: Writer, parts: Part[], defaults: Defaults): Promise<number> {
   let changed = 0;
   for (const p of parts) {
-    const rows = defaults[p.table];
+    let rows = defaults[p.table];
     if (!rows) throw missing(`The defaults file has no ${p.table}.`);
+    if (p.key) rows = rekey(rows, (await w.tx.unsafe(`SELECT to_jsonb(t) AS j FROM ${tableOf(p.table)} t`)).map(r => r.j as Row), p.key);
     const sql = updateSql(p.table, p.cols);
     const ids = (await w.tx.unsafe(sql.find, [JSON.stringify(rows)])).map(r => r.id as string);
     if (ids.length === 0) continue;

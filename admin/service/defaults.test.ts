@@ -3,7 +3,7 @@ import { mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { gzipSync } from 'node:zlib';
-import { RESET_TABS, canon, loadDefaults, resetInfo, updateSql } from './defaults';
+import { RESET_TABS, canon, loadDefaults, rekey, resetInfo, updateSql } from './defaults';
 
 test('every tab of the Servidor page can be reset', () => {
   expect(Object.keys(RESET_TABS)).toEqual(['rules', 'maps', 'spawns', 'monsters', 'drops', 'shops', 'events', 'warps', 'plugins']);
@@ -36,4 +36,10 @@ test('the snapshot is read from a gzip file, and its absence is reported', () =>
   writeFileSync(file, gzipSync(JSON.stringify({ WarpInfo: [{ Id: 'x', Costs: 1 }] })));
   expect(loadDefaults(file)?.WarpInfo?.[0]?.Costs).toBe(1);
   expect(resetInfo(file).available).toBe(true);
+});
+
+test('rows whose Id changed are matched by their key, and ambiguous ones are left alone', () => {
+  const live = [{ Id: 'a', Index: 1 }, { Id: 'b', Index: 2 }, { Id: 'c', Index: 3 }, { Id: 'd', Index: 3 }];
+  const want = [{ Id: 'a', Index: 1 }, { Id: 'x', Index: 2 }, { Id: 'y', Index: 3 }, { Id: 'z', Index: 9 }];
+  expect(rekey(want, live, ['Index'])).toEqual([{ Id: 'a', Index: 1 }, { Id: 'b', Index: 2 }]);
 });
