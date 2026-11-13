@@ -836,6 +836,9 @@ const MOBILE_PROFILES: readonly Partial<GameOptions>[] = [
     materialQuality: 0,
     grassDensity: 2,
   },
+  // v4, measured (docs/rendimiento_historial.md, row 8): Mu Magdalena's ground has no grass blades, and on a phone they cost a quarter
+  // of the frame. Off, the ground looks like Magdalena's; Options can bring them back.
+  { grassDensity: 0 },
 ];
 export const MOBILE_PROFILE_VERSION = MOBILE_PROFILES.length;
 const MOBILE_PROFILE_KEY = '_mu_mobile_profile';

@@ -125,3 +125,11 @@ describe('fidelity in a stored blob', () => {
     expect(optionsFrom({ fidelityOverrides: { a: 1, b: false } }).fidelityOverrides).toEqual({ b: false });
   });
 });
+
+describe('MOBILE_PROFILE', () => {
+  it('draws the ground without grass blades on a phone, as Mu Magdalena does', async () => {
+    const { MOBILE_PROFILE } = await import('./gameOptions');
+    expect(MOBILE_PROFILE.grassDensity).toBe(0);
+    expect(MOBILE_PROFILE.postProcessing).toBe(false);
+  });
+});
