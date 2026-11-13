@@ -55,9 +55,11 @@ export const MobilePanel = observer(({ selecting, onConnect, onCreate, onDelete,
       <div className="char-m-card">
         {selected ? (
           <>
-            <div className="char-m-name">{selected.Name}</div>
-            <div className="char-m-info">
-              {getClassName(classFromAppearance(selected.Appearance))} · {t('common.level')} {selected.Level}
+            <div className="char-m-title">
+              <span className="char-m-name">{selected.Name}</span>
+              <span className="char-m-info">
+                {getClassName(classFromAppearance(selected.Appearance))} · {t('mobile.level', { n: selected.Level })}
+              </span>
             </div>
           </>
         ) : (

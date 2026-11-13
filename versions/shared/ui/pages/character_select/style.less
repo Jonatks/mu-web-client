@@ -388,3 +388,103 @@
     }
   }
 }
+
+// Mu Magdalena's compact card: name and class on one line, small pills, bronze arrows; the card sits low and narrow.
+.char-m {
+  .char-m-card {
+    min-width: min(56vw, 510px);
+    padding: 6px 18px 8px;
+    border-radius: 10px;
+    border: 1px solid rgba(150, 110, 50, 0.85);
+    background: radial-gradient(ellipse at 50% 0%, rgba(90, 64, 30, 0.3), transparent 60%), linear-gradient(rgba(29, 21, 13, 0.92), rgba(12, 8, 5, 0.94));
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.8), inset 0 0 0 3px rgba(214, 170, 96, 0.1), 0 8px 26px rgba(0, 0, 0, 0.75);
+  }
+
+  .char-m-title {
+    display: flex;
+    justify-content: center;
+    align-items: baseline;
+    gap: 10px;
+  }
+
+  .char-m-name {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 17px;
+    color: #fff;
+  }
+
+  .char-m-info {
+    font-size: 11px;
+    color: #cfae74;
+  }
+
+  .char-m-dots i {
+    width: 6px;
+    height: 6px;
+
+    &.on {
+      width: 20px;
+    }
+  }
+
+  .char-m-pill {
+    min-width: 66px;
+    height: 28px;
+    padding: 0 12px;
+    border-radius: 7px;
+    font-size: 13px;
+  }
+
+  .char-m-arrow {
+    width: 44px;
+    height: 44px;
+    font-size: 26px;
+    color: #f3dcae;
+    border: 0;
+    background:
+      radial-gradient(circle, #1b130b 0 60%, transparent 62%),
+      conic-gradient(from 200deg, #e3b766, #8a5a22, #3c240e, #8a5a22, #e3b766, #8a5a22, #3c240e, #8a5a22, #e3b766);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.8), 0 3px 8px rgba(0, 0, 0, 0.6);
+  }
+
+  .char-m-menu {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+    border: 0;
+    background:
+      radial-gradient(circle, #1b130b 0 60%, transparent 62%),
+      conic-gradient(from 200deg, #e3b766, #8a5a22, #3c240e, #8a5a22, #e3b766, #8a5a22, #3c240e, #8a5a22, #e3b766);
+  }
+}
+
+// The creation card a size smaller and the same leather and bronze as the selection card.
+.char-mk {
+  .char-mk-card {
+    width: min(82vw, 720px);
+    padding: 6px 12px 8px;
+    border-radius: 10px;
+    border: 1px solid rgba(150, 110, 50, 0.85);
+    background: radial-gradient(ellipse at 50% 0%, rgba(90, 64, 30, 0.3), transparent 60%), linear-gradient(rgba(29, 21, 13, 0.92), rgba(12, 8, 5, 0.94));
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.8), inset 0 0 0 3px rgba(214, 170, 96, 0.1), 0 8px 26px rgba(0, 0, 0, 0.75);
+  }
+
+  .char-mk-title {
+    font-size: 15px;
+    margin-bottom: 4px;
+  }
+
+  .char-mk-class {
+    height: 28px;
+    padding: 0 10px;
+    border-radius: 7px;
+    font-size: 11px;
+  }
+
+  .char-mk-row input,
+  .char-mk-row .char-m-pill {
+    height: 32px;
+    border-radius: 7px;
+    font-size: 13px;
+  }
+}
