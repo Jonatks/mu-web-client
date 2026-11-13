@@ -10,7 +10,7 @@ echo "respaldo: $DUMP"
 sudo docker exec database psql -U postgres -qc 'drop database if exists openmu_probe' -c 'create database openmu_probe'
 sudo docker exec -i database pg_restore -U postgres -d openmu_probe --no-owner < "$DUMP" 2>&1 | grep -v -i "already exists" | head -5 || true
 T=$(mktemp -d)
-for f in defaults.ts server.ts undo.ts errors.ts reset-check.ts package.json; do curl -fsSL "$RAW/$f" -o "$T/$f"; done
+for f in defaults.ts server.ts undo.ts errors.ts reset-check.ts package.json plugin_names.json; do curl -fsSL "$RAW/$f" -o "$T/$f"; done
 NET=$(sudo docker inspect mu-admin --format '{{range $k,$v := .NetworkSettings.Networks}}{{$k}}{{end}}')
 URL=$(sudo docker inspect mu-admin --format '{{range .Config.Env}}{{println .}}{{end}}' | grep '^DATABASE_URL=' | cut -d= -f2- | sed 's#/openmu$#/openmu_probe#')
 # contenedor desechable con bun; instala "postgres" al vuelo. Ve solo la copia de pruebas.
