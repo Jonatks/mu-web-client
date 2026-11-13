@@ -43,9 +43,9 @@ sudo docker ps --format '{{.Names}}' | grep -qx database || { echo "no encuentro
 sudo install -d -m 700 "$CFG" "$DATA"
 sudo install -d -m 777 "$DATA/bridge"   # shared with the OpenMU container when the admin bridge plugin is installed
 
-# Clave larga (solo si no existe) y clave del rol de base de datos.
-[ -s "$CFG/key" ] || { head -c 48 /dev/urandom | od -An -tx1 | tr -d ' \n' | sudo tee "$CFG/key" >/dev/null; sudo chmod 600 "$CFG/key"; }
-[ -s "$CFG/db-password" ] || { head -c 24 /dev/urandom | od -An -tx1 | tr -d ' \n' | sudo tee "$CFG/db-password" >/dev/null; sudo chmod 600 "$CFG/db-password"; }
+# Clave larga (solo si no existe) y clave del rol de base de datos. Con sudo: la carpeta es 700 de root y un test sin sudo da falso.
+sudo test -s "$CFG/key" || { head -c 48 /dev/urandom | od -An -tx1 | tr -d ' \n' | sudo tee "$CFG/key" >/dev/null; sudo chmod 600 "$CFG/key"; }
+sudo test -s "$CFG/db-password" || { head -c 24 /dev/urandom | od -An -tx1 | tr -d ' \n' | sudo tee "$CFG/db-password" >/dev/null; sudo chmod 600 "$CFG/db-password"; }
 
 # Rol con lo minimo: leer data/config y escribir solo las tablas que el servicio edita.
 PW=$(sudo cat "$CFG/db-password")
