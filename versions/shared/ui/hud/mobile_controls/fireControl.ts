@@ -10,6 +10,8 @@ import { castSkill } from './castSkill';
 import { MobileMenu } from './menuState';
 import { nearestTalkNpc } from './talkNearby';
 import { stickHeld } from '@/controllers/interface/touchStick';
+import { addNotification } from '@/modules/chat';
+import { t } from '@/i18n';
 
 /** How far (tiles) the cast button looks for something to fight. */
 export const FIRE_RANGE = 8;
@@ -34,6 +36,17 @@ function affordable(skill: number): boolean {
   return skillUsability(skill).blocks.every(b => b === 'cooldown' || b === 'safezone');
 }
 
+/** When the skill in hand cannot be paid for, say so (Mu Magdalena's "NOT ENOUGH MANA"), at most once every 2 s. */
+let warnedAt = 0;
+function warnUnaffordable(skill: number): void {
+  const blocks = skillUsability(skill).blocks;
+  const key = blocks.includes('mana') ? 'mobile.noMana' : blocks.includes('ag') ? 'mobile.noAg' : null;
+  const now = performance.now();
+  if (!key || now - warnedAt < 2000) return;
+  warnedAt = now;
+  addNotification(t(key), 'error');
+}
+
 /**
  * Take a monster as the target (the seam a tap on it writes) and, when the skill in hand is an attack skill the hero can pay for, arm its
  * repeat in the same breath: otherwise the plain swing would get a frame or two to walk up and punch before the first cast.
@@ -45,6 +58,7 @@ function engage(target: Entity): void {
   world.pickupTarget = null;
   world.talkTarget = null;
   const skill = HeroSkills.currentSkill;
+  if (skillDefinition(skill) && isAttackSkill(skill) && !affordable(skill)) warnUnaffordable(skill);
   if (skillDefinition(skill) && isAttackSkill(skill) && affordable(skill)) {
     world.touchCastHeld = true;
     const pos = target.transform?.pos;
@@ -138,6 +152,7 @@ export function installFireLoop(): () => void {
 
     const skill = HeroSkills.currentSkill;
     if (!skillDefinition(skill) || !isAttackSkill(skill) || !affordable(skill)) {
+      if (skillDefinition(skill) && isAttackSkill(skill)) warnUnaffordable(skill);
       world.touchCastHeld = false;
       return;
     }

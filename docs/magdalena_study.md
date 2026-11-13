@@ -266,3 +266,8 @@ Corrects section 12, which overcounted by one or two.
 - The bottom bar is now the size of Magdalena's (47 px orbs, 32 px boxes); this client's bar still has no ornate gold frame across the screen width.
 - The camera opens at the original distance on phones too (it used to open one step closer); Magdalena still shows a little more of the town around the hero, with a slightly lower pitch.
 - Brightness over the same crop: Magdalena value 67, saturation 106; this client 60 and 98, about 10 percent darker and less saturated, with a stronger pool of light around the hero. Not changed yet: the lighting is the classic tier and a global lift would also brighten night maps.
+
+## 26. Casting a skill as a level 1 Dark Knight (2026-11-13)
+- Placing a skill in the Skills window moves the selection to the next box by itself; the right-edge round button then shows the placed skill and casts it.
+- A skill the hero cannot pay for shows "NOT ENOUGH MANA" in a dark pill with a gold border at the top left, and nothing is cast; this client now says "Not enough mana" / "Not enough AG" (touch only, once every 2 s) instead of punching silently.
+- The west field ground is a dark green grass texture with no blades (matches the phone profile v4). The birds there are scenery, not targets; a skill cast with no monster near shows no effect, so the effects of both clients were not compared frame by frame (both come from the original client's data).

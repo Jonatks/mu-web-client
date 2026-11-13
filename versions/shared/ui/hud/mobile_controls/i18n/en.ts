@@ -76,6 +76,8 @@ const en = {
   'mobile.hlp.selected': 'Named items',
   'mobile.hlp.auto': 'Auto',
   'mobile.hlp.off': 'Off',
+  'mobile.noMana': 'Not enough mana',
+  'mobile.noAg': 'Not enough AG',
 };
 
 export default en;

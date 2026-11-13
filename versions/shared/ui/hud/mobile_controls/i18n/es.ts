@@ -78,4 +78,6 @@ export default {
   'mobile.hlp.selected': 'Ítems por nombre',
   'mobile.hlp.auto': 'Auto',
   'mobile.hlp.off': 'No',
+  'mobile.noMana': 'No hay suficiente maná',
+  'mobile.noAg': 'No hay suficiente AG',
 } satisfies Partial<Record<keyof typeof en, string>>;
