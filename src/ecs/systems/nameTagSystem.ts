@@ -11,6 +11,10 @@ import {
   ID_LIFE_REFRESH,
   TICKS_PER_SECOND,
 } from '../../controllers/interface/nameTags';
+import { isMobileDevice } from '../../controllers/interface/mobile';
+
+/** Tiles around the hero in which a phone keeps every other player's name up (Mu Magdalena shows them without a touch). */
+const PHONE_NAME_RANGE = 12;
 
 /**
  * The original's name balloons - `CreateChat` / `AddChat` / `MoveChat`
@@ -98,6 +102,18 @@ export const NameTagSystem: ISystemFactory = world => {
 
       const hovered = world.currentPointerTarget;
       if (hovered && isBalloonTarget(world, hovered)) showName(hovered);
+
+      // A phone has no hover: the players around stay named, as on Mu Magdalena (NPCs still on a touch).
+      const hero = world.playerEntity;
+      if (hero && isMobileDevice()) {
+        const hx = hero.transform.pos.x;
+        const hz = hero.transform.pos.z;
+        for (const e of named.entities) {
+          if (e === hero || !e.playerAnimation || e.npcType !== undefined || e.dying || e.objOutOfScope) continue;
+          if (Math.abs(e.transform.pos.x - hx) > PHONE_NAME_RANGE || Math.abs(e.transform.pos.z - hz) > PHONE_NAME_RANGE) continue;
+          if (isBalloonTarget(world, e)) showName(e);
+        }
+      }
 
       // `CPersonalShopTitleImp::Draw`: a stall title is its own draw list in
       // the original, not the hover balloon - it stands over the seller for
