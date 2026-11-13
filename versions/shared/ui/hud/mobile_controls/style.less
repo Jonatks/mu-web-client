@@ -1887,3 +1887,143 @@ body:has(.mu-item-window) .mobile-controls .mobile-book {
     --stick: 146px;
   }
 }
+
+// ---- the drawn MU art (muArt.tsx): frames fill their button, icons sit inside; no CSS rim left under them ---------------------
+.mobile-round {
+  position: relative;
+}
+
+.mobile-round,
+.mobile-book,
+.mobile-attack,
+.mobile-chat-bubble {
+  border: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+
+  &::after {
+    display: none !important;
+  }
+
+  .mu-round-frame {
+    position: absolute;
+    inset: -6%;
+    width: 112%;
+    height: 112%;
+    pointer-events: none;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.7));
+  }
+
+  .mu-art-icon {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  svg:not(.mu-round-frame):not(.mu-art-icon) {
+    position: relative;
+    color: #f0c46a;
+    filter: drop-shadow(0 0 3px rgba(255, 170, 60, 0.45));
+  }
+}
+
+.mobile-round {
+  width: 48px;
+  height: 48px;
+}
+
+.mobile-chat-bubble {
+  width: 34px;
+  height: 34px;
+}
+
+.mobile-attack .mobile-attack-skill {
+  position: relative;
+  transform: scale(0.95);
+  border-radius: 50%;
+  overflow: hidden;
+  width: 66%;
+  height: 66%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.9;
+}
+
+.mobile-attack.is-auto .mu-round-frame,
+.mobile-round.is-on .mu-round-frame {
+  filter: drop-shadow(0 0 6px rgba(120, 255, 160, 0.85));
+}
+
+// The pad: the drawn ring, a see-through middle, a double gold hairline knob, orange arrows.
+.mobile-stick {
+  .mobile-stick-ring {
+    inset: -10%;
+    width: 120%;
+    height: 120%;
+    filter: drop-shadow(0 8px 12px rgba(0, 0, 0, 0.55));
+  }
+
+  .mobile-stick-knob {
+    background: radial-gradient(circle at 50% 45%, rgba(40, 28, 16, 0.18), rgba(20, 14, 8, 0.32));
+    border: 2px solid rgba(214, 178, 110, 0.75);
+    box-shadow:
+      inset 0 0 0 5px rgba(0, 0, 0, 0.08),
+      inset 0 0 0 6px rgba(214, 178, 110, 0.4),
+      0 2px 6px rgba(0, 0, 0, 0.45);
+  }
+
+  .mobile-stick-mark {
+    opacity: 0.7;
+
+    &.n {
+      top: 18%;
+    }
+    &.s {
+      bottom: 18%;
+    }
+    &.e {
+      right: 18%;
+    }
+    &.w {
+      left: 18%;
+    }
+  }
+
+  .mobile-stick-knob {
+    width: 40%;
+    height: 40%;
+    margin: -20% 0 0 -20%;
+    border-width: 1.5px;
+    background: radial-gradient(circle, rgba(30, 20, 10, 0.1), rgba(30, 20, 10, 0.25));
+    box-shadow:
+      inset 0 0 0 4px rgba(0, 0, 0, 0.05),
+      inset 0 0 0 5px rgba(214, 178, 110, 0.25),
+      0 1px 4px rgba(0, 0, 0, 0.4);
+  }
+}
+
+// The six boxes: bronze frames around a dark red well, as on Mu Magdalena's bar.
+.mobile-slot {
+  background-image: none !important;
+  border: 2px solid #a8783a;
+  border-radius: 3px;
+  background: radial-gradient(circle at 50% 40%, #5a2c1a, #2a1009 75%) !important;
+  box-shadow:
+    inset 0 0 0 2px #2a1708,
+    inset 0 0 0 3px rgba(240, 200, 122, 0.25),
+    0 1px 2px rgba(0, 0, 0, 0.7);
+}
+
+.mobile-top-buttons .mobile-round-label {
+  margin-top: -4px;
+  padding: 2px 7px;
+  border-radius: 5px;
+  background: rgba(14, 10, 6, 0.82);
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: #f3dcae;
+}

@@ -7,6 +7,7 @@ import { MobileButton } from './mobileButton';
 import { toggleFire } from './fireControl';
 import { MobileMenu } from './menuState';
 import { Icon } from './icons';
+import { ArtIcon, RoundFrame } from './muArt';
 
 /**
  * The big round button bottom right (Mu Magdalena's skill button): it shows the current skill. One thumb press picks the nearest
@@ -25,22 +26,30 @@ export const AttackButton = observer(() => {
         title={t('skills.title')}
         onTap={() => (MobileMenu.picker = 0)}
       >
-        {() => <Icon name="book" size={22} />}
+        {() => (
+          <>
+            <RoundFrame />
+            <ArtIcon name="book" />
+          </>
+        )}
       </MobileButton>
       <MobileButton
         className={`mobile-attack${auto ? ' is-auto' : ''}${MobileMenu.firing ? ' is-firing' : ''}`}
         title={t('mobile.attack')}
         onTap={toggleFire}
       >
-        {() =>
-          showSkill ? (
-            <div className="mobile-attack-skill">
-              <SkillIcon number={current} disabled={false} />
-            </div>
-          ) : (
-            <Icon name="attack" size={34} />
-          )
-        }
+        {() => (
+          <>
+            <RoundFrame skull={false} />
+            {showSkill ? (
+              <div className="mobile-attack-skill">
+                <SkillIcon number={current} disabled={false} />
+              </div>
+            ) : (
+              <Icon name="attack" size={26} />
+            )}
+          </>
+        )}
       </MobileButton>
     </>
   );

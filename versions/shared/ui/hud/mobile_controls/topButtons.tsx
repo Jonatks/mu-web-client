@@ -8,6 +8,7 @@ import { toggleMuHelperWindow } from '@/modules/mu_helper/state';
 import { MobileButton } from './mobileButton';
 import { MobileMenu } from './menuState';
 import { Icon } from './icons';
+import { ArtIcon, RoundFrame } from './muArt';
 
 /**
  * Top right, like Mu Magdalena: the Helper switch (tap starts or stops it, a long press opens its settings) and the
@@ -37,7 +38,12 @@ const PickupButton = observer(() => {
           autoGetItem(world);
         }}
       >
-        {() => <Icon name="hand" size={26} />}
+        {() => (
+          <>
+            <RoundFrame skull={false} />
+            <Icon name="hand" size={24} />
+          </>
+        )}
       </MobileButton>
     </div>
   );
@@ -53,13 +59,23 @@ export const TopButtons = observer(() => (
         onTap={() => MuHelper.toggleMuHelper()}
         onLongPress={() => toggleMuHelperWindow(true)}
       >
-        {() => <Icon name="helper" size={26} />}
+        {() => (
+          <>
+            <RoundFrame />
+            <ArtIcon name="helper" />
+          </>
+        )}
       </MobileButton>
       <span className="mobile-round-label">{t('mobile.helper')}</span>
     </div>
     <div className="mobile-round-wrap">
       <MobileButton className="mobile-round" title={t('mobile.menu')} onTap={() => (MobileMenu.open = !MobileMenu.open)}>
-        {() => <Icon name="menu" size={26} />}
+        {() => (
+          <>
+            <RoundFrame />
+            <ArtIcon name="bones" />
+          </>
+        )}
       </MobileButton>
     </div>
   </div>

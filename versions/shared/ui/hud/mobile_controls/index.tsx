@@ -19,6 +19,7 @@ import { MessagesPanel } from './messagesPanel';
 import { SettingsModal } from './settingsModal';
 import { HelperSheet } from './helperSheet';
 import { MonsterBars } from './monsterBars';
+import { MuArtDefs } from './muArt';
 import { installPlayerLongPress } from './playerLongPress';
 import { installFireLoop } from './fireControl';
 
@@ -65,6 +66,7 @@ export const MobileControls = observer(() => {
     <>
       {/* Under the windows (z 100+), as in Mu Magdalena: a window covers the monster names and the bottom bar. */}
       <div className="mobile-controls mobile-under">
+        <MuArtDefs />
         <MonsterBars />
         <Bar />
       </div>

@@ -3,6 +3,7 @@ import { observer } from 'mobx-react-lite';
 import { t } from '@/i18n';
 import { Social } from '@/modules/social/social';
 import { MobileButton } from './mobileButton';
+import { ArtIcon, RoundFrame } from './muArt';
 import { MobileMenu } from './menuState';
 
 /**
@@ -30,9 +31,8 @@ export const ChatBubble = observer(() => {
     >
       {() => (
         <>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-            <path d="M4 5h16v11H9l-5 4z" />
-          </svg>
+          <RoundFrame skull={false} />
+          <ArtIcon name="chat" />
           {unread > 0 && <span className="mobile-chat-count">{Math.min(unread, 99)}</span>}
         </>
       )}
