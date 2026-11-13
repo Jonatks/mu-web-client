@@ -1,6 +1,6 @@
 # openmu
 
-Our plugins for OpenMU. We do not ship or fork OpenMU: the installer runs OpenMU the OpenMU way (its
+Our plugins for OpenMU. Plugins are the first choice, and a fork of OpenMU is allowed when a plugin cannot reach what is needed. By default the installer runs OpenMU the OpenMU way (its
 repository at a release tag, its `deploy/all-in-one` compose, the official `munique/openmu` image),
 and this folder adds one thin layer on top.
 

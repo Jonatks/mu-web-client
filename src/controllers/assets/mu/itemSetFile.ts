@@ -13,8 +13,8 @@ import { decodeLocalText, downloadLocalDataFile, repairPackText } from './localD
 /** `MAX_ITEM`: 16 groups of 512. */
 const MAX_ITEM = 16 * 512;
 const TYPE_RECORD = 4;
-/** `MAX_SET_OPTION`. */
-const MAX_SETS = 64;
+/** `MAX_SET_OPTION` was 64; a set number is one byte (255 means none), so files may hold up to 255 records. */
+const MAX_SETS = 255;
 /** `ITEM_SET_OPTION_FILE`: name 64, standard 6x2 + 6x2, ext 2 + 2, count, full 5 + 5, classes 7. */
 const OPTION_RECORD = 110;
 const NAME_LENGTH = 64;
