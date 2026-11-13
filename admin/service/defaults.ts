@@ -108,9 +108,23 @@ async function replaceRows(w: Writer, table: string, saveTable: string, filter: 
   return { deleted: extra.length, inserted: missingRows.length };
 }
 
+/** A few monsters get a different Id on every fresh database, so the snapshot's monsters are matched to the live ones by their number. */
+export async function matchMonsters(w: Writer, defaults: Defaults): Promise<Defaults> {
+  const live = new Map((await w.tx.unsafe(`SELECT "Number" AS n, "Id" AS id FROM config."MonsterDefinition"`)).map(r => [r.n as number, r.id as string]));
+  const byOld = new Map<string, string>();
+  for (const m of defaults.MonsterDefinition ?? []) {
+    const id = live.get(m.Number as number);
+    if (id) byOld.set(m.Id as string, id);
+  }
+  const monsters = (defaults.MonsterDefinition ?? []).map(m => ({ ...m, Id: byOld.get(m.Id as string) ?? m.Id }));
+  const spawns = (defaults.MonsterSpawnArea ?? []).flatMap(a => (byOld.has(a.MonsterDefinitionId as string) ? [{ ...a, MonsterDefinitionId: byOld.get(a.MonsterDefinitionId as string) }] : []));
+  return { ...defaults, MonsterDefinition: monsters, MonsterSpawnArea: spawns };
+}
+
 async function resetSpawns(w: Writer, defaults: Defaults): Promise<number> {
-  const rows = defaults.MonsterSpawnArea;
-  if (!rows) throw missing('The defaults file has no MonsterSpawnArea.');
+  if (!defaults.MonsterSpawnArea) throw missing('The defaults file has no MonsterSpawnArea.');
+  const maps = new Set((await w.tx.unsafe(`SELECT "Id" AS id FROM config."GameMapDefinition"`)).map(r => r.id as string));
+  const rows = (await matchMonsters(w, defaults)).MonsterSpawnArea.filter(a => maps.has(a.GameMapId as string));
   const r = await replaceRows(w, 'config."MonsterSpawnArea"', 'config.MonsterSpawnArea', 'true', [], rows);
   return r.deleted + r.inserted;
 }
@@ -163,7 +177,7 @@ export async function resetTab(sql: Sql, admin: string, tab: string, defaults: D
   if (!t) throw bad('Unknown tab.');
   if (!defaults) throw missing('Los valores por defecto aún no se generaron en el servidor (export-defaults.sh).');
   return write(sql, { admin, action: `server.reset.${tab}`, target: t.label, detail: { tab } }, async w => {
-    const changed = t.parts ? await resetParts(w, t.parts, defaults) : t.replace === 'spawns' ? await resetSpawns(w, defaults) : await resetShops(w, defaults);
+    const changed = t.parts ? await resetParts(w, t.parts, await matchMonsters(w, defaults)) : t.replace === 'spawns' ? await resetSpawns(w, defaults) : await resetShops(w, defaults);
     return { changed };
   });
 }
