@@ -50,14 +50,14 @@ export function setItemSetNumber(bytes: Uint8Array, code: number, slot: 0 | 1, s
 const writeOptions = (record: Uint8Array, at: number, valuesAt: number, list: readonly SetOptionValue[] | undefined, count: number) => {
   for (let i = 0; i < count; i++) {
     record[at + i] = list?.[i]?.option ?? 0xff;
-    record[valuesAt + i] = list?.[i]?.value ?? 0;
+    record[valuesAt + i] = list?.[i]?.value ?? 0xff;
   }
 };
 
-/** The 110 plain bytes of a set record, layout as `OPTION_RECORD` in itemSetFile.ts. */
+/** The 110 plain bytes of a set record (names are one byte per character, as the client reads them), layout as `OPTION_RECORD` in itemSetFile.ts. */
 export function encodeSetRecord(set: SetRecord): Uint8Array {
   const record = new Uint8Array(OPTION_RECORD);
-  const name = new TextEncoder().encode(set.name);
+  const name = Uint8Array.from(set.name, c => c.charCodeAt(0));
   if (name.length >= NAME_LENGTH) throw new Error(`Set name too long: ${set.name}`);
   record.set(name, 0);
   for (let row = 0; row < 6; row++) writeOptions(record, 64 + row * 2, 76 + row * 2, set.standard?.[row], 2);
@@ -66,6 +66,28 @@ export function encodeSetRecord(set: SetRecord): Uint8Array {
   writeOptions(record, 93, 98, set.full, 5);
   for (let i = 0; i < 7; i++) record[103 + i] = set.classes?.[i] ?? 0;
   return record;
+}
+
+const readOptions = (record: Uint8Array, at: number, valuesAt: number, count: number): SetOptionValue[] => {
+  const out: SetOptionValue[] = [];
+  for (let i = 0; i < count; i++) out.push({ option: record[at + i], value: record[valuesAt + i] });
+  return out;
+};
+
+/** The reverse of `encodeSetRecord`: the set record in 110 plain bytes. Slots stay in place, so rows keep their gaps. */
+export function decodeSetRecord(record: Uint8Array): SetRecord {
+  let end = 0;
+  while (end < NAME_LENGTH && record[end]) end++;
+  const standard: SetOptionValue[][] = [];
+  for (let row = 0; row < 6; row++) standard.push(readOptions(record, 64 + row * 2, 76 + row * 2, 2));
+  return {
+    name: String.fromCharCode(...record.subarray(0, end)),
+    standard,
+    ext: readOptions(record, 88, 90, 2),
+    itemCount: record[92],
+    full: readOptions(record, 93, 98, 5),
+    classes: Array.from(record.subarray(103, 110)),
+  };
 }
 
 /** Writes one set record (Bux-keyed) at its set number. The file grows when the number is past its end. */

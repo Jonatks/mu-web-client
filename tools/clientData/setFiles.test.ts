@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { convertBux } from '../../src/controllers/terrain/mapFileEncryption';
 import { parseItemSetOptions, parseItemSetTypes } from '../../src/controllers/assets/mu/itemSetFile';
-import { itemCode, setItemSetNumber, setSetOption } from './setFiles';
+import { existsSync, readFileSync } from 'fs';
+import { decodeSetRecord, encodeSetRecord, itemCode, setItemSetNumber, setSetOption } from './setFiles';
 
 /** A type table shaped like the live one: 8192 keyed records of zeros plus a 4 byte tail. */
 function emptyTypes(): Uint8Array {
@@ -51,5 +52,17 @@ describe('setFiles', () => {
     const grown = setSetOption(base, 70, { name: 'Test' });
     expect(grown.length).toBe(71 * 110 + 4);
     expect(parseItemSetOptions(grown, setOf)[70]?.name).toBe('Test');
+  });
+
+  // Set MU_BMD_DIR to a folder with the live itemsettype.bmd and itemsetoption_eng.bmd.
+  const dir = process.env.MU_BMD_DIR;
+  it.skipIf(!dir || !existsSync(`${dir}/itemsetoption_eng.bmd`))('rewrites every live set record byte for byte', () => {
+    const bytes = new Uint8Array(readFileSync(`${dir}/itemsetoption_eng.bmd`));
+    for (let i = 1; i * 110 + 110 <= bytes.length; i++) {
+      const raw = bytes.slice(i * 110, i * 110 + 110);
+      convertBux(raw, 110);
+      if (raw[0] === 0) continue;
+      expect(encodeSetRecord(decodeSetRecord(raw)), `set ${i}`).toEqual(raw);
+    }
   });
 });
