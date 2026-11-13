@@ -48,31 +48,42 @@ const Bar = observer(() => {
 export const MobileControls = observer(() => {
   const mobile = useIsMobile();
   const inWorld = AppState.uiState === UIState.World;
-  useEffect(() => (mobile && inWorld ? installPlayerLongPress() : undefined), [mobile, inWorld]);
-  useEffect(() => (mobile && inWorld ? installFireLoop() : undefined), [mobile, inWorld]);
+  useEffect(
+    () => (mobile && inWorld ? installPlayerLongPress() : undefined),
+    [mobile, inWorld]
+  );
+  useEffect(
+    () => (mobile && inWorld ? installFireLoop() : undefined),
+    [mobile, inWorld]
+  );
   if (!mobile) return null;
   // Not over the loading screen: `playerEntity` is plain per-frame state and would not re-render this when it arrives,
   // so the observable state is what gates the HUD.
   if (AppState.uiState !== UIState.World) return null;
 
   return (
-    <div className="mobile-controls">
-      <MonsterBars />
-      <StatusPanel />
-      <TopButtons />
-      <Bar />
-      <AttackButton />
-      <ChatBubble />
-      <Joystick />
-      <TalkButton />
-      <SkillPicker />
-      <CommandMenu />
-      <ItemSheetView />
-      <TeleportModal />
-      <StatsModal />
-      <MessagesPanel />
-      <SettingsModal />
-      <HelperSheet />
-    </div>
+    <>
+      {/* Under the windows (z 100+), unlike the controls: a shop must cover the monster names, as in Mu Magdalena. */}
+      <div className="mobile-monster-layer">
+        <MonsterBars />
+      </div>
+      <div className="mobile-controls">
+        <StatusPanel />
+        <TopButtons />
+        <Bar />
+        <AttackButton />
+        <ChatBubble />
+        <Joystick />
+        <TalkButton />
+        <SkillPicker />
+        <CommandMenu />
+        <ItemSheetView />
+        <TeleportModal />
+        <StatsModal />
+        <MessagesPanel />
+        <SettingsModal />
+        <HelperSheet />
+      </div>
+    </>
   );
 });
