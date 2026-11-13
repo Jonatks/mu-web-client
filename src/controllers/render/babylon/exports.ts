@@ -183,7 +183,7 @@ export { RenderTargetTexture } from '@babylonjs/core/Materials/Textures/renderTa
 export type { RenderTargetWrapper } from '@babylonjs/core/Engines/renderTargetWrapper';
 export type { MultiRenderTarget } from '@babylonjs/core/Materials/Textures/multiRenderTarget';
 export { SmartArray } from '@babylonjs/core/Misc/smartArray';
-export type { SubMesh } from '@babylonjs/core/Meshes/subMesh';
+export { SubMesh } from '@babylonjs/core/Meshes/subMesh';
 export { Skeleton } from '@babylonjs/core/Bones/skeleton';
 export type { IPointerEvent } from '@babylonjs/core/Events';
 export { Ray } from '@babylonjs/core/Culling/ray';

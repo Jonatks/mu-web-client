@@ -2,11 +2,14 @@ import {
   CreatePlane,
   RawTexture,
   StandardMaterial,
+  SubMesh,
   Texture,
   Vector3,
   VertexBuffer,
+  type IVector3Like,
+  type Mesh,
+  type Scene,
 } from '../render/babylon/exports';
-import type { IVector3Like, Mesh, Scene } from '../render/babylon/exports';
 import { createGroundMesh } from './customGroundMesh';
 import {
   createTileTextureArray,
@@ -44,7 +47,9 @@ import {
   buildGroundOffThread,
 } from './terrainParseClient';
 import { getTilesList } from './getTilesList';
+
 import {
+  chunkGroundIndices,
   groundTiles,
   refreshGroundTile,
 } from './groundArrays';
@@ -65,6 +70,9 @@ import { World, type TerrainLayers } from '../../ecs/world';
 import { assetWorldNum } from '../assets/worldAssets';
 import { devQuery } from '../../core/devSeams';
 import { maps } from '../maps';
+
+/** Tiles per side of one drawn ground square. */
+const GROUND_CHUNK = 32;
 
 const TERRAIN_AMBIENT = 0;
 
@@ -308,8 +316,13 @@ export async function getTerrainData(
   terrain.isPickable = TERRAIN_MESH_PICK;
   const picker = new TerrainPicker(ground.positions);
 
-  // One submesh, so this octree never narrowed a pick. It still chooses the
-  // frames the ground is drawn in (`getActiveSubMeshCandidates`).
+  // One submesh per 32 x 32 tile square, so only the squares in view are drawn (the whole ground was 131 072 triangles a
+  // frame); the octree picks them (`getActiveSubMeshCandidates`). Vertices and the picker keep the original order.
+  const chunked = chunkGroundIndices(ground.indices, GROUND_CHUNK);
+  terrain.setIndices(chunked.indices);
+  terrain.subMeshes = [];
+  const vertexCount = terrain.getTotalVertices();
+  for (const [start, count] of chunked.ranges) new SubMesh(0, 0, vertexCount, start, count, terrain);
   terrain.createOrUpdateSubmeshesOctree(64, 4);
 
   terrain.metadata = {

@@ -286,3 +286,30 @@ function computeNormals(
     normals[n + 2] = z / length;
   }
 }
+
+/**
+ * The ground's index buffer reordered so each `chunk` x `chunk` square of tiles is one contiguous range: one submesh each,
+ * so the camera draws only the squares it sees instead of all 131 072 triangles every frame. Vertices stay where they are.
+ */
+export function chunkGroundIndices(
+  indices: Uint32Array,
+  chunk: number
+): { indices: Uint32Array; ranges: [start: number, count: number][] } {
+  const out = new Uint32Array(indices.length);
+  const ranges: [number, number][] = [];
+  let o = 0;
+  for (let cy = 0; cy < TERRAIN_SIZE; cy += chunk) {
+    for (let cx = 0; cx < TERRAIN_SIZE; cx += chunk) {
+      const start = o;
+      for (let y = cy; y < cy + chunk; y++) {
+        for (let x = cx; x < cx + chunk; x++) {
+          const t = (y * TERRAIN_SIZE + x) * 6;
+          out.set(indices.subarray(t, t + 6), o);
+          o += 6;
+        }
+      }
+      ranges.push([start, o - start]);
+    }
+  }
+  return { indices: out, ranges };
+}

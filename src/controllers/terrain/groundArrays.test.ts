@@ -102,3 +102,22 @@ describe('refreshGroundTile', () => {
     expect(tile(ground.positions, 15, 70)).toEqual(before);
   });
 });
+
+describe('chunkGroundIndices', () => {
+  it('keeps every triangle and gives each chunk one contiguous range of its own tiles', async () => {
+    const { chunkGroundIndices } = await import('./groundArrays');
+    const arrays = build(heights(), new Uint16Array(N * N));
+    const { indices, ranges } = chunkGroundIndices(arrays.indices, 32);
+    expect(indices.length).toBe(arrays.indices.length);
+    expect(ranges.length).toBe((N / 32) ** 2);
+    expect([...indices].sort((a, b) => a - b)).toEqual([...arrays.indices].sort((a, b) => a - b));
+    // The second chunk (x 32..63, y 0..31) holds only tiles of that square.
+    const [start, count] = ranges[1];
+    for (let k = start; k < start + count; k++) {
+      const tile = Math.floor(indices[k] / 4);
+      const x = tile % N;
+      const y = Math.floor(tile / N);
+      expect(x >= 32 && x < 64 && y < 32).toBe(true);
+    }
+  });
+});
