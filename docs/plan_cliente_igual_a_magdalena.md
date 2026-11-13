@@ -45,7 +45,7 @@ C8. Helper tactil: pestañas Combate y Recoger, rotacion, buffs, rangos, pocione
 C9. Pociones: automaticas (no hay botones). [hecho]
 C10. Barra de vida y nombre sobre todos los mobs visibles (con tope por rendimiento), anillo naranja del objetivo, numeros de daño. [hecho: barras para los 5 mas cercanos y anillo naranja con 4 marcas, publicado]
 C11. Drops: pastilla de nombre, oro con "Zen N", mano. Verificar varios a la vez. [parcial]
-C12. Comercio, fiesta, clan, amigos con la interfaz tactil. [parcial: probado en linea con dos jugadores: pulsacion larga abre el menu (Trade, Purchase, Party, Whisper, Follow, Battle, Attack), invitacion y aceptacion de grupo con la lista arriba a la derecha, comercio abierto en ambos lados y joya puesta en la ventana; a 2 casillas como el original; faltan clan y amigos]
+C12. Comercio, fiesta, clan, amigos con la interfaz tactil. [parcial: probado en linea con dos jugadores: pulsacion larga abre el menu (Trade, Purchase, Party, Whisper, Follow, Battle, Attack), invitacion y aceptacion de grupo con la lista arriba a la derecha, comercio abierto en ambos lados y joya puesta en la ventana; a 2 casillas como el original; ventanas de Amigos y Clan abren pegadas a la derecha (antes en columna 2, tapando el nombre); crear clan y agregar amigo sin probar]
 C13. Mapa y minimapa tactil. [pendiente]
 C14. Movimiento: tirones, "tiron hacia atras", NPC que bloquea. Reproducir con registros del servidor y corregir. [pendiente]
 C15. Sonido: el mismo mapa de sonidos que Magdalena. [parcial: musica del login y del pueblo, pasos, viento y monstruos comprobados; Magdalena no se puede medir sonido por sonido (audio mezclado), falta escucharlo en el telefono]

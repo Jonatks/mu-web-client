@@ -1,5 +1,6 @@
 import './style.less';
-import { useCallback, type CSSProperties } from 'react';
+import { useCallback, useEffect, type CSSProperties } from 'react';
+import { observable, runInAction } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { MuSpriteFrame, useMuSprite } from '../mu_sprite';
 import { MuResizeGrip, useWindowChrome } from './useWindowChrome';
@@ -27,6 +28,19 @@ const BOTTOM_BAR_HEIGHT = 51;
 export const BOTTOM_BAR_ID = 'bottom-bar';
 export const bottomBarScreenHeight = () => BOTTOM_BAR_HEIGHT * MuWindows.scaleOf(BOTTOM_BAR_ID);
 
+/**
+ * A phone packs the open item windows against the right edge, as Mu Magdalena does: a window's column is how many open ones sit
+ * in lower columns, so the Guild window alone (column 2) is at the edge and next to the inventory when both are up.
+ */
+export function packedColumn(own: number, others: Iterable<number>): number {
+  let n = 0;
+  for (const c of others) if (c < own) n++;
+  return Math.min(own, n);
+}
+
+/** The columns of the item windows mounted now, by id (phones only read it). */
+const mountedColumns = observable.map<string, number>();
+
 type MuItemWindowProps = {
   id: string;
   column?: number;
@@ -51,6 +65,12 @@ export const MuItemWindow = observer(
       onClose,
     });
     const stackRef = chrome.ref as (el: HTMLElement | null) => void;
+    useEffect(() => {
+      runInAction(() => mountedColumns.set(id, column));
+      return () => runInAction(() => void mountedColumns.delete(id));
+    }, [id, column]);
+    const mobile = isMobileDevice();
+    const shown = mobile ? packedColumn(column, [...mountedColumns].filter(([k]) => k !== id).map(([, c]) => c)) : column;
     // Joins the stack and takes the focus, so the window is the keyboard's
     // target the moment it opens (and Escape scopes to it).
     const ref = useCallback(
@@ -70,7 +90,7 @@ export const MuItemWindow = observer(
         className={`mu-item-window${className ? ` ${className}` : ''}`}
         onPointerDown={chrome.onPointerDown}
         style={{
-          right: column * WINDOW_WIDTH * chrome.scaleX,
+          right: shown * WINDOW_WIDTH * chrome.scaleX,
           // A phone is short: like Mu Magdalena, the windows take the full height (the bar sits behind them) so the
           // title and the close button are never cut off.
           ...(isMobileDevice()
