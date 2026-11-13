@@ -23,3 +23,14 @@ Lectura: fila 8: el pasto en briznas costaba un cuarto del fotograma y Magdalena
 La unica medicion directamente comparable entre Magdalena y mi cliente en el mismo escenario es la 3 contra la 3b: mi cliente hace menos llamadas (25 contra 44), mas triangulos (24.9k contra 8.6k) y menos fotogramas (40 contra 57).
 La fila 4 repite la 1: los fotogramas no cambiaron (no se toco el dibujo) y la memoria JS subio 38 MB; la fila 5 muestra que fue un pico: la memoria sigue en torno a 195-200 MB.
 De donde sale (muestreo de la fila 5): 138 MB son de Babylon: datos de los modelos que el cargador glTF guarda en la CPU (22 MB), copias de vertices para calcular cajas de colision de mallas con huesos (7 MB, `refreshBoundingInfo`), huesos y geometria clonada por cada personaje (unos 10 MB). Pistas para bajarla sin cambiar el aspecto: no clonar la geometria por personaje (compartirla) y no recalcular cajas con huesos cada vez.
+
+## Memoria real del proceso (2026-11-13)
+La columna "Memoria JS" no compara bien: Magdalena es C++ compilado a WebAssembly y guarda casi todo en la memoria de WebAssembly, que no cuenta como memoria JS (por eso marcaba 19 MB). Medida la memoria real de la pestana (proceso renderer) y de la GPU, en el mundo, misma maquina:
+
+| | Pestana | GPU | Descarga inicial | fps en esa corrida |
+|---|---|---|---|---|
+| Mi cliente (fila 8, servidor local) | 786 MB | 264 MB | 4.6 MB | 16.7 |
+| Magdalena (Lorencia con multitud) | 1495 MB | 256 MB | 564 MB | 31.6 |
+
+Mi cliente usa la mitad de memoria que Magdalena y descarga 120 veces menos. La meta de memoria queda cumplida; el trabajo pendiente es de fotogramas.
+Sobre los fotogramas: entre corridas de mi cliente hay mucho ruido (14 a 20 fps en la misma escena), y Magdalena dio 22 en la primera medicion y 31.6 en esta. El suelo cuesta unos 20 ms por fotograma, de ellos unos 15 de su sombreado (con un material plano sube de 17.6 a 24.2 fps); en calidad 0 ya salta las nubes y las luces por pixel, asi que lo que queda es su trabajo base (dos capas de textura, grano y luz horneada).
