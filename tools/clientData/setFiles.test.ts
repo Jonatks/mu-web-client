@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { convertBux } from '../../src/controllers/terrain/mapFileEncryption';
 import { parseItemSetOptions, parseItemSetTypes } from '../../src/controllers/assets/mu/itemSetFile';
 import { existsSync, readFileSync } from 'fs';
-import { decodeSetRecord, encodeSetRecord, itemCode, setItemSetNumber, setSetOption } from './setFiles';
+import { decodeSetRecord, encodeSetRecord, itemCode, itemSetNumbers, setItemSetNumber, setSetOption } from './setFiles';
 
 /** A type table shaped like the live one: 8192 keyed records of zeros plus a 4 byte tail. */
 function emptyTypes(): Uint8Array {
@@ -23,6 +23,13 @@ describe('setFiles', () => {
     const changed = after.reduce((n, b, i) => n + (b !== before[i] ? 1 : 0), 0);
     expect(changed).toBe(1);
     expect(Array.from(after.subarray(8192 * 4))).toEqual([1, 2, 3, 4]);
+  });
+
+  it('reads back the two set numbers of an item', () => {
+    const code = itemCode(13, 27);
+    const bytes = setItemSetNumber(setItemSetNumber(emptyTypes(), code, 0, 31), code, 1, 53);
+    expect(itemSetNumbers(bytes, code)).toEqual([31, 53]);
+    expect(itemSetNumbers(bytes, itemCode(0, 1))).toEqual([0, 0]);
   });
 
   it('writing the same value is the identity', () => {

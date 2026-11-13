@@ -33,6 +33,14 @@ export type SetRecord = {
 /** Item code of a group and number, as `ItemSetType.bmd` indexes it. */
 export const itemCode = (group: number, number: number): number => group * 512 + number;
 
+/** The two set numbers of an item code (0 or 255 mean none). */
+export function itemSetNumbers(bytes: Uint8Array, code: number): [number, number] {
+  if (code < 0 || code >= MAX_ITEM) throw new Error(`Item code ${code} is out of range`);
+  const record = bytes.slice(code * TYPE_RECORD, code * TYPE_RECORD + TYPE_RECORD);
+  convertBux(record, TYPE_RECORD);
+  return [record[0], record[1]];
+}
+
 /** Puts `setNumber` in the first or second set slot of an item. Returns a new copy. */
 export function setItemSetNumber(bytes: Uint8Array, code: number, slot: 0 | 1, setNumber: number): Uint8Array {
   if (code < 0 || code >= MAX_ITEM) throw new Error(`Item code ${code} is out of range`);
