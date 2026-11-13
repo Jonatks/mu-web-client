@@ -93,7 +93,7 @@ export const Vault = observer(() => {
   };
 
   // The original parks each item window left of the last one.
-  const column = 1 + (MuWindows.isOpen('inventory') ? 1 : 0) + (MuWindows.isOpen('character_info') ? 1 : 0);
+  const column = (MuWindows.isOpen('inventory') ? 1 : 0) + (MuWindows.isOpen('character_info') ? 1 : 0);
 
   return (
     <MuItemWindow

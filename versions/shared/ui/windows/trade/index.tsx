@@ -94,7 +94,7 @@ export const TradeWindow = observer(() => {
   const partner = Economy.tradePartner;
   const band = levelBand(partner?.level ?? 0);
 
-  const column = 1 + (MuWindows.isOpen('inventory') ? 1 : 0) + (MuWindows.isOpen('character_info') ? 1 : 0);
+  const column = (MuWindows.isOpen('inventory') ? 1 : 0) + (MuWindows.isOpen('character_info') ? 1 : 0);
 
   return (
     <MuItemWindow

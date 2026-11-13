@@ -433,7 +433,7 @@ export const ChaosMachine = observer(() => {
   const finished = Economy.mixResult !== null;
   const accepts = !picked || picked.fromStorage === StorageKind.ChaosMachine || Economy.mixAccepts(picked.item);
 
-  const column = 1 + (MuWindows.isOpen('inventory') ? 1 : 0) + (MuWindows.isOpen('character_info') ? 1 : 0);
+  const column = (MuWindows.isOpen('inventory') ? 1 : 0) + (MuWindows.isOpen('character_info') ? 1 : 0);
 
   return (
     <>
