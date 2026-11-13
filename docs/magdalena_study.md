@@ -261,3 +261,8 @@ Corrects section 12, which overcounted by one or two.
 - Map: Magdalena's phone interface has no minimap or map window: the COMMANDS menu has none, and the round button at the right edge (857,270, 50 px) is the configured skill slot (the fist), not a map. This client keeps its Map tile (an extra, harmless).
 - When the game stops drawing, a centred card says "The game stopped responding" with a spinner, a reason ("Automatic recovery did not produce a new frame" or "The game has not completed a frame for 134 seconds") and three buttons: Wait, Reload, Restart (gold). Seen twice on this software-GPU machine while entering the world.
 - After Reload the login card remembers the account: the logo, "MUMAGDALENAS ACCOUNT", language buttons ES / EN / PT, "Logged in as jonatks", a gold CONNECT button and a plain Sign out; a red line "Auth request failed" sat under it once and did not block CONNECT.
+
+## 25. Side by side at Hanzo (Lorencia (115,140)), after the bar and camera changes
+- The bottom bar is now the size of Magdalena's (47 px orbs, 32 px boxes); this client's bar still has no ornate gold frame across the screen width.
+- The camera opens at the original distance on phones too (it used to open one step closer); Magdalena still shows a little more of the town around the hero, with a slightly lower pitch.
+- Brightness over the same crop: Magdalena value 67, saturation 106; this client 60 and 98, about 10 percent darker and less saturated, with a stronger pool of light around the hero. Not changed yet: the lighting is the classic tier and a global lift would also brighten night maps.

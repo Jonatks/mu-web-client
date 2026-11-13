@@ -63,7 +63,7 @@ for (const layer of CAMERA_LAYERS) {
 }
 
 /** `g_shCameraLevel`, 0..4. */
-let level = nearerOnTouch(DEFAULT_CAMERA_LEVEL);
+let level = DEFAULT_CAMERA_LEVEL;
 
 /** `CameraAngle[2]`, degrees. */
 let headingDeg = DEFAULT_HEADING_DEG;
@@ -154,13 +154,9 @@ let classic: {
  * every pinned value exactly (1100 and 2000 are both steps), so the nearest
  * step is that frame, not an approximation of it.
  */
+// A phone opens on the original's frame too, as Mu Magdalena does (pinch zooms, `installPinchZoom`).
 function openingLevelFor(world: ENUM_WORLD): number {
-  return nearerOnTouch(pinnedLevelFor(world));
-}
-
-/** A phone is a small screen: the hero opens one step closer than on a monitor (pinch zooms, `installPinchZoom`). */
-function nearerOnTouch(base: number): number {
-  return isMobileDevice() ? Math.max(2, base - 1) : base;
+  return pinnedLevelFor(world);
 }
 
 function pinnedLevelFor(world: ENUM_WORLD): number {
