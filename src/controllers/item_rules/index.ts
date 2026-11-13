@@ -14,7 +14,7 @@ export type { HeroStats, ItemDef, ItemStats } from './itemStats';
 export { isRepairBanned, isSellingBanned, itemValue, needsRepair, repairAllCost, repairCost, withTax } from './itemValue';
 export { learnableSkill } from './skillItems';
 export { archangelWeapon, dropModelProxy } from './dropModelProxy';
-export { activeSetOptions, ancientSetOf, setOptionLines, withWornStats, wornSetPieces, wornStatBonus } from './ancientSets';
+export { activeSetOptions, ancientSetComplete, ancientSetOf, setOptionLines, withWornStats, wornSetPieces, wornStatBonus } from './ancientSets';
 export type { SetOptionLine, WornStats } from './ancientSets';
 export { harmonyBonus, harmonyKindOf, harmonyNeedCut, harmonyOf, hasGuardianOption, isSocketItem, periodExpired, socketBonusOf, socketsOf } from './itemOptions';
 export { socketOptionValue, socketStatusBonus } from './socketBonus';

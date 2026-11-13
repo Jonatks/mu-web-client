@@ -301,6 +301,7 @@ function addCharacterToScope(
     // preview (`deserializeAppearance`), the extended one in its own slots.
     cApp.wings = appearance.wings ?? null;
     cApp.pet = appearance.pet ?? null;
+    cApp.ancientSet = appearance.ancientSet;
 
     cApp.changed = true;
 
@@ -654,5 +655,7 @@ export function installNet(): void {
             isAncient: p.AncientDiscriminator !== 0,
           };
     applyAppearanceChange(p.ChangedPlayerId, p.ItemSlot, item);
+    const changed = Ecs.world?.getByNetId(p.ChangedPlayerId & 0x7fff)?.charAppearance;
+    if (changed) changed.ancientSet = p.IsAncientSetComplete;
   });
 }

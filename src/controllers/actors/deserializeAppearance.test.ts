@@ -45,3 +45,12 @@ describe('Dark Raven in slot 1', () => {
     expect(app.rightHand).toMatchObject({ group: 5, num: 5 });
   });
 });
+
+describe('full ancient set flag', () => {
+  it('reads byte 11 bit 0 of the preview', () => {
+    const on = preview(CharacterClassNumber.DarkWizard, 5, 5);
+    on.setUint8(11, 0x01);
+    expect(deserializeAppearance(on).ancientSet).toBe(true);
+    expect(deserializeAppearance(preview(CharacterClassNumber.DarkWizard, 5, 5)).ancientSet).toBe(false);
+  });
+});

@@ -66,6 +66,7 @@ import { QuestSystem } from './systems/questSystem';
 import { PetSystem } from './systems/petSystem';
 import { TeleportSystem } from './systems/teleportSystem';
 import { GuildFlagSystem } from './systems/guildFlagSystem';
+import { AncientSetSystem } from './systems/ancientSetSystem';
 import { ClothSystem } from './systems/clothSystem';
 import { perfOverlayVisible, recordSystemTime } from '../controllers/render/perfOverlay';
 
@@ -129,6 +130,8 @@ const factories: ISystemFactory[] = [
   AnimationHoldSystem,
   // After AnimationSystem: the shoulder flag reads this frame's bone 26 pose.
   GuildFlagSystem,
+  // The full ancient set's blur follows the worn items and the appearance flag.
+  AncientSetSystem,
   // After AppearanceSystem: a held weapon's sprites ride the model the hand holds this frame.
   WeaponSpriteSystem,
   ItemGlowSystem,

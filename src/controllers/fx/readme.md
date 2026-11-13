@@ -228,7 +228,8 @@ Parts follow the wearer by `follow` (feet) and `bone` (MU bone index), step at 2
 is per tick, ramp in and out over `RAMP_SECONDS`, and end together on `stop()` or `until`.
 Examples: the five MODEL_SPEARSKILL ribbons of Greater Defense, Swell Life's shoulder motes. `groundGlow` keeps
 `ring` decals under the wearer, redrawn where it stands each frame (`RenderTerrainAlphaBitmap`), breathing on the clock.
-Spawned from `controllers/skills/visuals.ts` (`BUFF_VISUALS`, keyed by `eBuffState`).
+Spawned from `controllers/skills/visuals.ts` (`BUFF_VISUALS`, keyed by `eBuffState`). `ancientBlur` is the full ancient
+set's halo (two rings every 100 ticks, `BITMAP_LIGHT` sub 3), kept by `ecs/systems/ancientSetSystem.ts`.
 
 ### bandNotes.ts
 A note is a solid alpha-tested glyph in the world's rendering group, so it writes depth and gets

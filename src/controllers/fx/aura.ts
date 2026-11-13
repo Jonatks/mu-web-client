@@ -269,6 +269,11 @@ const RING_FLARE_LIGHT: RGB = [RING_LIGHT[0] * RING_GROW ** RING_GROW_TICKS, RIN
 const RING_FADE_FROM_TICK = 40;
 const RING_FADE = 1 / 1.1;
 const RING_FLARE_SIZE = px(64, 0.5);
+/** The ancient set's blur: a ring every 100 ticks and a second 15 later, 180 degrees on, scale 10. */
+const ANCIENT_EVERY_TICKS = 100;
+const ANCIENT_SECOND_TICKS = 15;
+const ANCIENT_STEP_DEG = 180;
+const ANCIENT_WIDTH = 0.1;
 
 /**
  * Berserker: BITMAP_ORORA (64 px) at the hands, Scale 0.2 growing 0.01 a
@@ -409,6 +414,8 @@ export interface AuraOptions {
   stun?: boolean;
   /** AG recovery: the orbiting healing rings. */
   healingRings?: boolean;
+  /** Full ancient set: the blur of two rings every four seconds. */
+  ancientBlur?: boolean;
   /** Berserker: the hand auroras and the body marks. */
   berserk?: boolean;
 }
@@ -944,6 +951,47 @@ function stun(scene: Scene, o: AuraOptions, stopping: () => boolean): Part {
   };
 }
 
+/** One orbiting healing ring (joint sub 9, ZzzEffectJoint.cpp:3572): starts at `angle` degrees round the body and closes in as it climbs. */
+function ring(scene: Scene, o: AuraOptions, stopping: () => boolean, angle: number, width: number): EffectHandle {
+  const born = fxNow();
+  const phase = angle * 0.1;
+  const anchor = new Vector3();
+  const colour: [number, number, number] = [RING_LIGHT[0], RING_LIGHT[1], RING_LIGHT[2]];
+  const head: PointSource = out => {
+    o.follow(anchor);
+    const ticks = (fxNow() - born) / TICK;
+    const r = Math.max(0, RING_RADIUS - RING_CLOSE * ticks);
+    const a = phase + RING_TURN * ticks;
+    return out.set(anchor.x + Math.sin(a) * r, anchor.y + RING_START_HEIGHT + RING_RISE * ticks, anchor.z + Math.cos(a) * r);
+  };
+  // Light: × 1.25 a tick for the first ten, × 1/1.1 a tick from the fortieth.
+  let lastTick = 0;
+  return spawnJoint(scene, anchor, {
+    head,
+    anchor: o.follow,
+    maxTails: RING_TAILS,
+    width,
+    colour,
+    texture: TEX.jointEnergy,
+    seconds: (RING_RADIUS / RING_CLOSE) * TICK,
+    until: stopping,
+    sprites: { texture: TEX.flareBlue, colour: RING_FLARE_LIGHT, size: RING_FLARE_SIZE, count: RING_TAILS },
+    trace: () => {
+      const tick = Math.floor((fxNow() - born) / TICK);
+      for (; lastTick < tick; lastTick++) {
+        const k = lastTick < RING_GROW_TICKS ? RING_GROW : lastTick >= RING_FADE_FROM_TICK ? RING_FADE : 1;
+        if (k !== 1) for (let i = 0; i < 3; i++) colour[i] *= k;
+      }
+    },
+  });
+}
+
+/** Drops the finished handles of `handles` and stops the rest. */
+function stopAll(handles: EffectHandle[]): void {
+  for (const h of handles) h.stop();
+  handles.length = 0;
+}
+
 function healingRings(scene: Scene, o: AuraOptions, stopping: () => boolean): Part {
   let due = 0;
   let angle = 0;
@@ -954,44 +1002,44 @@ function healingRings(scene: Scene, o: AuraOptions, stopping: () => boolean): Pa
       if (due > 0) return;
       due += RING_EVERY_TICKS * TICK;
       angle += RING_STEP_DEG;
-      const born = fxNow();
-      const phase = angle * 0.1;
-      const anchor = new Vector3();
-      const colour: [number, number, number] = [RING_LIGHT[0], RING_LIGHT[1], RING_LIGHT[2]];
-      const head: PointSource = out => {
-        o.follow(anchor);
-        const ticks = (fxNow() - born) / TICK;
-        const r = Math.max(0, RING_RADIUS - RING_CLOSE * ticks);
-        const a = phase + RING_TURN * ticks;
-        return out.set(anchor.x + Math.sin(a) * r, anchor.y + RING_START_HEIGHT + RING_RISE * ticks, anchor.z + Math.cos(a) * r);
-      };
-      // Light: × 1.25 a tick for the first ten, × 1/1.1 a tick from the fortieth.
-      let lastTick = 0;
-      const h = spawnJoint(scene, anchor, {
-        head,
-        anchor: o.follow,
-        maxTails: RING_TAILS,
-        width: RING_WIDTH,
-        colour,
-        texture: TEX.jointEnergy,
-        seconds: (RING_RADIUS / RING_CLOSE) * TICK,
-        until: stopping,
-        sprites: { texture: TEX.flareBlue, colour: RING_FLARE_LIGHT, size: RING_FLARE_SIZE, count: RING_TAILS },
-        trace: () => {
-          const tick = Math.floor((fxNow() - born) / TICK);
-          for (; lastTick < tick; lastTick++) {
-            const k = lastTick < RING_GROW_TICKS ? RING_GROW : lastTick >= RING_FADE_FROM_TICK ? RING_FADE : 1;
-            if (k !== 1) for (let i = 0; i < 3; i++) colour[i] *= k;
-          }
-        },
-      });
-      handles.push(h);
+      handles.push(ring(scene, o, stopping, angle, RING_WIDTH));
       for (let i = handles.length - 1; i >= 0; i--) if (!handles[i].alive) handles.splice(i, 1);
     },
-    release() {
-      for (const h of handles) h.stop();
-      handles.length = 0;
+    release: () => stopAll(handles),
+  };
+}
+
+/**
+ * The ancient set's blur (ZzzCharacter.cpp:11156-11166, ZzzEffect.cpp:6206-6222): while the full set is worn, every
+ * 100 ticks a `BITMAP_LIGHT` sub 3 spawns, and it sends a ring at once and another 15 ticks later, each turned
+ * 180 degrees from the last, narrower than the AG recovery's (scale 10).
+ */
+function ancientBlur(scene: Scene, o: AuraOptions, stopping: () => boolean): Part {
+  let since = 0;
+  let started = false;
+  let second = true;
+  let angle = 0;
+  const handles: EffectHandle[] = [];
+  const send = (): void => {
+    angle += ANCIENT_STEP_DEG;
+    handles.push(ring(scene, o, stopping, angle, ANCIENT_WIDTH));
+  };
+  return {
+    update(dt) {
+      since += dt;
+      if (!started || since >= ANCIENT_EVERY_TICKS * TICK) {
+        since = started ? since - ANCIENT_EVERY_TICKS * TICK : 0;
+        started = true;
+        second = false;
+        send();
+      }
+      if (!second && since >= ANCIENT_SECOND_TICKS * TICK) {
+        second = true;
+        send();
+      }
+      for (let i = handles.length - 1; i >= 0; i--) if (!handles[i].alive) handles.splice(i, 1);
     },
+    release: () => stopAll(handles),
   };
 }
 
@@ -1079,6 +1127,7 @@ function spawn(scene: Scene, _at: Vector3, opts: AuraOptions): EffectHandle {
   if (opts.skull) parts.push(skull(scene, opts, isStopping));
   if (opts.stun) parts.push(stun(scene, opts, isStopping));
   if (opts.healingRings) parts.push(healingRings(scene, opts, isStopping));
+  if (opts.ancientBlur) parts.push(ancientBlur(scene, opts, isStopping));
   if (opts.berserk) parts.push(berserk(scene, opts));
 
   let ramp = 0;

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { ItemSet, ItemSetTables } from '../assets/mu';
-import { activeSetOptions, ancientSetOf, setOptionLines, wornSetPieces, wornStatBonus } from './ancientSets';
+import { activeSetOptions, ancientSetComplete, ancientSetOf, setOptionLines, wornSetPieces, wornStatBonus } from './ancientSets';
 import { itemStats, type HeroStats } from './itemStats';
 
 const none = { option: 0xff, value: 0xff };
@@ -22,6 +22,13 @@ const piece = (group: number) => ({ group, num: 5, ancientDiscriminator: 1, dura
 
 // calcSetOptionList (CSItemOption.cpp:316-372).
 describe('ancient set options', () => {
+  it('is complete only with every piece of the set worn with durability left (ExtendState)', () => {
+    expect(ancientSetComplete([null, null, piece(7), piece(8), piece(9)], TABLES)).toBe(true);
+    expect(ancientSetComplete([null, null, piece(7), piece(8)], TABLES)).toBe(false);
+    expect(ancientSetComplete([null, null, piece(7), piece(8), { ...piece(9), durability: 0 }], TABLES)).toBe(false);
+    expect(ancientSetComplete([], TABLES)).toBe(false);
+  });
+
   it('lights one standard option per piece past the first, the full ones with the whole set', () => {
     expect(setOptionLines(SET, 1)).toEqual([]);
     expect(setOptionLines(SET, 2).map(l => l.active)).toEqual([true, false, false]);

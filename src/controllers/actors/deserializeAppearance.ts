@@ -151,6 +151,8 @@ export function deserializeAppearance(app: DataView) {
     boots,
     wings: wingFromAppearance(app),
     pet: petFromAppearance(app),
+    /** Byte 11 bit 0: every piece of an ancient set is worn (`Equipment[10] & 0x01`, ZzzCharacter.cpp:13547). */
+    ancientSet: (app.getUint8(11) & 0x01) !== 0,
   } as const;
 }
 
@@ -202,6 +204,8 @@ export function deserializeAppearanceExtended(app: DataView) {
     boots: shiny(20),
     wings: unshiny(23),
     pet: unshiny(25),
+    /** Byte 1 flag 0x10 (`ReadEquipmentExtended`, ZzzCharacter.cpp:13612). */
+    ancientSet: (app.getUint8(1) & 0x10) !== 0,
   } as const;
 }
 

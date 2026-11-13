@@ -352,6 +352,8 @@ export type Entity = Partial<{
     /** `c->Helper`: Guardian Angel, Imp, Horn of Uniria / Dinorant (group 13). */
     pet: Item | null;
     charClass: CharacterClassNumber;
+    /** `c->ExtendState`: every piece of an ancient set is worn; the set's blur follows it (AncientSetSystem). */
+    ancientSet?: boolean;
     changed: boolean;
     /**
      * Bumped by AppearanceSystem every time it applies these slots to the

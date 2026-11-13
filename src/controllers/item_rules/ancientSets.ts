@@ -48,6 +48,18 @@ export function wornSetPieces(set: ItemSet, worn: readonly (Item | null)[], hero
   return pieces;
 }
 
+/**
+ * Whether the worn items hold every piece of some ancient set, counted by durability alone: the original's
+ * `Hero->ExtendState` (`CheckItemSetOptions`, CSItemOption.cpp:402-410), which draws the set's blur.
+ */
+export function ancientSetComplete(worn: readonly (Item | null)[], tables: ItemSetTables | null = itemSetTables()): boolean {
+  for (const slot of SET_SLOTS) {
+    const set = worn[slot] ? ancientSetOf(worn[slot], tables) : null;
+    if (set && set.itemCount <= wornSetPieces(set, worn, null, tables)) return true;
+  }
+  return false;
+}
+
 export type SetOptionLine = {
   option: number;
   value: number;
