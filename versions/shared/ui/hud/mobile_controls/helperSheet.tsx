@@ -92,12 +92,12 @@ const Range = observer(({ label, value, max, set }: { label: TextKey; value: num
   </label>
 ));
 
-const Toggle = ({ on, set, label, className = '' }: { on: boolean; set: (v: boolean) => void; label: string; className?: string }) => (
+const Toggle = observer(({ on, set, label, className = '' }: { on: boolean; set: (v: boolean) => void; label: string; className?: string }) => (
   <label className={`hlp-toggle ${className}`}>
     <input type="checkbox" checked={on} onChange={e => set(e.target.checked)} />
     <span>{label}</span>
   </label>
-);
+));
 
 /**
  * Mu Magdalena's MU Helper on a phone: one centred panel, Combat and Pickup tabs, two lanes of skill tiles, the ranges, the

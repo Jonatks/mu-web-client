@@ -10,7 +10,7 @@ import { clearStick, setStick, stickDirection, TouchStick } from '@/controllers/
  * player controller's (`controllers/interface/touchStick.ts`); this only reports a direction.
  */
 /** The pad's ring: bronze, bone spikes and a skull on top, in the MU style (drawn here, no outside art). */
-const Ring = () => (
+const Ring = observer(() => (
   <svg className="mobile-stick-ring" viewBox="0 0 100 100" aria-hidden="true">
     <defs>
       <linearGradient id="stickBronze" x1="0" y1="0" x2="1" y2="1">
@@ -37,7 +37,7 @@ const Ring = () => (
       <circle cx="2.4" cy="0.2" r="1.5" fill="#2a1a0c" />
     </g>
   </svg>
-);
+));
 
 export const Joystick = observer(() => {
   const ring = useRef<HTMLDivElement>(null);
