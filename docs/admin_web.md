@@ -95,3 +95,9 @@ unless "undo" is ticked it keeps every change that can still be undone. The clea
 - Banning a connected player is refused; disconnect them first.
 - Server settings apply after a restart; undoing one needs the server empty like any other undo.
 - Experience is set to OpenMU's table value when the level changes.
+
+## Restablecer valores por defecto
+
+Every tab of `Servidor` ends with «Restablecer valores por defecto». It puts that tab back to what OpenMU shipped with: rules, map multipliers, spawn spots, monster stats, drop chances, shop stock, events, warps and plug-in settings. It is saved like any other change (applies at the next restart) and can be undone from «Registro».
+
+The shipped values are a snapshot of a fresh OpenMU database, `/var/lib/mu-admin/defaults.json.gz`, made once on the VM with `admin/service/export-defaults.sh` (it starts a throwaway OpenMU with its own empty database, so the game is stopped for about 4 minutes and always comes back). Without that file the button says so. Code: `admin/service/defaults.ts`.

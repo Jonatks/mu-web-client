@@ -7,6 +7,7 @@ const ROUTES = [
   /^\/characters(\/[A-Za-z0-9_]{1,10}(\/(items|skills|quests|letters|gens)(\/([0-9a-f-]{36}|available|[0-9]{1,5}))?)?)?$/,
   /^\/(classes|maps)$/, /^\/skills\/definitions$/, /^\/items\/[0-9a-f-]{36}(\/move)?$/,
   /^\/items\/definitions(\/[0-9a-f-]{36}(\/ancient)?)?$/, /^\/items\/categories$/,
+  /^\/server\/reset(\/(rules|maps|spawns|monsters|drops|shops|events|warps|plugins))?$/,
   /^\/server\/(rules|overview|maps|drops|boxes|monsters|spawns|shops|events|warps|plugins|restart)(\/(scale|[0-9a-f-]{36}(\/(terrain|items(\/[0-9a-f-]{36})?))?))?$/,
 ];
 

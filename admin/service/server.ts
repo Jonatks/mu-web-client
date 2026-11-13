@@ -428,13 +428,13 @@ export const listShops = (sql: Sql) =>
 /* ----------------------------------------------------------------- events */
 
 const GAMES: Record<number, string> = { 20: 'Devil Square', 25: 'Blood Castle', 30: 'Chaos Castle', 35: 'Illusion Temple', 40: 'Doppelganger' };
-const EVENT_SECS = ['EnterDuration', 'GameDuration', 'ExitDuration'];
-const EVENT_INTS: [string, string, number, number][] = [
+export const EVENT_SECS = ['EnterDuration', 'GameDuration', 'ExitDuration'];
+export const EVENT_INTS: [string, string, number, number][] = [
   ['MaximumPlayerCount', 'Jugadores máximos', 1, 1000], ['MinimumCharacterLevel', 'Nivel mínimo', 0, 1000], ['MaximumCharacterLevel', 'Nivel máximo', 0, 1000],
   ['MinimumSpecialCharacterLevel', 'Nivel mínimo (clases especiales)', 0, 1000], ['MaximumSpecialCharacterLevel', 'Nivel máximo (clases especiales)', 0, 1000],
   ['TicketItemLevel', 'Nivel del ticket de entrada', 0, 15], ['EntranceFee', 'Zen para entrar', 0, 2147483647],
 ];
-const EVENT_BOOLS: [string, string][] = [['RequiresMasterClass', 'Solo clases Master'], ['ArePlayerKillersAllowedToEnter', 'Pueden entrar los PK'], ['AllowParty', 'Se permite entrar en grupo']];
+export const EVENT_BOOLS: [string, string][] = [['RequiresMasterClass', 'Solo clases Master'], ['ArePlayerKillersAllowedToEnter', 'Pueden entrar los PK'], ['AllowParty', 'Se permite entrar en grupo']];
 
 export async function listEvents(sql: Sql) {
   const rows = await sql.unsafe(

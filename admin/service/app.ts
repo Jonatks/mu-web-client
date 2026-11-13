@@ -8,6 +8,7 @@ import { HttpError, bad, missing } from './errors';
 import { GateError, assertNobodyConnected } from './gate';
 import * as items from './items';
 import * as server from './server';
+import { resetInfo, resetTab } from './defaults';
 import { disconnectAccount, readOnline } from './bridge';
 import { kickAll, restartServer } from './kick';
 import * as skills from './skills';
@@ -127,6 +128,10 @@ export function createApp(cfg: Config) {
       switch (p[1]) {
         case 'overview':
           if (m === 'GET') return server.overview(sql, auditTail(1000));
+          break;
+        case 'reset':
+          if (m === 'GET' && p.length === 2) return resetInfo();
+          if (m === 'POST' && p.length === 3) { needAdmin(); return resetTab(sql, admin, p[2]!); }
           break;
         case 'restart':
           if (m === 'POST') { needAdmin(); return restartServer(cfg.gateFile, admin); }

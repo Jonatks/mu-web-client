@@ -611,7 +611,22 @@ const sign = (a, b, fmt = f.num) => `${b > a ? '+' : '−'}${fmt(Math.abs(b - a)
   /* ------------------------------------------------------------------- page */
   const tabs = [['rules', 'Experiencia y reglas', rulesTab], ['maps', 'Mapas', mapsTab], ['spawns', 'Mobs y spots', spawnsTab], ['monsters', 'Monstruos', monstersTab], ['drops', 'Drops', dropsTab],
     ['shops', 'Tiendas', shopsTab], ['events', 'Eventos', eventsTab], ['warps', 'Teletransportes', warpsTab], ['plugins', 'Avanzado', pluginsTab]];
+  /** Every tab ends with the button that puts it back to what OpenMU shipped with. */
+  const withReset = (key, label, render) => () => {
+    const wrap = h('div', {});
+    const draw = () => fill(wrap, render(), h('div', { class: 'actions' }, h('button', { class: 'small', onclick: reset }, 'Restablecer valores por defecto')));
+    async function reset() {
+      if (!(await confirmBox(`¿Restablecer «${label}»?`, 'Todo lo de esta pestaña vuelve a los valores con los que llegó el servidor. Se aplica al reiniciar y se puede deshacer en «Registro».', 'Restablecer', true))) return;
+      const r = await act(() => api('POST', '/server/reset/' + key, {}));
+      if (!r) return;
+      toast(r.result.changed ? `Restablecido (${r.result.changed}). Se aplica al reiniciar el servidor.` : 'Ya estaba con los valores por defecto.');
+      refreshHero(); draw();
+    }
+    draw();
+    return wrap;
+  };
+  const resettable = tabs.map(([key, label, render]) => [key, label, withReset(key, label, render)]);
   view.append(head('Servidor', 'Así está el servidor hoy. Al editar, cada número muestra cómo quedaría. Los cambios se guardan al instante y se aplican al reiniciar.', h('button', { onclick: restart }, 'Reiniciar servidor')), hero.box,
-    tabset(tabs, 'rules', () => { for (const n of Object.keys(hero.t)) bus(n); }));
+    tabset(resettable, 'rules', () => { for (const n of Object.keys(hero.t)) bus(n); }));
   refreshHero();
 }
