@@ -256,3 +256,8 @@ Corrects section 12, which overcounted by one or two.
 - Tapping a shop item shows the classic tooltip on the left (purchase price in green "Purchasing price: 5,995,400", option lines in blue, class lines in red when the hero cannot use it) and picks the item up like a mouse click; tapping the inventory then tries to buy. With 0 zen nothing is bought and no message was seen.
 - Difference kept on purpose: this client shows a sheet with the picture, the tooltip and a gold Buy button instead of picking the item up, because a phone has no cursor to carry it (noted for the owner).
 - In the Helper the Dark Knight's red shield icon sits under Buffs, so one of its six level 1 skills is a buff (likely Swell Life), not an attack.
+
+## 24. Map, freezes and the remembered login (2026-11-13)
+- Map: Magdalena's phone interface has no minimap or map window: the COMMANDS menu has none, and the round button at the right edge (857,270, 50 px) is the configured skill slot (the fist), not a map. This client keeps its Map tile (an extra, harmless).
+- When the game stops drawing, a centred card says "The game stopped responding" with a spinner, a reason ("Automatic recovery did not produce a new frame" or "The game has not completed a frame for 134 seconds") and three buttons: Wait, Reload, Restart (gold). Seen twice on this software-GPU machine while entering the world.
+- After Reload the login card remembers the account: the logo, "MUMAGDALENAS ACCOUNT", language buttons ES / EN / PT, "Logged in as jonatks", a gold CONNECT button and a plain Sign out; a red line "Auth request failed" sat under it once and did not block CONNECT.
