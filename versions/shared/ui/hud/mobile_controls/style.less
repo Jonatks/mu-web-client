@@ -678,7 +678,7 @@
 }
 
 // A window open on the right takes the full height (its title and X at the top): the buttons on that side would
-// cover it, so they step aside and the bar moves left, clear of the windows, until it closes.
+// cover it, so they step aside until it closes; the bar stays behind the window, as on Mu Magdalena.
 body:has(.mu-item-window) .mobile-controls {
   .mobile-top-buttons,
   .mobile-attack,
@@ -686,11 +686,7 @@ body:has(.mu-item-window) .mobile-controls {
     display: none;
   }
 
-  .mobile-bar {
-    left: calc(@edge + env(safe-area-inset-left, 0px));
-    transform: scale(0.76);
-    transform-origin: 0 100%;
-  }
+
 }
 
 // The item sheet (Mu Magdalena's): a dark framed panel over the screen, the picture at the top, the tooltip (portalled by
