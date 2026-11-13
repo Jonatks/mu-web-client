@@ -107,18 +107,21 @@ export const QuickCommandWindow = observer(() => {
     // The release, not the press, and the left button only - the right
     // release of the very click that opened the menu is still to come, and
     // it bubbles to a listener added during its own press.
-    // Touch opens the menu on the tap's own press, so that tap's release is still to
-    // come and must not read as "outside".
-    const openedAt = performance.now();
+    // Touch opens the menu during a press (a long press), so only a finger put down after it opened can close it: the
+    // release of the press that opened it, however long it was held, is not "outside".
+    const pressedSince = new Set<number>();
+    const onDown = (e: PointerEvent) => pressedSince.add(e.pointerId);
     const onUp = (e: PointerEvent) => {
       if (e.button !== 0) return;
-      if (e.pointerType === 'touch' && performance.now() - openedAt < 400) return;
+      if (e.pointerType === 'touch' && !pressedSince.delete(e.pointerId)) return;
       const el = e.target as HTMLElement | null;
       if (!el?.closest(`.${WINDOW_ID}`)) Commands.closeQuick();
     };
+    window.addEventListener('pointerdown', onDown, true);
     window.addEventListener('pointerup', onUp);
     return () => {
       window.clearInterval(tick);
+      window.removeEventListener('pointerdown', onDown, true);
       window.removeEventListener('pointerup', onUp);
     };
   }, [open]);

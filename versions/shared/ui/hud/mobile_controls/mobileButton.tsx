@@ -10,6 +10,19 @@ import { uiClick } from '@/controllers/sound/sfx';
  * long press the skill pad needs.
  */
 
+/**
+ * The browser's click that follows a touch lands on whatever is under the finger by then: once a button's panel has closed
+ * that is the window below (a sheet's Move opened the trade's zen prompt). A handled touch eats the click that comes after it.
+ */
+function swallowNextClick(): void {
+  const eat = (e: MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+  };
+  window.addEventListener('click', eat, { capture: true, once: true });
+  window.setTimeout(() => window.removeEventListener('click', eat, { capture: true }), 500);
+}
+
 /** Held this long (ms) without moving, a press is a long press, not a tap. */
 const LONG_PRESS_MS = 400;
 /** Pixels the finger may wander before the press stops counting as either. */
@@ -69,6 +82,7 @@ export const MobileButton = ({
       onPointerUp={e => {
         e.stopPropagation();
         const held = end();
+        if (e.pointerType === 'touch' && held) swallowNextClick();
         if (held && !held.long) uiClick(onTap)();
       }}
       onPointerCancel={end}

@@ -176,15 +176,15 @@ export const TradeWindow = observer(() => {
         style={{ position: 'absolute', left: YOUR_ACCEPT_X, top: YOUR_ACCEPT_Y }}
       />
 
-      {}
-      <div className="trade-warn-title" style={{ left: WARN_X, top: WARN_Y }}>
+      {/* "Warning" on its own row in the gap above the lines, so a translation of any width never runs into them. */}
+      <div className="trade-warn-title" style={{ left: WARN_X, top: WARN_Y - 14 }}>
         {t(WARN_TITLE)}
       </div>
       {WARN_LINES.map(line => (
         <div
           key={line.textKey}
           className="trade-warn-line"
-          style={{ left: line.x, top: line.y }}
+          style={{ left: WARN_X, top: line.y }}
         >
           {t(line.textKey)}
         </div>
