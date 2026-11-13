@@ -63,15 +63,15 @@ export const MobileControls = observer(() => {
 
   return (
     <>
-      {/* Under the windows (z 100+), unlike the controls: a shop must cover the monster names, as in Mu Magdalena. */}
-      <div className="mobile-monster-layer">
+      {/* Under the windows (z 100+), as in Mu Magdalena: a window covers the monster names and the bottom bar. */}
+      <div className="mobile-controls mobile-under">
         <MonsterBars />
+        <Bar />
       </div>
       <div className="mobile-controls">
         <StatusPanel />
         <TopButtons />
-        <Bar />
-        <AttackButton />
+                <AttackButton />
         <ChatBubble />
         <Joystick />
         <TalkButton />
