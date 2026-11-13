@@ -67,6 +67,7 @@ export const MobileControls = observer(() => {
       {/* Under the windows (z 100+), as in Mu Magdalena: a window covers the monster names and the bottom bar. */}
       <div className="mobile-controls mobile-under">
         <MuArtDefs />
+        <div className="mobile-bar-strip" />
         <MonsterBars />
         <Bar />
       </div>

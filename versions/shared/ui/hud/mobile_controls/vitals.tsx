@@ -1,16 +1,21 @@
 import { observer } from 'mobx-react-lite';
 import { Hero } from '@/modules/hero';
+import { OrbCrest } from './muArt';
 
-const pct = (value: number, max: number) => `${Math.max(0, Math.min(100, max > 0 ? (value / max) * 100 : 0))}%`;
+const pct = (value: number, max: number) =>
+  `${Math.max(0, Math.min(100, max > 0 ? (value / max) * 100 : 0))}%`;
 
 /** A liquid orb: the fill rises with the value, the number sits on top (Mu Magdalena's life and mana). */
 export const Orb = observer(({ kind }: { kind: 'hp' | 'mp' }) => {
   const value = kind === 'hp' ? Hero.currentHP : Hero.currentMP;
   const max = kind === 'hp' ? Hero.maxHP : Hero.maxMP;
   return (
-    <div className={`mobile-orb ${kind}`}>
-      <div className="mobile-orb-fill" style={{ height: pct(value, max) }} />
-      <span className="mobile-orb-value">{value}</span>
+    <div className={`mobile-orb-wrap ${kind}`}>
+      <OrbCrest side={kind === 'hp' ? 'left' : 'right'} />
+      <div className={`mobile-orb ${kind}`}>
+        <div className="mobile-orb-fill" style={{ height: pct(value, max) }} />
+        <span className="mobile-orb-value">{value}</span>
+      </div>
     </div>
   );
 });
@@ -32,6 +37,8 @@ export const Gauges = observer(() => (
 /** Experience, a hairline under the slots. */
 export const ExpLine = observer(() => (
   <div className="mobile-exp">
-    <i style={{ width: `${Math.max(0, Math.min(100, Hero.expPercent * 100))}%` }} />
+    <i
+      style={{ width: `${Math.max(0, Math.min(100, Hero.expPercent * 100))}%` }}
+    />
   </div>
 ));

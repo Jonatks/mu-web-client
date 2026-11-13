@@ -2027,3 +2027,146 @@ body:has(.mu-item-window) .mobile-controls .mobile-book {
   letter-spacing: 0.06em;
   color: #f3dcae;
 }
+
+// The orbs' carvings and the strip under the whole bar (Mu Magdalena's bar runs the full width).
+.mobile-orb-wrap {
+  position: relative;
+
+  .mu-orb-crest {
+    position: absolute;
+    top: -4%;
+    width: 78%;
+    height: 108%;
+    pointer-events: none;
+    filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.7));
+    z-index: 1;
+
+    &.left {
+      left: 44%;
+    }
+
+    &.right {
+      right: 44%;
+    }
+  }
+
+  .mobile-orb {
+    z-index: 2;
+  }
+}
+
+.mobile-bar-strip {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 13px;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 6% 55%, #1a120a 0 5px, transparent 6px),
+    radial-gradient(circle at 10% 55%, #1a120a 0 5px, transparent 6px),
+    radial-gradient(circle at 90% 55%, #1a120a 0 5px, transparent 6px),
+    radial-gradient(circle at 94% 55%, #1a120a 0 5px, transparent 6px),
+    linear-gradient(#3a2814, #120c06 40%, #050302);
+  border-top: 1px solid #b4823c;
+  box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.7), 0 -4px 10px rgba(0, 0, 0, 0.45);
+}
+
+// The plate under the boxes is now the strip and the carvings: lighter and lower.
+.mobile-bar::before {
+  height: 40px;
+  background: linear-gradient(rgba(42, 29, 16, 0.85), rgba(13, 9, 5, 0.92));
+}
+
+// ---- bar pieces as on Mu Magdalena: oval glass orbs, flat thin gauges, carvings over the joins ------------------------------
+.mobile-orb-wrap {
+  z-index: 3;
+
+  .mu-orb-crest {
+    top: 8%;
+    width: 70%;
+    height: 96%;
+
+    &.left {
+      left: 62%;
+    }
+
+    &.right {
+      right: 62%;
+    }
+  }
+}
+
+.mobile-orb {
+  width: 76px;
+  height: 58px;
+  border: 1px solid rgba(20, 8, 4, 0.9) !important;
+  box-shadow:
+    inset 0 -6px 12px rgba(0, 0, 0, 0.5),
+    inset 0 2px 0 rgba(255, 255, 255, 0.12),
+    0 3px 8px rgba(0, 0, 0, 0.7) !important;
+
+  &::after {
+    left: 18%;
+    top: 6%;
+    width: 46%;
+    height: 30%;
+    background: linear-gradient(rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0));
+  }
+
+  &.hp .mobile-orb-fill,
+  &.mp .mobile-orb-fill {
+    background-size: 100% 58px;
+  }
+
+  .mobile-orb-value {
+    font-size: 17px;
+    font-weight: 400;
+    color: #fff;
+    text-shadow: 0 1px 2px #000, 0 0 4px rgba(0, 0, 0, 0.8);
+  }
+}
+
+.mobile-gauges .mobile-gauge {
+  height: 6px;
+  border-radius: 0;
+  border: 1px solid #6b4a1e;
+  background: #0d0805;
+  overflow: visible;
+
+  i {
+    top: 0;
+    bottom: 0;
+  }
+
+  b {
+    top: -12px;
+    bottom: auto;
+    font-size: 12px;
+    line-height: 12px;
+    font-weight: 400;
+    color: #fff;
+  }
+
+  &.ag i {
+    background: linear-gradient(#e8b52c, #8a5e08);
+  }
+
+  &.sd i {
+    background: linear-gradient(#b65ae8, #5a1a8a);
+  }
+}
+
+.mobile-gauges {
+  margin-top: 8px;
+}
+
+.mobile-bar::before {
+  left: 30px;
+  right: 30px;
+  height: 38px;
+  border-radius: 0;
+  border: 0;
+  border-top: 1px solid #8a5a22;
+  background: linear-gradient(rgba(30, 20, 11, 0.9), rgba(10, 7, 4, 0.95));
+}

@@ -173,3 +173,18 @@ export const ArtIcon = observer(({ name }: { name: ArtIconName }) => (
     )}
   </svg>
 ));
+
+/** The carving on an orb's inner side (towards the boxes): two bronze talons hugging the orb and a skull where they meet. */
+export const OrbCrest = observer(({ side }: { side: 'left' | 'right' }) => (
+  <svg className={`mu-orb-crest ${side}`} viewBox="0 0 120 120" overflow="visible" aria-hidden="true">
+    <g transform={side === 'right' ? 'translate(120 0) scale(-1 1)' : undefined}>
+      <path d="M60 4 C96 6 116 34 112 66 C110 82 100 96 88 104 C98 88 102 70 98 54 C94 32 80 16 60 12 Z" fill="url(#muBronze)" stroke="#2a1708" strokeWidth="1.4" />
+      <path d="M62 112 C86 112 104 100 112 84 C110 100 96 116 74 118 Z" fill="url(#muBronze)" stroke="#2a1708" strokeWidth="1.2" />
+      <path d="M100 30 C112 26 122 30 126 38 C118 36 110 38 104 42 Z" fill="url(#muBone)" stroke="#3a2814" strokeWidth="0.9" />
+      <path d="M108 70 C120 70 128 76 130 84 C122 80 114 80 108 82 Z" fill="url(#muBone)" stroke="#3a2814" strokeWidth="0.9" />
+      <g transform="translate(100 96) scale(0.9)">
+        <Skull />
+      </g>
+    </g>
+  </svg>
+));
