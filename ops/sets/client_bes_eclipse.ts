@@ -18,7 +18,7 @@ const root = process.argv[2];
 if (!root) throw new Error('falta la carpeta Data/Local');
 let n = 0;
 for (const p of walk(root)) {
-  const name = p.split('/').pop()!.toLowerCase();
+  const name = (p.split('/').pop() ?? '').toLowerCase();
   if (name.endsWith('.gz')) continue;
   let bytes: Uint8Array = new Uint8Array(readFileSync(p));
   if (name === 'itemsettype.bmd') bytes = setItemSetNumber(setItemSetNumber(bytes, PANTS, 0, SET), STAFF, 0, SET);
@@ -27,7 +27,7 @@ for (const p of walk(root)) {
   if (!existsSync(p + '.bak')) writeFileSync(p + '.bak', new Uint8Array(readFileSync(p)));
   writeFileSync(p, bytes);
   if (existsSync(p + '.gz')) writeFileSync(p + '.gz', new Uint8Array(gzipSync(bytes, { level: 9 })));
-  console.log('ok', p, bytes.length);
+  process.stdout.write(`ok ${p} ${bytes.length}\n`);
   n++;
 }
-console.log(n, 'archivos');
+process.stdout.write(`${n} archivos\n`);
