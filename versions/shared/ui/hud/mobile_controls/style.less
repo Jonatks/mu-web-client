@@ -142,7 +142,9 @@
   position: absolute;
   left: 50%;
   bottom: max(6px, env(safe-area-inset-bottom, 0px));
-  transform: translateX(-50%);
+  // Mu Magdalena's bar is three quarters of this one: 47 px orbs and 32 px boxes on a 412 px tall screen.
+  transform: translateX(-50%) scale(0.76);
+  transform-origin: 50% 100%;
   display: flex;
   align-items: flex-end;
   gap: 8px;
@@ -686,7 +688,8 @@ body:has(.mu-item-window) .mobile-controls {
 
   .mobile-bar {
     left: calc(@edge + env(safe-area-inset-left, 0px));
-    transform: none;
+    transform: scale(0.76);
+    transform-origin: 0 100%;
   }
 }
 
