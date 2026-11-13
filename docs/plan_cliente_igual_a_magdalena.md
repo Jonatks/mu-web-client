@@ -48,7 +48,7 @@ C11. Drops: pastilla de nombre, oro con "Zen N", mano. Verificar varios a la vez
 C12. Comercio, fiesta, clan, amigos con la interfaz tactil. [pendiente]
 C13. Mapa y minimapa tactil. [pendiente]
 C14. Movimiento: tirones, "tiron hacia atras", NPC que bloquea. Reproducir con registros del servidor y corregir. [pendiente]
-C15. Sonido: el mismo mapa de sonidos que Magdalena. [pendiente]
+C15. Sonido: el mismo mapa de sonidos que Magdalena. [parcial: musica del login y del pueblo, pasos, viento y monstruos comprobados; Magdalena no se puede medir sonido por sonido (audio mezclado), falta escucharlo en el telefono]
 C16. Letras y colores exactos del HUD de Magdalena. [parcial]
 C17. Opciones: perfil de celular, ajustes tactiles, todo lo demas en el menu de Opciones del cliente. [hecho]
 C18. Pantalla instantanea de arranque, pantalla completa y horizontal automaticos, aviso de girar. [hecho]

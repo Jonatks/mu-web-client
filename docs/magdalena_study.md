@@ -271,3 +271,7 @@ Corrects section 12, which overcounted by one or two.
 - Placing a skill in the Skills window moves the selection to the next box by itself; the right-edge round button then shows the placed skill and casts it.
 - A skill the hero cannot pay for shows "NOT ENOUGH MANA" in a dark pill with a gold border at the top left, and nothing is cast; this client now says "Not enough mana" / "Not enough AG" (touch only, once every 2 s) instead of punching silently.
 - The west field ground is a dark green grass texture with no blades (matches the phone profile v4). The birds there are scenery, not targets; a skill cast with no monster near shows no effect, so the effects of both clients were not compared frame by frame (both come from the original client's data).
+
+## 27. Sound (2026-11-13)
+- Magdalena mixes all its audio in one stream (the compiled C++ client's SDL audio), so its sounds cannot be counted one by one from the page; only by ear.
+- This client: the login theme plays at the character screen, Lorencia's main_theme starts once the hero stands in the safe zone (as the original, SceneManager.cpp:1031), footsteps, wind, birds, torches and monster cries play in the world (15 to 30 sound starts per 20 s).
