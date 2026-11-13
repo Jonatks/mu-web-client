@@ -66,7 +66,7 @@ export const canon = (r: Row) => JSON.stringify(Object.keys(r).sort().map(k => [
 /** The SQL that sets the listed columns of the rows that differ from the defaults. Exported for the tests. */
 export function updateSql(table: string, cols: string[]): { find: string; set: string } {
   const t = tableOf(table);
-  const from = `jsonb_populate_recordset(NULL::${t}, $1::jsonb) r`;
+  const from = `jsonb_populate_recordset(NULL::${t}, $1::text::jsonb) r`;
   const differ = cols.map(c => `t.${q(c)} IS DISTINCT FROM r.${q(c)}`).join(' OR ');
   return {
     find: `SELECT t."Id" AS id FROM ${t} t JOIN ${from} ON t."Id" = r."Id" WHERE ${differ}`,
@@ -101,7 +101,7 @@ async function replaceRows(w: Writer, table: string, saveTable: string, filter: 
     await w.tx.unsafe(`DELETE FROM ${table} WHERE "Id" = ANY($1::uuid[])`, [extra.map(r => r.Id) as never]);
   }
   if (missingRows.length) {
-    await w.tx.unsafe(`INSERT INTO ${table} SELECT * FROM jsonb_populate_recordset(NULL::${table}, $1::jsonb)`, [JSON.stringify(missingRows)]);
+    await w.tx.unsafe(`INSERT INTO ${table} SELECT * FROM jsonb_populate_recordset(NULL::${table}, $1::text::jsonb)`, [JSON.stringify(missingRows)]);
     const saved = new Set(extra.map(r => r.Id));
     w.created(saveTable, missingRows.filter(r => !saved.has(r.Id)).map(r => ({ Id: r.Id })));
   }
@@ -143,7 +143,7 @@ async function resetShops(w: Writer, defaults: Defaults): Promise<number> {
     const ids = new Set(stock.map(r => r.Id as string));
     const mine = (r: Row) => ids.has(r.ItemId as string);
     const put = async (table: string, rows: Row[]) => {
-      if (rows.length) await w.tx.unsafe(`INSERT INTO data.${q(table)} SELECT * FROM jsonb_populate_recordset(NULL::data.${q(table)}, $1::jsonb)`, [JSON.stringify(rows)]);
+      if (rows.length) await w.tx.unsafe(`INSERT INTO data.${q(table)} SELECT * FROM jsonb_populate_recordset(NULL::data.${q(table)}, $1::text::jsonb)`, [JSON.stringify(rows)]);
     };
     await put('Item', stock);
     await put('ItemOptionLink', links.filter(mine));
