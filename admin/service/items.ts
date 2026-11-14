@@ -153,8 +153,11 @@ export async function getShop(sql: Sql, monsterId: string) {
   return { name, rows: s.layout.rows, cols: s.layout.cols, items: await listStorage(sql, s.id) };
 }
 
-type Spec = { luck?: boolean; option?: number; excellent?: number[] };
-type Link = { optionId: string; level: number; kind: 'luck' | 'option' | 'excellent' };
+export type FenrirColor = 'black' | 'blue' | 'gold';
+type Spec = { luck?: boolean; option?: number; excellent?: number[]; fenrir?: FenrirColor | null };
+type Link = { optionId: string; level: number; kind: 'luck' | 'option' | 'excellent' | 'fenrir' };
+/** The Fenrir colour an option type stands for (red Fenrir has none), or null. */
+export const fenrirOf = (type: string): FenrirColor | null => (/fenrir/i.test(type) ? (/black/i.exec(type) ? 'black' : /blue/i.exec(type) ? 'blue' : /gold/i.exec(type) ? 'gold' : null) : null);
 
 /** The option links a spec asks for, checked against what the item definition can carry. */
 export function wantedLinks(opts: OptionRow[], b: Spec): Link[] {
@@ -169,6 +172,12 @@ export function wantedLinks(opts: OptionRow[], b: Spec): Link[] {
     const o = opts.find(x => x.type === 'Option');
     if (!o) throw bad('That item cannot have an additional option.');
     links.push({ optionId: o.optionId, level: b.option, kind: 'option' });
+  }
+  if (b.fenrir) {
+    if (!['black', 'blue', 'gold'].includes(b.fenrir)) throw bad('fenrir: black, blue or gold.');
+    const o = opts.find(x => fenrirOf(x.type) === b.fenrir);
+    if (!o) throw bad('That item cannot be a ' + b.fenrir + ' Fenrir.');
+    links.push({ optionId: o.optionId, level: 0, kind: 'fenrir' });
   }
   for (const n of new Set(b.excellent ?? [])) {
     const o = opts.find(x => /^Excellent/.test(x.type) && x.number === n);
@@ -231,7 +240,7 @@ async function checkWear(sql: Sql, definitionId: string, slot: number, occupied:
   if (occupied.some(o => o.slot === slot)) throw bad('That slot already has an item. Take it off first.');
 }
 
-export type NewItem = { definitionId: string; level?: number; durability?: number; skill?: boolean; luck?: boolean; option?: number; excellent?: number[]; slot?: number; ancient?: AncientPick };
+export type NewItem = { definitionId: string; level?: number; durability?: number; skill?: boolean; luck?: boolean; option?: number; excellent?: number[]; fenrir?: FenrirColor; slot?: number; ancient?: AncientPick };
 
 export async function addItem(sql: Sql, admin: string, t: Target, b: NewItem) {
   const store = await storeOf(sql, t);
@@ -346,7 +355,7 @@ export type ItemEdit = Spec & { ancient?: AncientPick | null; level?: number; du
 
 /** Edits an item that is already placed: level, durability, skill, luck, additional option, excellent options, sockets, pet experience. */
 export async function editItem(sql: Sql, admin: string, itemId: string, b: ItemEdit) {
-  const known = ['level', 'durability', 'skill', 'luck', 'option', 'excellent', 'socketCount', 'petExperience', 'ancient'];
+  const known = ['level', 'durability', 'skill', 'luck', 'option', 'excellent', 'fenrir', 'socketCount', 'petExperience', 'ancient'];
   const keys = Object.keys(b);
   if (!keys.length || keys.some(k => !known.includes(k))) throw bad(`Editable fields: ${known.join(', ')}.`);
   const it = await locate(sql, itemId);
@@ -357,20 +366,21 @@ export async function editItem(sql: Sql, admin: string, itemId: string, b: ItemE
   if (b.socketCount !== undefined && (!Number.isInteger(b.socketCount) || b.socketCount < 0 || b.socketCount > 5)) throw bad('socketCount: 0 to 5.');
   if (b.petExperience !== undefined && (!Number.isInteger(b.petExperience) || b.petExperience < 0 || b.petExperience > 2147483647)) throw bad('petExperience: a whole number from 0.');
   const ancient = b.ancient ? ancientPlan(await ancientSetsOf(sql, it.def), b.ancient) : null;
-  const touchesOptions = b.luck !== undefined || b.option !== undefined || b.excellent !== undefined;
+  const touchesOptions = b.luck !== undefined || b.option !== undefined || b.excellent !== undefined || b.fenrir !== undefined;
   const current = touchesOptions
     ? ((await sql`
         SELECT l."Id" AS id, l."ItemOptionId" AS "optionId", l."Level" AS level, split_part(t."Name", '||', 1) AS type, o."Number" AS number
         FROM data."ItemOptionLink" l JOIN config."IncreasableItemOption" o ON o."Id" = l."ItemOptionId" JOIN config."ItemOptionType" t ON t."Id" = o."OptionTypeId"
         WHERE l."ItemId" = ${itemId}::uuid`) as unknown as { id: string; optionId: string; level: number; type: string; number: number }[])
     : [];
-  const managed = (t: string) => /^Luck/.test(t) || t === 'Option' || /^Excellent/.test(t);
+  const managed = (t: string) => /^Luck/.test(t) || t === 'Option' || /^Excellent/.test(t) || fenrirOf(t) !== null;
   let wanted: Link[] = [];
   if (touchesOptions) {
     const spec: Spec = {
       luck: b.luck ?? current.some(l => /^Luck/.test(l.type)),
       option: b.option ?? current.find(l => l.type === 'Option')?.level ?? 0,
       excellent: b.excellent ?? current.filter(l => /^Excellent/.test(l.type)).map(l => l.number),
+      fenrir: b.fenrir === undefined ? current.map(l => fenrirOf(l.type)).find(Boolean) ?? null : b.fenrir,
     };
     wanted = wantedLinks(await definitionOptions(sql, it.def), spec);
   }

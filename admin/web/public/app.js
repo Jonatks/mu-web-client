@@ -481,6 +481,7 @@ function insertDialog(where, slot, done) {
     const dur = h('input', { type: 'number', min: 0, max: 255, placeholder: String(d.durability) });
     const luck = h('input', { type: 'checkbox' }), skill = h('input', { type: 'checkbox' });
     const option = h('select', {}, [0, 1, 2, 3, 4].map(n => h('option', { value: n }, n ? `+${n * 4}` : 'Sin opción')));
+    const fen = fenrirSelect(opts, '');
     const exc = opts.filter(o => /^Excellent/.test(o.type)).map(o => ({ o, on: false }));
     const chips = exc.map(x => h('button', { type: 'button', class: 'chip', 'aria-pressed': 'false', onclick: e => { x.on = !x.on; e.currentTarget.classList.toggle('on', x.on); e.currentTarget.setAttribute('aria-pressed', String(x.on)); } }, x.o.label ?? `Opción ${x.o.number}`));
     fill(form, h('div', {},
@@ -489,7 +490,8 @@ function insertDialog(where, slot, done) {
       h('div', { class: 'fields' },
         d.maxLevel > 0 ? h('label', {}, `Nivel (0-${d.maxLevel})`, level) : null,
         h('label', {}, 'Durabilidad', dur),
-        opts.some(o => o.type === 'Option') ? h('label', {}, 'Opción adicional', option) : null),
+        opts.some(o => o.type === 'Option') ? h('label', {}, 'Opción adicional', option) : null,
+        fen ? h('label', {}, 'Color de Fenrir', fen) : null),
       h('div', { class: 'chips' },
         opts.some(o => /^Luck/.test(o.type)) ? h('label', { class: 'inline' }, luck, 'Suerte') : null,
         d.hasSkill ? h('label', { class: 'inline' }, skill, 'Con habilidad') : null),
@@ -503,6 +505,7 @@ function insertDialog(where, slot, done) {
       if (Number(option.value)) body.option = Number(option.value);
       const ex = exc.filter(x => x.on).map(x => x.o.number);
       if (ex.length) body.excellent = ex;
+      if (fen?.value) body.fenrir = fen.value;
       const an = anc?.read();
       if (an) body.ancient = an;
       if (slot !== null) body.slot = slot;
@@ -528,6 +531,9 @@ function insertDialog(where, slot, done) {
   s.input.focus();
 }
 
+const FENRIR = [['', 'Rojo (normal)'], ['black', 'Negro'], ['blue', 'Azul'], ['gold', 'Dorado']];
+const fenrirSelect = (opts, cur) => { if (!opts.some(o => /fenrir/i.test(o.type))) return null; const s = h('select', {}, FENRIR.map(([v, t]) => h('option', { value: v }, t))); s.value = cur; return s; };
+const fenrirNow = it => { const t = it.options.find(o => /fenrir/i.test(o.type))?.type ?? ''; return /black/i.test(t) ? 'black' : /blue/i.test(t) ? 'blue' : /gold/i.test(t) ? 'gold' : ''; };
 /* -------------------------------------------------------------- item editor */
 /** Edits an item that is already placed. Only the fields that changed are sent; unknown options (ancient, socket) are kept. */
 async function editItemDialog(it, done) {
@@ -539,6 +545,7 @@ async function editItemDialog(it, done) {
   const skill = h('input', { type: 'checkbox' }); skill.checked = !!it.skill;
   const curOpt = it.options.find(o => o.type === 'Option')?.level ?? 0;
   const option = h('select', {}, [0, 1, 2, 3, 4].map(n => h('option', { value: n }, n ? `+${n * 4}` : 'Sin opción'))); option.value = curOpt;
+  const fen = fenrirSelect(opts, fenrirNow(it));
   const exc = opts.filter(o => /^Excellent/.test(o.type)).map(o => ({ o, on: it.options.some(x => /^Excellent/.test(x.type) && x.number === o.number) }));
   const was = new Set(exc.filter(x => x.on).map(x => x.o.number));
   const chips = exc.map(x => h('button', { type: 'button', class: 'chip' + (x.on ? ' on' : ''), 'aria-pressed': String(x.on), onclick: e => { x.on = !x.on; e.currentTarget.classList.toggle('on', x.on); e.currentTarget.setAttribute('aria-pressed', String(x.on)); } }, x.o.label ?? `Opción ${x.o.number}`));
@@ -550,7 +557,8 @@ async function editItemDialog(it, done) {
     h('div', { class: 'fields' },
       it.maxLevel > 0 ? h('label', {}, `Nivel (0-${it.maxLevel})`, level) : null,
       h('label', {}, 'Durabilidad', dur),
-      opts.some(o => o.type === 'Option') ? h('label', {}, 'Opción adicional', option) : null),
+      opts.some(o => o.type === 'Option') ? h('label', {}, 'Opción adicional', option) : null,
+      fen ? h('label', {}, 'Color de Fenrir', fen) : null),
     h('div', { class: 'chips' }, canLuck ? h('label', { class: 'inline' }, luck, 'Suerte') : null, it.canSkill ? h('label', { class: 'inline' }, skill, 'Con habilidad') : null),
     exc.length ? h('div', {}, h('p', { class: 'mute' }, 'Opciones excelentes'), h('div', { class: 'chips' }, chips)) : null,
     anc?.el ?? null,
@@ -565,6 +573,7 @@ async function editItemDialog(it, done) {
         if (canLuck && luck.checked !== hasLuck(it)) body.luck = luck.checked;
         if (it.canSkill && skill.checked !== !!it.skill) body.skill = skill.checked;
         if (Number(option.value) !== curOpt) body.option = Number(option.value);
+        if (fen && fen.value !== fenrirNow(it)) body.fenrir = fen.value || null;
         const now = exc.filter(x => x.on).map(x => x.o.number);
         if (now.length !== was.size || now.some(n => !was.has(n))) body.excellent = now;
         if (anc) {

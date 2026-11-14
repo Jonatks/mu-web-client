@@ -43,3 +43,10 @@ test('ancient: refuses a set the item is not in', () => {
   expect(() => ancientPlan(sets, { itemOfSetId: 'zzz' })).toThrow();
   expect(() => ancientPlan([], { itemOfSetId: 's1' })).toThrow();
 });
+
+test('picks the Fenrir colour option', () => {
+  const fen = [{ optionId: 'fb', type: 'Black Fenrir', number: 0, label: null }, { optionId: 'fg', type: 'Gold Fenrir', number: 0, label: null }];
+  expect(wantedLinks(fen, { fenrir: 'gold' }).map(l => [l.optionId, l.kind])).toEqual([['fg', 'fenrir']]);
+  expect(wantedLinks(fen, { fenrir: null })).toEqual([]);
+  expect(() => wantedLinks(fen, { fenrir: 'blue' })).toThrow();
+});
