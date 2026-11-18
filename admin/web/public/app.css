@@ -456,6 +456,7 @@ dialog::backdrop { background: #0009; backdrop-filter: blur(2px); }
 .detail li.anc, .anc-set { color: var(--q-anc); }
 .ancient { margin-top: 12px; }
 
-.login a.google { display: grid; place-items: center; height: 48px; border-radius: var(--r-m); background: var(--gold); color: #12151d; font-weight: 600; text-decoration: none; }
+.login a.google { display: grid; place-items: center; height: 48px; border-radius: 999px; background: var(--gold); color: var(--gold-ink); font-weight: 600; text-decoration: none; }
+.login a.google:hover { filter: brightness(1.1); }
 .login a.google:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
 .login .or { margin: 0; text-align: center; font-size: 13px; opacity: .7; }
