@@ -2,6 +2,7 @@ import { Quaternion, Vector3 } from '../../render/babylon/exports';
 import { MathUtils } from '@/core/mathUtils';
 import { decryptMapFile } from '../../terrain/mapFileEncryption';
 import { ArrayCopy } from '../download';
+import { modulusDecrypt } from './modulusCryptor';
 
 const SIZE_OF_Normal_t = 20;
 // [StructLayout(LayoutKind.Sequential, Pack = 4)]
@@ -131,29 +132,23 @@ function ValidateBuffer(buffer: Uint8Array) {
 }
 
 function DecryptBufferIfNeeded(buffer: Uint8Array, version: number) {
-  if (version !== 12 && version !== 15) return buffer;
+  if (version !== 12 && version !== 14) return buffer;
 
-  const enc = buffer.slice(8); // Extract the encrypted data starting from index 8
-
-  // var size = BitConverter.ToInt32(buffer, 4);
-  // var enc = new byte[size];
-  // Array.Copy(buffer, 8, enc, 0, size);
-
+  // Version 12 is MapFileDecrypt; 14 (Season 16+ clients) is ModulusCryptor, which drops its 34-byte header.
+  const size = new DataView(buffer.buffer, buffer.byteOffset).getInt32(4, true);
+  const enc = version === 12 ? buffer.slice(8) : buffer.slice(8, 8 + size);
+  let dec: Uint8Array;
   if (version === 12) {
-    const dec = new Uint8Array(enc.byteLength);
+    dec = new Uint8Array(enc.byteLength);
     decryptMapFile(dec, enc, enc.byteLength);
-
-    const newBuffer = new Uint8Array(4 + dec.byteLength);
-    ArrayCopy(buffer, 0, newBuffer, 0, 4); // Copy the first 4 bytes (type + version)
-    ArrayCopy(dec, 0, newBuffer, 4, dec.byteLength);
-    return newBuffer;
+  } else {
+    dec = modulusDecrypt(enc);
   }
 
-  throw new Error(
-    `Unsupported version: ${version}. Only version 12 is supported.`
-  );
-
-  // Array.Copy(dec, 0, buffer, 4, size);
+  const newBuffer = new Uint8Array(4 + dec.byteLength);
+  ArrayCopy(buffer, 0, newBuffer, 0, 4); // Copy the first 4 bytes (type + version)
+  ArrayCopy(dec, 0, newBuffer, 4, dec.byteLength);
+  return newBuffer;
 }
 
 export class BMDReader {

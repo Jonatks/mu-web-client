@@ -50,7 +50,7 @@ imports the modules below directly (baselined in `tools/checks`).
 - `itemIconPack.ts`: `prefetchItemIcons`, `itemIconPackChain`, `itemIconUrl`, `itemIconKey`.
 - `worldAssets.ts`: `assetWorldNum`, `*_WORLDS` lists (readers over `maps`).
 - `ktx2Pixels.ts`: `isKtx2`, `loadTranscoder`, `decodeKtx2`, `TranscoderUrls`.
-- `bmd/`: `BMD`, `BMDReader`, `BMDTextureBone` (used by `tools/bmdToGlb.ts`).
+- `bmd/`: `BMD`, `BMDReader`, `BMDTextureBone` (used by `tools/bmdToGlb.ts`); reads versions 10, 12 and 14 (`bmd/readme.md`).
 - `preloadSprites.ts`: `preloadPregameSprites`, `preloadWorldSprites`, `clearWorldSprites`.
   `prefetchWorld.ts`: `prefetchWorldTerrain`, `fetchTerrainFile`, `consumeTerrainFile`,
   `terrainFilesFor`. `warmWorld.ts`: `warmWorldObjects`. `itemIconManifest.ts`: generated.
