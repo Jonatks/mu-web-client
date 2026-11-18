@@ -1,5 +1,5 @@
 // The only door to the VM service. The browser never sees the key or the VM address.
-import { sameOrigin, userOf } from '../lib/auth.js';
+import { auditName, sameOrigin, userOf } from '../lib/auth.js';
 
 const ROUTES = [
   /^\/status$/, /^\/players\/(disconnect|online)$/, /^\/audit(\/(stats|clean))?$/, /^\/undo(\/[a-z0-9-]+)?$/,
@@ -25,7 +25,7 @@ export default async function handler(req, res) {
   try {
     const r = await fetch(base.replace(/\/$/, '') + target.pathname + target.search, {
       method: req.method,
-      headers: { 'x-admin-key': key, 'x-admin-user': user, 'content-type': 'application/json' },
+      headers: { 'x-admin-key': key, 'x-admin-user': auditName(user), 'content-type': 'application/json' },
       body: req.method === 'GET' || req.method === 'DELETE' ? undefined : JSON.stringify(req.body ?? {}),
       signal: AbortSignal.timeout(25_000),
     });

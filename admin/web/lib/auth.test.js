@@ -1,5 +1,5 @@
 import { expect, test } from 'bun:test';
-import { checkPassword, makeHash, parseUsers, sameOrigin, sign, verify } from './auth.js';
+import { auditName, checkPassword, makeHash, parseUsers, sameOrigin, sign, verify } from './auth.js';
 
 test('a password checks against its own hash only', async () => {
   const h = await makeHash('s3cret!');
@@ -29,4 +29,10 @@ test('only same-origin requests pass', () => {
   expect(sameOrigin({ headers: { origin: 'https://a.vercel.app', host: 'a.vercel.app' } })).toBe(true);
   expect(sameOrigin({ headers: { origin: 'https://evil.test', host: 'a.vercel.app' } })).toBe(false);
   expect(sameOrigin({ headers: { host: 'a.vercel.app' } })).toBe(false);
+});
+
+test('a Google email is logged by its name part', () => {
+  expect(auditName('jonath.mdza@gmail.com')).toBe('jonath.mdza');
+  expect(auditName('ana')).toBe('ana');
+  expect(auditName('a+b c@x.com')).toBe('abc');
 });

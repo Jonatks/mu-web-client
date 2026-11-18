@@ -65,3 +65,6 @@ export function sameOrigin(req) {
   const o = req.headers.origin;
   return !!o && new URL(o).host === req.headers.host;
 }
+
+/** The name the VM service logs for a session: a Google email becomes its part before the @ (the service takes [A-Za-z0-9_.-]{1,32}). */
+export const auditName = user => String(user ?? '').split('@')[0].replace(/[^A-Za-z0-9_.-]/g, '').slice(0, 32) || 'admin';
