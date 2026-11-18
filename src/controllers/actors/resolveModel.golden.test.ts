@@ -8,7 +8,7 @@ import { createHash } from 'node:crypto';
  * Moving NPC content must leave these hashes alone; update them on purpose.
  */
 const RESOLVE_HASH = '0182484853a171ceaa3005b628d78d8618ba7b8b70d494a589a3b75e2f8a789e';
-const TABLES_HASH = 'b948d063eafc9dc9cd6503e72c2b26666ac10b176438ca7685aca8f7f5425665';
+const TABLES_HASH = 'fd8962b6ddb0073063245f9f3e98a85363649ad87d4d53ee0e813ded81aa91d7';
 
 const hash = (v: unknown) => createHash('sha256').update(JSON.stringify(v)).digest('hex');
 
@@ -44,7 +44,7 @@ describe('model resolution', () => {
     const m = await load();
     const tables = [m.NPC_MODEL_TABLE, m.GEARED_NPC_TABLE, m.TRANSFORMED_NPC_TABLE, m.TRAP_MODEL_TABLE, m.CHARACTER_SKIN_PARTS];
 
-    expect(tables.map(t => Object.keys(t).length)).toEqual([90, 13, 8, 6, 9]);
+    expect(tables.map(t => Object.keys(t).length)).toEqual([92, 13, 8, 6, 9]);
     expect(hash(tables)).toBe(TABLES_HASH);
   }, 120_000);
 });
