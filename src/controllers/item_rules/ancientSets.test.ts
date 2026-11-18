@@ -67,3 +67,11 @@ describe('the stats worn items add', () => {
     expect(activeSetOptions(worn, { ...HERO, str: need - 11 }, TABLES)).not.toHaveLength(3);
   });
 });
+
+describe('later seasons set options', () => {
+  it('adds "all stats" (40) to the four stats', () => {
+    const ALL: ItemSet = { ...SET, standard: [[opt(40, 7), none], [none, none], [none, none], [none, none], [none, none], [none, none]] };
+    const tables: ItemSetTables = { setOf, sets: [null, ALL] };
+    expect(wornStatBonus([null, null, piece(7), piece(8)], tables)).toEqual({ str: 7, agi: 7, ene: 7, vit: 7, cmd: 0 });
+  });
+});

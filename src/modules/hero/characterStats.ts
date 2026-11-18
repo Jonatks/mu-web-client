@@ -953,6 +953,8 @@ function withRing<T extends Range>(range: T, items: CharacterStatsInput['items']
 
 /** `AT_SET_OPTION_*` past `AT_SET_OPTION_IMPROVE_STRENGTH` (_enum.h:3408-3442) that the window reads. */
 const SET = { attackMin: 5, attackMax: 6, magicPower: 7, attackRate: 9, defense: 10, skillAttack: 19, shieldDefense: 22, byStr: 24, byAgi: 25, defenseByAgi: 26, defenseByVit: 27, magicByEne: 28 } as const;
+/** Later seasons' flat base defense and damage (`LATER_SET_OPTION`). */
+const LATER = { defense: 41, damage: 42 } as const;
 
 /** `CSItemOption::PlusSpecial` (CSItemOption.cpp:477-485): the lit values of one option, summed. */
 function setSum(lines: readonly SetOptionLine[], option: number): number {
@@ -969,7 +971,7 @@ function setByStat(lines: readonly SetOptionLine[], option: number, source: numb
 
 /** `Defense` after the sets and sockets (ZzzInfomation.cpp:3361-3381). */
 function withSetDefense(defense: number, input: CharacterStatsInput, lines: readonly SetOptionLine[], socket: SocketStatusBonus): number {
-  defense += setSum(lines, SET.defense) + setByStat(lines, SET.defenseByAgi, input.agility) + setByStat(lines, SET.defenseByVit, input.vitality);
+  defense += setSum(lines, SET.defense) + setSum(lines, LATER.defense) + setByStat(lines, SET.defenseByAgi, input.agility) + setByStat(lines, SET.defenseByVit, input.vitality);
   const shield = equipped(input.items, InventoryConstants.RightHandSlot);
   if (shield && isShield(shield)) defense += Math.trunc((defense * setSum(lines, SET.shieldDefense)) / 100);
   defense += socket.defense;
@@ -991,7 +993,7 @@ export function deriveCharacterStats(bare: CharacterStatsInput): DerivedStats {
   const socket = socketStatusBonus(items, { level, masterLevel: input.masterLevel, maxLife: input.maxLife, maxMana: input.maxMana }, input.options ?? null);
   const setDamage = setByStat(lines, SET.byAgi, input.agility) + setByStat(lines, SET.byStr, input.strength);
   const flat = {
-    set: { min: setSum(lines, SET.attackMin) + setDamage, max: setSum(lines, SET.attackMax) + setDamage },
+    set: { min: setSum(lines, SET.attackMin) + setSum(lines, LATER.damage) + setDamage, max: setSum(lines, SET.attackMax) + setSum(lines, LATER.damage) + setDamage },
     socket: { min: socket.damageMin, max: socket.damageMax },
   };
   const pet = equipped(items, InventoryConstants.PetSlot);

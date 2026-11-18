@@ -851,6 +851,14 @@ const SET_OPTION_TEXT: readonly TextKey[] = [
   'item.setOpt.shieldDefense',
   'item.setOpt.twoHanded',
 ];
+/** The later seasons' options the client keeps at 40+ (`LATER_SET_OPTION`). */
+const LATER_SET_OPTION_TEXT: Readonly<Record<number, TextKey>> = {
+  40: 'item.setOpt.allStats',
+  41: 'item.setOpt.baseDefense',
+  42: 'item.setOpt.flatDamage',
+  43: 'item.setOpt.magicDamage',
+  44: 'item.setOpt.wizCurse',
+};
 
 /**
  * `RenderSetOptionListInItem` (CSItemOption.cpp:1052-1095): the header, then the options of the set
@@ -864,7 +872,7 @@ function setOptionBlock(out: Lines, item: Item, hero: HeroStats, ancient?: Toolt
   out.blank();
   const pieces = ancient ? wornSetPieces(set, ancient.worn, withWornStats(hero, ancient.worn)) : 0;
   for (const line of setOptionLines(set, pieces)) {
-    const key = SET_OPTION_TEXT[line.option];
+    const key = SET_OPTION_TEXT[line.option] ?? LATER_SET_OPTION_TEXT[line.option];
     if (!key) continue;
     const lit = ancient?.equipped && line.active;
     const color = !lit ? 'gray' : line.kind === 'full' ? 'yellow' : line.kind === 'ext' ? 'green' : 'blue';

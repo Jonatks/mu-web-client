@@ -108,6 +108,11 @@ export function activeSetOptions(worn: readonly (Item | null)[], hero: HeroStats
 export type WornStats = { str: number; agi: number; ene: number; vit: number; cmd: number };
 /** `SET_OPTION_*` / `AT_SET_OPTION_IMPROVE_*` order: strength, dexterity, energy, vitality (charisma for the set options). */
 const STAT_ORDER = ['str', 'agi', 'ene', 'vit', 'cmd'] as const;
+/**
+ * Set options of later seasons that Season 6 has no number for (S19 ItemSetOption 24-27 and 33), kept at 40+
+ * because the Season 6 client already uses 24-35 for class masteries. The server applies the same bonuses.
+ */
+export const LATER_SET_OPTION = { allStats: 40, baseDefense: 41, damage: 42, magicDamage: 43, wizCurse: 44 } as const;
 /** The worn slots, `EQUIPMENT_WEAPON_RIGHT` to `MAX_EQUIPMENT`. */
 const MAX_EQUIPMENT = 12;
 
@@ -128,6 +133,7 @@ export function wornStatBonus(worn: readonly (Item | null)[], tables: ItemSetTab
   for (const line of litOptions(worn, null, tables)) {
     const stat = STAT_ORDER[line.option];
     if (stat) out[stat] += line.value;
+    if (line.option === LATER_SET_OPTION.allStats) for (const all of ['str', 'agi', 'ene', 'vit'] as const) out[all] += line.value;
   }
   return out;
 }
