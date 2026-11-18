@@ -8,7 +8,12 @@ route to the VM service and only forwards the paths it lists; `lib/auth.js` hold
 `mkhash.mjs NAME` prints the `ADMIN_USERS` entry for one admin (it asks for the password hidden).
 
 Environment variables (Vercel project settings, never in the repo): `MU_ADMIN_URL` (`https://<host>/_admin`), `MU_ADMIN_KEY` (the VM key),
-`ADMIN_USERS` (`name=scrypt$...;name2=scrypt$...`).
+`ADMIN_USERS` (`name=scrypt$...;name2=scrypt$...`), `GOOGLE_CLIENT_ID` (the OAuth web client of the Google Cloud project `mu-editor`) and
+`ADMIN_GOOGLE_EMAILS` (the Google accounts let in, comma separated).
+
+"Entrar con Google" (`api/google-start.js`, `public/google.html`, `api/google.js`, `lib/google.js`) uses the OpenID Connect implicit
+flow: Google returns an id_token in the fragment, the page posts it here, and it is checked against Google's keys, the client id, a
+stateless signed nonce (10 minutes) and the allow list. No client secret is needed. The password sign-in stays as a fallback.
 
 Item icons: `public/items/<group>_<number>.webp` (72px) and `public/items/index.json` (which ones exist) are made from the client's pre-rendered icons by
 `python3 admin/web/tools/item_icons.py` (run from the repo root; it needs `public/items` built by the client). The item picker shows them next to category
