@@ -30,6 +30,8 @@ const TWO_HAND_SWORD_TWO_INDICES = new Set([21, 23, 25, 31]);
 const MISTERY_STICK = 14;
 const ETERNAL_WING_STICK = 20;
 const BOOK_OF_SAHAMUTT = 21;
+/** The later Book of Bloodangel (S19 ItemList 5/57). */
+const BOOK_OF_BLOODANGEL = 57;
 
 export type Hands = { leftHand: Item | null; rightHand: Item | null };
 
@@ -58,8 +60,7 @@ export function isBook(item: Item | null): boolean {
   return (
     !!item &&
     item.group === GROUP_STAFF &&
-    item.num >= BOOK_OF_SAHAMUTT &&
-    item.num <= 29
+    ((item.num >= BOOK_OF_SAHAMUTT && item.num <= 29) || item.num === BOOK_OF_BLOODANGEL)
   );
 }
 
@@ -68,16 +69,16 @@ export function isBook(item: Item | null): boolean {
 // each carries three models: the inventory one items.json names, and a left /
 // right pair worn on the character. The Phoenix Soul Star additionally trails
 // a pair of phoenix wings (`RenderPhoenixGloves`, :241).
-const SACRED_GLOVE = 32;
 export const PHOENIX_SOUL_STAR = 35;
 
-/** `Item/` model stems, indexed from `SACRED_GLOVE`: [worn right, worn left]. */
-const SWORDFORM_GLOVE_MODELS: readonly (readonly [string, string])[] = [
-  ['SwordR33', 'SwordL33'], // Sacred Glove
-  ['SwordR34', 'SwordL34'], // Storm Hard Glove
-  ['SwordR35', 'SwordL35'], // Piercing Blade Glove
-  ['Sword36R', 'Sword36L'], // Phoenix Soul Star
-];
+/** `Item/` model stems by sword index: [worn right, worn left]. 46 is the later Bloodangel Claws (S19 ItemList). */
+const SWORDFORM_GLOVE_MODELS: Readonly<Record<number, readonly [string, string]>> = {
+  32: ['SwordR33', 'SwordL33'], // Sacred Glove
+  33: ['SwordR34', 'SwordL34'], // Storm Hard Glove
+  34: ['SwordR35', 'SwordL35'], // Piercing Blade Glove
+  35: ['Sword36R', 'Sword36L'], // Phoenix Soul Star
+  46: ['BloodangelClo_R', 'BloodangelClo_L'], // Bloodangel Claws
+};
 
 export function isPhoenixSoulStar(item: Item | null | undefined): boolean {
   return !!item && item.group === GROUP_SWORD && item.num === PHOENIX_SOUL_STAR;
@@ -88,8 +89,7 @@ export function isSwordformGloves(item: Item | null): boolean {
   return (
     !!item &&
     item.group === GROUP_SWORD &&
-    item.num >= SACRED_GLOVE &&
-    item.num < SACRED_GLOVE + SWORDFORM_GLOVE_MODELS.length
+    item.num in SWORDFORM_GLOVE_MODELS
   );
 }
 
@@ -103,14 +103,17 @@ export function swordformGlovesModel(
   slot: 0 | 1
 ): string | null {
   if (!item || !isSwordformGloves(item)) return null;
-  return `${SWORDFORM_GLOVE_MODELS[item.num - SACRED_GLOVE][slot]}.glb`;
+  return `${SWORDFORM_GLOVE_MODELS[item.num][slot]}.glb`;
 }
+
+/** The later Bloodangel Bow (S19 ItemList 4/28), drawn as a bow. */
+const BLOODANGEL_BOW = 28;
 
 /** `IsBowModel` (CharacterManager.cpp:68): 0-6, Celestial 17, Viper…Stinger 20-23, Air Lyn 24. */
 export function isBow(item: Item | null): boolean {
   if (!item || item.group !== GROUP_BOW) return false;
   const n = item.num;
-  return n <= 6 || n === 17 || (n >= 20 && n <= 24);
+  return n <= 6 || n === 17 || (n >= 20 && n <= 24) || n === BLOODANGEL_BOW;
 }
 
 /** `IsCrossbowModel` (CharacterManager.cpp:76): 8-14, Saint 16, Divine CB…Great Reign 18-19. */
