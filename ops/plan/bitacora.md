@@ -50,6 +50,12 @@ ItemOptionLink) y los demas a mano. La compilacion en la VM tarda unos minutos; 
 `openmu` con los compose del contenedor en marcha. Rollback: `docker tag mu-openmu-admin:pre-craft
 mu-openmu-admin:latest` y recrear.
 
+### Estado en la VM (19-11-2026)
+- `openmu` corre `mu-openmu-admin:latest` = `:pre-craft` + `/app/plugins/craftings/MUnique.OpenMU.MuPlugins.dll`,
+  hooks encadenados; arranca sin errores y escucha 45904 a 45906.
+- `craft.sql` aplicado en `openmu` y `openmu_probe`; `Mix.bmd` servido con 5 recetas mas (`.bak3` al lado).
+- Falta la prueba en juego: pieza Bloodangel + Soul en el Chaos Goblin.
+
 ## 2. Lo aprendido
 
 ### 2.1 Archivos del S19
