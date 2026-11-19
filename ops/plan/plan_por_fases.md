@@ -59,6 +59,8 @@ Con las fases 1, 3, 7 y 15 tu cliente pasaría de 49 a 144 sets. El archivo de s
 
 ### Fase 0. Preparación
 
+Estado de cada punto: [../fase0/readme.md](../fase0/readme.md). El orden se respeta desde aquí: fase 0 completa, luego 2, luego 4.
+
 1. Rama `contenido-temporadas` desde `release`.
 2. Respaldo completo de la base `openmu`, y otro antes de cada fase.
 3. Copia propia de OpenMU con su compilación y despliegue en tu VM, y la forma de volver a la versión actual si algo falla.
@@ -156,7 +158,7 @@ Frigg, Emile, Arkajin, Moloso, Vesper y Elune, con los ítems Holy Spirit, Kenaz
 
 Independiente del contenido; se intercala con las otras fases. Todo va como opción (Enhanced/Ultra) y la vista clásica no cambia.
 
-- G1 (después de la fase 3): resolución completa en celular (hecho: Opciones > Video > Resolución > Densidad de píxeles, 1.5x, 2x o la del teléfono); suavizado de bordes, filtrado de texturas y cámara más cercana ya existían en Opciones (MSAA, FXAA, anisotropía, campo de visión, zoom con Ctrl+rueda y pellizco); falta el resplandor de las alas (necesito una captura nueva).
+- G1 (después de la fase 3): resolución completa en celular (hecho: Opciones > Video > Resolución > Densidad de píxeles, 1.5x, 2x o la del teléfono); suavizado de bordes, filtrado de texturas y cámara más cercana ya existían en Opciones (MSAA, FXAA, anisotropía, campo de visión, zoom con Ctrl+rueda y pellizco); el resplandor era el anillo del set ancient (destellos apilados), corregido. Además, por decisión tuya: celular a 2x con el aspecto clásico, cámara abriendo a 840 en celular y PC, y celdas con ítem sin tinte.
 - G2: luz y efectos (brillo suave, color, sombras).
 - G3: tema moderno de ventanas pensado para celular (inventario, personaje, tienda, barras y habilidades).
 - G4: inventario y baúl ampliados con el tema nuevo, junto con la fase 4.
