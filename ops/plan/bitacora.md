@@ -39,6 +39,8 @@ provisionales que hay que cerrar para llegar a la meta tal como se pidio.
    Goblin (238) desde 51 (usamos 200). Ejemplo: `craft.sql`.
 3. Cliente: la receta en `Mix.bmd` (tipo 0 = Goblin) con el mismo mixId: `client_mix.ts` / `client_mix.sh`.
    Las fuentes son rangos de codigo `grupo*512+numero`; el cliente no excluye, el servidor si.
+   El nombre es un id de GlobalText (`find_text.py Text_eng.bmd <palabra>`): 618 "Create Set Item".
+   El `mix.bmd` servido tenia 99 recetas (65000 bytes); con las 5 nuestras, 68280.
 
 ### Compilar y desplegar un plugin en la VM (sin SDK fuera)
 `deploy_craft.sh <sha>` en la VM: baja el repo por `codeload`, guarda la imagen actual como
@@ -74,6 +76,7 @@ mu-openmu-admin:latest` y recrear.
   en la terminal del usuario. Pendiente: cambiarla.
 - Vercel: el push a git solo hace preview; produccion con `create_deployment` target production.
 - Editor con Google: las escrituras al servicio de la VM piden `x-admin-user` (`auditName`).
+- `pgrep -f nombre` dentro de un `sh -c "...nombre..."` se encuentra a si mismo: esperar por pid o por un archivo.
 - Vitest completo pasa el tiempo limite: correrlo en segundo plano y comparar fallos antes/despues.
 
 ## 3. Reemplazos provisionales (cerrar antes de dar la meta por cumplida)
@@ -84,5 +87,4 @@ mu-openmu-admin:latest` y recrear.
 | Plugin solo de craftings en la VM | `MuPlugins` completo nunca se desplego ahi | Fase 0: desplegar el `MuPlugins` completo y quitar `Only=Craftings` |
 | Mezcla al 100 % y 1.000.000 Zen | no tengo la tasa del S19 | leer la receta del `mix.bmd` del S19 y copiar tasa y precio |
 | Opcion bonus de pieza al nivel maximo | el drop la elige al azar | decidir con el usuario |
-| Nombre de la receta en el cliente | falta un id de GlobalText | buscar con `find_text.py` y pasarlo en `NAME=` |
 | Iconos de guantes y algunas armaduras aproximados | el visor no da el angulo del original | Fase G: render del cliente con su camara de inventario |
