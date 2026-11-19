@@ -77,6 +77,12 @@ La VM lo toma sola en unos 3 minutos (`build.json` cambia).
 la generacion se describe en `ops/s19/generaciones.json`. Prueba: `S19_DATA=... bunx vitest run ops/s19`.
 Para la fase 7 basta con sumar una entrada por generacion y revisar sus exclusiones.
 
+### Editor: sets completos y borrado multiple (19-11-2026)
+- `GET /sets`, `POST /characters/:n/sets`, `POST /accounts/:l/vault/sets` (mu-admin `admin/service/sets.ts`); en la web,
+  "Insertar set completo" y "Seleccionar varios". Probado contra `openmu_probe` con `curl` desde la VM (clave leida en la VM,
+  nunca impresa): vestido, ranura ocupada (no escribe nada) y a la mochila. Para probar el servicio contra la copia:
+  `sudo DB=openmu_probe bash ~/install-admin.sh` y volver con `DB=openmu`.
+
 ## 2. Lo aprendido
 
 ### 2.0 Recetas Mastery del S19 (`Data/Mix/MasteryItemMix.xml`)

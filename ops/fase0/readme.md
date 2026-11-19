@@ -1,6 +1,6 @@
 # fase0
 
-Fase 0 del plan ([../plan/plan_por_fases.md](../plan/plan_por_fases.md)): la preparacion. Cada punto y su estado.
+Fase 0 del plan, **cerrada el 19-11-2026** ([../plan/plan_por_fases.md](../plan/plan_por_fases.md)): la preparacion. Cada punto y su estado.
 
 | Punto | Estado | Donde |
 |---|---|---|
@@ -9,7 +9,7 @@ Fase 0 del plan ([../plan/plan_por_fases.md](../plan/plan_por_fases.md)): la pre
 | 3. Nuestro OpenMU compilado y desplegado, con vuelta atras | hecho 19-11-2026: `/app/plugins/mu/MUnique.OpenMU.MuPlugins.dll`, plugins registrados, tabla `mu_plugins.login_token` creada, puertos arriba | `Dockerfile` + `deploy.sh` |
 | 4. Generadores de sets y recetas: leer y reescribir da lo mismo | hecho: los 7 archivos del cliente servido salen identicos; `tools/clientData/roundtrip.ts` (+ prueba); en la VM `roundtrip.sh` | cliente servido |
 | 5. SQL repetibles con reversa | hecho: `ops/sets/*.sql`, `ops/bloodangel/*.sql` (`-v undo=1`) | VM |
-| 6. Set piloto Bes Eclipse probado en el juego | cargado (2 piezas: Staff of Destruction 5/8 y Eclipse Pants 9/35); falta la prueba en el juego | `ops/sets/bes_eclipse.sql`, `client_bes_eclipse.sh` | juego |
+| 6. Set piloto Bes Eclipse probado en el juego | hecho 19-11-2026: probado en el juego (Saruri), el tooltip muestra Energia +200 y daño de habilidad +80 | `ops/sets/bes_eclipse.sql`, `client_bes_eclipse.sh` | juego |
 
 ## Nuestro OpenMU (punto 3)
 

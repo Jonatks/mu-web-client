@@ -59,7 +59,7 @@ Con las fases 1, 3, 7 y 15 tu cliente pasaría de 49 a 144 sets. El archivo de s
 
 ### Fase 0. Preparación
 
-Estado de cada punto: [../fase0/readme.md](../fase0/readme.md). El orden se respeta desde aquí: fase 0 completa, luego 2, luego 4.
+Estado de cada punto: [../fase0/readme.md](../fase0/readme.md). Fase 0 cerrada el 19-11-2026. Fase 1: los 12 sets cargados en el servidor (Bes Eclipse y 11 más). Siguen el editor (borrar varios ítems e insertar set completo, hecho) y la fase 2.
 
 1. Rama `contenido-temporadas` desde `release`.
 2. Respaldo completo de la base `openmu`, y otro antes de cada fase.
@@ -170,7 +170,7 @@ No se usa el arte ni el cliente de otros juegos de MU para móvil: son de otra e
 
 | Decisión | Mi recomendación |
 | --- | --- |
-| Fases en curso | 0, 0b y 3 |
+| Fases en curso | 2 (0, 0b, 1 y 3 hechas) |
 | Nivel máximo | 400 normal + 400 Master + 900 Majestic (como el S19) |
 | Nivel master máximo | 400 en la fase 2 |
 | Mapas de drop de Bloodangel mientras no existan los oficiales | Raklion y Vulcanus para normales; Kanturu para excellent |
