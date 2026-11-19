@@ -98,6 +98,7 @@ export default {
   'options.lightingQuality': 'ライティング',
   'options.materialQuality': 'マテリアル',
   'options.renderScale': 'レンダリング解像度',
+  'options.pixelDensity': 'ピクセル密度',
   'options.upscale': 'アップスケール',
   'options.msaa': 'MSAA',
   'options.materialDetail': 'ディテール',
@@ -248,6 +249,8 @@ export default {
   'options.help.materialSky':
     '上を向いた金属に映る空の明るさです。',
   'options.help.renderScale': '3D の世界を低い解像度で描画して動作を軽くします。インターフェースは鮮明なままです。',
+  'options.help.pixelDensity':
+    'スマートフォンなどの高精細な画面で3Dの世界をより多くのピクセルで描きます。高いほど鮮明になり、グラフィック性能を多く使います。',
   'options.help.upscale': '下げたレンダリング解像度を、単純な引き伸ばしではなく FSR で本来の鮮明さに復元します。',
   'options.help.msaa': 'モデルや背景の輪郭のギザギザを滑らかにします。値が高いほど GPU への負荷が増えます。',
   'options.help.anisotropy': '浅い角度から見た地面や壁のテクスチャを鮮明に保ちます。',

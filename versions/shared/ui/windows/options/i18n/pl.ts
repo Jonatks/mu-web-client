@@ -99,6 +99,7 @@ export default {
   'options.lightingQuality': 'Oświetlenie',
   'options.materialQuality': 'Materiały',
   'options.renderScale': 'Skala renderowania',
+  'options.pixelDensity': 'Gęstość pikseli',
   'options.upscale': 'Skalowanie',
   'options.msaa': 'MSAA',
   'options.materialDetail': 'Szczegóły',
@@ -269,6 +270,8 @@ export default {
     'Jak jasno niebo lśni w metalu zwróconym ku górze.',
   'options.help.renderScale':
     'Rysuje świat 3D w niższej rozdzielczości dla większej płynności. Interfejs pozostaje ostry.',
+  'options.help.pixelDensity':
+    'Rysuje świat 3D z większą liczbą pikseli na ostrych ekranach, np. telefonów. Wyżej wygląda ostrzej i kosztuje więcej mocy graficznej.',
   'options.help.upscale':
     'Przywraca pełną ostrość obniżonej skali renderowania za pomocą FSR zamiast zwykłego rozciągnięcia.',
   'options.help.msaa':

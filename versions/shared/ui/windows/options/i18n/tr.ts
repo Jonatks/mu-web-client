@@ -93,6 +93,7 @@ export default {
   'options.lightingQuality': 'Aydınlatma',
   'options.materialQuality': 'Malzemeler',
   'options.renderScale': 'Render ölçeği',
+  'options.pixelDensity': 'Piksel yoğunluğu',
   'options.upscale': 'Ölçek büyütme',
   'options.msaa': 'MSAA',
   'options.materialDetail': 'Ayrıntı',
@@ -230,6 +231,8 @@ export default {
     'Gerçekçi malzemelerin kabartmasının, metal parlaklığının ve zemin dokusunun ne kadar belirgin olduğu.',
   'options.help.renderScale':
     'Daha fazla hız için 3B dünyayı daha düşük çözünürlükte çizer. Arayüz keskin kalır.',
+  'options.help.pixelDensity':
+    '3B dünyayı telefon gibi keskin ekranlarda daha çok pikselle çizer. Daha yüksek daha net görünür ve daha çok grafik gücü ister.',
   'options.help.upscale':
     'Düşürülmüş Render ölçeğini düz bir germe yerine FSR ile tam keskinliğe getirir.',
   'options.help.msaa':

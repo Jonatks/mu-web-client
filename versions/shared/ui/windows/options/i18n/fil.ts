@@ -99,6 +99,7 @@ export default {
   'options.lightingQuality': 'Ilaw',
   'options.materialQuality': 'Mga materyal',
   'options.renderScale': 'Sukat ng render',
+  'options.pixelDensity': 'Densidad ng pixel',
   'options.upscale': 'Upscaling',
   'options.msaa': 'MSAA',
   'options.materialDetail': 'Detalye',
@@ -276,6 +277,8 @@ export default {
     'Gaano kaliwanag kumikinang ang langit sa metal na nakaharap paitaas.',
   'options.help.renderScale':
     'Iginuguhit ang 3D na mundo sa mas mababang resolusyon para bumilis. Nananatiling malinaw ang interface.',
+  'options.help.pixelDensity':
+    'Iginuguhit ang 3D na mundo nang may mas maraming pixel sa matatalas na screen gaya ng telepono. Mas mataas ay mas malinaw at mas malakas sa graphics.',
   'options.help.upscale':
     'Ibinabalik sa buong talas ang ibinabang Sukat ng render gamit ang FSR sa halip na simpleng pag-unat.',
   'options.help.msaa':

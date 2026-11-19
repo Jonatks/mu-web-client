@@ -93,6 +93,7 @@ export default {
   'options.lightingQuality': 'रोशनी',
   'options.materialQuality': 'मटीरियल',
   'options.renderScale': 'रेंडर स्केल',
+  'options.pixelDensity': 'पिक्सेल घनत्व',
   'options.upscale': 'अपस्केलिंग',
   'options.msaa': 'MSAA',
   'options.materialDetail': 'डिटेल',
@@ -231,6 +232,8 @@ export default {
     'असली जैसे मटीरियल में उभार, धातु की चमक और ज़मीन के दाने कितने गहरे दिखें।',
   'options.help.renderScale':
     'ज़्यादा स्पीड के लिए 3D दुनिया को कम रिज़ॉल्यूशन पर बनाता है। इंटरफ़ेस साफ़ रहता है।',
+  'options.help.pixelDensity':
+    'फ़ोन जैसी तेज़ स्क्रीन पर 3D दुनिया को ज़्यादा पिक्सेल से बनाता है। ज़्यादा मान ज़्यादा साफ़ दिखता है और ज़्यादा ग्राफ़िक्स शक्ति लेता है।',
   'options.help.upscale':
     'घटाए गए रेंडर स्केल को सादे खिंचाव के बजाय FSR से पूरी स्पष्टता तक दोबारा बनाता है।',
   'options.help.msaa':

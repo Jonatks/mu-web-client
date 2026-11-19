@@ -93,6 +93,7 @@ export default {
   'options.lightingQuality': 'Il·luminació',
   'options.materialQuality': 'Materials',
   'options.renderScale': 'Escala de renderització',
+  'options.pixelDensity': 'Densitat de píxels',
   'options.upscale': 'Escalat',
   'options.msaa': 'MSAA',
   'options.materialDetail': 'Detall',
@@ -238,6 +239,8 @@ export default {
     'La intensitat amb què es veuen el relleu, la brillantor metàl·lica i el gra del terra dels materials realistes.',
   'options.help.renderScale':
     'Dibuixa el món 3D a una resolució més baixa per guanyar velocitat. La interfície continua nítida.',
+  'options.help.pixelDensity':
+    'Dibuixa el món 3D amb més píxels a les pantalles nítides com les dels mòbils. Més alt es veu més definit i gasta més gràfics.',
   'options.help.upscale':
     'Reconstrueix una Escala de renderització reduïda fins a la nitidesa completa amb FSR, en lloc d\'un simple estirament.',
   'options.help.msaa':

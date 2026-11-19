@@ -85,6 +85,11 @@ export type GameOptions = {
    * to native (controllers/render/renderScale.ts).
    */
   renderScale: number;
+  /**
+   * Device pixels per CSS pixel the 3D view is drawn at, as a step of `controllers/render/pixelDensity.ts`:
+   * 0 keeps the start (1 on a computer, 1.5 on a phone), 1 asks for 2, 2 for the screen's own ratio.
+   */
+  pixelDensity: number;
   /** Frame-rate cap (ours), an index into `FPS_LIMIT_STEPS` (`controllers/render/fpsLimit.ts`); 0 uncapped. */
   fpsLimit: number;
   /**
@@ -573,6 +578,7 @@ const RANGES: Partial<Record<keyof GameOptions, readonly [number, number]>> = {
   chromatic: [0, 9],
   sharpness: [0, 9],
   renderScale: [0, RENDER_SCALE_TOP],
+  pixelDensity: [0, 2],
   fpsLimit: [0, FPS_LIMIT_TOP],
   upscale: [0, 1],
   vignette: [0, 9],
@@ -610,6 +616,7 @@ const DEFAULTS: GameOptions = {
   chromatic: 0,
   sharpness: 2,
   renderScale: 0,
+  pixelDensity: 0,
   fpsLimit: 0,
   upscale: 1,
   vignette: 0,

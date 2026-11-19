@@ -99,6 +99,7 @@ export default {
   'options.lightingQuality': 'روشنی',
   'options.materialQuality': 'مٹیریل',
   'options.renderScale': 'رینڈر پیمانہ',
+  'options.pixelDensity': 'پکسل کثافت',
   'options.upscale': 'اپ اسکیلنگ',
   'options.msaa': 'MSAA',
   'options.materialDetail': 'تفصیل',
@@ -262,6 +263,8 @@ export default {
   'options.help.materialSky': 'اوپر رخ والی دھات میں آسمان کتنا روشن چمکے۔',
   'options.help.renderScale':
     'زیادہ رفتار کے لیے 3D دنیا کو کم ریزولوشن پر بناتا ہے۔ انٹرفیس واضح رہتا ہے۔',
+  'options.help.pixelDensity':
+    'تیز اسکرینوں جیسے فون پر 3D دنیا کو زیادہ پکسلز سے بناتا ہے۔ زیادہ قدر زیادہ صاف دکھتی ہے اور زیادہ گرافکس طاقت لیتی ہے۔',
   'options.help.upscale':
     'کم کیے گئے رینڈر پیمانے کو سادہ کھینچاؤ کے بجائے FSR سے پوری وضاحت تک دوبارہ بناتا ہے۔',
   'options.help.msaa':

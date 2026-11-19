@@ -99,6 +99,7 @@ export default {
   'options.lightingQuality': 'Ánh sáng',
   'options.materialQuality': 'Chất liệu',
   'options.renderScale': 'Tỉ lệ kết xuất',
+  'options.pixelDensity': 'Mật độ điểm ảnh',
   'options.upscale': 'Nâng độ phân giải',
   'options.msaa': 'MSAA',
   'options.materialDetail': 'Chi tiết',
@@ -268,6 +269,8 @@ export default {
     'Bầu trời sáng đến đâu trên kim loại hướng lên trên.',
   'options.help.renderScale':
     'Vẽ thế giới 3D ở độ phân giải thấp hơn để chạy nhanh hơn. Giao diện vẫn sắc nét.',
+  'options.help.pixelDensity':
+    'Vẽ thế giới 3D với nhiều điểm ảnh hơn trên màn hình sắc nét như điện thoại. Cao hơn trông nét hơn và tốn nhiều sức mạnh đồ họa hơn.',
   'options.help.upscale':
     'Dùng FSR khôi phục độ nét đầy đủ khi Tỉ lệ kết xuất bị hạ, thay vì kéo giãn đơn thuần.',
   'options.help.msaa':

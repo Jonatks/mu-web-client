@@ -107,6 +107,7 @@ const en = {
   'options.lightingQuality': 'Lighting',
   'options.materialQuality': 'Materials',
   'options.renderScale': 'Render scale',
+  'options.pixelDensity': 'Pixel density',
   'options.upscale': 'Upscaling',
   'options.msaa': 'MSAA',
   'options.materialDetail': 'Detail',
@@ -292,6 +293,8 @@ const en = {
     'How brightly the sky shines in metal that faces up.',
   'options.help.renderScale':
     'Draws the 3D world at a lower resolution for more speed. The interface stays sharp.',
+  'options.help.pixelDensity':
+    'Draws the 3D world with more pixels on sharp screens such as phones. Higher looks crisper and costs more graphics power.',
   'options.help.upscale':
     'Rebuilds a lowered Render scale to full sharpness with FSR instead of a plain stretch.',
   'options.help.msaa':

@@ -93,6 +93,7 @@ export default {
   'options.lightingQuality': 'Φωτισμός',
   'options.materialQuality': 'Υλικά',
   'options.renderScale': 'Κλίμακα απόδοσης',
+  'options.pixelDensity': 'Πυκνότητα pixel',
   'options.upscale': 'Κλιμάκωση',
   'options.msaa': 'MSAA',
   'options.materialDetail': 'Λεπτομέρεια',
@@ -233,6 +234,8 @@ export default {
     'Πόσο έντονα φαίνονται το ανάγλυφο, η μεταλλική γυαλάδα και ο κόκκος του εδάφους στα ρεαλιστικά υλικά.',
   'options.help.renderScale':
     'Σχεδιάζει τον 3D κόσμο σε χαμηλότερη ανάλυση για περισσότερη ταχύτητα. Η διεπαφή μένει καθαρή.',
+  'options.help.pixelDensity':
+    'Σχεδιάζει τον τρισδιάστατο κόσμο με περισσότερα pixel σε καθαρές οθόνες, όπως των κινητών. Υψηλότερη δείχνει πιο καθαρά και κοστίζει περισσότερη ισχύ γραφικών.',
   'options.help.upscale':
     'Επαναφέρει πλήρη ευκρίνεια σε μειωμένη Κλίμακα απόδοσης με FSR αντί για απλό τέντωμα.',
   'options.help.msaa':

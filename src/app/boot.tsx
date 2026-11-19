@@ -34,6 +34,7 @@ import {
   renderScaleForStep,
   renderScaleSeam,
 } from '../controllers/render/renderScale';
+import { applyPixelDensity, PHONE_START_DENSITY, pixelDensityFor } from '../controllers/render/pixelDensity';
 import { upscaleLive } from '@/controllers/render/scenes';
 import { TestScene } from '../controllers/render/scenes/testScene';
 import { loadMapIntoScene, onHeroPlaced, onMapChange } from '../controllers/terrain/loadMapIntoScene';
@@ -111,7 +112,7 @@ let useAntialiaing = false;
 
 // A phone's screen has 2 to 3 device pixels per CSS pixel; drawn at 1 the 3D view is blurry and its edges stair-step.
 // A phone draws at up to 1.5x (the render scale option still trades it down); `?dpr=1.5` tries another cap.
-const deviceRatioLimit = devQueryNumber('dpr') ?? (isMobileDevice() ? 1.5 : 1);
+const deviceRatioLimit = devQueryNumber('dpr') ?? (isMobileDevice() ? PHONE_START_DENSITY : 1);
 
 let engine: Engine;
 try {
@@ -143,6 +144,14 @@ reaction(
       ? 1
       : scaleSeam ?? renderScaleForStep(GameOptions.renderScale),
   scale => applyRenderScale(engine, scale),
+  { fireImmediately: true }
+);
+
+// Pixel density (Options > Video > Resolution): above the start cap only when the player asks for it.
+const startDensity = Math.min(window.devicePixelRatio || 1, deviceRatioLimit);
+reaction(
+  () => pixelDensityFor(GameOptions.pixelDensity, window.devicePixelRatio || 1, startDensity),
+  density => applyPixelDensity(engine, density, startDensity),
   { fireImmediately: true }
 );
 

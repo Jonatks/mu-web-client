@@ -99,6 +99,7 @@ export default {
   'options.lightingQuality': 'نورپردازی',
   'options.materialQuality': 'مواد',
   'options.renderScale': 'مقیاس رندر',
+  'options.pixelDensity': 'تراکم پیکسل',
   'options.upscale': 'افزایش وضوح',
   'options.msaa': 'MSAA',
   'options.materialDetail': 'جزئیات',
@@ -262,6 +263,8 @@ export default {
   'options.help.materialSky': 'شدت درخشش آسمان در فلزی که رو به بالاست.',
   'options.help.renderScale':
     'جهان سه‌بعدی را برای سرعت بیشتر با وضوح کمتر رسم می‌کند. رابط واضح می‌ماند.',
+  'options.help.pixelDensity':
+    'دنیای سه\u200cبعدی را روی صفحه\u200cهای واضح مثل گوشی با پیکسل بیشتری می\u200cکشد. مقدار بالاتر واضح\u200cتر است و توان گرافیکی بیشتری می\u200cگیرد.',
   'options.help.upscale':
     'مقیاس رندر کاهش‌یافته را به جای کشیدن ساده، با FSR به وضوح کامل بازمی‌سازد.',
   'options.help.msaa':

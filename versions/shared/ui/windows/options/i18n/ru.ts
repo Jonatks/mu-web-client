@@ -98,6 +98,7 @@ export default {
   'options.lightingQuality': 'Освещение',
   'options.materialQuality': 'Материалы',
   'options.renderScale': 'Масштаб рендеринга',
+  'options.pixelDensity': 'Плотность пикселей',
   'options.upscale': 'Масштабирование',
   'options.msaa': 'MSAA',
   'options.materialDetail': 'Детализация',
@@ -284,6 +285,8 @@ export default {
     'Насколько ярко небо сияет в металле, обращённом вверх.',
   'options.help.renderScale':
     'Рисует 3D-мир в меньшем разрешении ради скорости. Интерфейс остаётся чётким.',
+  'options.help.pixelDensity':
+    'Рисует 3D-мир с большим числом пикселей на чётких экранах, например телефонов. Выше выглядит чётче и требует больше от видеокарты.',
   'options.help.upscale':
     'Восстанавливает полную чёткость при пониженном масштабе рендеринга с помощью FSR, а не простым растяжением.',
   'options.help.msaa':

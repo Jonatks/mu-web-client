@@ -99,6 +99,7 @@ export default {
   'options.lightingQuality': 'Beleuchtung',
   'options.materialQuality': 'Materialien',
   'options.renderScale': 'Renderskalierung',
+  'options.pixelDensity': 'Pixeldichte',
   'options.upscale': 'Hochskalierung',
   'options.msaa': 'MSAA',
   'options.materialDetail': 'Detail',
@@ -285,6 +286,8 @@ export default {
     'Wie hell der Himmel in Metall glänzt, das nach oben zeigt.',
   'options.help.renderScale':
     'Zeichnet die 3D-Welt in geringerer Auflösung, damit das Spiel flüssiger läuft. Die Oberfläche bleibt scharf.',
+  'options.help.pixelDensity':
+    'Zeichnet die 3D-Welt auf scharfen Bildschirmen wie Handys mit mehr Pixeln. Höher wirkt schärfer und kostet mehr Grafikleistung.',
   'options.help.upscale':
     'Bringt eine gesenkte Renderskalierung mit FSR auf volle Schärfe, statt sie nur zu strecken.',
   'options.help.msaa':

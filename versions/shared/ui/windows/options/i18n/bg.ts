@@ -98,6 +98,7 @@ export default {
   'options.lightingQuality': 'Осветление',
   'options.materialQuality': 'Материали',
   'options.renderScale': 'Мащаб на рендиране',
+  'options.pixelDensity': 'Плътност на пикселите',
   'options.upscale': 'Мащабиране',
   'options.msaa': 'MSAA',
   'options.materialDetail': 'Детайл',
@@ -267,6 +268,8 @@ export default {
     'Колко ярко небето блести в метал, обърнат нагоре.',
   'options.help.renderScale':
     'Рисува 3D света с по-ниска резолюция за повече скорост. Интерфейсът остава остър.',
+  'options.help.pixelDensity':
+    'Рисува 3D света с повече пиксели на резки екрани като тези на телефоните. По-високо изглежда по-ясно и иска повече графична мощ.',
   'options.help.upscale':
     'При намален Мащаб на рендиране възстановява пълната острота с FSR вместо просто разтягане.',
   'options.help.msaa':

@@ -93,6 +93,7 @@ export default {
   'options.lightingQuality': 'Megvilágítás',
   'options.materialQuality': 'Anyagok',
   'options.renderScale': 'Renderelési arány',
+  'options.pixelDensity': 'Képpontsűrűség',
   'options.upscale': 'Felskálázás',
   'options.msaa': 'MSAA',
   'options.materialDetail': 'Részletesség',
@@ -234,6 +235,8 @@ export default {
     'Mennyire látszik a valószerű anyagok domborzata, fémes csillogása és talajszemcséje.',
   'options.help.renderScale':
     'Kisebb felbontáson rajzolja a 3D világot a nagyobb sebességért. A felület éles marad.',
+  'options.help.pixelDensity':
+    'Több képponttal rajzolja a 3D világot éles kijelzőkön, például telefonokon. Magasabb érték élesebb, de több grafikus erőt igényel.',
   'options.help.upscale':
     'A lecsökkentett renderelési arányt FSR segítségével teljes élességűre állítja vissza sima nyújtás helyett.',
   'options.help.msaa':

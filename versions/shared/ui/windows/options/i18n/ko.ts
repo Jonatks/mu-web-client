@@ -98,6 +98,7 @@ export default {
   'options.lightingQuality': '조명',
   'options.materialQuality': '재질',
   'options.renderScale': '렌더링 배율',
+  'options.pixelDensity': '픽셀 밀도',
   'options.upscale': '업스케일링',
   'options.msaa': 'MSAA',
   'options.materialDetail': '디테일',
@@ -250,6 +251,8 @@ export default {
   'options.help.materialSky':
     '위를 향한 금속에 비치는 하늘의 밝기입니다.',
   'options.help.renderScale': '3D 월드를 낮은 해상도로 그려 속도를 높입니다. 인터페이스는 선명하게 유지됩니다.',
+  'options.help.pixelDensity':
+    '휴대폰처럼 선명한 화면에서 3D 세계를 더 많은 픽셀로 그립니다. 높을수록 선명하지만 그래픽 성능을 더 씁니다.',
   'options.help.upscale': '렌더링 배율을 낮춘 화면을 단순히 늘리지 않고, FSR로 원래 선명도까지 되살립니다.',
   'options.help.msaa': '모델과 배경의 계단 현상을 부드럽게 합니다. 값이 높을수록 그래픽 성능을 더 씁니다.',
   'options.help.anisotropy': '비스듬히 보이는 바닥과 벽 텍스처를 선명하게 유지합니다.',

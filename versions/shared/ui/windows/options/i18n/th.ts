@@ -98,6 +98,7 @@ export default {
   'options.lightingQuality': 'แสง',
   'options.materialQuality': 'วัสดุ',
   'options.renderScale': 'สเกลการเรนเดอร์',
+  'options.pixelDensity': 'ความหนาแน่นพิกเซล',
   'options.upscale': 'การขยายภาพ',
   'options.msaa': 'MSAA',
   'options.materialDetail': 'รายละเอียด',
@@ -266,6 +267,8 @@ export default {
     'ท้องฟ้าสะท้อนสว่างแค่ไหนบนโลหะที่หันขึ้นด้านบน',
   'options.help.renderScale':
     'วาดโลก 3 มิติที่ความละเอียดต่ำลงเพื่อให้เร็วขึ้น ส่วนอินเทอร์เฟซยังคมชัดเหมือนเดิม',
+  'options.help.pixelDensity':
+    'วาดโลก 3 มิติด้วยพิกเซลมากขึ้นบนจอคมชัดอย่างโทรศัพท์ ค่าสูงขึ้นจะคมกว่าและใช้พลังกราฟิกมากขึ้น',
   'options.help.upscale':
     'ใช้ FSR ขยายภาพเมื่อลด "สเกลการเรนเดอร์" ให้กลับมาคมชัดเต็มที่ แทนการยืดภาพธรรมดา',
   'options.help.msaa': 'ลดรอยหยักตามขอบของโมเดลและฉาก ค่ายิ่งสูงยิ่งใช้พลังกราฟิกมาก',

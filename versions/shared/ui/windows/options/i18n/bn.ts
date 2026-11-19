@@ -93,6 +93,7 @@ export default {
   'options.lightingQuality': 'আলো',
   'options.materialQuality': 'ম্যাটেরিয়াল',
   'options.renderScale': 'রেন্ডার স্কেল',
+  'options.pixelDensity': 'পিক্সেল ঘনত্ব',
   'options.upscale': 'আপস্কেলিং',
   'options.msaa': 'MSAA',
   'options.materialDetail': 'খুঁটিনাটি',
@@ -228,6 +229,8 @@ export default {
   'options.help.materialDetail':
     'বাস্তবসম্মত ম্যাটেরিয়ালের উঁচুনিচু, ধাতব চকচকে ভাব ও মাটির দানা কতটা জোরালোভাবে দেখা যায়।',
   'options.help.renderScale': 'বেশি গতির জন্য 3D জগৎ কম রেজোলিউশনে আঁকে। ইন্টারফেস ঝকঝকে থাকে।',
+  'options.help.pixelDensity':
+    'ফোনের মতো তীক্ষ্ণ স্ক্রিনে 3D জগৎ বেশি পিক্সেলে আঁকে। বেশি মান আরও স্পষ্ট দেখায় এবং বেশি গ্রাফিক্স শক্তি নেয়।',
   'options.help.upscale':
     'কমানো রেন্ডার স্কেলকে সাধারণভাবে টেনে বড় করার বদলে FSR দিয়ে পূর্ণ তীক্ষ্ণতায় ফিরিয়ে আনে।',
   'options.help.msaa':

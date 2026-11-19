@@ -99,6 +99,7 @@ export default {
   'options.lightingQuality': 'Éclairage',
   'options.materialQuality': 'Matériaux',
   'options.renderScale': 'Échelle de rendu',
+  'options.pixelDensity': 'Densité de pixels',
   'options.upscale': "Mise à l'échelle",
   'options.msaa': 'MSAA',
   'options.materialDetail': 'Détail',
@@ -270,6 +271,8 @@ export default {
     'L\'éclat du ciel dans le métal tourné vers le haut.',
   'options.help.renderScale':
     'Affiche le monde 3D à une résolution plus basse pour gagner en fluidité. L’interface reste nette.',
+  'options.help.pixelDensity':
+    'Affiche le monde 3D avec plus de pixels sur les écrans fins comme ceux des téléphones. Plus haut est plus net et demande plus à la carte graphique.',
   'options.help.upscale':
     'Avec une échelle de rendu réduite, FSR rend toute sa netteté à l’image au lieu de simplement l’étirer.',
   'options.help.msaa':

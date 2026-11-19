@@ -101,6 +101,14 @@ Para la fase 7 basta con sumar una entrada por generacion y revisar sus exclusio
 - En vitest no existe `import.meta.dir` (es de bun): leer JSON con `import x from './x.json'`.
 - Vitest completo pasa el tiempo limite: correrlo en segundo plano y comparar fallos antes/despues.
 
+### 2.4 Cliente web: graficos (fase G)
+- Ya habia en Opciones: escala de render con FSR, MSAA, FXAA, anisotropia, limite de FPS, campo de vision, zoom
+  (Ctrl+rueda y pellizco). El perfil de celular (`MOBILE_PROFILES` en `gameOptions.ts`) apaga efectos caros a proposito
+  (medido en `docs/magdalena_study.md`): subir calidad en el celular es cambiar Opciones, no codigo.
+- La resolucion del celular arranca en 1.5x (`PHONE_START_DENSITY`); la opcion Densidad de pixeles sube a 2x o a la del
+  telefono. Decision del dueno (2026-11-11, `docs/plan_mu_web.md` 1f): lo visual va por Opciones, nunca fijo en codigo.
+- Un texto nuevo cambia el golden de textos (`src/i18n/text.golden.test.ts`: cuenta y hash por idioma).
+
 ## 3. Reemplazos provisionales (cerrar antes de dar la meta por cumplida)
 
 | Provisional | Por que | Como se cierra |

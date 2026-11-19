@@ -99,6 +99,7 @@ export default {
   'options.lightingQuality': 'Iluminação',
   'options.materialQuality': 'Materiais',
   'options.renderScale': 'Escala de renderização',
+  'options.pixelDensity': 'Densidade de pixels',
   'options.upscale': 'Escalonamento',
   'options.msaa': 'MSAA',
   'options.materialDetail': 'Detalhe',
@@ -272,6 +273,8 @@ export default {
     'O quanto o céu brilha no metal voltado para cima.',
   'options.help.renderScale':
     'Desenha o mundo 3D em resolução menor para ganhar desempenho. A interface continua nítida.',
+  'options.help.pixelDensity':
+    'Desenha o mundo 3D com mais pixels em telas nítidas como as de celulares. Mais alto fica mais definido e exige mais da placa de vídeo.',
   'options.help.upscale':
     'Com a Escala de renderização reduzida, usa FSR para recuperar a nitidez total em vez de só esticar a imagem.',
   'options.help.msaa':

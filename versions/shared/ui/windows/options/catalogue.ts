@@ -58,6 +58,8 @@ import {
   RENDER_SCALE_STEP_MAX,
   renderScaleForStep,
 } from '@/controllers/render/renderScale';
+import { isMobileDevice } from '@/controllers/interface/mobile';
+import { PHONE_START_DENSITY, PIXEL_DENSITY_MAX, pixelDensityFor } from '@/controllers/render/pixelDensity';
 import { FPS_LIMIT_MAX, fpsLimitForStep } from '@/controllers/render/fpsLimit';
 import { LOOT_ZEN_MAX, lootZenThreshold } from '@/modules/drops/lootFilter';
 import { CHAT_EMOJI_SIZE_LABEL_KEYS, CHAT_EMOJI_SIZE_MAX } from '@/modules/chat/chatEmojis';
@@ -545,6 +547,11 @@ export const CATEGORIES: Category[] = [
               slider('renderScale', RENDER_SCALE_STEP_MAX, v =>
                 `${Math.round(renderScaleForStep(v) * 100)}%`
               ),
+              choice('pixelDensity', PIXEL_DENSITY_MAX, v => {
+                const screen = window.devicePixelRatio || 1;
+                const start = Math.min(screen, isMobileDevice() ? PHONE_START_DENSITY : 1);
+                return `${+pixelDensityFor(v, screen, start).toFixed(2)}x`;
+              }),
               choice('upscale', 1, v => (v > 0 ? 'FSR' : t('common.off')), {
                 indent: true,
                 needs: [{ kind: 'renderScaled' }],

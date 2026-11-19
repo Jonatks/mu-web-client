@@ -93,6 +93,7 @@ export default {
   'options.lightingQuality': 'Osvětlení',
   'options.materialQuality': 'Materiály',
   'options.renderScale': 'Měřítko vykreslování',
+  'options.pixelDensity': 'Hustota pixelů',
   'options.upscale': 'Upscaling',
   'options.msaa': 'MSAA',
   'options.materialDetail': 'Detaily',
@@ -231,6 +232,8 @@ export default {
     'Jak výrazně se projeví reliéf, lesk kovu a zrnitost země u realistických materiálů.',
   'options.help.renderScale':
     'Vykresluje 3D svět v nižším rozlišení pro vyšší rychlost. Rozhraní zůstane ostré.',
+  'options.help.pixelDensity':
+    'Vykresluje 3D svět s více pixely na ostrých obrazovkách, například telefonů. Vyšší vypadá ostřeji a stojí více grafického výkonu.',
   'options.help.upscale':
     'Obnoví plnou ostrost sníženého měřítka vykreslování pomocí FSR místo prostého roztažení.',
   'options.help.msaa':

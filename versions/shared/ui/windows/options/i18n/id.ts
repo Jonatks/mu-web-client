@@ -93,6 +93,7 @@ export default {
   'options.lightingQuality': 'Pencahayaan',
   'options.materialQuality': 'Material',
   'options.renderScale': 'Skala render',
+  'options.pixelDensity': 'Kepadatan piksel',
   'options.upscale': 'Peningkatan skala',
   'options.msaa': 'MSAA',
   'options.materialDetail': 'Detail',
@@ -232,6 +233,8 @@ export default {
     'Seberapa kuat relief, kilau logam, dan tekstur tanah dari material realistis terlihat.',
   'options.help.renderScale':
     'Menggambar dunia 3D pada resolusi lebih rendah agar lebih cepat. Antarmuka tetap tajam.',
+  'options.help.pixelDensity':
+    'Menggambar dunia 3D dengan lebih banyak piksel di layar tajam seperti ponsel. Lebih tinggi tampak lebih tajam dan memakai lebih banyak tenaga grafis.',
   'options.help.upscale':
     'Memulihkan Skala render yang diturunkan ke ketajaman penuh dengan FSR, bukan sekadar direntangkan.',
   'options.help.msaa':

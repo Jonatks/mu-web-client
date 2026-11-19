@@ -93,6 +93,7 @@ export default {
   'options.lightingQuality': 'الإضاءة',
   'options.materialQuality': 'المواد',
   'options.renderScale': 'مقياس العرض',
+  'options.pixelDensity': 'كثافة البكسل',
   'options.upscale': 'رفع الدقة',
   'options.msaa': 'MSAA',
   'options.materialDetail': 'التفاصيل',
@@ -227,6 +228,8 @@ export default {
   'options.help.materialDetail':
     'مدى وضوح التضاريس ولمعان المعادن وحبيبات الأرض في المواد الواقعية.',
   'options.help.renderScale': 'يرسم العالم ثلاثي الأبعاد بدقة أقل لسرعة أكبر. تبقى الواجهة حادة.',
+  'options.help.pixelDensity':
+    'يرسم العالم ثلاثي الأبعاد بعدد أكبر من البكسلات على الشاشات الحادة مثل شاشات الهواتف. القيمة الأعلى أوضح وتستهلك قدرة رسومية أكبر.',
   'options.help.upscale':
     'يعيد مقياس العرض المنخفض إلى الحدة الكاملة بتقنية FSR بدلا من التمديد البسيط.',
   'options.help.msaa':

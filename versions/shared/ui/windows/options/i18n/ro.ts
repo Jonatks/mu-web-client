@@ -99,6 +99,7 @@ export default {
   'options.lightingQuality': 'Iluminare',
   'options.materialQuality': 'Materiale',
   'options.renderScale': 'Scalare randare',
+  'options.pixelDensity': 'Densitate de pixeli',
   'options.upscale': 'Scalare imagine',
   'options.msaa': 'MSAA',
   'options.materialDetail': 'Detaliu',
@@ -275,6 +276,8 @@ export default {
     'Cât de puternic strălucește cerul în metalul îndreptat în sus.',
   'options.help.renderScale':
     'Desenează lumea 3D la o rezoluție mai mică, pentru mai multă viteză. Interfața rămâne clară.',
+  'options.help.pixelDensity':
+    'Desenează lumea 3D cu mai mulți pixeli pe ecranele clare, cum sunt cele ale telefoanelor. Mai sus arată mai clar și cere mai multă putere grafică.',
   'options.help.upscale':
     'Cu Scalare randare redusă, reface imaginea la claritate deplină cu FSR, nu printr-o simplă întindere.',
   'options.help.msaa':

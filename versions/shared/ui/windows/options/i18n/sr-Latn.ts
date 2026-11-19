@@ -93,6 +93,7 @@ export default {
   'options.lightingQuality': 'Osvetljenje',
   'options.materialQuality': 'Materijali',
   'options.renderScale': 'Razmera renderovanja',
+  'options.pixelDensity': 'Gustina piksela',
   'options.upscale': 'Skaliranje',
   'options.msaa': 'MSAA',
   'options.materialDetail': 'Detalji',
@@ -230,6 +231,8 @@ export default {
     'Koliko jako se vide reljef, sjaj metala i zrnastost tla kod realističnih materijala.',
   'options.help.renderScale':
     'Crta 3D svet u nižoj rezoluciji radi veće brzine. Interfejs ostaje oštar.',
+  'options.help.pixelDensity':
+    'Crta 3D svet sa više piksela na oštrim ekranima kao što su telefoni. Više izgleda oštrije i troši više grafičke snage.',
   'options.help.upscale':
     'Vraća punu oštrinu smanjenoj razmeri renderovanja pomoću FSR umesto običnog razvlačenja.',
   'options.help.msaa':

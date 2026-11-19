@@ -29,7 +29,7 @@ There is no `index.ts` facade; other folders import the modules directly.
   map type's box under its node from its batch or its loaded model (the wall lean measures walls with it).
 - `objectShadow.ts`: `setShadowWorld` (the shadowless worlds and the lean, `shadowLean`), `setShadowlessScene`
   (the Kanturu Maya scene, from `modules/events`), `invalidateShadowState`.
-- options: `materialQuality.ts`, `renderingStyle.ts`, `renderScale.ts`, `renderDistance.ts` (slider
+- options: `materialQuality.ts`, `renderingStyle.ts`, `renderScale.ts`, `pixelDensity.ts`, `renderDistance.ts` (slider
   steps and readers for the Options window, the materials and boot).
 - `fpsLimit.ts` (ours, the FPS limit option): `FPS_LIMIT_STEPS` / `_MAX`, `fpsLimitForStep`, `FramePacer`,
   `framePacer` (boot's render loop asks `due(now, limit)`; its `fps` counts drawn frames, which the perf
@@ -223,6 +223,9 @@ There is no `index.ts` facade; other folders import the modules directly.
 - `renderScale.ts`: helps integrated GPUs (Radeon 610M at the Lorencia spawn: 15 fps at 1, 29 at 0.6);
   a discrete card is CPU bound and gains nothing. `resize` keeps the scale across monitors because
   Babylon multiplies the level by the device ratio change.
+- `pixelDensity.ts` (ours, Options > Video > Resolution): a phone starts at 1.5 device pixels per CSS pixel
+  (`PHONE_START_DENSITY`, measured cheaper than its own 2 to 3); the option asks for 2 or the screen's own ratio.
+  It moves the hardware scaling level by ratio, like `renderScale`, so both stack.
 - `fpsLimit.ts`: a cap skips whole animation frames (nothing runs; the next drawn frame gets the whole dt),
   carrying the due time forward so 45 on 60 Hz averages right, with 1 ms of slack so a cap equal to the
   refresh rate drops nothing. Off (step 0) is the browser rate the client always ran at.

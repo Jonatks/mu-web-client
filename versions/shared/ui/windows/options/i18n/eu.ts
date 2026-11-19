@@ -93,6 +93,7 @@ export default {
   'options.lightingQuality': 'Argiztapena',
   'options.materialQuality': 'Materialak',
   'options.renderScale': 'Errendatze-eskala',
+  'options.pixelDensity': 'Pixel dentsitatea',
   'options.upscale': 'Goranzko eskalatzea',
   'options.msaa': 'MSAA',
   'options.materialDetail': 'Xehetasuna',
@@ -239,6 +240,8 @@ export default {
     'Material errealisten erliebea, metal-distira eta lurraren pikorra zenbateraino nabaritzen diren.',
   'options.help.renderScale':
     '3D mundua bereizmen txikiagoan marrazten du abiadura handiagoa lortzeko. Interfazeak zorrotz jarraitzen du.',
+  'options.help.pixelDensity':
+    '3D mundua pixel gehiagorekin marrazten du pantaila zorrotzetan, mugikorretan adibidez. Altuagoa garbiagoa da eta grafiko gehiago kontsumitzen du.',
   'options.help.upscale':
     'Jaitsitako errendatze-eskala zorroztasun osora berreraikitzen du FSR bidez, luzatze soil baten ordez.',
   'options.help.msaa':

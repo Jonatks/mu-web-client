@@ -99,6 +99,7 @@ export default {
   'options.lightingQuality': 'Illuminazione',
   'options.materialQuality': 'Materiali',
   'options.renderScale': 'Scala di rendering',
+  'options.pixelDensity': 'Densità di pixel',
   'options.upscale': 'Upscaling',
   'options.msaa': 'MSAA',
   'options.materialDetail': 'Dettaglio',
@@ -275,6 +276,8 @@ export default {
     'Quanto brilla il cielo nel metallo rivolto verso l\'alto.',
   'options.help.renderScale':
     'Disegna il mondo 3D a risoluzione ridotta per guadagnare velocità. L’interfaccia resta nitida.',
+  'options.help.pixelDensity':
+    'Disegna il mondo 3D con più pixel sugli schermi nitidi come quelli dei telefoni. Più alta è più definita e richiede più grafica.',
   'options.help.upscale':
     'Con FSR riporta a piena nitidezza una Scala di rendering ridotta, invece di stirare semplicemente l’immagine.',
   'options.help.msaa':

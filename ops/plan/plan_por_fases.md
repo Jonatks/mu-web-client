@@ -156,7 +156,7 @@ Frigg, Emile, Arkajin, Moloso, Vesper y Elune, con los ítems Holy Spirit, Kenaz
 
 Independiente del contenido; se intercala con las otras fases. Todo va como opción (Enhanced/Ultra) y la vista clásica no cambia.
 
-- G1 (después de la fase 3): resolución completa en celular, suavizado de bordes, filtrado de texturas, cámara más cercana como opción, corregir el resplandor de las alas.
+- G1 (después de la fase 3): resolución completa en celular (hecho: Opciones > Video > Resolución > Densidad de píxeles, 1.5x, 2x o la del teléfono); suavizado de bordes, filtrado de texturas y cámara más cercana ya existían en Opciones (MSAA, FXAA, anisotropía, campo de visión, zoom con Ctrl+rueda y pellizco); falta el resplandor de las alas (necesito una captura nueva).
 - G2: luz y efectos (brillo suave, color, sombras).
 - G3: tema moderno de ventanas pensado para celular (inventario, personaje, tienda, barras y habilidades).
 - G4: inventario y baúl ampliados con el tema nuevo, junto con la fase 4.

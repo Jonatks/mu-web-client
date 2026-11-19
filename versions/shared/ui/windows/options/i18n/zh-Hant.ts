@@ -98,6 +98,7 @@ export default {
   'options.lightingQuality': '光照',
   'options.materialQuality': '材質',
   'options.renderScale': '繪製比例',
+  'options.pixelDensity': '像素密度',
   'options.upscale': '超解析度',
   'options.msaa': 'MSAA',
   'options.materialDetail': '細節',
@@ -235,6 +236,8 @@ export default {
   'options.help.materialGround': '金屬映出多少地面。越高鎧甲越亮，越低越暗。',
   'options.help.materialSky': '朝上的金屬映出的天空有多亮。',
   'options.help.renderScale': '以較低解析度繪製3D世界來提升速度。介面依然清晰。',
+  'options.help.pixelDensity':
+    '在手機等清晰螢幕上用更多像素繪製 3D 世界。越高越清晰，也越耗費顯示卡效能。',
   'options.help.upscale': '調低繪製比例後，以 FSR 還原到完整清晰度，而不是單純拉伸。',
   'options.help.msaa': '平滑模型與場景的鋸齒邊緣。數值越高越耗顯示卡效能。',
   'options.help.anisotropy': '以傾斜角度觀看時，地面與牆面的材質依然清晰。',

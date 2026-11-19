@@ -98,6 +98,7 @@ export default {
   'options.lightingQuality': '光照',
   'options.materialQuality': '材质',
   'options.renderScale': '渲染比例',
+  'options.pixelDensity': '像素密度',
   'options.upscale': '超分辨率',
   'options.msaa': 'MSAA',
   'options.materialDetail': '细节',
@@ -244,6 +245,8 @@ export default {
   'options.help.materialSky':
     '朝上的金属中天空映得有多亮。',
   'options.help.renderScale': '用较低的分辨率绘制 3D 世界来提升性能。界面依然清晰。',
+  'options.help.pixelDensity':
+    '在手机等清晰屏幕上用更多像素绘制 3D 世界。越高越清晰，也越耗费显卡性能。',
   'options.help.upscale': '调低渲染比例后，用 FSR 还原到完整清晰度，而不是简单拉伸。',
   'options.help.msaa': '平滑模型和场景的锯齿边缘。数值越高，越耗显卡性能。',
   'options.help.anisotropy': '以倾斜角度观看时，地面和墙面的贴图依然清晰。',

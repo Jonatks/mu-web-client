@@ -93,6 +93,7 @@ export default {
   'options.lightingQuality': 'Освітлення',
   'options.materialQuality': 'Матеріали',
   'options.renderScale': 'Масштаб рендерингу',
+  'options.pixelDensity': 'Щільність пікселів',
   'options.upscale': 'Масштабування',
   'options.msaa': 'MSAA',
   'options.materialDetail': 'Деталізація',
@@ -231,6 +232,8 @@ export default {
     'Наскільки помітні рельєф, металевий блиск і зернистість землі в реалістичних матеріалах.',
   'options.help.renderScale':
     'Малює 3D-світ у нижчій роздільності заради швидкості. Інтерфейс залишається чітким.',
+  'options.help.pixelDensity':
+    'Малює 3D-світ з більшою кількістю пікселів на чітких екранах, наприклад телефонів. Вище виглядає чіткіше й потребує більше від відеокарти.',
   'options.help.upscale':
     'Відновлює повну чіткість зниженого масштабу рендерингу за допомогою FSR замість простого розтягування.',
   'options.help.msaa':
