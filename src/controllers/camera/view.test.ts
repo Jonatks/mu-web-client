@@ -64,11 +64,10 @@ describe('the camera view across a warp', () => {
   });
 });
 
-describe('phone opening frame', () => {
-  it('opens a phone at 840 where the map frames 1200, and a computer at the frame itself', async () => {
-    const { DEFAULT_CAMERA_LEVEL, DISTANCE_BY_LEVEL, phoneOpeningLevel } = await import('./recipes');
-    expect(DISTANCE_BY_LEVEL[phoneOpeningLevel(DEFAULT_CAMERA_LEVEL, true)]).toBe(840);
-    expect(phoneOpeningLevel(DEFAULT_CAMERA_LEVEL, false)).toBe(DEFAULT_CAMERA_LEVEL);
-    expect(phoneOpeningLevel(1, true)).toBe(2);
+describe('opening frame', () => {
+  it('opens at 840 where the map frames 1200, never in first person', async () => {
+    const { DEFAULT_CAMERA_LEVEL, DISTANCE_BY_LEVEL, openingLevel } = await import('./recipes');
+    expect(DISTANCE_BY_LEVEL[openingLevel(DEFAULT_CAMERA_LEVEL)]).toBe(840);
+    expect(openingLevel(1)).toBe(2);
   });
 });

@@ -41,7 +41,7 @@ import {
   MOUSE_LOOK_DEG_PER_PX,
   MU_SCALE,
   nearestLevel,
-  phoneOpeningLevel,
+  openingLevel as closerOpeningLevel,
   PITCH_DRAG_DEG_PER_PX,
   PITCH_OFFSET_MAX_DEG,
   PITCH_OFFSET_MIN_DEG,
@@ -156,10 +156,9 @@ let classic: {
  * every pinned value exactly (1100 and 2000 are both steps), so the nearest
  * step is that frame, not an approximation of it.
  */
-// A phone opens closer (the owner's choice, 2026-11-19): its screen is small and the hero read too small at the
-// original's frame. Pinch and Ctrl+wheel still move it.
+// Opens closer than the original's frame (the owner's choice, 2026-11-19); the wheel and pinch still move it.
 function openingLevelFor(world: ENUM_WORLD): number {
-  return phoneOpeningLevel(pinnedLevelFor(world), isMobileDevice());
+  return closerOpeningLevel(pinnedLevelFor(world));
 }
 
 function pinnedLevelFor(world: ENUM_WORLD): number {

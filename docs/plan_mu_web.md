@@ -164,6 +164,8 @@ Se corrigio el cuadrado del destello del anillo del set ancient (destellos apila
 v6 (mismo dia, captura del propietario): el post-procesado, los halos y la iluminacion de v5 dejaban los modelos brillantes y
 transparentes; se vuelve al aspecto de v4 con densidad 2x. El fondo celeste de los items era el modo oscuro del navegador del
 celular invirtiendo el color de las celdas: `color-scheme` pasa a "only light" en index.html.
+Despues el propietario pidio quitar tambien el tinte original de las celdas con item (46,77,77): ahora negro suave. Y la
+camara abre a 840 tambien en PC.
 
 ### 1i. Interfaz movil rehecha a partir de Mu Magdalena (2026-11-11 noche; detalle en `docs/magdalena_study.md`)
 Decision del propietario: la interfaz anterior (barra original, 5 botones, pociones, tres casillas) no le gustaba. Se estudio Magdalena pantalla por pantalla y se rehizo

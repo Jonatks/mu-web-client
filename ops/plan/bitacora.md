@@ -119,6 +119,8 @@ Para la fase 7 basta con sumar una entrada por generacion y revisar sus exclusio
 - v6: el post-procesado y los halos de v5 dejaban los modelos lavados y transparentes en el celular: vuelve el aspecto de v4
   con 2x. El celeste detras de los items era el modo oscuro del navegador invirtiendo el color de las celdas (46,77,77 a
   175,209,209: misma tonalidad, luminosidad invertida); se apaga con `<meta name="color-scheme" content="only light">`.
+- Camara: abre a 840 (0.7 del encuadre del mapa) en celular y PC, decision del dueno. Las celdas con item ya no llevan
+  el tinte verde azulado del original (46,77,77): fondo negro suave, tambien decision del dueno.
 - Un texto nuevo cambia el golden de textos (`src/i18n/text.golden.test.ts`: cuenta y hash por idioma).
 
 ## 3. Reemplazos provisionales (cerrar antes de dar la meta por cumplida)
