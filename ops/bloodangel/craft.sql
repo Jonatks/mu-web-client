@@ -1,6 +1,6 @@
 -- Fase 3: la mezcla del Chaos Goblin (238) numero 200: pieza Bloodangel no ancient + Bloodangel Soul = la pieza ancient.
 -- La hace el plugin BloodangelAncientCrafting (openmu/plugins/GameLogic/Craftings). 100 %, 1.000.000 Zen.
--- Tambien enlaza el drop del Soul a Medusa por nombre (soul.sql usaba un numero que no existe).
+-- Tambien suma el drop del Soul a Balgass (349) y Nightmare (361): Medusa (561 en soul.sql) no existe en OpenMU 0.9.10.
 -- Aplica con psql -v ON_ERROR_STOP=1 -f craft.sql; revierte con -v undo=1. OpenMU se reinicia despues.
 \set ON_ERROR_STOP on
 BEGIN;
@@ -10,7 +10,7 @@ DELETE FROM config."ItemCraftingRequiredItemItemDefinition" WHERE "ItemCraftingR
 DELETE FROM config."ItemCraftingRequiredItem" WHERE "Id"::text LIKE '0000ba5e-0008-0002-%';
 DELETE FROM config."SimpleCraftingSettings" WHERE "Id"='0000ba5e-0008-0003-0000-000000000001';
 DELETE FROM config."MonsterDefinitionDropItemGroup" WHERE "DropItemGroupId"='0000ba5e-0007-0002-0000-000000000001'
-  AND "MonsterDefinitionId" IN (SELECT "Id" FROM config."MonsterDefinition" WHERE "Designation" ILIKE 'medusa%' AND "Number" NOT IN (275,459,561));
+  AND "MonsterDefinitionId" IN (SELECT "Id" FROM config."MonsterDefinition" WHERE "Number" IN (349,361));
 \else
 INSERT INTO config."SimpleCraftingSettings" ("Id","Money","MoneyPerFinalSuccessPercentage","SuccessPercent","MaximumSuccessPercent","MultipleAllowed","ResultItemSelect",
   "SuccessPercentageAdditionForLuck","SuccessPercentageAdditionForExcellentItem","SuccessPercentageAdditionForAncientItem","SuccessPercentageAdditionForSocketItem",
@@ -27,7 +27,7 @@ INSERT INTO config."ItemCrafting" ("Id","SimpleCraftingSettingsId","MonsterDefin
          'MUnique.OpenMU.GameLogic.Craftings.BloodangelAncientCrafting, MUnique.OpenMU.MuPlugins'
   FROM config."MonsterDefinition" WHERE "Number"=238;
 INSERT INTO config."MonsterDefinitionDropItemGroup"
-  SELECT "Id",'0000ba5e-0007-0002-0000-000000000001' FROM config."MonsterDefinition" m WHERE "Designation" ILIKE 'medusa%'
+  SELECT "Id",'0000ba5e-0007-0002-0000-000000000001' FROM config."MonsterDefinition" m WHERE "Number" IN (349,361)
    AND NOT EXISTS (SELECT 1 FROM config."MonsterDefinitionDropItemGroup" d WHERE d."MonsterDefinitionId"=m."Id" AND d."DropItemGroupId"='0000ba5e-0007-0002-0000-000000000001');
 SELECT count(*) || ' piezas en la mezcla' FROM config."ItemCraftingRequiredItemItemDefinition" WHERE "ItemCraftingRequiredItemId"='0000ba5e-0008-0002-0000-000000000001';
 SELECT count(*) || ' jefes sueltan el Soul' FROM config."MonsterDefinitionDropItemGroup" WHERE "DropItemGroupId"='0000ba5e-0007-0002-0000-000000000001';

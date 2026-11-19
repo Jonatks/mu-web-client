@@ -1,4 +1,4 @@
--- Fase 3: el Bloodangel Soul (13/407) y su drop en jefes (Kundun 275, Selupan 459, Medusa 561), 30 %.
+-- Fase 3: el Bloodangel Soul (13/407) y su drop en jefes (Kundun 275, Selupan 459, Medusa 561, que no existe: ver craft.sql), 30 %.
 -- Aplica con psql -v ON_ERROR_STOP=1 -f soul.sql; revierte con -v undo=1. OpenMU se reinicia despues.
 \set ON_ERROR_STOP on
 BEGIN;
