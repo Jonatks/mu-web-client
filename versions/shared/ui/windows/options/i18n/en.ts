@@ -436,9 +436,15 @@ const en = {
   'options.help.fidelity':
     'Classic is the original client, exactly. Enhanced and Ultra turn on the improvements below; change one and the preset reads Custom.',
   'options.section.improvements': 'Improvements',
+  'options.autoHealthPotion': 'Automatic health potion',
   'options.autoManaPotion': 'Automatic mana potion',
+  'options.help.autoHealthPotion':
+    'Drinks the biggest health potion in your bag when your life falls under the threshold, at most one a second. Only on servers that allow it.',
   'options.help.autoManaPotion':
-    'Drinks the biggest mana potion in your bag when your mana falls under a tenth, at most one a second. Only on servers that allow it.',
+    'Drinks the biggest mana potion in your bag when your mana falls under the threshold, at most one a second. Only on servers that allow it.',
+  'options.autoPotionPercent': 'Potion threshold',
+  'options.help.autoPotionPercent':
+    'Life or mana under this share of the bar drinks the automatic potion.',
   'options.needs.server': 'This server does not allow it.',
   'options.autoQuiver': 'Automatic quiver',
   'options.help.autoQuiver':

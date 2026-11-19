@@ -35,6 +35,7 @@ export type Config = {
   muHelperAfterReconnect: boolean;
   /** `server.json`: players may have a mana potion drunk by itself when mana runs low (off = never). */
   autoManaPotion: boolean;
+  autoHealthPotion: boolean;
   /** `server.json`: players may have the next quiver put in as soon as one runs out (off = at the next shot, the original). */
   autoQuiver: boolean;
   /** `server.json`: players may lean on any straight wall, and so rest (faster regeneration) anywhere (off = pose boxes only, the original). */
@@ -83,6 +84,7 @@ const KEYS: Record<keyof Config, string> = {
   retryLoginWhenConnected: 'MU_RETRY_LOGIN_WHEN_CONNECTED',
   muHelperAfterReconnect: 'MU_HELPER_AFTER_RECONNECT',
   autoManaPotion: 'MU_AUTO_MANA_POTION',
+  autoHealthPotion: 'MU_AUTO_HEALTH_POTION',
   autoQuiver: 'MU_AUTO_QUIVER',
   restAnyWall: 'MU_REST_ANY_WALL',
   jewelryUpgrade: 'MU_JEWELRY_UPGRADE',
@@ -122,6 +124,7 @@ export const DEFAULTS: Config = {
   retryLoginWhenConnected: false,
   muHelperAfterReconnect: false,
   autoManaPotion: false,
+  autoHealthPotion: false,
   autoQuiver: false,
   restAnyWall: false,
   jewelryUpgrade: false,

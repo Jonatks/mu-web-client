@@ -402,9 +402,15 @@ export default {
   'options.help.fidelity':
     'Classica è il client originale, identico. Migliorata e Ultra attivano i miglioramenti qui sotto; cambiane uno e il preset diventa Personalizzata.',
   'options.section.improvements': 'Miglioramenti',
+  'options.autoHealthPotion': 'Pozione di vita automatica',
   'options.autoManaPotion': 'Pozione di mana automatica',
+  'options.help.autoHealthPotion':
+    'Beve la pozione di vita più grande della borsa quando la vita scende sotto la soglia, al massimo una al secondo. Solo sui server che lo permettono.',
   'options.help.autoManaPotion':
-    'Beve la pozione di mana più grande dello zaino quando il mana scende sotto un decimo, al massimo una al secondo. Solo sui server che lo consentono.',
+    'Beve la pozione di mana più grande della borsa quando il mana scende sotto la soglia, al massimo una al secondo. Solo sui server che lo permettono.',
+  'options.autoPotionPercent': 'Soglia pozioni',
+  'options.help.autoPotionPercent':
+    'Vita o mana sotto questa parte della barra beve la pozione automatica.',
   'options.needs.server': 'Questo server non lo consente.',
   'options.autoQuiver': 'Faretra automatica',
   'options.help.autoQuiver':

@@ -399,9 +399,15 @@ export default {
   'options.help.fidelity':
     'Clássica é o cliente original, exatamente. Melhorada e Ultra ligam as melhorias abaixo; mude uma e a predefinição vira Personalizada.',
   'options.section.improvements': 'Melhorias',
+  'options.autoHealthPotion': 'Poção de vida automática',
   'options.autoManaPotion': 'Poção de mana automática',
+  'options.help.autoHealthPotion':
+    'Bebe a maior poção de vida da bolsa quando a vida cai abaixo do limite, no máximo uma por segundo. Só em servidores que permitem.',
   'options.help.autoManaPotion':
-    'Bebe a maior poção de mana da sua bolsa quando a mana cai abaixo de um décimo, no máximo uma por segundo. Só em servidores que permitem.',
+    'Bebe a maior poção de mana da bolsa quando a mana cai abaixo do limite, no máximo uma por segundo. Só em servidores que permitem.',
+  'options.autoPotionPercent': 'Limite das poções',
+  'options.help.autoPotionPercent':
+    'Vida ou mana abaixo desta parte da barra bebe a poção automática.',
   'options.needs.server': 'Este servidor não permite.',
   'options.autoQuiver': 'Aljava automática',
   'options.help.autoQuiver':

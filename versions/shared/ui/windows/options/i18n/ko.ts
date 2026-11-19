@@ -337,8 +337,15 @@ export default {
   'options.help.fidelity':
     '클래식은 원작 클라이언트 그대로입니다. 향상과 울트라는 아래 개선 사항을 켭니다. 하나라도 바꾸면 사용자 지정이 됩니다.',
   'options.section.improvements': '개선 사항',
+  'options.autoHealthPotion': '자동 생명 물약',
   'options.autoManaPotion': '마나 물약 자동 사용',
-  'options.help.autoManaPotion': '마나가 10분의 1 아래로 떨어지면 가방에서 가장 큰 마나 물약을 마십니다(초당 최대 1개). 허용하는 서버에서만.',
+  'options.help.autoHealthPotion':
+    '생명이 기준 아래로 떨어지면 가방의 가장 큰 생명 물약을 마십니다. 초당 최대 1개. 허용하는 서버에서만.',
+  'options.help.autoManaPotion':
+    '마나가 기준 아래로 떨어지면 가방의 가장 큰 마나 물약을 마십니다. 초당 최대 1개. 허용하는 서버에서만.',
+  'options.autoPotionPercent': '물약 기준',
+  'options.help.autoPotionPercent':
+    '바의 이 비율 아래로 생명이나 마나가 떨어지면 자동 물약을 마십니다.',
   'options.needs.server': '이 서버에서는 허용되지 않습니다.',
   'options.autoQuiver': '화살통 자동 장전',
   'options.help.autoQuiver': '화살통이 비면 다음 사격을 기다리지 않고 가방의 다음 화살이나 볼트를 바로 손에 장착합니다. 허용하는 서버에서만.',

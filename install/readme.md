@@ -123,6 +123,10 @@ everything the stack reads is rendered from `mu.env`, so `mu config` can change 
   the biggest mana potion in the bag, at most one a second, the same request the W key sends. Off,
   the player's option does nothing, as in the original. Gameplay automation: your call.
 
+  `autoHealthPotion` (`mu config` > Features, `MU_AUTO_HEALTH_POTION`, default off) is the same
+  for life: under the player's threshold it drinks the biggest health potion, the request the Q key
+  sends. Gameplay automation: your call.
+
   `autoQuiver` (`mu config` > Features, `MU_AUTO_QUIVER`, default off) lets a player turn on the
   automatic quiver (Options > Game): the next arrows or bolts in the bag go into the hand as soon
   as the server takes the empty quiver, the same move a drag sends. Off, the original's reload

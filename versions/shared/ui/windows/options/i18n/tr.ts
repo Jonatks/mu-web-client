@@ -390,9 +390,15 @@ export default {
   'options.help.fidelity':
     'Klasik, birebir orijinal istemcidir. Gelişmiş ve Ultra aşağıdaki iyileştirmeleri açar; birini değiştirirsen hazır ayar Özel olur.',
   'options.section.improvements': 'İyileştirmeler',
+  'options.autoHealthPotion': 'Otomatik can iksiri',
   'options.autoManaPotion': 'Otomatik mana iksiri',
+  'options.help.autoHealthPotion':
+    'Can eşiğin altına düştüğünde çantadaki en büyük can iksirini içer, saniyede en fazla bir. Yalnızca izin veren sunucularda.',
   'options.help.autoManaPotion':
-    'Manan onda birin altına düştüğünde çantandaki en büyük mana iksirini içer, saniyede en fazla bir tane. Yalnızca buna izin veren sunucularda.',
+    'Mana eşiğin altına düştüğünde çantadaki en büyük mana iksirini içer, saniyede en fazla bir. Yalnızca izin veren sunucularda.',
+  'options.autoPotionPercent': 'İksir eşiği',
+  'options.help.autoPotionPercent':
+    'Çubuğun bu kısmının altındaki can veya mana otomatik iksiri içer.',
   'options.needs.server': 'Bu sunucu buna izin vermiyor.',
   'options.autoQuiver': 'Otomatik sadak',
   'options.help.autoQuiver':

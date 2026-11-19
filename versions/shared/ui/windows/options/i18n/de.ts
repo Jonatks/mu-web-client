@@ -432,9 +432,15 @@ export default {
   'options.help.fidelity':
     'Klassisch ist exakt der Original-Client. Verbessert und Ultra schalten die Verbesserungen unten ein; änderst du eine, steht die Vorgabe auf Eigene.',
   'options.section.improvements': 'Verbesserungen',
+  'options.autoHealthPotion': 'Automatischer Heiltrank',
   'options.autoManaPotion': 'Automatischer Manatrank',
+  'options.help.autoHealthPotion':
+    'Trinkt den größten Heiltrank im Beutel, wenn das Leben unter die Schwelle fällt, höchstens einen pro Sekunde. Nur auf Servern, die es erlauben.',
   'options.help.autoManaPotion':
-    'Trinkt den größten Manatrank aus deinem Inventar, wenn dein Mana unter ein Zehntel fällt, höchstens einen pro Sekunde. Nur auf Servern, die es erlauben.',
+    'Trinkt den größten Manatrank im Beutel, wenn das Mana unter die Schwelle fällt, höchstens einen pro Sekunde. Nur auf Servern, die es erlauben.',
+  'options.autoPotionPercent': 'Trank-Schwelle',
+  'options.help.autoPotionPercent':
+    'Leben oder Mana unter diesem Anteil der Leiste trinkt den automatischen Trank.',
   'options.needs.server': 'Dieser Server erlaubt das nicht.',
   'options.autoQuiver': 'Automatischer Köcher',
   'options.help.autoQuiver':

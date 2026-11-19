@@ -18,12 +18,12 @@ const Switch = observer(({ label, on, set }: { label: string; on: boolean; set: 
 ));
 
 const Slider = observer(
-  ({ label, option, max, show }: { label: string; option: NumberKey; max: number; show: (v: number) => string }) => (
+  ({ label, option, max, show, min = 0 }: { label: string; option: NumberKey; max: number; show: (v: number) => string; min?: number }) => (
     <label className="mobile-set-row">
       <span>{label}</span>
       <input
         type="range"
-        min={0}
+        min={min}
         max={max}
         step={1}
         value={GameOptions[option]}
@@ -65,7 +65,9 @@ export const SettingsModal = observer(() => {
           <Slider label={t('mobile.set.music')} option="musicVolume" max={10} show={v => `${v * 10}%`} />
           <Slider label={t('mobile.set.effects')} option="effectsVolume" max={10} show={v => `${v * 10}%`} />
           <Switch label={t('mobile.set.groundNames')} on={Drops.showDropNames} set={() => Drops.toggleDropNames()} />
+          {bool('autoHealthPotion', 'options.autoHealthPotion')}
           {bool('autoManaPotion', 'options.autoManaPotion')}
+          <Slider label={t('options.autoPotionPercent')} option="autoPotionPercent" min={1} max={9} show={v => `${v * 10}%`} />
           {bool('autoQuiver', 'options.autoQuiver')}
           <MobileButton
             className="mobile-settings-all"

@@ -399,9 +399,15 @@ export default {
   'options.help.fidelity':
     'Klasikoa jatorrizko bezeroa da, zehatz-mehatz. Hobetua eta Ultra aukerek beheko hobekuntzak aktibatzen dituzte; bat aldatzen baduzu, aurrezarpenak Pertsonalizatua dio.',
   'options.section.improvements': 'Hobekuntzak',
+  'options.autoHealthPotion': 'Bizi edabe automatikoa',
   'options.autoManaPotion': 'Mana-edabe automatikoa',
+  'options.help.autoHealthPotion':
+    'Poltsako bizi edaberik handiena edaten du bizia atalasetik behera jaisten denean, gehienez bat segundoko. Baimentzen duten zerbitzarietan bakarrik.',
   'options.help.autoManaPotion':
-    'Zure poltsako mana-edaberik handiena edaten du mana hamarren batetik behera jaisten denean, gehienez bat segundoko. Baimentzen duten zerbitzarietan soilik.',
+    'Poltsako mana edaberik handiena edaten du mana atalasetik behera jaisten denean, gehienez bat segundoko. Baimentzen duten zerbitzarietan bakarrik.',
+  'options.autoPotionPercent': 'Edabeen atalasea',
+  'options.help.autoPotionPercent':
+    'Barraren zati honetatik beherako bizia edo manak edabe automatikoa edaten du.',
   'options.needs.server': 'Zerbitzari honek ez du baimentzen.',
   'options.autoQuiver': 'Gezi-zorro automatikoa',
   'options.help.autoQuiver':

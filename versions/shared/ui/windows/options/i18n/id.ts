@@ -391,9 +391,15 @@ export default {
   'options.help.fidelity':
     'Klasik adalah klien asli, persis. Ditingkatkan dan Ultra menyalakan perbaikan di bawah; ubah salah satunya dan preset menjadi Kustom.',
   'options.section.improvements': 'Perbaikan',
+  'options.autoHealthPotion': 'Ramuan nyawa otomatis',
   'options.autoManaPotion': 'Ramuan mana otomatis',
+  'options.help.autoHealthPotion':
+    'Meminum ramuan nyawa terbesar di tas saat nyawa turun di bawah ambang, paling banyak satu per detik. Hanya di server yang mengizinkan.',
   'options.help.autoManaPotion':
-    'Meminum ramuan mana terbesar di tasmu saat mana turun di bawah sepersepuluh, paling banyak satu per detik. Hanya di server yang mengizinkannya.',
+    'Meminum ramuan mana terbesar di tas saat mana turun di bawah ambang, paling banyak satu per detik. Hanya di server yang mengizinkan.',
+  'options.autoPotionPercent': 'Ambang ramuan',
+  'options.help.autoPotionPercent':
+    'Nyawa atau mana di bawah bagian bilah ini meminum ramuan otomatis.',
   'options.needs.server': 'Server ini tidak mengizinkannya.',
   'options.autoQuiver': 'Tabung panah otomatis',
   'options.help.autoQuiver':

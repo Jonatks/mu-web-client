@@ -407,9 +407,15 @@ export default {
   'options.help.fidelity':
     'Ang Klasiko ay eksaktong ang orihinal na client. Ina-on ng Pinahusay at Ultra ang mga pagpapahusay sa ibaba; baguhin ang isa at magiging Custom ang preset.',
   'options.section.improvements': 'Mga pagpapahusay',
+  'options.autoHealthPotion': 'Awtomatikong potion ng buhay',
   'options.autoManaPotion': 'Awtomatikong mana potion',
+  'options.help.autoHealthPotion':
+    'Iniinom ang pinakamalaking potion ng buhay sa bag kapag bumaba ang buhay sa threshold, hanggang isa bawat segundo. Sa mga server lang na pumapayag.',
   'options.help.autoManaPotion':
-    'Iniinom ang pinakamalaking mana potion sa iyong bag kapag bumaba ang mana mo sa ilalim ng ikasampu, hanggang isa bawat segundo. Sa mga server lamang na pumapayag dito.',
+    'Iniinom ang pinakamalaking potion ng mana sa bag kapag bumaba ang mana sa threshold, hanggang isa bawat segundo. Sa mga server lang na pumapayag.',
+  'options.autoPotionPercent': 'Threshold ng potion',
+  'options.help.autoPotionPercent':
+    'Ang buhay o mana na mas mababa sa bahaging ito ng bar ay iinom ng awtomatikong potion.',
   'options.needs.server': 'Hindi ito pinapayagan ng server na ito.',
   'options.autoQuiver': 'Awtomatikong lalagyan ng palaso',
   'options.help.autoQuiver':

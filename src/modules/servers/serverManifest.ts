@@ -20,6 +20,8 @@ type ServerSettings = {
   readonly muHelperAfterReconnect: boolean;
   /** Drink a mana potion from the bag when mana runs low (ours: the original never drinks by itself). */
   readonly autoManaPotion: boolean;
+  /** Players may let the client drink a health potion when life runs low (ours; the original never drinks by itself). */
+  readonly autoHealthPotion: boolean;
   /** Put the next quiver in as soon as one runs out (the original waits for the next shot's CheckArrow, ZzzInterface.cpp:1206). */
   readonly autoQuiver: boolean;
   /** Players may lean on any straight wall (ours: the original leans only at pose boxes); OpenMU regenerates a resting player faster. */
@@ -72,6 +74,7 @@ export const ORIGINAL_SETTINGS: ServerSettings = {
   retryLoginWhenConnected: false,
   muHelperAfterReconnect: false,
   autoManaPotion: false,
+  autoHealthPotion: false,
   autoQuiver: false,
   restAnyWall: false,
   jewelryUpgrade: false,
@@ -95,6 +98,7 @@ const SETTING_TYPES: { readonly [K in keyof ServerSettings]: 'boolean' } = {
   retryLoginWhenConnected: 'boolean',
   muHelperAfterReconnect: 'boolean',
   autoManaPotion: 'boolean',
+  autoHealthPotion: 'boolean',
   autoQuiver: 'boolean',
   restAnyWall: 'boolean',
   jewelryUpgrade: 'boolean',

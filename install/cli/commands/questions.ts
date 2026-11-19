@@ -62,6 +62,7 @@ export async function ask(c: Config, group: Group): Promise<Config> {
       next.retryLoginWhenConnected = await ui.confirm('Retry a login refused as "account already connected"? (off = the original; only useful if this server drops the old session on that refusal)', c.retryLoginWhenConnected);
       next.muHelperAfterReconnect = await ui.confirm('Start the MU Helper again after an automatic reconnect if it was running? (off = it stays off; botting policy)', c.muHelperAfterReconnect);
       next.autoManaPotion = await ui.confirm('Let players turn on drinking a mana potion by itself when mana runs low? (off = the original; gameplay automation)', c.autoManaPotion);
+      next.autoHealthPotion = await ui.confirm('Let players turn on drinking a health potion by itself when life runs low? (off = the original; gameplay automation)', c.autoHealthPotion);
       next.autoQuiver = await ui.confirm('Let players turn on putting the next quiver in as soon as one runs out? (off = the original reloads at the next shot; gameplay automation)', c.autoQuiver);
       next.restAnyWall = await ui.confirm('Let players rest against any wall? Resting regenerates faster, so this lets them do it anywhere (off = the original; only at the lean spots)', c.restAnyWall);
       next.jewelryUpgrade = await ui.confirm('Let players put Bless, Soul and Life on the common rings and pendants? Only if this server supports it; stock OpenMU does not (off = the original)', c.jewelryUpgrade);

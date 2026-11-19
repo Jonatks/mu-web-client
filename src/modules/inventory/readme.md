@@ -44,10 +44,12 @@ items themselves are the hero's (`Hero.items`, `Hero.money`).
   the yes/no needs `GameOptions.confirmValuableItems`.
 - Jewels: `jewelTargetError` mirrors `ApplyJewels` (NewUIMyInventory.cpp:1546); the server has the last word.
 - Hotkeys: a slot holds an item kind, not an item (`CNewUIItemHotKey`, NewUIMainFrameWindow.cpp:929-1320).
-- Automatic mana potion (`autoMana.ts`, ours): where the world's `server.json` sets `autoManaPotion`
-  and the player's option of that name is on, mana under a tenth drinks the potion the unbound W
-  key would (`findHotkeyItem`, the same `consumeItemRequest`), at most once a second, alive and in
-  the world. The original never drinks by itself, so both default off.
+- Automatic potions (`autoMana.ts`, ours): where the world's `server.json` sets `autoHealthPotion` /
+  `autoManaPotion` and the player's option of that name is on, life or mana under `autoPotionPercent`
+  (40 % by default, Mu Magdalena's potions row; `potionThreshold.ts`) drinks the potion the unbound Q
+  or W key would (`findHotkeyItem`, the same `consumeItemRequest`), at most once a second each, alive
+  and in the world. The original never drinks by itself, so all default off; the phone profile (v7)
+  turns both on.
 
 ## Packets
 - `CharacterInventory`: the full bag, emptied first (WSclient.cpp:1672-1683); slots past `FirstStoreItemSlotIndex` go to `Economy.myShopItems`.

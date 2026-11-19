@@ -320,8 +320,15 @@ export default {
   'options.fidelityCustom': '還原度（自訂）',
   'options.help.fidelity': '經典即與原版用戶端完全相同。增強與極致會開啟下方的改進；變更任何一項，預設就會顯示為自訂。',
   'options.section.improvements': '改進',
+  'options.autoHealthPotion': '自動生命藥水',
   'options.autoManaPotion': '自動喝魔力藥水',
-  'options.help.autoManaPotion': '魔力低於十分之一時，自動喝下背包中最大的魔力藥水，每秒最多一瓶。僅限允許此功能的伺服器。',
+  'options.help.autoHealthPotion':
+    '生命低於閾值時喝下包裡最大的生命藥水，每秒最多一瓶。僅限允許的伺服器。',
+  'options.help.autoManaPotion':
+    '魔力低於閾值時喝下包裡最大的魔力藥水，每秒最多一瓶。僅限允許的伺服器。',
+  'options.autoPotionPercent': '藥水閾值',
+  'options.help.autoPotionPercent':
+    '生命或魔力低於條的這一比例時喝自動藥水。',
   'options.needs.server': '此伺服器不允許。',
   'options.autoQuiver': '自動補充箭筒',
   'options.help.autoQuiver': '箭筒用完時，立即將背包中的下一組箭矢或弩箭裝到手上，而不是等到下一次射擊。僅限允許此功能的伺服器。',

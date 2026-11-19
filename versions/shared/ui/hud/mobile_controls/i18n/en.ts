@@ -12,6 +12,7 @@ const en = {
   'mobile.cmd.inventory': 'Inventory',
   'mobile.cmd.character': 'Character',
   'mobile.cmd.skills': 'Skills',
+  'mobile.cmd.master': 'Master tree',
   'mobile.cmd.friends': 'Friends',
   'mobile.cmd.party': 'Party',
   'mobile.cmd.guild': 'Guild',

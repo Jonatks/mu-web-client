@@ -397,9 +397,15 @@ export default {
   'options.help.fidelity':
     'Classique est le client d\'origine, à l\'identique. Améliorée et Ultra activent les améliorations ci-dessous ; changez-en une et le préréglage devient Personnalisée.',
   'options.section.improvements': 'Améliorations',
+  'options.autoHealthPotion': 'Potion de vie automatique',
   'options.autoManaPotion': 'Potion de mana automatique',
+  'options.help.autoHealthPotion':
+    'Boit la plus grande potion de vie du sac quand la vie passe sous le seuil, au plus une par seconde. Seulement sur les serveurs qui l\'autorisent.',
   'options.help.autoManaPotion':
-    'Boit la plus grande potion de mana de votre sac quand votre mana passe sous un dixième, au plus une par seconde. Seulement sur les serveurs qui l’autorisent.',
+    'Boit la plus grande potion de mana du sac quand le mana passe sous le seuil, au plus une par seconde. Seulement sur les serveurs qui l\'autorisent.',
+  'options.autoPotionPercent': 'Seuil des potions',
+  'options.help.autoPotionPercent':
+    'La vie ou le mana sous cette part de la barre boit la potion automatique.',
   'options.needs.server': 'Ce serveur ne l’autorise pas.',
   'options.autoQuiver': 'Carquois automatique',
   'options.help.autoQuiver':

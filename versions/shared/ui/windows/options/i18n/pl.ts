@@ -396,9 +396,15 @@ export default {
   'options.help.fidelity':
     'Klasyczne to dokładnie oryginalny klient. Ulepszone i Ultra włączają ulepszenia poniżej; zmień jedno, a ustawienie stanie się Własne.',
   'options.section.improvements': 'Ulepszenia',
+  'options.autoHealthPotion': 'Automatyczna mikstura życia',
   'options.autoManaPotion': 'Automatyczna mikstura many',
+  'options.help.autoHealthPotion':
+    'Pije największą miksturę życia z torby, gdy życie spadnie poniżej progu, najwyżej jedną na sekundę. Tylko na serwerach, które na to pozwalają.',
   'options.help.autoManaPotion':
-    'Wypija największą miksturę many z plecaka, gdy mana spadnie poniżej jednej dziesiątej, najwyżej jedną na sekundę. Tylko na serwerach, które na to pozwalają.',
+    'Pije największą miksturę many z torby, gdy mana spadnie poniżej progu, najwyżej jedną na sekundę. Tylko na serwerach, które na to pozwalają.',
+  'options.autoPotionPercent': 'Próg mikstur',
+  'options.help.autoPotionPercent':
+    'Życie lub mana poniżej tej części paska pije automatyczną miksturę.',
   'options.needs.server': 'Ten serwer na to nie pozwala.',
   'options.autoQuiver': 'Automatyczny kołczan',
   'options.help.autoQuiver':

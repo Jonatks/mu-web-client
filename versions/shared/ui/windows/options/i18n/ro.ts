@@ -406,9 +406,15 @@ export default {
   'options.help.fidelity':
     'Clasică este clientul original, exact. Îmbunătățită și Ultra pornesc îmbunătățirile de mai jos; schimbă una și presetarea devine Personalizată.',
   'options.section.improvements': 'Îmbunătățiri',
+  'options.autoHealthPotion': 'Poțiune de viață automată',
   'options.autoManaPotion': 'Poțiune de mana automată',
+  'options.help.autoHealthPotion':
+    'Bea cea mai mare poțiune de viață din geantă când viața scade sub prag, cel mult una pe secundă. Doar pe serverele care permit.',
   'options.help.autoManaPotion':
-    'Bea cea mai mare poțiune de mana din rucsac când mana scade sub o zecime, cel mult una pe secundă. Doar pe serverele care permit.',
+    'Bea cea mai mare poțiune de mana din geantă când mana scade sub prag, cel mult una pe secundă. Doar pe serverele care permit.',
+  'options.autoPotionPercent': 'Pragul poțiunilor',
+  'options.help.autoPotionPercent':
+    'Viața sau mana sub această parte a barei bea poțiunea automată.',
   'options.needs.server': 'Acest server nu permite.',
   'options.autoQuiver': 'Tolbă automată',
   'options.help.autoQuiver':

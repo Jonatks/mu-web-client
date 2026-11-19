@@ -335,8 +335,15 @@ export default {
   'options.help.fidelity':
     'クラシックはオリジナルのクライアントそのままです。強化とウルトラは下の改善をオンにします。どれかを変えるとカスタムになります。',
   'options.section.improvements': '改善',
+  'options.autoHealthPotion': '自動回復薬',
   'options.autoManaPotion': 'マナポーション自動使用',
-  'options.help.autoManaPotion': 'マナが10分の1を下回ると、バッグ内で一番大きいマナポーションを飲みます(最大1秒に1本)。許可しているサーバーでのみ。',
+  'options.help.autoHealthPotion':
+    'ライフがしきい値を下回るとバッグの一番大きい回復薬を飲みます。1秒に1本まで。許可しているサーバーのみ。',
+  'options.help.autoManaPotion':
+    'マナがしきい値を下回るとバッグの一番大きいマナ薬を飲みます。1秒に1本まで。許可しているサーバーのみ。',
+  'options.autoPotionPercent': 'ポーションのしきい値',
+  'options.help.autoPotionPercent':
+    'ゲージのこの割合を下回ったライフかマナで自動ポーションを飲みます。',
   'options.needs.server': 'このサーバーでは許可されていません。',
   'options.autoQuiver': '矢筒の自動装填',
   'options.help.autoQuiver': '矢筒が尽きたら、次の射撃を待たずにバッグ内の次の矢またはボルトを手に装備します。許可しているサーバーでのみ。',

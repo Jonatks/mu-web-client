@@ -379,9 +379,15 @@ export default {
   'options.help.fidelity':
     'Klasické je přesně původní klient. Vylepšené a Ultra zapnou vylepšení níže; změníš-li jedno, předvolba se přepne na Vlastní.',
   'options.section.improvements': 'Vylepšení',
+  'options.autoHealthPotion': 'Automatický lektvar života',
   'options.autoManaPotion': 'Automatický lektvar many',
+  'options.help.autoHealthPotion':
+    'Vypije největší lektvar života z vaku, když život klesne pod práh, nejvýš jeden za sekundu. Jen na serverech, které to dovolují.',
   'options.help.autoManaPotion':
-    'Vypije největší lektvar many v inventáři, když mana klesne pod desetinu, nejvýš jeden za sekundu. Jen na serverech, které to povolují.',
+    'Vypije největší lektvar many z vaku, když mana klesne pod práh, nejvýš jeden za sekundu. Jen na serverech, které to dovolují.',
+  'options.autoPotionPercent': 'Práh lektvarů',
+  'options.help.autoPotionPercent':
+    'Život nebo mana pod tímto podílem pruhu vypije automatický lektvar.',
   'options.needs.server': 'Tento server to nepovoluje.',
   'options.autoQuiver': 'Automatický toulec',
   'options.help.autoQuiver':

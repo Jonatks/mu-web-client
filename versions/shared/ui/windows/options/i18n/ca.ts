@@ -401,9 +401,15 @@ export default {
   'options.help.fidelity':
     'Clàssic és el client original, tal qual. Millorat i Ultra activen les millores de sota; si en canvies una, el predefinit passa a Personalitzat.',
   'options.section.improvements': 'Millores',
+  'options.autoHealthPotion': 'Poció de vida automàtica',
   'options.autoManaPotion': 'Poció de manà automàtica',
+  'options.help.autoHealthPotion':
+    'Pren la poció de vida més gran de la bossa quan la vida baixa del llindar, com a molt una per segon. Només en servidors que ho permeten.',
   'options.help.autoManaPotion':
-    'Beu la poció de manà més gran de la bossa quan el manà baixa d\'una desena part, com a màxim una per segon. Només als servidors que ho permeten.',
+    'Pren la poció de manà més gran de la bossa quan el manà baixa del llindar, com a molt una per segon. Només en servidors que ho permeten.',
+  'options.autoPotionPercent': 'Llindar de pocions',
+  'options.help.autoPotionPercent':
+    'La vida o el manà per sota d’aquesta part de la barra pren la poció automàtica.',
   'options.needs.server': 'Aquest servidor no ho permet.',
   'options.autoQuiver': 'Buirac automàtic',
   'options.help.autoQuiver':

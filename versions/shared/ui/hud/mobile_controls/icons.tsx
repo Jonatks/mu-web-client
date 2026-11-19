@@ -11,6 +11,7 @@ const PATHS: Record<string, string> = {
   guild: 'M12 3l8 3v6c0 4.500-3.400 8-8 9-4.600-1-8-4.500-8-9V6zM12 8v7M9 11h6',
   quests: 'M7 3h10v16a2 2 0 0 1-4 0H5v-2a2 2 0 0 1 2-2V3zM10 7h4M10 11h4',
   helper: 'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2',
+  master: 'M12 21v-7M12 14l-5-4M12 14l5-4M7 10V6M17 10V6M12 14V4M5 6h4M15 6h4M10 4h4',
   options: 'M4 7h9M17 7h3M4 17h3M11 17h9M15 5v4M9 15v4',
   switch: 'M4 8h13l-3-3M20 16H7l3 3',
   system: 'M12 3v8M6.300 6.300a8 8 0 1 0 11.400 0',

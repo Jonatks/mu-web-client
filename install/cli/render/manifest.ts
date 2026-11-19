@@ -60,6 +60,7 @@ export function serverManifest(c: Config, modules: readonly ModuleEntry[] = []):
       retryLoginWhenConnected: c.retryLoginWhenConnected,
       muHelperAfterReconnect: c.muHelperAfterReconnect,
       autoManaPotion: c.autoManaPotion,
+      autoHealthPotion: c.autoHealthPotion,
       autoQuiver: c.autoQuiver,
       restAnyWall: c.restAnyWall,
       jewelryUpgrade: c.jewelryUpgrade,

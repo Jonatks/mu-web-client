@@ -342,7 +342,9 @@ export const CATEGORIES: Category[] = [
               toggle('quickItemActions'),
               toggle('confirmValuableItems'),
               // Gameplay automation (ours): only where the world's server.json allows it.
+              toggle('autoHealthPotion', { needs: [needServer('autoHealthPotion')] }),
               toggle('autoManaPotion', { needs: [needServer('autoManaPotion')] }),
+              choice('autoPotionPercent', 9, v => `${v * 10}%`, { min: 1 }),
               toggle('autoQuiver', { needs: [needServer('autoQuiver')] }),
               choice('compareTooltips', COMPARE_TOOLTIP_MAX, named(COMPARE_TOOLTIP_LABEL_KEYS)),
             ],

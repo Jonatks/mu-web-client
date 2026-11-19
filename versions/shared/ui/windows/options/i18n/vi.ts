@@ -388,9 +388,15 @@ export default {
   'options.help.fidelity':
     'Cổ điển là client gốc, y nguyên. Nâng cao và Ultra bật các cải tiến bên dưới; đổi một mục thì thiết lập thành Tùy chỉnh.',
   'options.section.improvements': 'Cải tiến',
+  'options.autoHealthPotion': 'Bình máu tự động',
   'options.autoManaPotion': 'Tự uống bình mana',
+  'options.help.autoHealthPotion':
+    'Uống bình máu lớn nhất trong túi khi máu xuống dưới ngưỡng, tối đa một bình mỗi giây. Chỉ trên máy chủ cho phép.',
   'options.help.autoManaPotion':
-    'Uống bình mana lớn nhất trong túi khi mana xuống dưới một phần mười, tối đa một bình mỗi giây. Chỉ trên máy chủ cho phép.',
+    'Uống bình mana lớn nhất trong túi khi mana xuống dưới ngưỡng, tối đa một bình mỗi giây. Chỉ trên máy chủ cho phép.',
+  'options.autoPotionPercent': 'Ngưỡng bình thuốc',
+  'options.help.autoPotionPercent':
+    'Máu hoặc mana dưới phần này của thanh sẽ uống bình tự động.',
   'options.needs.server': 'Máy chủ này không cho phép.',
   'options.autoQuiver': 'Tự thay ống tên',
   'options.help.autoQuiver':

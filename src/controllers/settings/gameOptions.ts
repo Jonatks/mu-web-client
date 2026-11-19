@@ -436,11 +436,15 @@ export type GameOptions = {
    */
   confirmValuableItems: boolean;
   /**
-   * Under a tenth of the mana, drink the mana potion the W key would (ours,
-   * `modules/inventory/autoMana.ts`). Only where the world's `server.json`
+   * Under `autoPotionPercent` of the mana, drink the mana potion the W key would
+   * (ours, `modules/inventory/autoMana.ts`). Only where the world's `server.json`
    * sets `autoManaPotion`; the original never drinks by itself.
    */
   autoManaPotion: boolean;
+  /** The same for life and the Q key, where `server.json` sets `autoHealthPotion`. */
+  autoHealthPotion: boolean;
+  /** Share of the bar, in tenths (1 to 9), under which the automatic potions drink: 4 is 40 %, Mu Magdalena's default. */
+  autoPotionPercent: number;
   /**
    * Put the next quiver in as soon as the server takes the empty one (ours,
    * `ecs/systems/attackSystem.ts`). Only where the world's `server.json` sets
@@ -579,6 +583,7 @@ const RANGES: Partial<Record<keyof GameOptions, readonly [number, number]>> = {
   sharpness: [0, 9],
   renderScale: [0, RENDER_SCALE_TOP],
   pixelDensity: [0, 2],
+  autoPotionPercent: [1, 9],
   fpsLimit: [0, FPS_LIMIT_TOP],
   upscale: [0, 1],
   vignette: [0, 9],
@@ -724,6 +729,8 @@ const DEFAULTS: GameOptions = {
   quickItemActions: true,
   confirmValuableItems: true,
   autoManaPotion: false,
+  autoHealthPotion: false,
+  autoPotionPercent: 4,
   autoQuiver: false,
   performanceReadout: false,
   compareTooltips: 2,
@@ -853,6 +860,8 @@ const MOBILE_PROFILES: readonly Partial<GameOptions>[] = [
   // v6, from the owner's phone screenshot: v5's post chain, halos and lighting washed the models out (bright, see-through).
   // Back to v4's look, kept at twice the pixels, which is what made it sharper.
   { postProcessing: false, fxaa: false, sharpness: 0, glow: 0, lightingQuality: 0, materialQuality: 0 },
+  // v7, the owner's ask (2026-11-19): life drinks itself too, both at 40 %, as Mu Magdalena's potions row; needs server.json.
+  { autoHealthPotion: true, autoPotionPercent: 4 },
 ];
 export const MOBILE_PROFILE_VERSION = MOBILE_PROFILES.length;
 const MOBILE_PROFILE_KEY = '_mu_mobile_profile';

@@ -6,11 +6,13 @@ import { Messenger } from '@/modules/friends/messenger';
 import { Social } from '@/modules/social/social';
 import { SessionExit } from '@/modules/session/sessionExit';
 import { toggleMuHelperWindow } from '@/modules/mu_helper/state';
+import { skills } from '@/modules/skills';
+import { toggleMasterSkillsWindow } from '@versions/shared/ui/windows/master_skills/windowState';
 import { MobileButton } from './mobileButton';
 import { MobileMenu } from './menuState';
 import { Icon, type IconName } from './icons';
 
-type Tile = { icon: IconName; label: TextKey; run: () => void };
+type Tile = { icon: IconName; label: TextKey; run: () => void; shown?: () => boolean };
 
 const open = (id: string) => () => MuWindows.setOpen(id, true);
 
@@ -20,6 +22,8 @@ const TILES: readonly Tile[] = [
   { icon: 'inventory', label: 'mobile.cmd.inventory', run: open('inventory') },
   { icon: 'character', label: 'mobile.cmd.points', run: () => (MobileMenu.stats = true) },
   { icon: 'skills', label: 'mobile.cmd.skills', run: () => (MobileMenu.picker = 0) },
+  // The original opens it with A or the sheet's button (NewUIHotKey.cpp); ours for a master character only.
+  { icon: 'master', label: 'mobile.cmd.master', run: () => toggleMasterSkillsWindow(true), shown: () => skills.inMasterProgression },
   { icon: 'friends', label: 'mobile.cmd.friends', run: () => Messenger.toggleWindow() },
   { icon: 'party', label: 'mobile.cmd.party', run: open('party') },
   { icon: 'guild', label: 'mobile.cmd.guild', run: () => (Social.guildWindowEnabled = true) },
@@ -45,7 +49,7 @@ export const CommandMenu = observer(() => {
           </MobileButton>
         </div>
         <div className="mobile-tiles">
-          {TILES.map(tile => (
+          {TILES.filter(tile => tile.shown?.() ?? true).map(tile => (
             <MobileButton
               key={tile.label}
               className="mobile-tile"

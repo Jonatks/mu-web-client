@@ -11,7 +11,7 @@ vi.hoisted(() => {
 const world = vi.hoisted(() => ({ allows: true }));
 vi.mock('../servers/serverManifest', async importOriginal => ({
   ...(await importOriginal<typeof import('../servers/serverManifest')>()),
-  serverSetting: (key: string) => (key === 'autoManaPotion' ? world.allows : false),
+  serverSetting: (key: string) => (key === 'autoManaPotion' || key === 'autoHealthPotion' ? world.allows : false),
 }));
 
 // Skills first: they keep the app import cycle in order (versions/shared/skills/readme.md).
@@ -41,6 +41,8 @@ describe('the automatic mana potion', () => {
     vi.useFakeTimers();
     world.allows = true;
     setGameOption('autoManaPotion', true);
+    // A tenth, the threshold these tests were written for; the default is 4 (40 %).
+    setGameOption('autoPotionPercent', 1);
     runInAction(() => {
       Ecs.world = { playerEntity: {} } as unknown as typeof Ecs.world;
       Hero.maxMP = 100;
@@ -55,6 +57,8 @@ describe('the automatic mana potion', () => {
     vi.advanceTimersByTime(5000);
     vi.useRealTimers();
     setGameOption('autoManaPotion', false);
+    setGameOption('autoHealthPotion', false);
+    setGameOption('autoPotionPercent', 4);
     runInAction(() => {
       Hero.items[MANA_SLOT] = null;
       Hero.items[HEALTH_SLOT] = null;
@@ -89,5 +93,19 @@ describe('the automatic mana potion', () => {
       Hero.items[MANA_SLOT] = null;
     });
     expect(dropTo(5)).toEqual([]);
+  });
+
+  it('drinks the health potion the unbound Q key would under the threshold, when the player turns it on', () => {
+    const used = vi.spyOn(Bag, 'consumeItemRequest').mockImplementation(() => {});
+    setGameOption('autoPotionPercent', 4);
+    runInAction(() => {
+      Hero.maxHP = 100;
+      Hero.currentHP = 39;
+    });
+    expect(used).not.toHaveBeenCalled();
+    setGameOption('autoHealthPotion', true);
+    runInAction(() => (Hero.currentHP = 38));
+    expect(used.mock.calls.map(c => c[0])).toEqual([HEALTH_SLOT]);
+    used.mockRestore();
   });
 });

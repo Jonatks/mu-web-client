@@ -14,6 +14,7 @@ export default {
   'mobile.cmd.inventory': 'Inventario',
   'mobile.cmd.character': 'Personaje',
   'mobile.cmd.skills': 'Habilidades',
+  'mobile.cmd.master': 'Árbol de maestría',
   'mobile.cmd.friends': 'Amigos',
   'mobile.cmd.party': 'Grupo',
   'mobile.cmd.guild': 'Clan',

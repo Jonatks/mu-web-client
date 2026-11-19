@@ -98,6 +98,12 @@ Para la fase 7 basta con sumar una entrada por generacion y revisar sus exclusio
 - El fork `Jonatks/OpenMU` (rama `mu` desde v0.10.1, imagen en ghcr por Actions) queda listo para lo que un plugin no alcance.
 - La VM corre OpenMU 0.10.1 (imagen del 01-11-2026), no 0.9.10: compilar y leer el codigo de esa version.
 
+### Pedidos del dueno (19-11-2026, tarde)
+- Pociones automaticas de vida y mana al 40 % (como Mu Magdalena), en `server.json` (`autoHealthPotion`) y en el perfil
+  movil v7. El mana antes solo tomaba bajo el 10 % y la vida no existia.
+- Menu de comandos del celular: "Arbol de maestria" para personajes master.
+- Pendiente: el texto "Nivel de maestria: 400" se monta con "Puntos de nivel" en espanol (las posiciones son las del original).
+
 ## 2. Lo aprendido
 
 ### 2.0 Recetas Mastery del S19 (`Data/Mix/MasteryItemMix.xml`)

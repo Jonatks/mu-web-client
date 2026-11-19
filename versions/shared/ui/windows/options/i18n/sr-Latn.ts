@@ -378,9 +378,15 @@ export default {
   'options.help.fidelity':
     'Klasično je tačno originalni klijent. Poboljšano i Ultra uključuju poboljšanja ispod; promeni jedno i profil postaje Prilagođeno.',
   'options.section.improvements': 'Poboljšanja',
+  'options.autoHealthPotion': 'Automatski napitak života',
   'options.autoManaPotion': 'Automatski napitak mane',
+  'options.help.autoHealthPotion':
+    'Pije najveći napitak života iz torbe kad život padne ispod praga, najviše jedan u sekundi. Samo na serverima koji to dozvoljavaju.',
   'options.help.autoManaPotion':
-    'Pije najveći napitak mane iz torbe kada mana padne ispod desetine, najviše jedan u sekundi. Samo na serverima koji to dozvoljavaju.',
+    'Pije najveći napitak mane iz torbe kad mana padne ispod praga, najviše jedan u sekundi. Samo na serverima koji to dozvoljavaju.',
+  'options.autoPotionPercent': 'Prag napitaka',
+  'options.help.autoPotionPercent':
+    'Život ili mana ispod ovog dela trake pije automatski napitak.',
   'options.needs.server': 'Ovaj server to ne dozvoljava.',
   'options.autoQuiver': 'Automatski tobolac',
   'options.help.autoQuiver':

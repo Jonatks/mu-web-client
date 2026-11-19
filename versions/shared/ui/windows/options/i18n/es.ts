@@ -445,9 +445,15 @@ export default {
   'options.help.fidelity':
     'Clásica es el cliente original, tal cual. Mejorada y Ultra activan las mejoras de abajo; si cambias una, el preajuste pasa a Personalizada.',
   'options.section.improvements': 'Mejoras',
+  'options.autoHealthPotion': 'Poción de vida automática',
   'options.autoManaPotion': 'Poción de maná automática',
+  'options.help.autoHealthPotion':
+    'Toma la poción de vida más grande de tu bolsa cuando tu vida baja del umbral, como mucho una por segundo. Solo en servidores que lo permiten.',
   'options.help.autoManaPotion':
-    'Bebe la poción de maná más grande de tu inventario cuando el maná baja de una décima parte, como mucho una por segundo. Solo en servidores que lo permiten.',
+    'Toma la poción de maná más grande de tu bolsa cuando tu maná baja del umbral, como mucho una por segundo. Solo en servidores que lo permiten.',
+  'options.autoPotionPercent': 'Umbral de pociones',
+  'options.help.autoPotionPercent':
+    'La vida o el maná por debajo de esta parte de la barra toma la poción automática.',
   'options.needs.server': 'Este servidor no lo permite.',
   'options.autoQuiver': 'Carcaj automático',
   'options.help.autoQuiver':

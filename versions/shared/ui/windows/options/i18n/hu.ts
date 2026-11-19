@@ -388,9 +388,15 @@ export default {
   'options.help.fidelity':
     'A Klasszikus pontosan az eredeti kliens. A Fejlett és az Ultra bekapcsolja az alábbi fejlesztéseket; ha egyet módosítasz, az előbeállítás Egyéni lesz.',
   'options.section.improvements': 'Fejlesztések',
+  'options.autoHealthPotion': 'Automatikus életital',
   'options.autoManaPotion': 'Automatikus manaital',
+  'options.help.autoHealthPotion':
+    'Megissza a táska legnagyobb életitalát, ha az élet a küszöb alá esik, legfeljebb egyet másodpercenként. Csak az ezt engedő szervereken.',
   'options.help.autoManaPotion':
-    'Megissza a leltáradban lévő legnagyobb manaitalt, amikor a manád egytized alá esik, legfeljebb egyet másodpercenként. Csak az ezt engedő szervereken.',
+    'Megissza a táska legnagyobb manaitalát, ha a mana a küszöb alá esik, legfeljebb egyet másodpercenként. Csak az ezt engedő szervereken.',
+  'options.autoPotionPercent': 'Italküszöb',
+  'options.help.autoPotionPercent':
+    'Az élet vagy mana a sáv ezen része alatt megissza az automatikus italt.',
   'options.needs.server': 'Ez a szerver nem engedi.',
   'options.autoQuiver': 'Automatikus tegez',
   'options.help.autoQuiver':
