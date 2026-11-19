@@ -131,9 +131,9 @@ describe('MOBILE_PROFILE', () => {
     const { MOBILE_PROFILE } = await import('./gameOptions');
     expect(MOBILE_PROFILE.grassDensity).toBe(0);
   });
-  it('v5 draws a sharper picture: twice the pixels, FXAA and sharpening, shadows still off', async () => {
+  it('v6 keeps twice the pixels with the plain look (v5\'s post chain washed the models out)', async () => {
     const { MOBILE_PROFILE, MOBILE_PROFILE_VERSION } = await import('./gameOptions');
-    expect(MOBILE_PROFILE_VERSION).toBe(5);
-    expect(MOBILE_PROFILE).toMatchObject({ pixelDensity: 1, postProcessing: true, fxaa: true, sharpness: 3, shadows: false });
+    expect(MOBILE_PROFILE_VERSION).toBe(6);
+    expect(MOBILE_PROFILE).toMatchObject({ pixelDensity: 1, postProcessing: false, glow: 0, lightingQuality: 0, shadows: false });
   });
 });

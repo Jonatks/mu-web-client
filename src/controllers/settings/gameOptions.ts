@@ -850,6 +850,9 @@ const MOBILE_PROFILES: readonly Partial<GameOptions>[] = [
   // post chain back with FXAA and sharpening, item halos, and the default lighting and materials. Shadows, lights,
   // bloom, sun rays and grass stay off for speed; all of it is in Options.
   { pixelDensity: 1, postProcessing: true, fxaa: true, sharpness: 3, glow: 5, lightingQuality: 1, materialQuality: 1 },
+  // v6, from the owner's phone screenshot: v5's post chain, halos and lighting washed the models out (bright, see-through).
+  // Back to v4's look, kept at twice the pixels, which is what made it sharper.
+  { postProcessing: false, fxaa: false, sharpness: 0, glow: 0, lightingQuality: 0, materialQuality: 0 },
 ];
 export const MOBILE_PROFILE_VERSION = MOBILE_PROFILES.length;
 const MOBILE_PROFILE_KEY = '_mu_mobile_profile';
