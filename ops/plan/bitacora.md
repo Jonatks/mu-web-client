@@ -91,6 +91,13 @@ Para la fase 7 basta con sumar una entrada por generacion y revisar sus exclusio
 - OpenMU no tiene un punto de plugin para "experiencia ganada": con el master al tope llama a la vista con 0. El tramo
   Majestic necesita tocar `Player.AddMasterExperienceCoreAsync`, o sea compilar OpenMU desde su codigo (copia propia).
 
+### Fase 2b: niveles Majestic (19-11-2026, desplegado)
+- No hizo falta tocar OpenMU: la 0.10.1 tiene el punto `IPlayerGainedExperiencePlugIn` con la experiencia de la muerte;
+  con el master al tope, esa experiencia va al Majestic (`openmu/plugins/GameLogic/Majestic`). Tabla `mu_plugins.majestic`.
+- Al cliente: `MajesticStatus` (C1 E7 10, 33 bytes). La experiencia pasa 2^53: en el cliente es bigint.
+- El fork `Jonatks/OpenMU` (rama `mu` desde v0.10.1, imagen en ghcr por Actions) queda listo para lo que un plugin no alcance.
+- La VM corre OpenMU 0.10.1 (imagen del 01-11-2026), no 0.9.10: compilar y leer el codigo de esa version.
+
 ## 2. Lo aprendido
 
 ### 2.0 Recetas Mastery del S19 (`Data/Mix/MasteryItemMix.xml`)
