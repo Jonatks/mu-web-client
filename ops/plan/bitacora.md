@@ -83,6 +83,14 @@ Para la fase 7 basta con sumar una entrada por generacion y revisar sus exclusio
   nunca impresa): vestido, ranura ocupada (no escribe nada) y a la mochila. Para probar el servicio contra la copia:
   `sudo DB=openmu_probe bash ~/install-admin.sh` y volver con `DB=openmu`.
 
+### Fase 2a: Master a 400 (19-11-2026, aplicado)
+- `ops/fase2/gen_master.py` > `master400.sql`: `MaximumMasterLevel` 400 y `MasterExperienceFormula` = `iff(...)` (la formula
+  de OpenMU hasta 200, que es la del S19, y la tabla del S19 del 201 al 400). Comprobado con el mXparser de la imagen
+  (`check_master.sh`: 402 niveles iguales). Probado en `openmu_probe` con su reversa; OpenMU reiniciado y arriba.
+- `docker restart openmu` tambien deja caido el chequeo del editor: reiniciar `mu-gate mu-kick` despues.
+- OpenMU no tiene un punto de plugin para "experiencia ganada": con el master al tope llama a la vista con 0. El tramo
+  Majestic necesita tocar `Player.AddMasterExperienceCoreAsync`, o sea compilar OpenMU desde su codigo (copia propia).
+
 ## 2. Lo aprendido
 
 ### 2.0 Recetas Mastery del S19 (`Data/Mix/MasteryItemMix.xml`)
