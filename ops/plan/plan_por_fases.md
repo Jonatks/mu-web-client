@@ -52,6 +52,7 @@ Reglas de trabajo:
 | 13. Clases nuevas | por clase | por clase | 0 | 0 | 9 clases, una por una |
 | 14. Modelos reales | 0 | 0 | 0 | 0 | Cambio de modelos prestados por reales |
 | 15. Los 6 sets sin ítem base | por definir | 6 | 0 | 0 | Necesita ítems de cliente nuevo |
+| G. Gráficos e interfaz | 0 | 0 | 0 | 0 | Opciones Enhanced/Ultra: resolución, suavizado, cámara, luz, tema de ventanas, texturas HD |
 
 Con las fases 1, 3, 7 y 15 tu cliente pasaría de 49 a 144 sets. El archivo de sets guarda el número de set en un byte, así que el tope real es 254: alcanza, pero hay que subir el tope de 64 en mu-web (fase 3).
 
@@ -149,6 +150,18 @@ Cambiar los modelos prestados por los reales a medida que tengas los archivos.
 ### Fase 15. Los 6 sets sin ítem base
 
 Frigg, Emile, Arkajin, Moloso, Vesper y Elune, con los ítems Holy Spirit, Kenaz y Night Wing de un cliente nuevo.
+
+### Fase G. Gráficos e interfaz
+
+Independiente del contenido; se intercala con las otras fases. Todo va como opción (Enhanced/Ultra) y la vista clásica no cambia.
+
+- G1 (después de la fase 3): resolución completa en celular, suavizado de bordes, filtrado de texturas, cámara más cercana como opción, corregir el resplandor de las alas.
+- G2: luz y efectos (brillo suave, color, sombras).
+- G3: tema moderno de ventanas pensado para celular (inventario, personaje, tienda, barras y habilidades).
+- G4: inventario y baúl ampliados con el tema nuevo, junto con la fase 4.
+- G5: paquete opcional de texturas en alta resolución, por partes.
+
+No se usa el arte ni el cliente de otros juegos de MU para móvil: son de otra empresa y hablan otro protocolo.
 
 ### Decisiones que necesito de ti, con mi recomendación
 
