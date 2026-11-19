@@ -1,0 +1,14 @@
+# Fase 3 en la VM: la imagen actual (mu-openmu-admin, guardada como :pre-craft) + solo el plugin de craftings.
+# Contexto: la carpeta openmu/ del repo. Rollback: docker tag mu-openmu-admin:pre-craft mu-openmu-admin:latest.
+ARG BASE=mu-openmu-admin:pre-craft
+FROM ${BASE} AS openmu
+
+FROM mcr.microsoft.com/dotnet/sdk:10.0-alpine AS build
+COPY --from=openmu /app /openmu
+WORKDIR /src
+COPY plugins/ ./
+RUN dotnet publish MuPlugins.csproj -c Release -o /out -p:OpenMuDir=/openmu -p:Only=Craftings
+
+FROM ${BASE}
+COPY --from=build /out/MUnique.OpenMU.MuPlugins.dll /app/plugins/craftings/
+ENV DOTNET_STARTUP_HOOKS=/app/plugins/MUnique.OpenMU.MuAdminBridge.dll:/app/plugins/craftings/MUnique.OpenMU.MuPlugins.dll

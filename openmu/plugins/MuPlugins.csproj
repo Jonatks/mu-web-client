@@ -18,4 +18,9 @@
     <PackageReference Include="Serilog.Formatting.Compact" Version="3.0.0" />
     <Using Include="System.ComponentModel.DataAnnotations" />
   </ItemGroup>
+  <!-- -p:Only=Craftings builds just the loader and the craftings (a server that does not run the other plugins yet). -->
+  <ItemGroup Condition="'$(Only)' == 'Craftings'">
+    <Compile Remove="**/*.cs" />
+    <Compile Include="StartupHook.cs;GameLogic/Craftings/**/*.cs" />
+  </ItemGroup>
 </Project>
