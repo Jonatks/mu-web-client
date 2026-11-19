@@ -460,3 +460,8 @@ dialog::backdrop { background: #0009; backdrop-filter: blur(2px); }
 .login a.google:hover { filter: brightness(1.1); }
 .login a.google:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
 .login .or { margin: 0; text-align: center; font-size: 13px; opacity: .7; }
+
+/* Full set dialog: one row per ancient set. */
+.set-list { display: grid; gap: 6px; max-height: 40vh; overflow: auto; margin: 8px 0; }
+.set-row { text-align: left; padding: 8px 10px; border-radius: 8px; }
+.set-row.sel { outline: 2px solid var(--gold); }

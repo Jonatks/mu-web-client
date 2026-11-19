@@ -14,3 +14,8 @@ Routes: `GET /status`, `/accounts`, `/characters`, `/characters/:name`, `/charac
 `DELETE /characters/:name/items/:id`.
 
 Tests: `bun test admin/service`. Install on the VM: `bash install-vm.sh` (`DB=openmu_probe` to try it on the scratch copy first).
+
+- Sets completos (`sets.ts`): `GET /sets?q=` lista los sets ancient con sus piezas; `POST /characters/:name/sets` y
+  `POST /accounts/:login/vault/sets` ponen todas las piezas de uno (`setId`, `level`, `option`, `luck`, `skill`, `bonusLevel`,
+  `wear`). Los lugares se calculan antes (`planSet`): si una pieza no cabe o su ranura del cuerpo esta ocupada, no se escribe nada.
+  Cada pieza es un `addItem` con su propia linea de registro y su deshacer.

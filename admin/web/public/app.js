@@ -597,8 +597,8 @@ function storagePanel(kind, id, forChar) {
   const isInv = kind === 'inventory';
   const box = h('div');
   const where = { kind, id, forChar };
-  let data, sel = null, moving = null;
-  const stop = e => { if (e.key === 'Escape' && moving) { moving = null; draw(); } };
+  let data, sel = null, moving = null, picked = null;
+  const stop = e => { if (e.key !== 'Escape') return; if (moving) moving = null; else if (picked) picked = null; else return; draw(); };
   addEventListener('keydown', stop);
 
   async function load() {
@@ -621,7 +621,7 @@ function storagePanel(kind, id, forChar) {
     }
     for (const it of items.filter(x => x.slot >= first)) {
       const i = it.slot - first;
-      const t = tile(it, () => { sel = it.id; draw(); }, sel === it.id);
+      const t = tile(it, () => choose(it), picked ? picked.has(it.id) : sel === it.id);
       t.style.gridColumn = `${(i % cols) + 1} / span ${it.w}`;
       t.style.gridRow = `${Math.floor(i / cols) + 1} / span ${it.h}`;
       g.append(t);
@@ -633,7 +633,7 @@ function storagePanel(kind, id, forChar) {
     const d = h('div', { class: 'doll' });
     for (const [slot, label] of DOLL) {
       const it = data.items.find(x => x.slot === slot);
-      d.append(h('div', { class: 'slot' }, h('i', {}, label), it ? tile(it, () => { sel = it.id; draw(); }, sel === it.id)
+      d.append(h('div', { class: 'slot' }, h('i', {}, label), it ? tile(it, () => choose(it), picked ? picked.has(it.id) : sel === it.id)
         : h('button', { class: 'slot-add', title: `Poner un ítem en: ${label}`, 'aria-label': `Poner un ítem en ${label}`, onclick: () => (moving ? moveTo(slot) : insertDialog(where, slot, load)) }, '+')));
     }
     return d;
@@ -660,6 +660,25 @@ function storagePanel(kind, id, forChar) {
         } }, 'Borrar')));
   }
 
+  /** A tap on an item: shows it, or with "Seleccionar varios" on, adds it to or takes it out of the selection. */
+  function choose(it) {
+    if (picked) { if (!picked.delete(it.id)) picked.add(it.id); } else sel = it.id;
+    draw();
+  }
+
+  /** Deletes every selected item, one call each (each one keeps its own undo in Registro). */
+  async function deletePicked() {
+    const list = data.items.filter(x => picked.has(x.id));
+    if (!list.length) return;
+    if (!(await confirmBox(`¿Borrar ${list.length} ítems?`, list.map(x => x.name).join(', ') + '. Cada uno se puede deshacer desde Registro.', 'Borrar todos', true))) return;
+    let ok = 0, err = '';
+    for (const it of list) {
+      try { await api('DELETE', isInv ? `/characters/${id}/items/${it.id}` : `/accounts/${id}/vault/items/${it.id}`); ok++; } catch (e) { err = e.message; break; }
+    }
+    toast(err ? `Se borraron ${ok} de ${list.length}: ${err}` : `${ok} ítems borrados`, !!err);
+    picked = null; sel = null; load();
+  }
+
   async function moveTo(slot) {
     const it = data.items.find(x => x.id === moving);
     moving = null;
@@ -680,17 +699,54 @@ function storagePanel(kind, id, forChar) {
   function draw() {
     const bar = h('div', { class: 'row bar' },
       h('button', { class: 'primary', onclick: () => insertDialog(where, null, load) }, isInv ? 'Insertar ítem en el inventario' : 'Insertar ítem en el baúl'),
+      h('button', { onclick: () => setDialog(where, load) }, 'Insertar set completo'),
+      picked
+        ? [h('button', { class: 'danger', disabled: !picked.size, onclick: deletePicked }, `Borrar seleccionados (${picked.size})`),
+           h('button', { onclick: () => { picked = new Set(data.items.map(x => x.id)); draw(); } }, 'Todos'),
+           h('button', { onclick: () => { picked = null; draw(); } }, 'Cancelar')]
+        : h('button', { onclick: () => { picked = new Set(); moving = null; draw(); } }, 'Seleccionar varios'),
       h('span', { class: 'mute' }, `${data.items.filter(x => x.slot >= data.first).length} ítems ${isInv ? 'en la mochila' : 'en el baúl'}`));
     let zenRow = null;
     if (!isInv) {
       const zen = h('input', { type: 'number', min: 0, max: 2147483647, value: data.zen });
       zenRow = h('div', { class: 'row' }, h('label', {}, 'Zen del baúl', zen), h('button', { onclick: async () => { if (await act(() => api('PATCH', `/accounts/${id}/vault`, { zen: Number(zen.value) }), 'Zen del baúl guardado')) load(); } }, 'Guardar zen'));
     }
-    const banner = moving ? h('p', { class: 'banner' }, 'Toca la casilla vacía de destino (sirve también una ranura del cuerpo). Esc cancela.') : null;
+    const banner = moving ? h('p', { class: 'banner' }, 'Toca la casilla vacía de destino (sirve también una ranura del cuerpo). Esc cancela.')
+      : picked ? h('p', { class: 'banner' }, 'Toca los ítems que quieres borrar (también los puestos). Esc cancela.') : null;
     fill(box, ...[bar, banner, zenRow, h('div', { class: 'bench' }, ...[isInv ? doll() : null, grid(), detail()].filter(Boolean))].filter(Boolean));
   }
   load();
   return box;
+}
+
+/* ---------------------------------------------------------------- full set */
+/** Puts every piece of one ancient set in an inventory (worn or in the bag) or a vault, with the same level and options. */
+async function setDialog(where, done) {
+  const isInv = where.kind === 'inventory';
+  const url = isInv ? `/characters/${where.id}/sets` : `/accounts/${where.id}/vault/sets`;
+  const q = h('input', { type: 'search', placeholder: 'Buscar set (Bes, Bloodangel, Mahes...)' });
+  const list = h('div', { class: 'set-list' });
+  const level = h('select', {}, Array.from({ length: 16 }, (_, n) => h('option', { value: n }, `+${n}`)));
+  const option = h('select', {}, [0, 1, 2, 3, 4].map(n => h('option', { value: n }, n ? `+${n * 4}` : 'Sin opción')));
+  const luck = h('input', { type: 'checkbox' }), skill = h('input', { type: 'checkbox' }), wear = h('input', { type: 'checkbox', checked: isInv });
+  const bonus = h('select', {}, h('option', { value: 1 }, '+5'), h('option', { value: 2 }, '+10'));
+  const go = h('button', { class: 'primary', disabled: true }, 'Insertar set');
+  let chosen = null;
+  const show = sets => fill(list, sets.length ? sets.map(st => h('button', { class: 'set-row' + (chosen?.id === st.id ? ' sel' : ''), onclick: () => { chosen = st; go.disabled = false; show(sets); } },
+    h('b', {}, st.name), h('span', { class: 'mute' }, ` · ${st.pieces.length} piezas: ${st.pieces.map(x => x.name).join(', ')}`))) : h('p', { class: 'hint' }, 'Ningún set con ese nombre.'));
+  const search = debounce(async () => show((await act(() => api('GET', '/sets?q=' + encodeURIComponent(q.value)))) ?? []), 250);
+  q.addEventListener('input', search);
+  go.addEventListener('click', async () => {
+    const r = await act(() => api('POST', url, { setId: chosen.id, level: Number(level.value), option: Number(option.value), luck: luck.checked, skill: skill.checked, bonusLevel: Number(bonus.value), wear: isInv && wear.checked }));
+    if (r) { toast(`${r.set}: ${r.added.length} piezas insertadas`); closeDialog(); done(); }
+  });
+  openDialog(h('h3', {}, `Insertar set completo en ${isInv ? 'el personaje ' + where.id : 'el baúl de ' + where.id}`), q, list,
+    h('div', { class: 'row' }, h('label', {}, 'Nivel', level), h('label', {}, 'Opción', option), h('label', {}, 'Bonus de pieza', bonus)),
+    h('div', { class: 'row' }, h('label', { class: 'inline' }, luck, 'Suerte'), h('label', { class: 'inline' }, skill, 'Habilidad'),
+      isInv ? h('label', { class: 'inline' }, wear, 'Ponérselo (si una ranura está ocupada, no se inserta nada)') : null),
+    h('p', { class: 'hint' }, 'Todas las piezas salen ancient de ese set. Suerte, opción y habilidad solo van en las piezas que las admiten; el nivel no pasa el máximo de cada pieza.'),
+    h('div', { class: 'actions' }, h('button', { onclick: closeDialog }, 'Cancelar'), go));
+  search();
 }
 
 /* ------------------------------------------------------------------ skills */

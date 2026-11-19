@@ -85,13 +85,13 @@ export async function definitionOptions(sql: Sql, definitionId: string): Promise
   return rows as unknown as OptionRow[];
 }
 
-type Target = { kind: 'inventory'; name: string } | { kind: 'vault'; login: string } | { kind: 'shop'; monsterId: string };
+export type Target = { kind: 'inventory'; name: string } | { kind: 'vault'; login: string } | { kind: 'shop'; monsterId: string };
 export const SHOP: Layout = { first: 0, cols: 8, rows: 15 };
 const who = (t: Target) => (t.kind === 'inventory' ? t.name : t.kind === 'vault' ? `${t.login} (vault)` : `shop ${t.monsterId}`);
 const act = (t: Target, what: 'add' | 'delete') => `${t.kind === 'inventory' ? 'item' : t.kind === 'vault' ? 'vault.item' : 'shop.item'}.${what}`;
 type Store = { id: string | null; layout: Layout; accountId?: string };
 
-async function storeOf(sql: Sql, t: Target): Promise<Store> {
+export async function storeOf(sql: Sql, t: Target): Promise<Store> {
   if (t.kind === 'inventory') {
     const r = await sql`SELECT "InventoryId" AS inv FROM data."Character" WHERE "Name" = ${t.name}`;
     if (!r[0]) throw missing('No such character.');

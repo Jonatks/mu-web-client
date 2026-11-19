@@ -8,6 +8,7 @@ import { HttpError, bad, missing } from './errors';
 import { GateError, assertNobodyConnected } from './gate';
 import * as items from './items';
 import * as server from './server';
+import * as sets from './sets';
 import { resetInfo, resetTab } from './defaults';
 import { disconnectAccount, readOnline } from './bridge';
 import { kickAll, restartServer } from './kick';
@@ -64,6 +65,7 @@ export function createApp(cfg: Config) {
         if (m === 'PATCH' && p.length === 3) { needAdmin(); const b = await body(); return gated(() => items.setVaultZen(sql, admin, login, b.zen)); }
         if (m === 'POST' && p[3] === 'items') { needAdmin(); const b = await body(); return gated(() => items.addItem(sql, admin, { kind: 'vault', login }, b as items.NewItem)); }
         if (m === 'DELETE' && p[3] === 'items' && p[4]) { needAdmin(); return gated(() => items.deleteItem(sql, admin, { kind: 'vault', login }, p[4]!)); }
+        if (m === 'POST' && p[3] === 'sets') { needAdmin(); const b = await body(); return gated(() => sets.addSet(sql, admin, { kind: 'vault', login }, b as sets.NewSet)); }
       }
       if (p[2] === 'classes') {
         if (m === 'GET') return extras.listUnlockedClasses(sql, login);
@@ -76,6 +78,7 @@ export function createApp(cfg: Config) {
       }
       if (m === 'POST' && p[2] === 'state') { needAdmin(); const b = await body(); return gated(() => accounts.setState(sql, admin, login, b.state)); }
     }
+    if (p[0] === 'sets' && m === 'GET') return sets.listSets(sql, q.get('q') ?? '');
     if (p[0] === 'maps' && m === 'GET') return characters.listMaps(sql);
     if (p[0] === 'classes' && m === 'GET') return characters.listClasses(sql);
     if (p[0] === 'skills' && p[1] === 'definitions' && m === 'GET') return skills.searchSkills(sql, q.get('q') ?? '', q.get('character') ?? '');
@@ -112,6 +115,7 @@ export function createApp(cfg: Config) {
         if (m === 'POST') { needAdmin(); const b = await body(); return gated(() => items.addItem(sql, admin, { kind: 'inventory', name }, b as items.NewItem)); }
         if (m === 'DELETE' && p[3]) { needAdmin(); return gated(() => items.deleteItem(sql, admin, { kind: 'inventory', name }, p[3]!)); }
       }
+      if (p[2] === 'sets' && m === 'POST') { needAdmin(); const b = await body(); return gated(() => sets.addSet(sql, admin, { kind: 'inventory', name }, b as sets.NewSet)); }
     }
     if (p[0] === 'items' && p[1] && p[1] !== 'definitions') {
       if (m === 'PATCH' && p.length === 2) { needAdmin(); const b = await body(); return gated(() => items.editItem(sql, admin, p[1]!, b as items.ItemEdit)); }
