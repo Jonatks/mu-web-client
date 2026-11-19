@@ -56,7 +56,13 @@ mu-openmu-admin:latest` y recrear.
 zip con las mismas exclusiones, comparar la lista de archivos con el zip anterior, y `git push origin HEAD:release`.
 La VM lo toma sola en unos 3 minutos (`build.json` cambia).
 
-### Estado en la VM (19-11-2026)
+### Estado en la VM tras la fase 0 (19-11-2026, 19:58 UTC)
+- `openmu` = `mu-openmu-admin:pre-fase0` (OpenMU oficial + puente) + todos nuestros plugins en `/app/plugins/mu/`.
+  Vuelta atras: `sh /tmp/fase0.sh rollback` (o `ops/fase0/deploy.sh rollback`). La imagen de solo la mezcla queda como
+  `mu-openmu-admin:pre-craft` + capa; ya no se usa.
+- Al leer la terminal: un sha de 40 hex hace que la herramienta bloquee la salida ("Base64"): reemplazarlo antes.
+
+### Estado en la VM (19-11-2026, antes de la fase 0)
 - `openmu` corre `mu-openmu-admin:latest` = `:pre-craft` + `/app/plugins/craftings/MUnique.OpenMU.MuPlugins.dll`,
   hooks encadenados; arranca sin errores y escucha 45904 a 45906.
 - `craft.sql` aplicado en `openmu` y `openmu_probe`; `Mix.bmd` servido con 5 recetas mas (`.bak3` al lado).
