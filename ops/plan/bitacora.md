@@ -56,6 +56,11 @@ mu-openmu-admin:latest` y recrear.
 - `craft.sql` aplicado en `openmu` y `openmu_probe`; `Mix.bmd` servido con 5 recetas mas (`.bak3` al lado).
 - Falta la prueba en juego: pieza Bloodangel + Soul en el Chaos Goblin.
 
+### Convertir una generacion del S19 (fase 0b)
+`bun ops/s19/convert.ts "<Data S19>" <generacion> <salida>` da `items_s19.json`, `sets_s19.json` y `mixes_s19.json`;
+la generacion se describe en `ops/s19/generaciones.json`. Prueba: `S19_DATA=... bunx vitest run ops/s19`.
+Para la fase 7 basta con sumar una entrada por generacion y revisar sus exclusiones.
+
 ## 2. Lo aprendido
 
 ### 2.0 Recetas Mastery del S19 (`Data/Mix/MasteryItemMix.xml`)
@@ -91,6 +96,9 @@ mu-openmu-admin:latest` y recrear.
 - Vercel: el push a git solo hace preview; produccion con `create_deployment` target production.
 - Editor con Google: las escrituras al servicio de la VM piden `x-admin-user` (`auditName`).
 - `pgrep -f nombre` dentro de un `sh -c "...nombre..."` se encuentra a si mismo: esperar por pid o por un archivo.
+- `bun run tsc` se queda sin memoria: `NODE_OPTIONS=--max-old-space-size=6144 bunx tsc --noEmit -p .`; los errores de
+  `install/` son por no tener sus paquetes instalados aqui.
+- En vitest no existe `import.meta.dir` (es de bun): leer JSON con `import x from './x.json'`.
 - Vitest completo pasa el tiempo limite: correrlo en segundo plano y comparar fallos antes/despues.
 
 ## 3. Reemplazos provisionales (cerrar antes de dar la meta por cumplida)

@@ -1,0 +1,10 @@
+{
+  "_readme": "Tabla de equivalencias S19 -> Season 6 (fase 0b). Ver readme.md.",
+  "indexOverride": { "2/22": 30 },
+  "groupMap": { "16": null, "17": null, "18": null, "19": null, "20": null },
+  "firstClientSet": 62,
+  "s6Classes": ["DarkWizard", "DarkKnight", "FairyElf", "MagicGladiator", "DarkLord", "Summoner", "RageFighter"],
+  "thirdClass": { "DarkWizard": 3, "DarkKnight": 7, "FairyElf": 11, "MagicGladiator": 13, "DarkLord": 17, "Summoner": 23, "RageFighter": 25 },
+  "classStat": { "DarkKnight": "str", "DarkWizard": "ene", "FairyElf": "agi", "Summoner": "ene", "MagicGladiator": "str", "DarkLord": "str", "RageFighter": "vit" },
+  "setOptionClient": { "24": 40, "25": 41, "26": 42, "27": 43, "33": 44 }
+}
