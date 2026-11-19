@@ -34,6 +34,7 @@ export default {
   'notify.masterLevelUp': 'Master Level {level}',
   'notify.expGained': 'Nakakuha ng {amount} Exp',
   'notify.masterExpGained': 'Nakakuha ng {amount} Master EXP',
+  'notify.majesticLevelUp': 'Naabot ang Majestic level {level}',
   'notify.fruitAdd': '{stat} +{points} (prutas)',
   'notify.fruitRemove': '{stat} -{points} (prutas)',
   'notify.fruitNoEffect': 'Walang epekto ang prutas',

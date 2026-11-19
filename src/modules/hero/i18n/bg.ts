@@ -35,6 +35,7 @@ export default {
   'notify.masterLevelUp': 'Ниво на майстор {level}',
   'notify.expGained': 'Получен опит: {amount}',
   'notify.masterExpGained': 'Получен опит на майстор: {amount}',
+  'notify.majesticLevelUp': 'Достигнахте ниво Majestic {level}',
   'notify.fruitAdd': '{stat} +{points} (плод)',
   'notify.fruitRemove': '{stat} -{points} (плод)',
   'notify.fruitNoEffect': 'Плодът не подейства',

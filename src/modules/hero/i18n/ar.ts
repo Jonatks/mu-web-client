@@ -45,4 +45,5 @@ export default {
   'warn.buffEnding': 'التعزيز {name} على وشك الانتهاء',
   'notify.expGained': 'حصلت على {amount} من الخبرة',
   'notify.masterExpGained': 'خبرة الإتقان المكتسبة {amount}',
+  'notify.majesticLevelUp': 'وصلت إلى مستوى Majestic {level}',
 } satisfies Partial<Record<keyof typeof en, string>>;

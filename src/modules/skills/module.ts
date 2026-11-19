@@ -1,6 +1,7 @@
 import { defineModule } from '../module';
 import { installNet } from './net';
 import { installMasterLevel } from './masterLevel';
+import { installMajesticLevel } from './majesticLevel';
 import { installMasterTree } from './masterTree';
 
 export default defineModule({
@@ -8,6 +9,7 @@ export default defineModule({
   core: true,
   install() {
     installMasterLevel();
+    installMajesticLevel();
     installMasterTree();
     installNet();
   },

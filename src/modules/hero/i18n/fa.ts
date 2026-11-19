@@ -34,6 +34,7 @@ export default {
   'notify.masterLevelUp': 'سطح استادی {level}',
   'notify.expGained': 'تجربه کسب‌شده: {amount}',
   'notify.masterExpGained': 'تجربه استادی کسب‌شده: {amount}',
+  'notify.majesticLevelUp': 'به سطح Majestic {level} رسیدی',
   'notify.fruitAdd': '{stat} +{points} (میوه)',
   'notify.fruitRemove': '{stat} -{points} (میوه)',
   'notify.fruitNoEffect': 'میوه اثری نداشت',

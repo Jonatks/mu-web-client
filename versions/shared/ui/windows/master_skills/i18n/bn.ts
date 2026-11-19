@@ -6,4 +6,5 @@ export default {
   'master.spendPoint': '{skill} স্কিলে {points} মাস্টার পয়েন্ট খরচ করবেন?',
   'master.spendPoints': '{skill} স্কিলে {points} মাস্টার পয়েন্ট খরচ করবেন?',
   'master.skillFallback': 'স্কিল {number}',
+  'master.majestic': 'Majestic স্তর {level} · পয়েন্ট {points}',
 } satisfies Partial<Record<keyof typeof en, string>>;

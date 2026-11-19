@@ -35,6 +35,7 @@ export default {
   'notify.masterLevelUp': '大师等级 {level}',
   'notify.expGained': '获得经验值 {amount}',
   'notify.masterExpGained': '获得大师经验值 {amount}',
+  'notify.majesticLevelUp': '达到 Majestic 等级 {level}',
   'notify.fruitAdd': '{stat} +{points}（果实）',
   'notify.fruitRemove': '{stat} -{points}（果实）',
   'notify.fruitNoEffect': '果实没有效果',

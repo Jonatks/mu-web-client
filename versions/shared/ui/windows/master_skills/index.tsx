@@ -54,6 +54,7 @@ import {
   EXP_PERCENT_X,
   EXP_TIP,
   HEADER_Y,
+  MAJESTIC_LINE_DY,
   ICON_GREY_SPRITE,
   ICON_INSET_X,
   ICON_INSET_Y,
@@ -417,6 +418,11 @@ export const MasterSkillsWindow = observer(() => {
         <Text x={LEVEL_POINT_X} y={HEADER_Y}>
           {formatMasterText(MASTER_TEXT.levelPoints, skills.masterLevelUpPoints)}
         </Text>
+        {skills.majesticActive && (
+          <Text x={MASTER_LEVEL_X} y={HEADER_Y + MAJESTIC_LINE_DY}>
+            {t('master.majestic', { level: skills.majesticLevel, points: skills.majesticPoints })}
+          </Text>
+        )}
         {next !== 0 && (
           <Text x={EXP_PERCENT_X} y={HEADER_Y}>
             {formatMasterText(MASTER_TEXT.expPercent, expPercent)}

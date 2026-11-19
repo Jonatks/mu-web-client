@@ -6,4 +6,5 @@ export default {
   'master.spendPoint': 'Utratit mistrovské body ({points}) za: {skill}?',
   'master.spendPoints': 'Utratit mistrovské body ({points}) za: {skill}?',
   'master.skillFallback': 'dovednost {number}',
+  'master.majestic': 'Úroveň Majestic {level} · body {points}',
 } satisfies Partial<Record<keyof typeof en, string>>;

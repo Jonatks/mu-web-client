@@ -35,6 +35,7 @@ export default {
   'notify.masterLevelUp': '마스터 레벨 {level}',
   'notify.expGained': '경험치 {amount} 획득',
   'notify.masterExpGained': '마스터 경험치 {amount} 획득',
+  'notify.majesticLevelUp': 'Majestic 레벨 {level} 달성',
   'notify.fruitAdd': '{stat} +{points} (열매)',
   'notify.fruitRemove': '{stat} -{points} (열매)',
   'notify.fruitNoEffect': '열매의 효과가 없었습니다',

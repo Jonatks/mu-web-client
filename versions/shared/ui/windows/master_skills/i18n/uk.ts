@@ -6,4 +6,5 @@ export default {
   'master.spendPoint': '{skill}: витратити очки майстра ({points})?',
   'master.spendPoints': '{skill}: витратити очки майстра ({points})?',
   'master.skillFallback': 'Навичка {number}',
+  'master.majestic': 'Рівень Majestic {level} · очки {points}',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -25,6 +25,11 @@ if __name__ == '__main__':
     acc = table(sys.argv[1] + '/ExpSystem/MasterExp.xml')
     f, cut = formula(acc)
     open(__file__.replace('gen_master.py', 'master_formula.txt'), 'w').write(f)
+    rows = ',\n  '.join(', '.join(str(acc[n]) for n in range(i, min(i + 6, 401))) for i in range(cut + 1, 401, 6))
+    open(__file__.replace('ops/fase2/gen_master.py', 'src/modules/skills/masterExpS19.ts'), 'w').write(
+        f"// Experience to reach master levels {cut + 1} to 400 (Season 19 Data/ExpSystem/MasterExp.xml), from ops/fase2/gen_master.py.\n"
+        f"// Up to {cut} the original's formula holds (masterLevel.ts); past it the server (master400.sql) uses this table.\n"
+        f"export const MASTER_TABLE_FROM = {cut + 1};\nexport const MASTER_EXPERIENCE_S19: readonly number[] = [\n  {rows},\n];\n")
     print(f"""-- Fase 2a: nivel master maximo 400 con la experiencia del S19 (formula de OpenMU hasta el {cut}, tabla del S19 despues).
 -- Generado por gen_master.py desde MasterExp.xml: no se edita a mano. Comprobar la formula antes con checkformula/.
 -- Aplica con psql -v ON_ERROR_STOP=1 -f master400.sql; revierte con -v undo=1 (200 y la formula que tenia, la de OpenMU). Reiniciar OpenMU.

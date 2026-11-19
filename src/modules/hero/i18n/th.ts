@@ -35,6 +35,7 @@ export default {
   'notify.masterLevelUp': 'เลเวลมาสเตอร์ {level}',
   'notify.expGained': 'ได้รับค่าประสบการณ์ {amount}',
   'notify.masterExpGained': 'ได้รับค่าประสบการณ์มาสเตอร์ {amount}',
+  'notify.majesticLevelUp': 'ถึงเลเวล Majestic {level} แล้ว',
   'notify.fruitAdd': '{stat} +{points} (ผลไม้)',
   'notify.fruitRemove': '{stat} -{points} (ผลไม้)',
   'notify.fruitNoEffect': 'ผลไม้ไม่มีผล',

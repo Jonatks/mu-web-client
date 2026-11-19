@@ -35,6 +35,7 @@ export default {
   'notify.masterLevelUp': 'マスターレベル {level}',
   'notify.expGained': '経験値 {amount} を獲得',
   'notify.masterExpGained': 'マスター経験値 {amount} を獲得',
+  'notify.majesticLevelUp': 'Majesticレベル {level} に到達しました',
   'notify.fruitAdd': '{stat} +{points}（果実）',
   'notify.fruitRemove': '{stat} -{points}（果実）',
   'notify.fruitNoEffect': '果実の効果はありませんでした',

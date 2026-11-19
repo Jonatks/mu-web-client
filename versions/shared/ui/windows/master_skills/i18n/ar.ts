@@ -6,4 +6,5 @@ export default {
   'master.spendPoint': 'إنفاق {points} نقطة إتقان على {skill}؟',
   'master.spendPoints': 'إنفاق {points} نقطة إتقان على {skill}؟',
   'master.skillFallback': 'المهارة {number}',
+  'master.majestic': 'مستوى Majestic {level} · النقاط {points}',
 } satisfies Partial<Record<keyof typeof en, string>>;

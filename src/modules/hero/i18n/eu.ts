@@ -45,4 +45,5 @@ export default {
   'warn.buffEnding': 'Amaitzear dago: {name}',
   'notify.expGained': 'EXP lortua: {amount}',
   'notify.masterExpGained': 'Maisu-EXP lortua: {amount}',
+  'notify.majesticLevelUp': 'Majestic {level}. mailara iritsi zara',
 } satisfies Partial<Record<keyof typeof en, string>>;

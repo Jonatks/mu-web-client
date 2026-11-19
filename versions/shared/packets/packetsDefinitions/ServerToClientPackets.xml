@@ -12790,6 +12790,54 @@
     </Packet>
     <Packet>
       <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>E7</Code>
+      <SubCode>10</SubCode>
+      <Name>MajesticStatus</Name>
+      <Length>33</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>Our OpenMU plugin: when the character enters the world, and on every Majestic experience gain (after the maximum master level).</SentWhen>
+      <CausedReaction>The client shows the Majestic level, its points and its experience bar.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>ShortLittleEndian</Type>
+          <Name>Level</Name>
+          <Description>The Majestic level, 0 to 900.</Description>
+        </Field>
+        <Field>
+          <Index>6</Index>
+          <Type>ShortLittleEndian</Type>
+          <Name>Points</Name>
+          <Description>The unspent Majestic points.</Description>
+        </Field>
+        <Field>
+          <Index>8</Index>
+          <Type>LongBigEndian</Type>
+          <Name>Experience</Name>
+          <Description>The Majestic experience, counted from Majestic level 0.</Description>
+        </Field>
+        <Field>
+          <Index>16</Index>
+          <Type>LongBigEndian</Type>
+          <Name>ExperienceOfNextLevel</Name>
+          <Description>The experience the next Majestic level needs.</Description>
+        </Field>
+        <Field>
+          <Index>24</Index>
+          <Type>LongBigEndian</Type>
+          <Name>ExperienceOfLevel</Name>
+          <Description>The experience the current Majestic level began at.</Description>
+        </Field>
+        <Field>
+          <Index>32</Index>
+          <Type>Boolean</Type>
+          <Name>LevelUp</Name>
+          <Description>Whether this gain reached a new level.</Description>
+        </Field>
+      </Fields>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
       <Code>D1</Code>
       <SubCode>00</SubCode>
       <Name>KanturuStateInfo</Name>

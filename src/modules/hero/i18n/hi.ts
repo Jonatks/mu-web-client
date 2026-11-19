@@ -45,4 +45,5 @@ export default {
   'warn.buffEnding': 'बफ़ {name} जल्द खत्म होने वाला है',
   'notify.expGained': '{amount} EXP मिला',
   'notify.masterExpGained': 'मास्टर EXP मिला: {amount}',
+  'notify.majesticLevelUp': 'आप Majestic स्तर {level} पर पहुँचे',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -45,4 +45,5 @@ export default {
   'warn.buffEnding': 'Brzy skončí: {name}',
   'notify.expGained': 'Získáno EXP: {amount}',
   'notify.masterExpGained': 'Získáno mistrovské EXP: {amount}',
+  'notify.majesticLevelUp': 'Dosažena úroveň Majestic {level}',
 } satisfies Partial<Record<keyof typeof en, string>>;

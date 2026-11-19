@@ -45,4 +45,5 @@ export default {
   'warn.buffEnding': 'Hamarosan lejár: {name}',
   'notify.expGained': 'Szerzett EXP: {amount}',
   'notify.masterExpGained': 'Szerzett mester-EXP: {amount}',
+  'notify.majesticLevelUp': 'Elérted a(z) {level}. Majestic szintet',
 } satisfies Partial<Record<keyof typeof en, string>>;

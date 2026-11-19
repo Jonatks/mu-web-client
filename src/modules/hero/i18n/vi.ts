@@ -34,6 +34,7 @@ export default {
   'notify.masterLevelUp': 'Cấp Master {level}',
   'notify.expGained': 'Nhận được {amount} kinh nghiệm',
   'notify.masterExpGained': 'Nhận được {amount} kinh nghiệm Master',
+  'notify.majesticLevelUp': 'Đã đạt cấp Majestic {level}',
   'notify.fruitAdd': '{stat} +{points} (quả)',
   'notify.fruitRemove': '{stat} -{points} (quả)',
   'notify.fruitNoEffect': 'Quả không có tác dụng',

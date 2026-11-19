@@ -33,6 +33,7 @@ const en = {
   'notify.masterLevelUp': 'Master level {level}',
   'notify.expGained': 'Obtained {amount} Exp',
   'notify.masterExpGained': 'Master EXP achievement {amount}',
+  'notify.majesticLevelUp': 'Majestic level {level} reached',
   'notify.fruitAdd': '{stat} +{points} (fruit)',
   'notify.fruitRemove': '{stat} -{points} (fruit)',
   'notify.fruitNoEffect': 'The fruit had no effect',

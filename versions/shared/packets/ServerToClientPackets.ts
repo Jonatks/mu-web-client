@@ -22705,6 +22705,88 @@ Failed = 2
     }
 }
 }
+export class MajesticStatusPacket {
+  buffer!: DataView;
+  static readonly Name = `MajesticStatus`;
+  static readonly HeaderType = `C1HeaderWithSubCode`;
+  static readonly HeaderCode = 0xC1;
+  static readonly Direction = 'ServerToClient';
+  static readonly SentWhen = `Our OpenMU plugin: when the character enters the world, and on every Majestic experience gain (after the maximum master level).`;
+  static readonly CausedReaction = `The client shows the Majestic level, its points and its experience bar.`;
+  static readonly Length = 33;
+  static readonly LengthSize = 1;
+  static readonly DataOffset = 2;
+  static readonly Code = 0xE7;
+  static readonly SubCode = 0x10;
+
+  static getRequiredSize(dataSize:number){
+    return MajesticStatusPacket.DataOffset + 1 + 1 + dataSize;
+  }
+
+  constructor(buffer?: DataView){
+    buffer && (this.buffer = buffer);
+  }
+
+  writeHeader(){
+    const b = this.buffer;
+    b.setUint8(0, MajesticStatusPacket.HeaderCode);
+    b.setUint8(MajesticStatusPacket.DataOffset, MajesticStatusPacket.Code);
+  b.setUint8(MajesticStatusPacket.DataOffset + 1, MajesticStatusPacket.SubCode);
+    return this;
+  }
+
+  writeLength(l: number|undefined = MajesticStatusPacket.Length){
+    const b = this.buffer;
+    l = l ?? b.byteLength;
+    b.setUint8(1, l);
+    return this;
+  }
+
+  static createPacket(requiredSize: number = 33): MajesticStatusPacket {
+    const p = new MajesticStatusPacket();
+    p.buffer = new DataView(new ArrayBuffer(requiredSize));
+    p.writeHeader();
+    p.writeLength();
+    return p;
+  }
+  get Level(){
+    return this.buffer.getUint16(4, true);
+  }
+  set Level(value: number){
+    this.buffer.setUint16(4, value, true);
+  }
+  get Points(){
+    return this.buffer.getUint16(6, true);
+  }
+  set Points(value: number){
+    this.buffer.setUint16(6, value, true);
+  }
+  get Experience(){
+    return this.buffer.getBigUint64(8, false);
+  }
+  set Experience(value: bigint){
+    this.buffer.setBigUint64(8, value, false);
+  }
+  get ExperienceOfNextLevel(){
+    return this.buffer.getBigUint64(16, false);
+  }
+  set ExperienceOfNextLevel(value: bigint){
+    this.buffer.setBigUint64(16, value, false);
+  }
+  get ExperienceOfLevel(){
+    return this.buffer.getBigUint64(24, false);
+  }
+  set ExperienceOfLevel(value: bigint){
+    this.buffer.setBigUint64(24, value, false);
+  }
+  get LevelUp(){
+    return GetBoolean(this.buffer.getUint8(32), 0);
+  }
+  set LevelUp(value: boolean){
+    const oldByte = this.buffer.getUint8(32);
+    this.buffer.setUint8(32, SetBoolean(oldByte, value, 0));
+  }
+}
 export enum KanturuStateInfoStateTypeEnum {
     None = 0,
 Standby = 1,
@@ -23728,6 +23810,7 @@ export const ServerToClientPackets = [
   CrywolfBenefitPacket,
   MarketplaceEscrowResultPacket,
   LoginTokenAnswerPacket,
+  MajesticStatusPacket,
   KanturuStateInfoPacket,
   KanturuEnterResultPacket,
   KanturuStateChangePacket,

@@ -35,6 +35,7 @@ export default {
   'notify.masterLevelUp': 'Niveau de maîtrise {level}',
   'notify.expGained': 'Expérience obtenue : {amount}',
   'notify.masterExpGained': 'Expérience de maîtrise obtenue : {amount}',
+  'notify.majesticLevelUp': 'Niveau Majestic {level} atteint',
   'notify.fruitAdd': '{stat} +{points} (fruit)',
   'notify.fruitRemove': '{stat} -{points} (fruit)',
   'notify.fruitNoEffect': 'Le fruit n’a rien fait',

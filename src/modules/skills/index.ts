@@ -21,6 +21,7 @@ import {
   masterLevel,
   masterLevelUpPoints,
 } from './masterLevel';
+import { majesticActive, majesticLevel, majesticPoints } from './majesticLevel';
 import {
   ensureMasterTreeData,
   learnMasterSkill,
@@ -156,6 +157,21 @@ class Skills {
   /** Master points not yet spent in the tree. */
   get masterLevelUpPoints(): number {
     return masterLevelUpPoints();
+  }
+
+  /** Majestic level (Season 19, past master 400), 0 without one. */
+  get majesticLevel(): number {
+    return majesticLevel();
+  }
+
+  /** Unspent Majestic points. */
+  get majesticPoints(): number {
+    return majesticPoints();
+  }
+
+  /** Whether the hero levels in Majestic (the master bar shows it then). */
+  get majesticActive(): boolean {
+    return majesticActive();
   }
 
   /** Whether the tree tables are parsed (observable; see `loadMasterTree`). */

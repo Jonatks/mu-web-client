@@ -34,6 +34,7 @@ export default {
   'notify.masterLevelUp': '大師等級{level}',
   'notify.expGained': '獲得經驗值{amount}',
   'notify.masterExpGained': '獲得大師經驗值{amount}',
+  'notify.majesticLevelUp': '達到 Majestic 等級 {level}',
   'notify.fruitAdd': '{stat} +{points}（果實）',
   'notify.fruitRemove': '{stat} -{points}（果實）',
   'notify.fruitNoEffect': '果實沒有效果',

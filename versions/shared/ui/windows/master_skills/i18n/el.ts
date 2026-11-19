@@ -6,4 +6,5 @@ export default {
   'master.spendPoint': 'Χρήση πόντων Master ({points}) για: {skill};',
   'master.spendPoints': 'Χρήση πόντων Master ({points}) για: {skill};',
   'master.skillFallback': 'δεξιότητα {number}',
+  'master.majestic': 'Επίπεδο Majestic {level} · πόντοι {points}',
 } satisfies Partial<Record<keyof typeof en, string>>;

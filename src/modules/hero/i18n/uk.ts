@@ -45,4 +45,5 @@ export default {
   'warn.buffEnding': 'Посилення «{name}» скоро закінчиться',
   'notify.expGained': 'Отримано досвіду: {amount}',
   'notify.masterExpGained': 'Отримано досвіду майстра: {amount}',
+  'notify.majesticLevelUp': 'Досягнуто рівня Majestic {level}',
 } satisfies Partial<Record<keyof typeof en, string>>;

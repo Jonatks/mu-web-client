@@ -45,4 +45,5 @@ export default {
   'warn.buffEnding': '{name} akan segera berakhir',
   'notify.expGained': 'Mendapat {amount} EXP',
   'notify.masterExpGained': 'Mendapat EXP Master {amount}',
+  'notify.majesticLevelUp': 'Mencapai level Majestic {level}',
 } satisfies Partial<Record<keyof typeof en, string>>;

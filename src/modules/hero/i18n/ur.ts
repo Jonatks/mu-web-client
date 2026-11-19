@@ -34,6 +34,7 @@ export default {
   'notify.masterLevelUp': 'ماسٹر لیول {level}',
   'notify.expGained': '{amount} EXP حاصل ہوا',
   'notify.masterExpGained': 'ماسٹر EXP حاصل: {amount}',
+  'notify.majesticLevelUp': 'آپ Majestic لیول {level} پر پہنچ گئے',
   'notify.fruitAdd': '{stat} +{points} (پھل)',
   'notify.fruitRemove': '{stat} -{points} (پھل)',
   'notify.fruitNoEffect': 'پھل کا کوئی اثر نہیں ہوا',

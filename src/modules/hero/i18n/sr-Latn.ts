@@ -45,4 +45,5 @@ export default {
   'warn.buffEnding': 'Uskoro ističe: {name}',
   'notify.expGained': 'Dobijeno iskustva: {amount}',
   'notify.masterExpGained': 'Dobijeno Master iskustva: {amount}',
+  'notify.majesticLevelUp': 'Dostignut Majestic nivo {level}',
 } satisfies Partial<Record<keyof typeof en, string>>;

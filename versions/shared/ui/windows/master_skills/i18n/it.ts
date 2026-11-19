@@ -6,4 +6,5 @@ export default {
   'master.spendPoint': 'Spendere {points} punto master su {skill}?',
   'master.spendPoints': 'Spendere {points} punti master su {skill}?',
   'master.skillFallback': 'abilità {number}',
+  'master.majestic': 'Livello Majestic {level} · punti {points}',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -62,6 +62,8 @@ export const MASTER_LEVEL_X = 275;
 export const LEVEL_POINT_X = 372;
 export const EXP_PERCENT_X = 466;
 export const HEADER_Y = 11;
+/** Ours: the Majestic line (Season 19, past master 400) under the master level, above the headings at y 40. */
+export const MAJESTIC_LINE_DY = 13;
 /** Hovering the EXP figure (`CheckMouseIn(458, 11, 81, 10)`) tips the totals at (466, 26). */
 export const EXP_HOVER = { x: 458, y: 11, width: 81, height: 10 };
 export const EXP_TIP = { x: 466, y: 26 };

@@ -59,6 +59,15 @@ packets travel inside one code, `0xE8`, in both directions: `C1 len E8 idLength 
 - Nothing to switch: the handler and the view are in the DLL every installed server runs, and the
   client's router is in every client; with no module plugin they do nothing.
 
+Majestic levels (phase 2 of `ops/plan`, Season 19's 1-900 past master 400):
+
+- `MajesticExperiencePlugIn` (`IPlayerGainedExperiencePlugIn`): the master experience of a kill, once the master
+  level is at its top, goes to the Majestic level, one level at most per gain as OpenMU's master experience does.
+  `MajesticTable` is S19's `MajesticExp.xml` (`ops/fase2/gen_majestic.py`), 1 point per level.
+- `MajesticStore`: the table `mu_plugins.majestic` (character id, level, experience, points); written on a level up,
+  at most a minute after a gain and when the character leaves the world.
+- `MajesticViewPlugIn`: `MajesticStatus` (C1 E7 10) on entering the world and on every gain.
+
 Login tokens (phase 6 of [docs/module_streaming.md](../docs/module_streaming.md), the wire there): the
 web client's saved login, so no password is kept in a browser.
 

@@ -35,6 +35,7 @@ export default {
   'notify.masterLevelUp': 'Meisterlevel {level}',
   'notify.expGained': '{amount} Erfahrung erhalten',
   'notify.masterExpGained': '{amount} Meister-Erfahrung erhalten',
+  'notify.majesticLevelUp': 'Majestic-Stufe {level} erreicht',
   'notify.fruitAdd': '{stat} +{points} (Frucht)',
   'notify.fruitRemove': '{stat} -{points} (Frucht)',
   'notify.fruitNoEffect': 'Die Frucht hatte keine Wirkung',

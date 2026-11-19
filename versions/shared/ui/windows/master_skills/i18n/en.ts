@@ -4,6 +4,7 @@ const en = {
   'master.spendPoint': 'Spend {points} master point on {skill}?',
   'master.spendPoints': 'Spend {points} master points on {skill}?',
   'master.skillFallback': 'skill {number}',
+  'master.majestic': 'Majestic level {level} · points {points}',
 };
 
 export default en;

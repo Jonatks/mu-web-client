@@ -45,4 +45,5 @@ export default {
   'warn.buffEnding': 'Bitmek üzere: {name}',
   'notify.expGained': 'Kazanılan Exp: {amount}',
   'notify.masterExpGained': 'Kazanılan Master EXP: {amount}',
+  'notify.majesticLevelUp': 'Majestic seviyesi {level} oldu',
 } satisfies Partial<Record<keyof typeof en, string>>;

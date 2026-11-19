@@ -65,7 +65,11 @@ hotbar share.
 - `AreaSkillAnimation`: turns the caster, plays the cast clip and the area visual.
 - `ChainLightningHitInfo`: draws the hops caster -> target -> target (`WSclient.cpp:5577-5629`).
 - `MasterStatsUpdate`, `MasterCharacterLevelUpdate(Extended)`, `ExperienceGained(Extended)`: master level,
-  exp and points (`masterLevel.ts`).
+  exp and points (`masterLevel.ts`). Past master 200 the bar counts Season 19's table (`masterExpCurve.ts`,
+  `masterExpS19.ts` from `ops/fase2/gen_master.py`), as the server does (`master400.sql`).
+- Majestic (Season 19, levels 1-900 past master 400, `majesticLevel.ts`): our plugin's `MajesticStatus` (C1 E7 10)
+  on entering the world and on every gain; experience stays a bigint (it passes 2^53). The master bar shows the
+  Majestic level once it arrives, and the master window a line with its level and points.
 - `MasterSkillList`, `MasterSkillLevelUpdate`: learned master levels (`masterTree.ts`). Out: `AddMasterSkillPoint`.
 
 ## Depends on / used by

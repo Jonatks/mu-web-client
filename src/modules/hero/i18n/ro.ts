@@ -35,6 +35,7 @@ export default {
   'notify.masterLevelUp': 'Nivel de maestru {level}',
   'notify.expGained': 'Experiență obținută: {amount}',
   'notify.masterExpGained': 'Experiență de maestru obținută: {amount}',
+  'notify.majesticLevelUp': 'Ai atins nivelul Majestic {level}',
   'notify.fruitAdd': '{stat} +{points} (fruct)',
   'notify.fruitRemove': '{stat} -{points} (fruct)',
   'notify.fruitNoEffect': 'Fructul nu a avut efect',

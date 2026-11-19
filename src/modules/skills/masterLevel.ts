@@ -8,6 +8,8 @@ import { Ecs } from '../../ecs/current';
 import { t } from '@/i18n';
 import { Social } from '../social/social';
 import { showMasterLevelUp } from './masterLevelUpLook';
+import { masterLevelBaseExperience } from './masterExpCurve';
+import { majesticActive, majesticExpPercent } from './majesticLevel';
 
 import { EventBus } from '../../core/eventBus';
 import {
@@ -21,15 +23,6 @@ import type { SkillLayer } from './layer';
 
 // ---- 1. tuning -------------------------------------------------------------
 
-/**
- * `RenderExperience` / `CNewUIMasterLevel::RenderText`: a master level is
- * counted on top of the 400 regular levels (400 is the cap), and the
- * experience curve breaks at level 255 - the two terms of the base formula.
- */
-const REGULAR_LEVEL_CAP = 400;
-const CURVE_BREAK_LEVEL = 255;
-/** The constant the original subtracts before halving (`iBaseExperience`). */
-const BASE_EXPERIENCE_OFFSET = 3892250000;
 /** `fExpBarNum`: the master bar is ten sub-bars, like the regular one. */
 export const MASTER_EXP_SUB_BARS = 10;
 
@@ -79,19 +72,10 @@ export function inMasterProgression(): boolean {
   return state.received;
 }
 
-/**
- * `iBaseExperience`: the total experience at which the current master level
- * began, from the original's two-term cubic (`RenderExperience`).
- */
-function masterLevelBaseExperience(level: number): number {
-  const total = level + REGULAR_LEVEL_CAP;
-  const over = total - CURVE_BREAK_LEVEL;
-  const a = (9 + total) * total * total * 10 + (9 + over) * over * over * 1000;
-  return Math.trunc((a - BASE_EXPERIENCE_OFFSET) / 2);
-}
-
 /** Progress through the current master level, 0…1. */
 export function masterExpPercent(): number {
+  // At the top master level the bar fills with the Majestic level (majesticLevel.ts).
+  if (majesticActive()) return majesticExpPercent();
   if (state.experienceOfNextLevel <= 0) return 0;
   const base = masterLevelBaseExperience(state.level);
   const need = state.experienceOfNextLevel - base;

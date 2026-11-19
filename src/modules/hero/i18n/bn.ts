@@ -45,4 +45,5 @@ export default {
   'warn.buffEnding': 'শীঘ্রই শেষ হবে: {name}',
   'notify.expGained': 'Exp পাওয়া গেছে: {amount}',
   'notify.masterExpGained': 'Master EXP অর্জন: {amount}',
+  'notify.majesticLevelUp': 'আপনি Majestic স্তর {level}-এ পৌঁছেছেন',
 } satisfies Partial<Record<keyof typeof en, string>>;

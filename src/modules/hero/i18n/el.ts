@@ -45,4 +45,5 @@ export default {
   'warn.buffEnding': 'Λήγει σύντομα: {name}',
   'notify.expGained': 'Αποκτήσατε εμπειρία: {amount}',
   'notify.masterExpGained': 'Εμπειρία Master: {amount}',
+  'notify.majesticLevelUp': 'Έφτασες στο επίπεδο Majestic {level}',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -6,4 +6,5 @@ export default {
   'master.spendPoint': 'Elköltesz {points} mesterpontot erre: {skill}?',
   'master.spendPoints': 'Elköltesz {points} mesterpontot erre: {skill}?',
   'master.skillFallback': '{number}. képesség',
+  'master.majestic': 'Majestic szint {level} · pontok {points}',
 } satisfies Partial<Record<keyof typeof en, string>>;
