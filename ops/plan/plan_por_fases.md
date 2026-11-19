@@ -3,6 +3,7 @@
 Base: secciones 1 a 17. Nada se implementa hasta que apruebes cada fase.
 
 Reglas de trabajo:
+- Lo aprendido, las recetas que ya funcionan y los reemplazos provisionales van en [bitacora.md](bitacora.md), al dia en cada paso.
 - Cliente: solo en la rama `contenido-temporadas` de `mu-web-client`. La fusión a `release` y el despliegue los hace el otro chat.
 - Servidor, datos: los edito yo desde Cloud Shell, con respaldo previo y probando antes en `openmu_probe`.
 - Servidor, código: se programa en una copia propia de OpenMU que se compila y se despliega en tu VM (fase 0). Todo lo que pediste que se programe (earrings, Muun, pentagramas, Ruud, nivel alto, eventos y clases) va ahí.
