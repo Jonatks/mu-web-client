@@ -5,12 +5,13 @@ import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from '
 import { join } from 'node:path';
 import { gzipSync } from 'node:zlib';
 import { convertBux } from '../../src/controllers/terrain/mapFileEncryption';
-import { MIX_TYPES, parseMixRecipes } from '../../src/controllers/assets/mu/mixFile';
 
 export const MIX_ID = 200;
 export const ZEN = 1_000_000;
 export const RATE = 100;
 const SIZE = 656;
+/** `MAX_MIX_TYPES` (assets/mu/mixFile.ts). */
+const MIX_TYPES = 14;
 const SOUL = 13 * 512 + 407;
 export const GROUPS = [7, 8, 9, 10, 11];
 
@@ -53,11 +54,16 @@ export function withRecipes(bytes: Uint8Array, name: number): Uint8Array {
   const head = bytes.slice(0, MIX_TYPES * 4);
   convertBux(head, head.length);
   const counts = new DataView(head.buffer);
-  const parsed = parseMixRecipes(bytes);
-  const ours = parsed[0].filter(r => r.mixId === MIX_ID).length;
-  const before = parsed[0].length - ours;
+  const total = counts.getInt32(0, true);
+  const mixId = (i: number) => {
+    const r = bytes.slice(MIX_TYPES * 4 + i * SIZE, MIX_TYPES * 4 + (i + 1) * SIZE);
+    convertBux(r, SIZE);
+    return new DataView(r.buffer).getInt32(4, true);
+  };
+  let before = total;
+  while (before > 0 && mixId(before - 1) === MIX_ID) before--;
   const start = MIX_TYPES * 4 + before * SIZE;
-  const rest = bytes.slice(MIX_TYPES * 4 + parsed[0].length * SIZE);
+  const rest = bytes.slice(MIX_TYPES * 4 + total * SIZE);
   const added = GROUPS.map((g, i) => recipe(before + i, g, name));
   counts.setInt32(0, before + added.length, true);
   convertBux(head, head.length);
