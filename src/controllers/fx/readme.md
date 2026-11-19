@@ -63,6 +63,9 @@ shared pools, textures and particle recipes other folders reuse.
   is rounded to 1/128 first, under one 8-bit level (1/32 showed as steps in a slow fade): keyed by
   the exact tint, a flickering effect made a new material nearly every frame and kept it until the
   map changed.
+- A joint with a card on every tail (`sprites.count` > 1, the healing and ancient-set rings) draws a card only on
+  tails its history has reached (`cardDrawn`, the original's `j < NumTails`); before, the first ticks piled all of
+  them on the head and the flare's dark square showed.
 - Caps: `effects.spawn('joint')` makes nothing past `MAX_JOINTS` (500) live joints and
   `effects.spawn('model')` past `MAX_EFFECTS` (200) models, the original's fixed `Joints[]` /
   `Effects[]` slots (Core/Globals/_define.h:456,504). The level-up rings go through the joint cap.

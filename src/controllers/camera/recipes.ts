@@ -55,6 +55,25 @@ export const MAX_CAMERA_LEVEL = DISTANCE_BY_LEVEL.length - 1;
 export const DEFAULT_CAMERA_LEVEL =
   DISTANCE_BY_LEVEL.indexOf(PORTED_DEFAULT_DISTANCE);
 
+/** The phone's opening step: the one nearest `PHONE_FRAME` of the map's frame, never the first-person two. */
+export function phoneOpeningLevel(level: number, phone: boolean): number {
+  return phone ? Math.max(2, nearestLevel(DISTANCE_BY_LEVEL[level] * PHONE_FRAME)) : level;
+}
+
+/** Share of the map's frame a phone opens at: 1200 becomes 840, the hero about 1.4 times taller. */
+const PHONE_FRAME = 0.7;
+
+export function nearestLevel(distance: number): number {
+  let best = DEFAULT_CAMERA_LEVEL;
+
+  for (let i = 0; i < DISTANCE_BY_LEVEL.length; i++) {
+    if (Math.abs(DISTANCE_BY_LEVEL[i] - distance) < Math.abs(DISTANCE_BY_LEVEL[best] - distance)) best = i;
+  }
+
+  return best;
+}
+
+
 /** `CameraDistance += (target - CameraDistance) / 3`, per 25 fps frame. */
 export const DISTANCE_EASE = 1 / 3;
 

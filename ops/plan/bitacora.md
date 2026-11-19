@@ -114,6 +114,8 @@ Para la fase 7 basta con sumar una entrada por generacion y revisar sus exclusio
   (medido en `docs/magdalena_study.md`): subir calidad en el celular es cambiar Opciones, no codigo.
 - La resolucion del celular arranca en 1.5x (`PHONE_START_DENSITY`); la opcion Densidad de pixeles sube a 2x o a la del
   telefono. Decision del dueno (2026-11-11, `docs/plan_mu_web.md` 1f): lo visual va por Opciones, nunca fijo en codigo.
+- Perfil movil v5 (decision del dueno 2026-11-19): 2x, FXAA, nitidez 3, halos, luz y materiales por defecto; camara
+  del celular a 840. El cuadrado del destello era la pila de 20 destellos en la cabeza del anillo (`cardDrawn` en joint.ts).
 - Un texto nuevo cambia el golden de textos (`src/i18n/text.golden.test.ts`: cuenta y hash por idioma).
 
 ## 3. Reemplazos provisionales (cerrar antes de dar la meta por cumplida)

@@ -130,6 +130,10 @@ describe('MOBILE_PROFILE', () => {
   it('draws the ground without grass blades on a phone, as Mu Magdalena does', async () => {
     const { MOBILE_PROFILE } = await import('./gameOptions');
     expect(MOBILE_PROFILE.grassDensity).toBe(0);
-    expect(MOBILE_PROFILE.postProcessing).toBe(false);
+  });
+  it('v5 draws a sharper picture: twice the pixels, FXAA and sharpening, shadows still off', async () => {
+    const { MOBILE_PROFILE, MOBILE_PROFILE_VERSION } = await import('./gameOptions');
+    expect(MOBILE_PROFILE_VERSION).toBe(5);
+    expect(MOBILE_PROFILE).toMatchObject({ pixelDensity: 1, postProcessing: true, fxaa: true, sharpness: 3, shadows: false });
   });
 });

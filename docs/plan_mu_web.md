@@ -157,6 +157,11 @@ El propietario autorizo de nuevo los cambios visuales, ahora como valores por de
 - NO HECHO (decidido dejar para despues): menu de teselas y botones redondos de Magdalena (se mantienen los 5 botones originales), hoja de detalle al tocar un item,
   ventanas en columnas, ranuras de habilidad estilo Magdalena. Falta verificar en un telefono real (Chrome y Samsung Internet).
 
+### 1h2. Celular mas definido por defecto (2026-11-19, decision del propietario)
+Perfil movil v5: densidad de pixeles 2x, post-procesado con FXAA y nitidez 3, halos de items, iluminacion y materiales por defecto
+(sombras, luces, bloom, rayos de sol y pasto siguen apagados). La camara del celular abre a 840 (0.7 del encuadre del mapa).
+Se corrigio el cuadrado del destello del anillo del set ancient (destellos apilados en la cabeza de la estela).
+
 ### 1i. Interfaz movil rehecha a partir de Mu Magdalena (2026-11-11 noche; detalle en `docs/magdalena_study.md`)
 Decision del propietario: la interfaz anterior (barra original, 5 botones, pociones, tres casillas) no le gustaba. Se estudio Magdalena pantalla por pantalla y se rehizo
 SOLO para tactil: barra inferior delgada (orbes de vida y mana, 6 casillas de habilidad, AG y SD, experiencia), estado arriba a la izquierda (nivel, nombre, zona y

@@ -748,6 +748,8 @@ function spawnTrail(scene: Scene, at: Vector3, opts: JointOptions): EffectHandle
 
   let t = 0;
   let sinceSample = 0;
+  // Tails the history really holds: it starts as copies of the head, and a card on a copy stacks on the head's.
+  let filled = 1;
 
   return live.push({
     update(dt) {
@@ -829,6 +831,7 @@ function spawnTrail(scene: Scene, at: Vector3, opts: JointOptions): EffectHandle
         }
         // Shift the history back one slot; slot 0 is the head.
         line.copyWithin(3, 0, tails * 3);
+        if (filled <= tails) filled++;
         opts.trace?.(head);
       }
       // A ribbon whose history is frozen and whose head stopped has nothing new to upload.
@@ -873,7 +876,7 @@ function spawnTrail(scene: Scene, at: Vector3, opts: JointOptions): EffectHandle
           c.scaling.setAll(s.size);
           let v = vis;
           if (s.fadeAbove !== undefined && anchor) v *= Math.max(0, 1 - Math.max(0, drawLine[o + 1] - (anchorNow.y + s.fadeAbove)));
-          c.visibility = v;
+          c.visibility = cardDrawn(spriteSlots[i], filled, spriteCards.length) ? v : 0;
         }
       }
       return true;
@@ -884,6 +887,15 @@ function spawnTrail(scene: Scene, at: Vector3, opts: JointOptions): EffectHandle
       disposeLine(scene, ribbon, drawLines);
     },
   });
+}
+
+/**
+ * Whether the card on history slot `slot` is drawn: with a card on every tail, only on tails the history has
+ * reached (the original loops `j < NumTails`, ZzzEffectJoint.cpp:7176), so the first ticks do not pile every
+ * card on the head. A single middle card always draws.
+ */
+export function cardDrawn(slot: number, filled: number, cards: number): boolean {
+  return cards === 1 || slot < filled;
 }
 
 /** A polyline the caller rebuilds once a tick (`polyline`); segments over `maxSegment` are not drawn. */

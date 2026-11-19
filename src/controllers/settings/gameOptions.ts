@@ -846,6 +846,10 @@ const MOBILE_PROFILES: readonly Partial<GameOptions>[] = [
   // v4, measured (docs/rendimiento_historial.md, row 8): Mu Magdalena's ground has no grass blades, and on a phone they cost a quarter
   // of the frame. Off, the ground looks like Magdalena's; Options can bring them back.
   { grassDensity: 0 },
+  // v5, the owner's choice (2026-11-19, next to Mu Magdalena): a sharper picture by default. Twice the pixels, the
+  // post chain back with FXAA and sharpening, item halos, and the default lighting and materials. Shadows, lights,
+  // bloom, sun rays and grass stay off for speed; all of it is in Options.
+  { pixelDensity: 1, postProcessing: true, fxaa: true, sharpness: 3, glow: 5, lightingQuality: 1, materialQuality: 1 },
 ];
 export const MOBILE_PROFILE_VERSION = MOBILE_PROFILES.length;
 const MOBILE_PROFILE_KEY = '_mu_mobile_profile';

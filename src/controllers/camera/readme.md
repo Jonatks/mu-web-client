@@ -41,6 +41,8 @@ per-map overrides and this client's extra zoom steps, drag and first-person mous
   opening frame and the wheel keeps working. Battle Castle: 1100 and ground 255
   (CameraUtility.cpp:160-162, :255-259). PK Field and Doppelganger: 2000 (level 5,
   CDirection.cpp:72).
+- A phone opens at `PHONE_FRAME` (0.7) of that frame, 840 for the usual 1200 (`phoneOpeningLevel` in
+  `recipes.ts`): the owner's choice, the hero read too small on a phone. Pinch and the wheel still move it.
 
 ### Notes: mouseLook.ts
 With `wsadMovement` on, first person (or any zoom with `thirdPersonMouseLook`) takes a pointer

@@ -40,6 +40,8 @@ import {
   MIN_RADIUS_MU,
   MOUSE_LOOK_DEG_PER_PX,
   MU_SCALE,
+  nearestLevel,
+  phoneOpeningLevel,
   PITCH_DRAG_DEG_PER_PX,
   PITCH_OFFSET_MAX_DEG,
   PITCH_OFFSET_MIN_DEG,
@@ -154,27 +156,16 @@ let classic: {
  * every pinned value exactly (1100 and 2000 are both steps), so the nearest
  * step is that frame, not an approximation of it.
  */
-// A phone opens on the original's frame too, as Mu Magdalena does (pinch zooms, `installPinchZoom`).
+// A phone opens closer (the owner's choice, 2026-11-19): its screen is small and the hero read too small at the
+// original's frame. Pinch and Ctrl+wheel still move it.
 function openingLevelFor(world: ENUM_WORLD): number {
-  return pinnedLevelFor(world);
+  return phoneOpeningLevel(pinnedLevelFor(world), isMobileDevice());
 }
 
 function pinnedLevelFor(world: ENUM_WORLD): number {
   const pinned = byWorld.get(world)?.distance;
 
-  if (pinned === undefined) return DEFAULT_CAMERA_LEVEL;
-
-  let best = DEFAULT_CAMERA_LEVEL;
-
-  for (let i = 0; i < DISTANCE_BY_LEVEL.length; i++) {
-    const closer =
-      Math.abs(DISTANCE_BY_LEVEL[i] - pinned) <
-      Math.abs(DISTANCE_BY_LEVEL[best] - pinned);
-
-    if (closer) best = i;
-  }
-
-  return best;
+  return pinned === undefined ? DEFAULT_CAMERA_LEVEL : nearestLevel(pinned);
 }
 
 /**
