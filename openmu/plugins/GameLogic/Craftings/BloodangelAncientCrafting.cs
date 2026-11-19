@@ -6,6 +6,7 @@ namespace MUnique.OpenMU.GameLogic.Craftings;
 
 using MUnique.OpenMU.DataModel.Configuration.ItemCrafting;
 using MUnique.OpenMU.DataModel.Configuration.Items;
+using MUnique.OpenMU.DataModel.Entities;
 using MUnique.OpenMU.GameLogic.PlayerActions.Items;
 
 /// <summary>

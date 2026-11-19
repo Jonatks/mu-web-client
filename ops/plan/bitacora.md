@@ -43,6 +43,8 @@ provisionales que hay que cerrar para llegar a la meta tal como se pidio.
    El `mix.bmd` servido tenia 99 recetas (65000 bytes); con las 5 nuestras, 68280.
 
 ### Compilar y desplegar un plugin en la VM (sin SDK fuera)
+Los plugins no tienen los `global using` de OpenMU: poner `using MUnique.OpenMU.DataModel.Entities;` (Item,
+ItemOptionLink) y los demas a mano. La compilacion en la VM tarda unos minutos; los avisos MSB3277 son normales.
 `deploy_craft.sh <sha>` en la VM: baja el repo por `codeload`, guarda la imagen actual como
 `mu-openmu-admin:pre-craft`, compila con `Dockerfile.craft` (SDK en una etapa de docker) y recrea solo
 `openmu` con los compose del contenedor en marcha. Rollback: `docker tag mu-openmu-admin:pre-craft
