@@ -91,7 +91,7 @@ Mahes y Bragi (Dark Knight), Bes y Alvis (Dark Wizard), Serket (Elf), Apis y Tyr
 
 - 43 ítems: 33 armaduras, 9 armas y 1 Ancient Hero's Soul.
 - 7 sets de 4 piezas con los bonus de Webzen.
-- 2 recetas: crear el Soul y convertir una pieza normal en ancient, programadas en C#.
+- 1 receta en C#: pieza + Ancient Hero's Soul = pieza ancient (hecha). El Soul no se fabrica en el S19: cae de jefes (hecho).
 - 3 grupos de drop en Raklion, Vulcanus y Kanturu, hasta que existan sus mapas oficiales (fase 11).
 - Priest James en Elvenland con tienda en zen.
 - Subir el tope de sets del cliente.

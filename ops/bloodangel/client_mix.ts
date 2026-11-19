@@ -7,7 +7,7 @@ import { gzipSync } from 'node:zlib';
 import { convertBux } from '../../src/controllers/terrain/mapFileEncryption';
 
 export const MIX_ID = 200;
-export const ZEN = 1_000_000;
+export const ZEN = 0;
 export const RATE = 100;
 const SIZE = 656;
 /** `MAX_MIX_TYPES` (assets/mu/mixFile.ts). */

@@ -58,6 +58,12 @@ mu-openmu-admin:latest` y recrear.
 
 ## 2. Lo aprendido
 
+### 2.0 Recetas Mastery del S19 (`Data/Mix/MasteryItemMix.xml`)
+- 1414 materiales y 2078 mezclas. Bloodangel: mezclas 78 a 113 (sellada + Ancient Hero's Soul, 100 %, 0 Zen) y 208 en
+  adelante (sellada + Bloodangel Spirit, +11).
+- El Soul no se fabrica: cae de bolsas de jefes (`ItemBag_PVP_World_Boss`, `ItemBag_Lord_of_Ferea`,
+  `ItemBag_CustomBossDrop`, `ItemBag_Labyrinth_Box(3)`). La "receta para crear el Soul" del plan no existe en el S19.
+
 ### 2.1 Archivos del S19
 - BMD v14 = ModulusCryptor: payload `buffer[8:8+size]`; byte1 elige el cifrado 1 (clave fija
   "webzen#@!01...") sobre bloques de 1 KB; byte0 elige el cifrado 2 con la clave de los bytes 2 a 33.
@@ -93,6 +99,6 @@ mu-openmu-admin:latest` y recrear.
 |---|---|---|
 | Soul en Balgass y Nightmare en vez de Medusa | Medusa no existe en OpenMU 0.9.10 | Fase 0b/7: traer el mapa y el monstruo, o dejar esta decision fija |
 | Plugin solo de craftings en la VM | `MuPlugins` completo nunca se desplego ahi | Fase 0: desplegar el `MuPlugins` completo y quitar `Only=Craftings` |
-| Mezcla al 100 % y 1.000.000 Zen | no tengo la tasa del S19 | leer la receta del `mix.bmd` del S19 y copiar tasa y precio |
+| La mezcla toma la pieza Bloodangel normal | en el S19 toma la pieza sellada (13/351 en adelante, "Sealed Blood Angel ...") y da la pieza con set y opcion de vida (+4 a +16, OptKeepType 24); con "(Hero) Bloodangel Spirit" (14/399) sale +11 | fase 0b: agregar las piezas selladas y la opcion de vida al azar |
 | Opcion bonus de pieza al nivel maximo | el drop la elige al azar | decidir con el usuario |
 | Iconos de guantes y algunas armaduras aproximados | el visor no da el angulo del original | Fase G: render del cliente con su camara de inventario |
