@@ -27,11 +27,11 @@ if __name__ == '__main__':
     open(__file__.replace('gen_master.py', 'master_formula.txt'), 'w').write(f)
     print(f"""-- Fase 2a: nivel master maximo 400 con la experiencia del S19 (formula de OpenMU hasta el {cut}, tabla del S19 despues).
 -- Generado por gen_master.py desde MasterExp.xml: no se edita a mano. Comprobar la formula antes con checkformula/.
--- Aplica con psql -v ON_ERROR_STOP=1 -f master400.sql; revierte con -v undo=1 (200 y la formula por defecto). Reiniciar OpenMU.
+-- Aplica con psql -v ON_ERROR_STOP=1 -f master400.sql; revierte con -v undo=1 (200 y la formula que tenia, la de OpenMU). Reiniciar OpenMU.
 \\set ON_ERROR_STOP on
 BEGIN;
 \\if :{{?undo}}
-UPDATE config."GameConfiguration" SET "MaximumMasterLevel" = 200, "MasterExperienceFormula" = NULL;
+UPDATE config."GameConfiguration" SET "MaximumMasterLevel" = 200, "MasterExperienceFormula" = '{BASE}';
 \\else
 UPDATE config."GameConfiguration" SET "MaximumMasterLevel" = 400, "MasterExperienceFormula" = '{f}';
 \\endif
