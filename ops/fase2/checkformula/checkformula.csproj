@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Fase 2a: evalua una formula de experiencia con el mXparser de la imagen de OpenMU, como GameContext.CreateExpTable. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="$(OpenMuDir)/MathParser.org-mXparser.dll" />
+  </ItemGroup>
+</Project>
