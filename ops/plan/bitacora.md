@@ -50,11 +50,18 @@ ItemOptionLink) y los demas a mano. La compilacion en la VM tarda unos minutos; 
 `openmu` con los compose del contenedor en marcha. Rollback: `docker tag mu-openmu-admin:pre-craft
 mu-openmu-admin:latest` y recrear.
 
+### Publicar el cliente
+`tools/ignies-client/build-release.sh` pide `Data/` local (aqui ya no esta). Como el zip excluye `Data/`,
+`game-assets/` e `items/`, basta: `APP_ENV=prod vite build`, copiar `release/vm/server.json` y `serverlist.md` a `dist/`,
+zip con las mismas exclusiones, comparar la lista de archivos con el zip anterior, y `git push origin HEAD:release`.
+La VM lo toma sola en unos 3 minutos (`build.json` cambia).
+
 ### Estado en la VM (19-11-2026)
 - `openmu` corre `mu-openmu-admin:latest` = `:pre-craft` + `/app/plugins/craftings/MUnique.OpenMU.MuPlugins.dll`,
   hooks encadenados; arranca sin errores y escucha 45904 a 45906.
 - `craft.sql` aplicado en `openmu` y `openmu_probe`; `Mix.bmd` servido con 5 recetas mas (`.bak3` al lado).
 - Falta la prueba en juego: pieza Bloodangel + Soul en el Chaos Goblin.
+- Cliente publicado `99d7d7b` (build `mwnnojbj`): Densidad de pixeles; OpenMU reiniciado con la mezcla a 0 Zen.
 
 ### Convertir una generacion del S19 (fase 0b)
 `bun ops/s19/convert.ts "<Data S19>" <generacion> <salida>` da `items_s19.json`, `sets_s19.json` y `mixes_s19.json`;
