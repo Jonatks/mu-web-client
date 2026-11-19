@@ -60,6 +60,9 @@ La VM lo toma sola en unos 3 minutos (`build.json` cambia).
 - `openmu` = `mu-openmu-admin:pre-fase0` (OpenMU oficial + puente) + todos nuestros plugins en `/app/plugins/mu/`.
   Vuelta atras: `sh /tmp/fase0.sh rollback` (o `ops/fase0/deploy.sh rollback`). La imagen de solo la mezcla queda como
   `mu-openmu-admin:pre-craft` + capa; ya no se usa.
+- **Recrear `openmu` tumba `mu-gate` y `mu-kick`** (el editor; comparten su red): el editor dice "the connection check is
+  stale" y no escribe. Se recrean con `sudo DB=openmu bash ~/install-admin.sh`; `deploy.sh` ya lo hace. Paso desde
+  el primer despliegue de la mezcla (14:12 UTC) hasta 20:05 UTC.
 - Al leer la terminal: un sha de 40 hex hace que la herramienta bloquee la salida ("Base64"): reemplazarlo antes.
 
 ### Estado en la VM (19-11-2026, antes de la fase 0)

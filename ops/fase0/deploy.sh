@@ -7,6 +7,8 @@ OLD=mu-openmu-admin:pre-fase0
 recreate() {
   F=$(sudo docker inspect openmu --format '{{index .Config.Labels "com.docker.compose.project.config_files"}}' | tr ',' '\n' | sed 's/^/-f /' | tr '\n' ' ')
   (cd /opt/openmu && sudo docker compose $F up -d --no-deps --force-recreate openmu)
+  # mu-gate y mu-kick (el editor) comparten la red de openmu: con openmu nuevo se caen y el editor no escribe.
+  if [ -f ~/install-admin.sh ]; then sudo DB=openmu bash ~/install-admin.sh >/dev/null; else sudo docker restart mu-gate mu-kick >/dev/null; fi
 }
 up() {
   for i in $(seq 1 48); do
