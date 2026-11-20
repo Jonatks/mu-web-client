@@ -117,6 +117,17 @@ Para la fase 7 basta con sumar una entrada por generacion y revisar sus exclusio
   `/opt/openmu/web/client/Data/Interface` sin pisar archivos de S6.
 - `pkill -f` con un patron que aparece en el propio comando de ssh mata la sesion: no usarlo asi.
 
+### Fase 2d: habilidades de cuarta clase (20-11-2026)
+- `ops/fase2/gen_skills4.py` lee SkillList/SkillLearn/SkillRequire/ItemList del S19 y escribe el SQL (con reversa), la
+  tabla del cliente (`skillsDatabaseS19.ts`), los pergaminos del cliente y la tabla de requisitos del plugin.
+- Cada habilidad copia la mecanica de la de S6 mas parecida (`LIKE`); `AreaSkillSettings` tiene indice unico por
+  habilidad: se clona la fila. Cambiar el SQL ya aplicado: reversa y de nuevo, luego reiniciar OpenMU.
+- El `skill.bmd` del S19 llega hasta la 722: las de cuarta clase y sus iconos estan en el ejecutable. Iconos de la hoja
+  `newui_skill00` (425-441) elegidos a ojo; sin icono 1501, 1503, 2025, 288 y las comunes.
+- Los modelos `Fire_Blood`/`Ice_Blood` del S19 son solo esqueleto (animacion del personaje): el aspecto se arma con
+  efectos de S6 (`s19Burst`).
+- Saruri: 400 puntos de maestria puestos a mano (copia en `mu_plugins.character_bak_20261120`).
+
 ### Fase 2c: arbol de estadisticas Majestic (20-11-2026)
 - Datos: `Skill/SkillTreeMajesticStat.xml` (8 nodos por clase: seccion 0 defensa, 1 ataque) y `FormulaData.xml` tipo 3
   (formula por puntos; la 1 hasta `EndPoint1`=30, la 2 de 31 a 40). `PointCondition` es el nivel Majestic que abre cada
@@ -197,4 +208,6 @@ Para la fase 7 basta con sumar una entrada por generacion y revisar sus exclusio
 | La mezcla toma la pieza Bloodangel normal | en el S19 toma la pieza sellada (13/351 en adelante, "Sealed Blood Angel ...") y da la pieza con set y opcion de vida (+4 a +16, OptKeepType 24); con "(Hero) Bloodangel Spirit" (14/399) sale +11 | fase 0b: agregar las piezas selladas y la opcion de vida al azar |
 | Opcion bonus de pieza al nivel maximo | el drop la elige al azar | decidir con el usuario |
 | A que estadistica va cada nodo Majestic | el S19 lo resuelve en su binario; "4th Stat" con formula fija 8 | `STAT` en `gen_majestic_stat.py`: seccion 0 a vitalidad, seccion 1 a la estadistica principal (DL: comando), 8 por punto; alas de nivel 4 a defensa y dano generales (S6 no tiene alas 4). Confirmar con un cliente S19 |
+| Aspecto de las habilidades de cuarta clase | el S19 las dibuja en su ejecutable | hechas a ojo con efectos de S6; revisar con video del S19 |
+| Iconos de las habilidades de cuarta clase | el S19 los asigna en su ejecutable | elegidos a ojo en `skillCasting.ts`; confirmar con un cliente S19 |
 | Iconos de guantes y algunas armaduras aproximados | el visor no da el angulo del original | Fase G: render del cliente con su camara de inventario |

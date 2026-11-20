@@ -104,6 +104,10 @@ S6 no tiene. Se traen primero, después el árbol.
 
 Orden por clase: Dark Wizard primero (Meteor Strike), como receta para las demás.
 
+Estado 20-11-2026: 2d-1 hecho (22 habilidades en `openmu`, pergaminos, requisito por plugin, íconos); 2d-3 primera
+pasada hecha (aspecto propio en todas menos Sword Blow y Strong Blessing, que se dibujan como Twisting Slash y Swell
+Life). Siguen 2d-2, 2d-4 y 2d-5.
+
 ### Fase 3. Generación Bloodangel
 
 - 43 ítems: 33 armaduras, 9 armas y 1 Ancient Hero's Soul.
