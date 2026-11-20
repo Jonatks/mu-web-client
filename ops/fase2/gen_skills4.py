@@ -35,6 +35,8 @@ for cat, body in re.findall(r'<Category Index="(\d+)"[^>]*>(.*?)</Category>', re
 
 q = lambda s: "'" + s.replace("'", "''") + "'"
 sid = lambda n: f"'0000ba5e-0009-0001-0000-{n:012d}'"
+aid = lambda n: f"'0000ba5e-0009-0002-0000-{n:012d}'"
+AREA = '"UseFrustumFilter","FrustumStartWidth","FrustumEndWidth","FrustumDistance","UseTargetAreaFilter","TargetAreaDiameter","UseDeferredHits","DelayPerOneDistance","DelayBetweenHits","MinimumNumberOfHitsPerTarget","MaximumNumberOfHitsPerTarget","MaximumNumberOfHitsPerAttack","HitChancePerDistanceMultiplier","ProjectileCount","EffectRange","MinimumNumberOfHitsPerAttack"'
 iid = lambda g, n: f"'00000080-{g:04x}-{n:04x}-0000-000000000000'"
 S = lambda n: f'(select "Id" from config."Skill" where "Number"={n})'
 A = lambda des: f'(select "Id" from config."AttributeDefinition" where "Designation"={q(des)})'
@@ -50,8 +52,10 @@ for n, folder in SKILLS.items():
     classes = [c for c, k in CLASS.items() if d.get(f'Allow{c}', '0') != '0']
     numbers = sorted({x for c in classes for x in (CLASS[c][int(d[f'Allow{c}']) - 1:] if d[f'Allow{c}'] in '123' else CLASS[c][2:])})
     do.append(f'-- {n} {d["Name"]} ({shape}, de {ref})')
+    # Cada habilidad tiene su propia fila de area (indice unico): copia de la de la referencia.
+    do.append(f'insert into config."AreaSkillSettings" ("Id",{AREA}) select {aid(n)},{AREA} from config."AreaSkillSettings" where "Id"=(select "AreaSkillSettingsId" from config."Skill" where "Number"={ref});')
     do.append(f'''insert into config."Skill" ("Id","ElementalModifierTargetId","MagicEffectDefId","MasterDefinitionId","GameConfigurationId","Number","Name","Range","DamageType","SkillType","Target","ImplicitTargetRange","TargetRestriction","MovesToTarget","MovesTarget","AttackDamage","AreaSkillSettingsId","NumberOfHitsPerAttack","SkipElementalModifier")
-  select {sid(n)},"ElementalModifierTargetId","MagicEffectDefId",null,"GameConfigurationId",{n},{q(d["Name"])},{int(d["Distance"])},{dmg_type if shape != 'buff' else '"DamageType"'},"SkillType","Target",{int(d["EffectRadio"]) if shape != 'direct' else '"ImplicitTargetRange"'},"TargetRestriction","MovesToTarget","MovesTarget",{int(d["Damage"])},"AreaSkillSettingsId","NumberOfHitsPerAttack","SkipElementalModifier"
+  select {sid(n)},"ElementalModifierTargetId","MagicEffectDefId",null,"GameConfigurationId",{n},{q(d["Name"])},{int(d["Distance"])},{dmg_type if shape != 'buff' else '"DamageType"'},"SkillType","Target",{int(d["EffectRadio"]) if shape != 'direct' else '"ImplicitTargetRange"'},"TargetRestriction","MovesToTarget","MovesTarget",{int(d["Damage"])},(select "Id" from config."AreaSkillSettings" where "Id"={aid(n)}),"NumberOfHitsPerAttack","SkipElementalModifier"
   from config."Skill" where "Number"={ref};''')
     do.append(f'insert into config."SkillCharacterClass" select {sid(n)}, "Id" from config."CharacterClass" where "Number" in ({",".join(map(str, numbers))});')
     reqs = [(REQ[k], int(d[k])) for k in REQ if int(d.get(k, '0') or 0) > 0]
@@ -76,6 +80,7 @@ for n, folder in SKILLS.items():
     undo.append(f'delete from config."AttributeRequirement" where "SkillId"={sid(n)} or "SkillId1"={sid(n)};')
     undo.append(f'delete from config."SkillCharacterClass" where "SkillId"={sid(n)};')
     undo.append(f'delete from config."Skill" where "Id"={sid(n)};')
+    undo.append(f'delete from config."AreaSkillSettings" where "Id"={aid(n)};')
     rq = require.get(n, {})
     client.append({'num': n, 'name': d['Name'], 'folder': folder, 'shape': shape, 'damageType': ['Physical', 'Wizardry'][dmg_type] if dmg_type >= 0 else 'None',
                    'damage': int(d['Damage']), 'distance': int(d['Distance']), 'range': int(d['EffectRadio']), 'mana': int(d['ManaCost']),
