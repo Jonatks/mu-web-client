@@ -51,8 +51,9 @@ ItemOptionLink) y los demas a mano. La compilacion en la VM tarda unos minutos; 
 mu-openmu-admin:latest` y recrear.
 
 ### Publicar el cliente
+`bash release/vm/publish-client.sh` hace todo esto y se niega si la lista de mundos no es la de la VM.
 `tools/ignies-client/build-release.sh` pide `Data/` local (aqui ya no esta). Como el zip excluye `Data/`,
-`game-assets/` e `items/`, basta: `APP_ENV=prod vite build`, copiar `release/vm/server.json` y `serverlist.md` a `dist/`,
+`game-assets/` e `items/`, basta: `APP_ENV=prod vite build`, copiar `release/vm/server.json` y `release/vm/serverlist.md` (no el `serverlist.md` de la raiz, que es la guia generica: con ese el juego busca el proxy en localhost y no pasa del login) a `dist/`,
 zip con las mismas exclusiones, comparar la lista de archivos con el zip anterior, y `git push origin HEAD:release`.
 La VM lo toma sola en unos 3 minutos (`build.json` cambia).
 
