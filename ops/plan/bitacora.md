@@ -109,6 +109,14 @@ Para la fase 7 basta con sumar una entrada por generacion y revisar sus exclusio
   (Caddy -> mu-proxy) respondia el `server.json` por defecto del proxy, todo apagado. `release/vm/caddy-server-json.sh`
   sirve ahi el `server.json` del cliente (nginx :80). Leccion: un ajuste de `server.json` se prueba en el host `ws.`.
 
+### Graficos del S19 a la VM (20-11-2026)
+- Los archivos de Webzen van al repo privado `Jonatks/mu-assets` (carpeta `s19/`), nunca al publico. La VM lo lee con
+  una llave de solo lectura (`~/.ssh/mu_assets`, deploy key "mu-vm-assets-readonly"): clonar con
+  `--filter=blob:none --no-checkout` y `sparse-checkout set --no-cone /s19/` (si no, baja los 750 MB del cliente S6).
+- Se descomprimen en `/opt/mu-s19/Data`; lo que el cliente pide tal cual (hojas de iconos) se copia a
+  `/opt/openmu/web/client/Data/Interface` sin pisar archivos de S6.
+- `pkill -f` con un patron que aparece en el propio comando de ssh mata la sesion: no usarlo asi.
+
 ### Fase 2c: arbol de estadisticas Majestic (20-11-2026)
 - Datos: `Skill/SkillTreeMajesticStat.xml` (8 nodos por clase: seccion 0 defensa, 1 ataque) y `FormulaData.xml` tipo 3
   (formula por puntos; la 1 hasta `EndPoint1`=30, la 2 de 31 a 40). `PointCondition` es el nivel Majestic que abre cada
