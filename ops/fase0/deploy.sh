@@ -1,6 +1,6 @@
 #!/bin/sh
 # Fase 0 en la VM: respalda la base, compila nuestros plugins sobre la imagen actual y recrea openmu.
-# Si OpenMU no levanta sus puertos en 4 minutos, vuelve solo a la imagen anterior.
+# Si OpenMU no levanta sus puertos en 8 minutos, vuelve solo a la imagen anterior.
 # Uso: sh deploy.sh <sha>     Volver a mano: sh deploy.sh rollback
 set -eu
 OLD=mu-openmu-admin:pre-fase0
@@ -11,7 +11,7 @@ recreate() {
   if [ -f ~/install-admin.sh ]; then sudo DB=openmu bash ~/install-admin.sh >/dev/null; else sudo docker restart mu-gate mu-kick >/dev/null; fi
 }
 up() {
-  for i in $(seq 1 48); do
+  for i in $(seq 1 96); do
     sudo docker logs --since "$1" openmu 2>&1 | grep -q 'ConnectServer.ClientListener\] Client Listener started' && return 0
     sleep 5
   done

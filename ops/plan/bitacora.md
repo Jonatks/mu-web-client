@@ -116,6 +116,11 @@ Para la fase 7 basta con sumar una entrada por generacion y revisar sus exclusio
   (`majesticStatTree.ts`), iguales. Puntos por nodo en `mu_plugins.majestic.stat_points` (int[]); se gastan de los
   puntos Majestic con C1 05 E7 11 nodo; `MajesticStatus` crece a 41 bytes con los 8 nodos.
 - El efecto lo aplica `MajesticStats`: un `SimpleElement` por nodo sumado a los atributos de OpenMU al entrar al mundo.
+- Despliegue: la primera vez que OpenMU ve un plugin nuevo tarda mas de 4 minutos en abrir puertos (crea su
+  configuracion); `deploy.sh` volvio a la imagen sin plugins. Ahora espera 8. Ojo: esa imagen de vuelta no tiene
+  ningun plugin nuestro (ni la mezcla Bloodangel ni el Majestic).
+- `install-admin.sh` (editor) reescribe el Caddyfile entero: borraba la ruta de `server.json`. La ruta ya esta en el
+  instalador (mu-admin `install-vm.sh`) y en la copia de la VM.
 - Cliente: ventana `majestic_stats` (placa negra como la de sesion); se abre con la linea Majestic del arbol de maestria
   y con "Majestic" en el menu de comandos del celular.
 
