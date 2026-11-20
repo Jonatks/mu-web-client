@@ -84,7 +84,7 @@ Mahes y Bragi (Dark Knight), Bes y Alvis (Dark Wizard), Serket (Elf), Apis y Tyr
 ### Fase 2. Tramos Master y Majestic
 
 - Datos reales del S19 (`Data/ExpSystem`): Normal 1-400, Master 1-400 (hoy 200), Majestic 1-900, total 1700.
-- Master a 400 con su tabla de experiencia (hecho 19-11-2026, `ops/fase2/`); tramo Majestic nuevo con `SkillTreeMajestic.xml` y `SkillTreeMajesticStat.xml` (2b: niveles, experiencia y puntos como plugin, hecho; 2c: árbol de estadísticas; 2d: árbol de habilidades).
+- Master a 400 con su tabla de experiencia (hecho 19-11-2026, `ops/fase2/`); tramo Majestic nuevo con `SkillTreeMajestic.xml` y `SkillTreeMajesticStat.xml` (2b: niveles, experiencia y puntos como plugin, hecho; 2c: árbol de estadísticas, hecho 20-11-2026; 2d: árbol de habilidades).
 - El requisito de nivel de los ítems pasa a contar el nivel total (400 + Master + Majestic).
 - Necesita la compilación propia de OpenMU (fase 0) y mensajes nuevos del "Season 6 ampliado" (fase 0b).
 - Riesgo: la experiencia Majestic acumulada (9,7·10^15) pasa el máximo exacto de JavaScript (9,0·10^15); el cliente debe usar enteros grandes.

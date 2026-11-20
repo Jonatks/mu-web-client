@@ -21,7 +21,9 @@ import {
   masterLevel,
   masterLevelUpPoints,
 } from './masterLevel';
-import { majesticActive, majesticLevel, majesticPoints } from './majesticLevel';
+import { majesticActive, majesticLevel, majesticPoints, majesticStatPoints } from './majesticLevel';
+export { majesticStatNodes, majesticStatCap, majesticStatValue, type MajesticStatNode } from './majesticStatTree';
+export { spendMajesticStat } from './majesticStatSpend';
 import {
   ensureMasterTreeData,
   learnMasterSkill,
@@ -167,6 +169,11 @@ class Skills {
   /** Unspent Majestic points. */
   get majesticPoints(): number {
     return majesticPoints();
+  }
+
+  /** Points spent on a node of the Majestic stat tree. */
+  majesticStatPoints(node: number): number {
+    return majesticStatPoints(node);
   }
 
   /** Whether the hero levels in Majestic (the master bar shows it then). */

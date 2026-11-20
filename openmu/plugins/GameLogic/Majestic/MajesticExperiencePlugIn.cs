@@ -91,6 +91,7 @@ public class MajesticExperiencePlugIn : IPlayerGainedExperiencePlugIn, IPlayerSt
             {
                 if (await GetAsync(player).ConfigureAwait(false) is { } progress)
                 {
+                    MajesticStats.Apply(player, progress);
                     await player.InvokeViewPlugInAsync<IMajesticViewPlugIn>(p => p.SendMajesticAsync(progress, false)).ConfigureAwait(false);
                 }
             }

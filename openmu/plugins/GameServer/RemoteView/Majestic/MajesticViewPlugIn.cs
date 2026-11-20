@@ -24,7 +24,7 @@ using MUnique.OpenMU.PlugIns;
 public class MajesticViewPlugIn : IMajesticViewPlugIn
 {
     private const byte SubCode = 0x10;
-    private const int Size = 33;
+    private const int Size = 41;
 
     private static readonly PropertyInfo ConnectionProperty =
         typeof(RemotePlayer).GetProperty("Connection", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
@@ -58,6 +58,11 @@ public class MajesticViewPlugIn : IMajesticViewPlugIn
             BinaryPrimitives.WriteUInt64BigEndian(span[16..], (ulong)progress.ExperienceOfNextLevel);
             BinaryPrimitives.WriteUInt64BigEndian(span[24..], (ulong)MajesticTable.ExperienceFor(progress.Level));
             span[32] = levelUp ? (byte)1 : (byte)0;
+            for (var i = 0; i < MajesticStatTree.NodeCount; i++)
+            {
+                span[33 + i] = (byte)progress.StatPoints[i];
+            }
+
             return Size;
         }
 

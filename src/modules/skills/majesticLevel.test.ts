@@ -4,11 +4,12 @@ vi.mock('../social/social', () => ({ Social: { systemMessage: vi.fn() } }));
 
 import { MajesticStatusPacket } from '@versions/shared/packets/ServerToClientPackets';
 import { Social } from '../social/social';
-import { applyMajesticStatus, majesticActive, majesticExpPercent, majesticLevel, majesticPoints } from './majesticLevel';
+import { applyMajesticStatus, majesticActive, majesticExpPercent, majesticLevel, majesticPoints, majesticStatPoints } from './majesticLevel';
+import { majesticStatCap, majesticStatNodes, majesticStatValue } from './majesticStatTree';
 import { masterLevelBaseExperience } from './masterExpCurve';
 
 function status(level: number, points: number, exp: bigint, base: bigint, next: bigint, up: boolean) {
-  const p = MajesticStatusPacket.createPacket(33);
+  const p = MajesticStatusPacket.createPacket(41);
   p.buffer.setUint16(4, level, true);
   p.buffer.setUint16(6, points, true);
   p.buffer.setBigUint64(8, exp, false);
@@ -30,6 +31,14 @@ describe('majestic level', () => {
     expect(Social.systemMessage).not.toHaveBeenCalled();
   });
 
+  it('reads the points of the stat tree', () => {
+    const p = status(70, 3, 0n, 0n, 1n, false);
+    p.buffer.setUint8(33, 12);
+    p.buffer.setUint8(40, 5);
+    applyMajesticStatus(p);
+    expect([majesticStatPoints(0), majesticStatPoints(7)]).toEqual([12, 5]);
+  });
+
   it('says a level up in the chat', () => {
     applyMajesticStatus(status(1, 1, 19_024_359_459n, 19_024_359_459n, 38_348_718_918n, true));
     expect(majesticExpPercent()).toBe(0);
@@ -43,5 +52,21 @@ describe('master bar past 200', () => {
     expect(masterLevelBaseExperience(200)).toBe(20_217_500_000);
     expect(masterLevelBaseExperience(201)).toBe(20_405_372_912);
     expect(masterLevelBaseExperience(400)).toBe(302_719_224_880);
+  });
+});
+
+describe('majestic stat tree', () => {
+  const hp = majesticStatNodes(1)[0];
+
+  it('opens each tier at its Majestic level, as SkillTreeMajesticStat.xml', () => {
+    expect([19, 20, 45, 65].map(l => majesticStatCap(hp, l))).toEqual([0, 10, 20, 40]);
+  });
+
+  it('follows FormulaData.xml: 70 HP a point to 30, then 42', () => {
+    expect([0, 1, 30, 31, 40].map(p => majesticStatValue(hp, p))).toEqual([0, 70, 2100, 2142, 2520]);
+  });
+
+  it('has eight nodes for each Season 6 class', () => {
+    expect([0, 1, 2, 3, 4, 5, 6].map(c => majesticStatNodes(c).length)).toEqual([8, 8, 8, 8, 8, 8, 8]);
   });
 });

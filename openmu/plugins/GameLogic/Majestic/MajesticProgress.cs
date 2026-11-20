@@ -25,6 +25,9 @@ public sealed class MajesticProgress
     /// <summary>Gets or sets the unspent points.</summary>
     public int Points { get; set; }
 
+    /// <summary>Gets the points spent on each node of the stat tree (<see cref="MajesticStatTree"/>).</summary>
+    public int[] StatPoints { get; } = new int[MajesticStatTree.NodeCount];
+
     /// <summary>Gets or sets when it was last written.</summary>
     public DateTime SavedAt { get; set; } = DateTime.UtcNow;
 

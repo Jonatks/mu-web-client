@@ -1,5 +1,5 @@
 import './style.less';
-import { Component, useEffect, useState, type ReactNode } from 'react';
+import { Component, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Ecs } from '@/ecs/current';
 import { isKey } from '@/controllers/interface/keyBindings';
@@ -20,6 +20,10 @@ import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
 import { MuButton } from '@/controllers/interface/components/mu_button';
 import { useUiStageScale } from '@/controllers/interface/components/ui_stage';
 import { TEXT_COLOR } from '@/controllers/interface/components/mu_text';
+import { MuWindows } from '@/controllers/interface/windowManager';
+
+/** The Majestic line opens the Majestic stat tree (majestic_stats). */
+const MAJESTIC_LINK_COLOR = 'rgb(140, 255, 140)';
 import {
   BACK_SPRITE,
   BTN_BOTH_CANCEL_X,
@@ -135,6 +139,8 @@ const Text = ({
   color,
   center,
   bold,
+  fit,
+  onClick,
   children,
 }: {
   x: number;
@@ -142,21 +148,39 @@ const Text = ({
   color?: string;
   center?: boolean;
   bold?: boolean;
+  /** Narrows a longer translation to this width instead of running into the next header text. */
+  fit?: number;
+  onClick?: () => void;
   children: React.ReactNode;
-}) => (
-  <div
-    className="master-text"
-    style={{
-      left: x,
-      top: y,
-      color,
-      fontWeight: bold ? 'bold' : undefined,
-      transform: center ? 'translateX(-50%)' : undefined,
-    }}
-  >
-    {children}
-  </div>
-);
+}) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
+  useLayoutEffect(() => {
+    const width = ref.current?.scrollWidth ?? 0;
+    setScale(fit && width > fit ? fit / width : 1);
+  }, [fit, children]);
+  const transforms = [center ? 'translateX(-50%)' : '', scale < 1 ? `scaleX(${scale})` : ''].filter(Boolean);
+  return (
+    <div
+      ref={ref}
+      className="master-text"
+      data-no-drag={onClick ? 'true' : undefined}
+      onClick={onClick}
+      style={{
+        left: x,
+        top: y,
+        color,
+        fontWeight: bold ? 'bold' : undefined,
+        cursor: onClick ? 'pointer' : undefined,
+        pointerEvents: onClick ? 'auto' : undefined,
+        transformOrigin: '0 0',
+        transform: transforms.length ? transforms.join(' ') : undefined,
+      }}
+    >
+      {children}
+    </div>
+  );
+};
 
 const NodeTip = observer(({ entry }: { entry: MasterTreeEntry }) => {
   // A child of the node, so its place is relative to the node.
@@ -412,14 +436,19 @@ export const MasterSkillsWindow = observer(() => {
         <Text x={CLASS_NAME_X} y={HEADER_Y}>
           {text.className}
         </Text>
-        <Text x={MASTER_LEVEL_X} y={HEADER_Y}>
+        <Text x={MASTER_LEVEL_X} y={HEADER_Y} fit={LEVEL_POINT_X - MASTER_LEVEL_X - 6}>
           {formatMasterText(MASTER_TEXT.masterLevel, skills.masterLevel)}
         </Text>
-        <Text x={LEVEL_POINT_X} y={HEADER_Y}>
+        <Text x={LEVEL_POINT_X} y={HEADER_Y} fit={EXP_PERCENT_X - LEVEL_POINT_X - 6}>
           {formatMasterText(MASTER_TEXT.levelPoints, skills.masterLevelUpPoints)}
         </Text>
         {skills.majesticActive && (
-          <Text x={MASTER_LEVEL_X} y={HEADER_Y + MAJESTIC_LINE_DY}>
+          <Text
+            x={MASTER_LEVEL_X}
+            y={HEADER_Y + MAJESTIC_LINE_DY}
+            color={MAJESTIC_LINK_COLOR}
+            onClick={() => MuWindows.setOpen('majestic_stats', !MuWindows.isOpen('majestic_stats'))}
+          >
             {t('master.majestic', { level: skills.majesticLevel, points: skills.majesticPoints })}
           </Text>
         )}

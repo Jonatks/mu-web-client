@@ -1,0 +1,63 @@
+@import (reference) '@/controllers/interface/components/mu_text/style.less';
+// The Majestic stat tree: the session panel's black plate, two sections of four rows and a close bar.
+.majestic-window {
+  position: absolute;
+  left: 240px;
+  top: 40px;
+  transform-origin: top left;
+  pointer-events: auto;
+  user-select: none;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.8);
+  font-size: 11px;
+
+  .majestic-center,
+  .majestic-label,
+  .majestic-right {
+    position: absolute;
+    white-space: nowrap;
+    text-shadow: 1px 1px 0 #000;
+  }
+
+  .majestic-center {
+    transform: translateX(-50%);
+  }
+
+  .majestic-right {
+    transform: translateX(-100%);
+  }
+
+  .majestic-plus {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    line-height: 11px;
+    text-align: center;
+    color: #fff;
+    cursor: pointer;
+    background: rgba(0, 110, 40, 0.8);
+
+    &:hover {
+      background: rgba(0, 160, 60, 0.9);
+    }
+
+    &.off {
+      cursor: default;
+      color: #777;
+      background: rgba(60, 60, 60, 0.6);
+    }
+  }
+
+  .majestic-close {
+    position: absolute;
+    left: 2px;
+    right: 3px;
+    text-align: center;
+    cursor: pointer;
+    background: rgba(120, 0, 0, 0.6);
+
+    &:hover {
+      background: rgba(170, 0, 0, 0.7);
+    }
+  }
+}

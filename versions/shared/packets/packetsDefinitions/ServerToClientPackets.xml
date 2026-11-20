@@ -12793,10 +12793,10 @@
       <Code>E7</Code>
       <SubCode>10</SubCode>
       <Name>MajesticStatus</Name>
-      <Length>33</Length>
+      <Length>41</Length>
       <Direction>ServerToClient</Direction>
-      <SentWhen>Our OpenMU plugin: when the character enters the world, and on every Majestic experience gain (after the maximum master level).</SentWhen>
-      <CausedReaction>The client shows the Majestic level, its points and its experience bar.</CausedReaction>
+      <SentWhen>Our OpenMU plugin: when the character enters the world, on every Majestic experience gain (after the maximum master level) and after a point is spent on the stat tree.</SentWhen>
+      <CausedReaction>The client shows the Majestic level, its points, its experience bar and the stat tree.</CausedReaction>
       <Fields>
         <Field>
           <Index>4</Index>
@@ -12833,6 +12833,13 @@
           <Type>Boolean</Type>
           <Name>LevelUp</Name>
           <Description>Whether this gain reached a new level.</Description>
+        </Field>
+        <Field>
+          <Index>33</Index>
+          <Type>Binary</Type>
+          <Name>StatPoints</Name>
+          <Length>8</Length>
+          <Description>The points spent on each node of the Majestic stat tree (section * 4 + id). The client raises one with C1 05 E7 11 node.</Description>
         </Field>
       </Fields>
     </Packet>

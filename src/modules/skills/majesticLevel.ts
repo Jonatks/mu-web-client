@@ -14,6 +14,8 @@ interface MajesticState {
   experience: bigint;
   experienceOfLevel: bigint;
   experienceOfNextLevel: bigint;
+  /** Points spent on each node of the stat tree (section * 4 + id). */
+  statPoints: number[];
   /** A `MajesticStatus` arrived: the hero's master level is at its top. */
   received: boolean;
 }
@@ -24,6 +26,7 @@ const state = observable.object<MajesticState>({
   experience: 0n,
   experienceOfLevel: 0n,
   experienceOfNextLevel: 0n,
+  statPoints: [0, 0, 0, 0, 0, 0, 0, 0],
   received: false,
 });
 
@@ -31,6 +34,8 @@ export const majesticLevel = (): number => state.level;
 export const majesticPoints = (): number => state.points;
 /** Whether the hero levels in Majestic (the server sends it once the master level is at its top). */
 export const majesticActive = (): boolean => state.received;
+/** Points spent on a node of the stat tree. */
+export const majesticStatPoints = (node: number): number => state.statPoints[node] ?? 0;
 
 /** Progress through the current Majestic level, 0…1 (bigint maths; only the ratio becomes a number). */
 export function majesticExpPercent(): number {
@@ -42,7 +47,10 @@ export function majesticExpPercent(): number {
 
 /** Reads a `MajesticStatus` into the state; a level up is said in the chat. */
 export function applyMajesticStatus(p: MajesticStatusPacket): void {
+  const raw = p.buffer;
   runInAction(() => {
+    // Bytes 33-40, the stat tree (the generated getter copies from the start of the underlying buffer).
+    if (raw.byteLength >= 41) state.statPoints = Array.from({ length: 8 }, (_, i) => raw.getUint8(33 + i));
     state.level = p.Level;
     state.points = p.Points;
     state.experience = p.Experience;
@@ -68,6 +76,7 @@ function resetMajestic(): void {
     state.experience = 0n;
     state.experienceOfLevel = 0n;
     state.experienceOfNextLevel = 0n;
+    state.statPoints = [0, 0, 0, 0, 0, 0, 0, 0];
     state.received = false;
   });
 }

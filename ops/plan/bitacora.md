@@ -102,7 +102,22 @@ Para la fase 7 basta con sumar una entrada por generacion y revisar sus exclusio
 - Pociones automaticas de vida y mana al 40 % (como Mu Magdalena), en `server.json` (`autoHealthPotion`) y en el perfil
   movil v7. El mana antes solo tomaba bajo el 10 % y la vida no existia.
 - Menu de comandos del celular: "Arbol de maestria" para personajes master.
-- Pendiente: el texto "Nivel de maestria: 400" se monta con "Puntos de nivel" en espanol (las posiciones son las del original).
+- El texto "Nivel de maestria: 400" se montaba con "Puntos de nivel" en espanol: los textos de la cabecera se angostan
+  (scaleX) al ancho que hay hasta el siguiente (`fit` en el `Text` de master_skills).
+- Pociones que no se tomaban: el cliente lee `server.json` del host del proxy (`ws.<host>/server.json`), y ese host
+  (Caddy -> mu-proxy) respondia el `server.json` por defecto del proxy, todo apagado. `release/vm/caddy-server-json.sh`
+  sirve ahi el `server.json` del cliente (nginx :80). Leccion: un ajuste de `server.json` se prueba en el host `ws.`.
+
+### Fase 2c: arbol de estadisticas Majestic (20-11-2026)
+- Datos: `Skill/SkillTreeMajesticStat.xml` (8 nodos por clase: seccion 0 defensa, 1 ataque) y `FormulaData.xml` tipo 3
+  (formula por puntos; la 1 hasta `EndPoint1`=30, la 2 de 31 a 40). `PointCondition` es el nivel Majestic que abre cada
+  tramo (10, 20 y 40 puntos); no pueden ser puntos gastados, porque el primer tramo pide 10 o 20 y no habria donde gastar.
+- `ops/fase2/gen_majestic_stat.py` escribe la tabla del plugin (`MajesticStatTree.cs`) y la del cliente
+  (`majesticStatTree.ts`), iguales. Puntos por nodo en `mu_plugins.majestic.stat_points` (int[]); se gastan de los
+  puntos Majestic con C1 05 E7 11 nodo; `MajesticStatus` crece a 41 bytes con los 8 nodos.
+- El efecto lo aplica `MajesticStats`: un `SimpleElement` por nodo sumado a los atributos de OpenMU al entrar al mundo.
+- Cliente: ventana `majestic_stats` (placa negra como la de sesion); se abre con la linea Majestic del arbol de maestria
+  y con "Majestic" en el menu de comandos del celular.
 
 ## 2. Lo aprendido
 
@@ -167,4 +182,5 @@ Para la fase 7 basta con sumar una entrada por generacion y revisar sus exclusio
 | Plugin solo de craftings en la VM | `MuPlugins` completo nunca se desplego ahi | Fase 0: desplegar el `MuPlugins` completo y quitar `Only=Craftings` |
 | La mezcla toma la pieza Bloodangel normal | en el S19 toma la pieza sellada (13/351 en adelante, "Sealed Blood Angel ...") y da la pieza con set y opcion de vida (+4 a +16, OptKeepType 24); con "(Hero) Bloodangel Spirit" (14/399) sale +11 | fase 0b: agregar las piezas selladas y la opcion de vida al azar |
 | Opcion bonus de pieza al nivel maximo | el drop la elige al azar | decidir con el usuario |
+| A que estadistica va cada nodo Majestic | el S19 lo resuelve en su binario; "4th Stat" con formula fija 8 | `STAT` en `gen_majestic_stat.py`: seccion 0 a vitalidad, seccion 1 a la estadistica principal (DL: comando), 8 por punto; alas de nivel 4 a defensa y dano generales (S6 no tiene alas 4). Confirmar con un cliente S19 |
 | Iconos de guantes y algunas armaduras aproximados | el visor no da el angulo del original | Fase G: render del cliente con su camara de inventario |

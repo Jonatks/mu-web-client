@@ -24,6 +24,8 @@ const TILES: readonly Tile[] = [
   { icon: 'skills', label: 'mobile.cmd.skills', run: () => (MobileMenu.picker = 0) },
   // The original opens it with A or the sheet's button (NewUIHotKey.cpp); ours for a master character only.
   { icon: 'master', label: 'mobile.cmd.master', run: () => toggleMasterSkillsWindow(true), shown: () => skills.inMasterProgression },
+  // Ours: the Season 19 Majestic stat tree, once the hero levels in Majestic.
+  { icon: 'master', label: 'mobile.cmd.majestic', run: open('majestic_stats'), shown: () => skills.majesticActive },
   { icon: 'friends', label: 'mobile.cmd.friends', run: () => Messenger.toggleWindow() },
   { icon: 'party', label: 'mobile.cmd.party', run: open('party') },
   { icon: 'guild', label: 'mobile.cmd.guild', run: () => (Social.guildWindowEnabled = true) },

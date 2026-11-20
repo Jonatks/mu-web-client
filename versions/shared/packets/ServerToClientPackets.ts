@@ -22711,9 +22711,9 @@ export class MajesticStatusPacket {
   static readonly HeaderType = `C1HeaderWithSubCode`;
   static readonly HeaderCode = 0xC1;
   static readonly Direction = 'ServerToClient';
-  static readonly SentWhen = `Our OpenMU plugin: when the character enters the world, and on every Majestic experience gain (after the maximum master level).`;
-  static readonly CausedReaction = `The client shows the Majestic level, its points and its experience bar.`;
-  static readonly Length = 33;
+  static readonly SentWhen = `Our OpenMU plugin: when the character enters the world, on every Majestic experience gain (after the maximum master level) and after a point is spent on the stat tree.`;
+  static readonly CausedReaction = `The client shows the Majestic level, its points, its experience bar and the stat tree.`;
+  static readonly Length = 41;
   static readonly LengthSize = 1;
   static readonly DataOffset = 2;
   static readonly Code = 0xE7;
@@ -22742,7 +22742,7 @@ export class MajesticStatusPacket {
     return this;
   }
 
-  static createPacket(requiredSize: number = 33): MajesticStatusPacket {
+  static createPacket(requiredSize: number = 41): MajesticStatusPacket {
     const p = new MajesticStatusPacket();
     p.buffer = new DataView(new ArrayBuffer(requiredSize));
     p.writeHeader();
@@ -22786,6 +22786,20 @@ export class MajesticStatusPacket {
     const oldByte = this.buffer.getUint8(32);
     this.buffer.setUint8(32, SetBoolean(oldByte, value, 0));
   }
+  get StatPoints(){
+    const to = 41;
+    const i = 33;
+              
+    return new DataView(this.buffer.buffer.slice(i,to));
+  }
+  setStatPoints(data: ArrayLike<number>, count = 8){
+    if (data.length !== count) throw new Error(`data.length must be ${count}`);
+    const from = 33;
+
+    for (let i = 0; i < data.length; i++) {
+      this.buffer.setUint8(from + i, data[i]);
+    }
+}
 }
 export enum KanturuStateInfoStateTypeEnum {
     None = 0,

@@ -66,7 +66,12 @@ Majestic levels (phase 2 of `ops/plan`, Season 19's 1-900 past master 400):
   `MajesticTable` is S19's `MajesticExp.xml` (`ops/fase2/gen_majestic.py`), 1 point per level.
 - `MajesticStore`: the table `mu_plugins.majestic` (character id, level, experience, points); written on a level up,
   at most a minute after a gain and when the character leaves the world.
-- `MajesticViewPlugIn`: `MajesticStatus` (C1 E7 10) on entering the world and on every gain.
+- `MajesticViewPlugIn`: `MajesticStatus` (C1 E7 10, 41 bytes) on entering the world, on every gain and after a point
+  is spent; the last 8 bytes are the points of each node of the stat tree.
+- Stat tree (2c): `MajesticStatTree` is S19's `SkillTreeMajesticStat.xml` with its `FormulaData.xml` formulas
+  (`ops/fase2/gen_majestic_stat.py`, also writes the client's copy). `MajesticStats` adds one element per node to the
+  attributes the character enters the world with; `MajesticStatRequestHandlerPlugIn` (C1 05 E7 11 node) spends a
+  point when the Majestic level opens the node's tier. Points per node in `mu_plugins.majestic.stat_points`.
 
 Login tokens (phase 6 of [docs/module_streaming.md](../docs/module_streaming.md), the wire there): the
 web client's saved login, so no password is kept in a browser.
