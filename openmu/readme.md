@@ -73,6 +73,10 @@ Majestic levels (phase 2 of `ops/plan`, Season 19's 1-900 past master 400):
   attributes the character enters the world with; `MajesticStatRequestHandlerPlugIn` (C1 05 E7 11 node) spends a
   point when the Majestic level opens the node's tier. Points per node in `mu_plugins.majestic.stat_points`.
 
+Fourth-class skills (phase 2d of `ops/plan`): `FourthSkillLearnPlugIn` (`IItemConsumingPlugIn`) stops a Season 19
+scroll unless the character has its base skill and its master skill at level 10 (`FourthSkillRequirements`, from
+`ops/fase2/gen_skills4.py`, which also writes the skills' SQL and the client's tables).
+
 Login tokens (phase 6 of [docs/module_streaming.md](../docs/module_streaming.md), the wire there): the
 web client's saved login, so no password is kept in a browser.
 

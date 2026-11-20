@@ -153,3 +153,26 @@ export default defineItem({{
   szModelName: '{model}',
 }});
 """)
+
+# El plugin: que habilidad base y que habilidad master (al nivel 10) pide cada una para aprenderse (SkillRequire.xml).
+reqs = '\n'.join(f"        [{c['num']}] = ({c['reqSkill']}, {c['reqMasterSkill']}, {c['reqMasterLevel']}),"
+                 for c in client if c['reqSkill'] > 0)
+open(os.path.join(OUT, '../../openmu/plugins/GameLogic/FourthSkills/FourthSkillRequirements.cs'), 'w').write(f"""// <copyright file="FourthSkillRequirements.cs" company="MUnique">
+// Licensed under the MIT License. See LICENSE file in the project root for full license information.
+// </copyright>
+
+namespace MUnique.OpenMU.GameLogic.FourthSkills;
+
+/// <summary>
+/// What each Season 19 fourth-class skill asks before its scroll teaches it (Skill/SkillRequire.xml), made by
+/// mu-web-client ops/fase2/gen_skills4.py: a base skill, and a master skill at a level.
+/// </summary>
+public static class FourthSkillRequirements
+{{
+    /// <summary>Skill number to (base skill, master skill, master level).</summary>
+    public static readonly IReadOnlyDictionary<int, (int BaseSkill, int MasterSkill, int MasterLevel)> Of = new Dictionary<int, (int, int, int)>
+    {{
+{reqs}
+    }};
+}}
+""")
