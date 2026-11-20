@@ -32,7 +32,8 @@ const MASTER_SHEET = ['new_Master_Icon.OZJ', 'new_Master_non_Icon.OZJ'];
  */
 export const SkillIcon = observer(
   ({ number, disabled = false }: { number: number; disabled?: boolean }) => {
-    const master = number >= MASTER_SKILL_FIRST;
+    // Past 700: our Season 19 skills, on their own sheet (skillIconCell) or as a text stand-in.
+    const master = number >= MASTER_SKILL_FIRST && number < 700 && !skillIconCell(number);
     const loaded = masterTreeDataLoaded();
 
     useEffect(() => {

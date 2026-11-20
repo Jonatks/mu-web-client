@@ -148,7 +148,17 @@ const SHEETS = {
   skill2: ['newui_skill2.OZJ', 'newui_non_skill2.OZJ'],
   skill3: ['newui_skill3.OZJ', 'newui_non_skill3.OZJ'],
   command: ['newui_command.OZJ', 'newui_non_command.OZJ'],
+  s19: ['newui_skill00.OZJ', 'newui_non_skill00.OZJ'],
 } as const;
+
+/**
+ * Our server's Season 19 fourth-class skills (ops/fase2/skills4.sql) on the S19 sheet `newui_skill00` (25 a row). The
+ * S19 keeps their cells in its executable: these are picked by eye (ops/plan/bitacora.md, provisional).
+ */
+const S19_CELLS: Record<number, number> = {
+  723: 425, 726: 426, 733: 427, 727: 428, 732: 429, 731: 430, 730: 431, 729: 432, 2023: 433, 724: 434, 734: 434,
+  725: 435, 2012: 436, 2013: 437, 2095: 438, 737: 439, 739: 440, 282: 441,
+};
 
 /**
  * Sheet-2 cells the row maths cannot reach. The eight columns the generic
@@ -196,8 +206,10 @@ export function skillIconCell(
   num: number,
   disabled = false
 ): { file: string; x: number; y: number } | null {
-  if (num <= 0 || num >= MASTER_SKILL_FIRST) return null;
   const i = disabled ? 1 : 0;
+  const s19 = S19_CELLS[num];
+  if (s19 !== undefined) return cell(SHEETS.s19[i], s19 % 25, Math.floor(s19 / 25));
+  if (num <= 0 || num >= MASTER_SKILL_FIRST) return null;
   if (num === PLASMA_STORM) return cell(SHEETS.command[i], 4, 0);
   const special = SHEET2_CELLS[num];
   if (special) return cell(SHEETS.skill2[i], special[0], special[1]);
