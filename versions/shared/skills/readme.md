@@ -119,3 +119,11 @@ a34a9ae2a), Multi-Shot (65023b363, 26cba0b10). Timing, bone, facing, leak and ca
 - Snapshots are in `__snapshots__/`. When a change is meant, update them with
   `bunx vitest run versions/shared/skills -u` and say why in the PR. `GOLDEN_FULL=1` snapshots
   the full trace instead of the hash.
+
+## Season 19 fourth-class skills (our server)
+Our server adds the S19 fourth-class skills (`ops/fase2/gen_skills4.py`: `skillsDatabaseS19.ts`, the scrolls in
+`items/misc`, the icons on the S19 sheet `newui_skill00` in `modules/skills/skillCasting.ts`). The S19 draws them in
+its executable, not in data, so each look here is ours, built from the Season 6 effects of the closest skill and the
+S19 models in `Data/Skill` and `Data/Effect` (served from the VM, never in this repo): Meteor Strike and Meteor Storm
+are grown Meteorites (`dark_wizard/_shared.ts`), Soul Seeker three green souls. Which icon each one has is picked by eye
+too (`ops/plan/bitacora.md`, provisional).

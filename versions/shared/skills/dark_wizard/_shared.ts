@@ -1,8 +1,8 @@
-import { EXPLOSION_CELLS, MODEL, RGBS, TEX } from '@/controllers/fx/recipes';
+import { EXPLOSION_CELLS, FIRE_SPARKS, MODEL, RGBS, TEX } from '@/controllers/fx/recipes';
 import { effects, type EffectHandle } from '@/controllers/fx';
 import { type Entity } from '@/ecs/world';
 import { FIRE_BLEND_MESH, LANDING_SMOKE_LIFT } from '../_shared';
-import { IMPACT_HEIGHT, SkillContext, Step, TICK, cm, onRelease, perTick, ring, seq, sprite, ticks } from '@/controllers/skills/visuals';
+import { IMPACT_HEIGHT, SkillContext, Step, TICK, burn, cm, explosion, onRelease, particles, perTick, ring, scorch, seq, sprite, ticks } from '@/controllers/skills/visuals';
 import { bonePos, delay, entityGone, entityPos, entityYaw, followEntity, fxNow, type ParticleRecipe, type RGB } from '@/controllers/fx/core';
 import { type ProjectileHead } from '@/controllers/fx/projectile';
 import { type Sounds } from '@/controllers/sound/recipes';
@@ -339,3 +339,105 @@ export const FIRE_BALL_LIGHT: LightRecipe = {
 
 /** BITMAP_EXPLOTION's (0.5, 0.3, 0.1) x LT/20 in range 4 (ZzzEffectParticle.cpp:4265-4269). */
 export const EXPLOSION_LIGHT: LightRecipe = { color: [0.5, 0.3, 0.1], range: 4, seconds: 20 * TICK_SECONDS, release: 20 * TICK_SECONDS };
+
+// ---- Meteorite and the Season 19 meteors (meteorite, meteor_strike, meteor_storm) ----
+
+/** The meteor's blast on the graded tiers: BITMAP_FIRE rolled out flat from the landing and rising as it burns off. */
+export const METEOR_BLAST: ParticleRecipe = {
+  texture: TEX.fire,
+  cells: { w: 64, h: 64, count: 4 },
+  colour: [1, 0.5, 0.15],
+  colourEnd: [0.6, 0.08, 0],
+  size: 0.7,
+  sizeJitter: 0.3,
+  life: 0.55,
+  lifeJitter: 0.3,
+  box: [0.15, 0.05, 0.15],
+  dir1: [-1, 0.1, -1],
+  dir2: [1, 0.45, 1],
+  power: 2.6,
+  settle: 0.5,
+  gravity: 0.8,
+  spin: 2,
+  endScale: 1.8,
+};
+
+/** Dust and smoke the landing throws up: straight-alpha matter, so it darkens what it covers and never blooms. */
+export const METEOR_DUST: ParticleRecipe = {
+  texture: TEX.smokeAlpha,
+  softEdge: true,
+  colour: [0.26, 0.23, 0.2],
+  size: 0.8,
+  sizeJitter: 0.3,
+  life: 1.5,
+  lifeJitter: 0.25,
+  box: [0.35, 0.05, 0.35],
+  dir1: [-0.5, 0.4, -0.5],
+  dir2: [0.5, 1, 0.5],
+  power: 0.9,
+  settle: 0.4,
+  gravity: 0.35,
+  spin: 0.6,
+  endScale: 2.6,
+  fade: [
+    [0, 0],
+    [0.15, 0.7],
+    [1, 0],
+  ],
+  blend: 'alpha',
+};
+
+/**
+ * 2 Meteorite (ZzzCharacter.cpp:5007-5010): MODEL_FIRE sub0 from 130-161 cm along +x and 400 cm over the
+ * target's feet, Scale 1.0-1.7, falling 50 cm a tick tilted 20 deg back onto them (ZzzEffect.cpp:2546-2556),
+ * the tail flickering at 0.4-0.7. On the ground (:7808-7858) `landing` runs at the feet.
+ */
+export const meteor = (landing: Step, look?: FireBallLook, scale = 1, height = 400): Step =>
+  atRelease((feet, c) => {
+    releaseSound('Sound/eMeteorite')(feet, c);
+    fall(feet, c, landing, look, scale, height);
+  });
+
+/** MODEL_FIRE sub0 falling on `feet`, then `landing` where it lands. */
+export function fall(feet: Vector3, c: SkillContext, landing: Step, look?: FireBallLook, scale = 1, height = 400): void {
+  const from = new Vector3(feet.x + cm(130 + Math.random() * 32), feet.y + cm(height), feet.z);
+  fireBallFlight(c, 2, from, feet, { scale: (1 + Math.random() * 0.7) * scale, tail: perTickRoll(0.4, 4, 0.1), alongPath: true, ...look }, p => landing(p, c));
+}
+
+/** The meteor's landing: 6 chips and one untinted BITMAP_EXPLOTION 80 cm up, which plays SOUND_EXPLOTION01 (ZzzEffectParticle.cpp:2466-2485). */
+export const meteorLanding = (tint: RGB = RGBS.white): Step => (p, c) => {
+  explosion(tint)(new Vector3(p.x, p.y + cm(80), p.z), c);
+  lavaChips(6)(p, c);
+  playCombat('Sound/eExplosion', p);
+};
+
+/** A bare `CreateEffect(MODEL_FIRE, feet)` and its landing, no cast and no sound of its own (Dark Ghost's fire). */
+export const dropMeteor: Step = (feet, c) => fall(feet, c, meteorLanding());
+
+/** The meteor's glow card and embers in flight. */
+export const METEOR_LOOK: FireBallLook = { glow: { texture: TEX.flare, colour: [1, 0.45, 0.12], size: 1.5, spin: 3 }, embers: FIRE_BALL_EMBERS };
+
+/**
+ * The meteor landing on the graded tiers: the same explosion 80 cm up (warm, soft-edged) and 6 chips, over a
+ * white-hot flash, a shock ring and a glowing crater, a flat roll of fire, sparks and the dust it throws up.
+ */
+/** `skill` names whose impact and crater bodies light it; `scale` widens the blast (Season 19's bigger meteors). */
+export const meteorImpactFor = (skill: number, scale = 1): Step => (p, c) => {
+  const up = new Vector3(p.x, p.y + cm(80), p.z);
+  softExplosion([0.95, 0.55, 0.25], scale)(up, c);
+  sprite({ texture: TEX.flare, colour: [1, 0.72, 0.45], size: 1.4 * scale, seconds: 0.25, growFrom: 0.5, grow: 1.4, fadeTail: 0.7 })(up, c);
+  ring({ texture: TEX.shockwave, colour: [1, 0.5, 0.15], scale: 1.2 * scale, grow: 2.4, growFrom: 0.4, seconds: 0.45, fadeTail: 0.7 })(p, c);
+  groundFlare([1, 0.32, 0.06], 2.2 * scale, 1.4)(p, c);
+  particles({ recipe: METEOR_BLAST, count: Math.round(10 * scale), height: 0.15 })(p, c);
+  particles({ recipe: FIRE_SPARKS, count: Math.round(18 * scale), height: 0.3 })(p, c);
+  particles({ recipe: METEOR_DUST, count: Math.round(8 * scale), height: 0.1 })(p, c);
+  lavaChips(Math.round(6 * scale))(p, c);
+  playCombat('Sound/eExplosion', p);
+  placeBodyLight(skill, 'impact')(p, c);
+  placeBodyLight(skill, 'crater')(p, c);
+  scorch(1.2 * scale)(p, c);
+  burn(1.2 * scale)(p, c);
+};
+
+export const meteorImpact = meteorImpactFor(2);
+
