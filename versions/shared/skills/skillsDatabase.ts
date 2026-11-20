@@ -4,6 +4,8 @@
  * Generated - do not edit by hand. Numbers are the wire SkillNumber.
  */
 
+import { S19_SKILL_DEFINITIONS } from './skillsDatabaseS19';
+
 export type SkillType =
   | "DirectHit"
   | "AreaSkillAutomaticHits"
@@ -445,7 +447,8 @@ export function masterRoot(num: number): number {
   return num;
 }
 
-const byNumber = new Map(SKILL_DEFINITIONS.map(s => [s.num, s]));
+// Our server's Season 19 fourth-class skills follow the generated table (skillsDatabaseS19.ts).
+const byNumber = new Map([...SKILL_DEFINITIONS, ...S19_SKILL_DEFINITIONS].map(s => [s.num, s]));
 
 // OpenMU copies the replaced skill's type, target and area onto the master skill, so it
 // goes out as that skill does (AreaSkill for Twisting Slash Strengthener, not a TargetedSkill).
