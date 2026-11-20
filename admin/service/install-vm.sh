@@ -25,7 +25,15 @@ $HOST {
 $( [ "$with_admin" = 1 ] && printf '  handle /_admin/* {\n    uri strip_prefix /_admin\n    reverse_proxy 127.0.0.1:3200\n  }\n  handle {\n    reverse_proxy 127.0.0.1:80\n  }' || printf '  reverse_proxy 127.0.0.1:80' )
 }
 ws.$HOST {
-  reverse_proxy 127.0.0.1:8090
+  # El juego lee server.json de este host: el del cliente (nginx), no el por defecto de mu-proxy.
+  handle /server.json {
+    header Access-Control-Allow-Origin *
+    header Cache-Control no-cache
+    reverse_proxy 127.0.0.1:80
+  }
+  handle {
+    reverse_proxy 127.0.0.1:8090
+  }
 }
 CF
   sudo docker exec caddy caddy reload --config /etc/caddy/Caddyfile >/dev/null
