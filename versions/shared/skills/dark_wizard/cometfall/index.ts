@@ -79,8 +79,7 @@ export default defineSkill({
   // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
   lookAliases: [382],
   // Master numbers cast, heard, lit and drawn as this skill (the original names them in its `case`).
-  // Our server's Season 19 skills with this one's mechanics, drawn as it until they have a look of their own (ops/fase2, provisional).
-  masterAliases: [484, 733],
+  masterAliases: [484],
   // 13 Cometfall (382 / 484 alias here): 2x MODEL_SKILL_BLAST on the cast point at AttackTime 15 (`cometfall`); Enhanced `cometfallGraded`.
   visual: { area: dw2AtAttackTime(cometfall), enhanced: { area: dw2AtAttackTime(cometfallGraded) } },
   // Cometfall (382 / 484 too): each comet's (0.2, 0.4, 1) range 2 while it falls (MoveHandlers.cpp:2576-2577),

@@ -709,3 +709,57 @@ export const TICK_SECONDS = 0.04;
 export const IRON_DEFENSE_LIGHT: SkillLight = {
   enhanced: { cast: effectLight([0.85, 0.85, 0.95], 1.2, 0.6, { attack: 0.05, release: 0.4 }) },
 };
+
+// ---- Our server's Season 19 fourth-class skills (readme.md, "Season 19 fourth-class skills") ----
+
+/** How an S19 burst reads: its colour going to `end`, how many tiles it covers, how many bursts land in it. */
+export interface S19Burst {
+  colour: RGB;
+  end: RGB;
+  tiles?: number;
+  bursts?: number;
+  texture?: string;
+  sound?: Sounds;
+}
+
+/**
+ * The look of an S19 skill the S19 draws in its executable: on the point a flash, a ground ring and a spray in its
+ * colour; with `bursts` more than one, that many land over `tiles` one after another. Our own look, not a port.
+ */
+export const s19Burst = (o: S19Burst): Step => (p, c) => {
+  const tiles = o.tiles ?? 1;
+  const spray: ParticleRecipe = {
+    texture: o.texture ?? TEX.flare,
+    colour: o.colour,
+    colourEnd: o.end,
+    size: 0.35,
+    sizeJitter: 0.4,
+    life: 0.6,
+    box: [0.25, 0.1, 0.25],
+    dir1: [-1.2, 0.6, -1.2],
+    dir2: [1.2, 1.8, 1.2],
+    power: 2.4,
+    gravity: -3,
+    capacity: 256,
+  };
+  const one = (at: Vector3, scale: number) => {
+    sprite({ texture: TEX.flare, colour: o.colour, size: 1.6 * scale, seconds: 0.3, growFrom: 0.5, grow: 1.4, fadeTail: 0.6 })(new Vector3(at.x, at.y + cm(80), at.z), c);
+    ring({ texture: TEX.shockwave, colour: o.colour, scale: 0.8 * scale, grow: 2.2, growFrom: 0.4, seconds: 0.4, fadeTail: 0.6 })(at, c);
+    particles({ recipe: spray, count: Math.round(14 * scale), height: 0.3 })(at, c);
+  };
+  const n = o.bursts ?? 1;
+  if (n <= 1) {
+    one(p, Math.max(1, tiles / 2));
+    if (o.sound) playCombat(o.sound, p);
+    return;
+  }
+  for (let i = 0; i < n; i++) {
+    const a = Math.random() * Math.PI * 2;
+    const r = Math.sqrt(Math.random()) * tiles;
+    delay(i * 0.08, () => {
+      const at = new Vector3(p.x + Math.cos(a) * r, p.y, p.z + Math.sin(a) * r);
+      one(at, 1);
+      if (o.sound && i % 3 === 0) playCombat(o.sound, at);
+    });
+  }
+};

@@ -162,8 +162,6 @@ const pollutionOf = (graded: boolean): Step => (at, c) => {
 export default defineSkill({
   id: 225,
   name: "Pollution",
-  // Our server's Season 19 skills with this one's mechanics, drawn as it until they have a look of their own (ops/fase2, provisional).
-  masterAliases: [288],
   // 225 Pollution: the casting circle, and at the point for 160 ticks violet smoke, clouds and drops with the
   // Laguls riding their spirit ribbons round it (summonCast, pollution).
   visual: {

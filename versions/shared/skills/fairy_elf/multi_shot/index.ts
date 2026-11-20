@@ -24,8 +24,6 @@ function bladeTurns(): number[] {
 export default defineSkill({
   id: 235,
   name: "Multi-Shot",
-  // Our server's Season 19 skills with this one's mechanics, drawn as it until they have a look of their own (ops/fase2, provisional).
-  masterAliases: [2023],
   checksArrows: true, // CheckArrow() before the shot (ClassAttack.cpp:328)
   // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
   lookAliases: [411, 431],

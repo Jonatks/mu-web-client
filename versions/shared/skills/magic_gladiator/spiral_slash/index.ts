@@ -120,8 +120,6 @@ const spiralSlashEnhanced = mgSpiralSlash(true);
 export default defineSkill({
   id: 57,
   name: "Spiral Slash",
-  // Our server's Season 19 skills with this one's mechanics, drawn as it until they have a look of their own (ops/fase2, provisional).
-  masterAliases: [2012, 2013],
   // UseSkillWarrior's glint (SkillCast.cpp:113-247, :357-376).
   warriorGlint: true,
   // 57 Spiral Slash: five BITMAP_FLARE sub23 ribbons in two waves on the ONE_FLASH clip (spiralSlash).

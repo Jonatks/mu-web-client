@@ -8,8 +8,6 @@ const drawNothing: Step = () => {};
 export default defineSkill({
   id: 270,
   name: "Phoenix Shot",
-  // Our server's Season 19 skills with this one's mechanics, drawn as it until they have a look of their own (ops/fase2, provisional).
-  masterAliases: [739],
   // Skill effects: Enhanced keeps ours, a phoenix arrow, a fire hit and the phoenix model.
   visual: {
     area: tiered(drawNothing, (at, c) => { fanArrows(at, c, 1, MODEL.phoenixShot, RGBS.fire, 0, 1.5); }),

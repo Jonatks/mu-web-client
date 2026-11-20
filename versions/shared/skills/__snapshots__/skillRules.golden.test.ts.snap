@@ -1986,8 +1986,6 @@ exports[`skill rules golden > clips that hold facing or ignore a hit 1`] = `
 exports[`skill rules golden > master aliases 1`] = `
 {
   "base": {
-    "282": 262,
-    "288": 225,
     "479": 22,
     "480": 3,
     "481": 41,
@@ -2020,8 +2018,6 @@ exports[`skill rules golden > master aliases 1`] = `
   "count": 253,
   "look": {
     "150": 50,
-    "282": 262,
-    "288": 225,
     "326": 22,
     "327": 23,
     "328": 19,

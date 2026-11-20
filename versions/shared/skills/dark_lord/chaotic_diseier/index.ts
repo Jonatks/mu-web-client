@@ -249,8 +249,7 @@ export default defineSkill({
   id: 238,
   name: "Chaotic Diseier",
   // Master numbers cast, heard, lit and drawn as this skill (the original names them in its `case`).
-  // Our server's Season 19 skills with this one's mechanics, drawn as it until they have a look of their own (ops/fase2, provisional).
-  masterAliases: [523, 737],
+  masterAliases: [523],
   // 238 Chaotic Diseier (523): the dark stars on the body, eight dark 2line_gost ribbons with their birds, feathers and
   // smoke flying the facing, and on the caster's own screen the dark bomb at his target (ClassAttack.cpp:698-775,
   // WSclient.cpp:4971-5025). SOUND_SKILL_CAOTIC is SKILL_SOUNDS[238].

@@ -303,8 +303,7 @@ export default defineSkill({
   // UseSkillWarrior's glint (SkillCast.cpp:113-247, :357-376).
   warriorGlint: true,
   // Master numbers cast, heard, lit and drawn as this skill (the original names them in its `case`).
-  // Our server's Season 19 skills with this one's mechanics, drawn as it until they have a look of their own (ops/fase2, provisional).
-  masterAliases: [490, 493, 732],
+  masterAliases: [490, 493],
   // 55 Fire Slash (MG): the WHEEL charge and crescent (fireSlash); the skull is the debuff's (BUFF_VISUALS[58]).
   visual: { cast: fireSlash, enhanced: { cast: fireSlashEnhanced } },
   buffs: {

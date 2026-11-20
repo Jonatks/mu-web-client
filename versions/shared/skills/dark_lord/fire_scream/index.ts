@@ -245,8 +245,7 @@ export default defineSkill({
   id: 78,
   name: "Fire Scream",
   // Master numbers cast, heard, lit and drawn as this skill (the original names them in its `case`).
-  // Our server's Season 19 skills with this one's mechanics, drawn as it until they have a look of their own (ops/fase2, provisional).
-  masterAliases: [518, 520, 2095],
+  masterAliases: [518, 520],
   // The cast (ClassAttack.cpp:866-901) and the caster's own echo (WSclient.cpp:5180, `sc != Hero`) are silent;
   // it screams when the effect spawns.
   silentHeroCast: true,
