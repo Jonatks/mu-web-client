@@ -1,0 +1,556 @@
+[
+ {
+  "num": 724,
+  "name": "Meteor Strike",
+  "folder": "meteor_strike",
+  "shape": "area",
+  "damageType": "Wizardry",
+  "damage": 100,
+  "distance": 7,
+  "range": 2,
+  "mana": 92,
+  "ag": 17,
+  "level": 160,
+  "energy": 1073,
+  "classes": [
+   3
+  ],
+  "scroll": [
+   12,
+   290
+  ],
+  "scrollName": "Scroll of Meteor Strike(Grand Master)",
+  "reqSkill": 2,
+  "reqMasterSkill": 390,
+  "reqMasterLevel": 10
+ },
+ {
+  "num": 725,
+  "name": "Meteor Storm",
+  "folder": "meteor_storm",
+  "shape": "area",
+  "damageType": "Wizardry",
+  "damage": 105,
+  "distance": 6,
+  "range": 6,
+  "mana": 105,
+  "ag": 20,
+  "level": 160,
+  "energy": 1160,
+  "classes": [
+   3
+  ],
+  "scroll": [
+   12,
+   291
+  ],
+  "scrollName": "Scroll of Meteor Storm",
+  "reqSkill": 2,
+  "reqMasterSkill": 390,
+  "reqMasterLevel": 10
+ },
+ {
+  "num": 726,
+  "name": "Soul Seeker",
+  "folder": "soul_seeker",
+  "shape": "area",
+  "damageType": "Wizardry",
+  "damage": 125,
+  "distance": 7,
+  "range": 2,
+  "mana": 90,
+  "ag": 16,
+  "level": 160,
+  "energy": 1115,
+  "classes": [
+   3
+  ],
+  "scroll": [
+   12,
+   292
+  ],
+  "scrollName": "Scroll of Soul Seeker",
+  "reqSkill": 9,
+  "reqMasterSkill": 385,
+  "reqMasterLevel": 10
+ },
+ {
+  "num": 723,
+  "name": "Fire Blow",
+  "folder": "fire_blow",
+  "shape": "area",
+  "damageType": "Physical",
+  "damage": 120,
+  "distance": 5,
+  "range": 2,
+  "mana": 17,
+  "ag": 17,
+  "level": 160,
+  "energy": 0,
+  "classes": [
+   7
+  ],
+  "scroll": [
+   12,
+   289
+  ],
+  "scrollName": "Orb of Fire Blow",
+  "reqSkill": 43,
+  "reqMasterSkill": 339,
+  "reqMasterLevel": 10
+ },
+ {
+  "num": 1501,
+  "name": "Sword Blow",
+  "folder": "sword_blow",
+  "shape": "area",
+  "damageType": "Physical",
+  "damage": 30,
+  "distance": 5,
+  "range": 5,
+  "mana": 19,
+  "ag": 17,
+  "level": 150,
+  "energy": 0,
+  "classes": [
+   4,
+   6,
+   7
+  ],
+  "scroll": [
+   12,
+   486
+  ],
+  "scrollName": "Orb of Sword Blow",
+  "reqSkill": 43,
+  "reqMasterSkill": 339,
+  "reqMasterLevel": 10
+ },
+ {
+  "num": 1503,
+  "name": "Strong Blessing",
+  "folder": "strong_blessing",
+  "shape": "buff",
+  "damageType": "None",
+  "damage": 0,
+  "distance": 0,
+  "range": 6,
+  "mana": 65,
+  "ag": 20,
+  "level": 120,
+  "energy": 1052,
+  "classes": [
+   4,
+   6,
+   7
+  ],
+  "scroll": [
+   12,
+   488
+  ],
+  "scrollName": "Orb of Strong Blessing",
+  "reqSkill": -1,
+  "reqMasterSkill": -1,
+  "reqMasterLevel": 0
+ },
+ {
+  "num": 727,
+  "name": "Focus Shot",
+  "folder": "focus_shot",
+  "shape": "direct",
+  "damageType": "Physical",
+  "damage": 110,
+  "distance": 7,
+  "range": 0,
+  "mana": 12,
+  "ag": 9,
+  "level": 160,
+  "energy": 0,
+  "classes": [
+   11
+  ],
+  "scroll": [
+   12,
+   293
+  ],
+  "scrollName": "Orb of Focus Shot",
+  "reqSkill": 24,
+  "reqMasterSkill": 418,
+  "reqMasterLevel": 10
+ },
+ {
+  "num": 2023,
+  "name": "Raining Arrow",
+  "folder": "raining_arrow",
+  "shape": "area",
+  "damageType": "Physical",
+  "damage": 65,
+  "distance": 7,
+  "range": 7,
+  "mana": 15,
+  "ag": 7,
+  "level": 160,
+  "energy": 0,
+  "classes": [
+   11
+  ],
+  "scroll": [
+   12,
+   167
+  ],
+  "scrollName": "Orb of Raining Arrow",
+  "reqSkill": 24,
+  "reqMasterSkill": 411,
+  "reqMasterLevel": 10
+ },
+ {
+  "num": 2025,
+  "name": "Holy Bolt",
+  "folder": "holy_bolt",
+  "shape": "direct",
+  "damageType": "Physical",
+  "damage": 777,
+  "distance": 6,
+  "range": 0,
+  "mana": 20,
+  "ag": 0,
+  "level": 110,
+  "energy": 1200,
+  "classes": [
+   11
+  ],
+  "scroll": [
+   12,
+   169
+  ],
+  "scrollName": "Orb of Holy Bolt",
+  "reqSkill": 28,
+  "reqMasterSkill": 422,
+  "reqMasterLevel": 10
+ },
+ {
+  "num": 731,
+  "name": "Ice Blood",
+  "folder": "ice_blood",
+  "shape": "area",
+  "damageType": "Physical",
+  "damage": 330,
+  "distance": 3,
+  "range": 2,
+  "mana": 19,
+  "ag": 14,
+  "level": 160,
+  "energy": 0,
+  "classes": [
+   13
+  ],
+  "scroll": [
+   12,
+   297
+  ],
+  "scrollName": "Orb of Ice Blood",
+  "reqSkill": 55,
+  "reqMasterSkill": 490,
+  "reqMasterLevel": 10
+ },
+ {
+  "num": 732,
+  "name": "Fire Blood",
+  "folder": "fire_blood",
+  "shape": "area",
+  "damageType": "Physical",
+  "damage": 330,
+  "distance": 3,
+  "range": 2,
+  "mana": 19,
+  "ag": 14,
+  "level": 160,
+  "energy": 0,
+  "classes": [
+   13
+  ],
+  "scroll": [
+   12,
+   298
+  ],
+  "scrollName": "Orb of Fire Blood",
+  "reqSkill": 55,
+  "reqMasterSkill": 490,
+  "reqMasterLevel": 10
+ },
+ {
+  "num": 2012,
+  "name": "Chaos Blade",
+  "folder": "chaos_blade",
+  "shape": "direct",
+  "damageType": "Physical",
+  "damage": 350,
+  "distance": 3,
+  "range": 0,
+  "mana": 19,
+  "ag": 14,
+  "level": 160,
+  "energy": 0,
+  "classes": [
+   13
+  ],
+  "scroll": [
+   12,
+   162
+  ],
+  "scrollName": "Orb of Chaos Blade",
+  "reqSkill": 55,
+  "reqMasterSkill": 490,
+  "reqMasterLevel": 10
+ },
+ {
+  "num": 733,
+  "name": "Dark Blast",
+  "folder": "dark_blast",
+  "shape": "area",
+  "damageType": "Wizardry",
+  "damage": 120,
+  "distance": 7,
+  "range": 2,
+  "mana": 92,
+  "ag": 17,
+  "level": 160,
+  "energy": 1073,
+  "classes": [
+   13
+  ],
+  "scroll": [
+   12,
+   299
+  ],
+  "scrollName": "Scroll of Dark Blast",
+  "reqSkill": 13,
+  "reqMasterSkill": 484,
+  "reqMasterLevel": 10
+ },
+ {
+  "num": 734,
+  "name": "Meteor Strike",
+  "folder": "meteor_strike_mg",
+  "shape": "area",
+  "damageType": "Wizardry",
+  "damage": 120,
+  "distance": 7,
+  "range": 2,
+  "mana": 92,
+  "ag": 17,
+  "level": 160,
+  "energy": 1073,
+  "classes": [
+   13
+  ],
+  "scroll": [
+   12,
+   300
+  ],
+  "scrollName": "Scroll of Meteor Strike(Dual Master)",
+  "reqSkill": 2,
+  "reqMasterSkill": 484,
+  "reqMasterLevel": 10
+ },
+ {
+  "num": 2013,
+  "name": "Havok Spear",
+  "folder": "havok_spear",
+  "shape": "direct",
+  "damageType": "Wizardry",
+  "damage": 150,
+  "distance": 6,
+  "range": 0,
+  "mana": 92,
+  "ag": 20,
+  "level": 160,
+  "energy": 1073,
+  "classes": [
+   13
+  ],
+  "scroll": [
+   12,
+   163
+  ],
+  "scrollName": "Scroll of Havok Spear",
+  "reqSkill": 13,
+  "reqMasterSkill": 484,
+  "reqMasterLevel": 10
+ },
+ {
+  "num": 737,
+  "name": "Wind Soul",
+  "folder": "wind_soul",
+  "shape": "area",
+  "damageType": "Physical",
+  "damage": 130,
+  "distance": 6,
+  "range": 2,
+  "mana": 35,
+  "ag": 17,
+  "level": 160,
+  "energy": 0,
+  "classes": [
+   17
+  ],
+  "scroll": [
+   12,
+   303
+  ],
+  "scrollName": "Scroll of Wind Soul",
+  "reqSkill": 238,
+  "reqMasterSkill": 523,
+  "reqMasterLevel": 10
+ },
+ {
+  "num": 2095,
+  "name": "Spirit Blast",
+  "folder": "spirit_blast",
+  "shape": "area",
+  "damageType": "Physical",
+  "damage": 350,
+  "distance": 6,
+  "range": 6,
+  "mana": 35,
+  "ag": 16,
+  "level": 160,
+  "energy": 0,
+  "classes": [
+   17
+  ],
+  "scroll": [
+   15,
+   67
+  ],
+  "scrollName": "Scroll of Spirit Blast",
+  "reqSkill": 61,
+  "reqMasterSkill": 508,
+  "reqMasterLevel": 10
+ },
+ {
+  "num": 288,
+  "name": "Death Scythe",
+  "folder": "death_scythe",
+  "shape": "area",
+  "damageType": "Wizardry",
+  "damage": 75,
+  "distance": 6,
+  "range": 6,
+  "mana": 120,
+  "ag": 20,
+  "level": 85,
+  "energy": 930,
+  "classes": [
+   23
+  ],
+  "scroll": [
+   15,
+   45
+  ],
+  "scrollName": "Death Scythe Parchment",
+  "reqSkill": 225,
+  "reqMasterSkill": 778,
+  "reqMasterLevel": 10
+ },
+ {
+  "num": 729,
+  "name": "Fire Beast",
+  "folder": "fire_beast",
+  "shape": "area",
+  "damageType": "Wizardry",
+  "damage": 100,
+  "distance": 7,
+  "range": 2,
+  "mana": 95,
+  "ag": 10,
+  "level": 160,
+  "energy": 1220,
+  "classes": [
+   23
+  ],
+  "scroll": [
+   12,
+   295
+  ],
+  "scrollName": "Parchment of Fire Beast",
+  "reqSkill": 215,
+  "reqMasterSkill": 455,
+  "reqMasterLevel": 10
+ },
+ {
+  "num": 730,
+  "name": "Aqua Beast",
+  "folder": "aqua_beast",
+  "shape": "area",
+  "damageType": "Wizardry",
+  "damage": 100,
+  "distance": 7,
+  "range": 2,
+  "mana": 95,
+  "ag": 10,
+  "level": 160,
+  "energy": 1220,
+  "classes": [
+   23
+  ],
+  "scroll": [
+   12,
+   296
+  ],
+  "scrollName": "Parchment of Aqua Beast",
+  "reqSkill": 215,
+  "reqMasterSkill": 455,
+  "reqMasterLevel": 10
+ },
+ {
+  "num": 282,
+  "name": "Spirit Hook",
+  "folder": "spirit_hook",
+  "shape": "area",
+  "damageType": "Physical",
+  "damage": 255,
+  "distance": 3,
+  "range": 2,
+  "mana": 27,
+  "ag": 21,
+  "level": 180,
+  "energy": 0,
+  "classes": [
+   25
+  ],
+  "scroll": [
+   12,
+   413
+  ],
+  "scrollName": "Spirit Hook Parchment",
+  "reqSkill": 262,
+  "reqMasterSkill": 558,
+  "reqMasterLevel": 10
+ },
+ {
+  "num": 739,
+  "name": "Dark Phoenix Shot",
+  "folder": "dark_phoenix_shot",
+  "shape": "area",
+  "damageType": "Physical",
+  "damage": 650,
+  "distance": 7,
+  "range": 2,
+  "mana": 30,
+  "ag": 10,
+  "level": 160,
+  "energy": 0,
+  "classes": [
+   25
+  ],
+  "scroll": [
+   12,
+   305
+  ],
+  "scrollName": "Parchment of Dark Phoenix Shot",
+  "reqSkill": 263,
+  "reqMasterSkill": 559,
+  "reqMasterLevel": 10
+ }
+]

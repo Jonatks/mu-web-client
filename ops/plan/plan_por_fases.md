@@ -89,6 +89,21 @@ Mahes y Bragi (Dark Knight), Bes y Alvis (Dark Wizard), Serket (Elf), Apis y Tyr
 - Necesita la compilación propia de OpenMU (fase 0) y mensajes nuevos del "Season 6 ampliado" (fase 0b).
 - Riesgo: la experiencia Majestic acumulada (9,7·10^15) pasa el máximo exacto de JavaScript (9,0·10^15); el cliente debe usar enteros grandes.
 
+#### 2d. Árbol de habilidades Majestic, completo (decisión del dueño 20-11-2026)
+
+El árbol del S19 (`SkillTreeMajestic.xml`, 129 a 319 nodos por clase) se apoya en las habilidades de cuarta clase, que
+S6 no tiene. Se traen primero, después el árbol.
+
+| Paso | Qué | Dónde |
+|---|---|---|
+| 2d-1 | Datos de las ~22 habilidades nuevas (`SkillList.xml`): daño, maná, distancia, área, tipo; pergaminos (`SkillLearn.xml`, ítems 12/290...) y requisitos (`SkillRequire.xml`: habilidad base y nivel de la master) | generador en `ops/fase2/`, SQL con reversa al servidor; `skillsDatabase.ts` y textos al cliente |
+| 2d-2 | Lo que S6 no hace de esas habilidades: versiones master de cuarta clase (812, 809, 806, 876, 911, 563) | plugins y datos de OpenMU |
+| 2d-3 | Cómo se ven: una por una, por clase (DW, DK, Elf, MG, DL, SUM, RF y las tres comunes), con modelos y texturas del cliente S19 (`Data/Skill`); la coreografía del S19 está en su ejecutable, así que se arma a ojo y queda anotada | `versions/shared/skills/<clase>/<habilidad>/` |
+| 2d-4 | El árbol: puntos Majestic, enlaces (`LinkSlot`, `ActiveNextPoints`), padres (`ParentSkill`), mínimo por nodo (`ReqPoints`) y ventana con la disposición del S19 (`PositionTemp`) | plugin Majestic y ventana del cliente |
+| 2d-5 | Efectos de los nodos: daño de habilidad y daño de arma primero (atributos por habilidad de OpenMU), después golpes extra, alcance, área y los campos mágicos (sangrado, congelación y sus debuffs) | plugins |
+
+Orden por clase: Dark Wizard primero (Meteor Strike), como receta para las demás.
+
 ### Fase 3. Generación Bloodangel
 
 - 43 ítems: 33 armaduras, 9 armas y 1 Ancient Hero's Soul.
