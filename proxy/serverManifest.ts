@@ -22,6 +22,7 @@ export function serverManifest(env: Env = process.env) {
       retryLoginWhenConnected: env.MU_RETRY_LOGIN_WHEN_CONNECTED === 'on',
       muHelperAfterReconnect: env.MU_HELPER_AFTER_RECONNECT === 'on',
       autoManaPotion: env.MU_AUTO_MANA_POTION === 'on',
+      autoHealthPotion: env.MU_AUTO_HEALTH_POTION === 'on',
       autoQuiver: env.MU_AUTO_QUIVER === 'on',
       restAnyWall: env.MU_REST_ANY_WALL === 'on',
       jewelryUpgrade: env.MU_JEWELRY_UPGRADE === 'on',
