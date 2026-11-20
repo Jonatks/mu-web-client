@@ -183,6 +183,19 @@ Independiente del contenido; se intercala con las otras fases. Todo va como opci
 - G4: inventario y baúl ampliados con el tema nuevo, junto con la fase 4.
 - G5: paquete opcional de texturas en alta resolución, por partes.
 
+Adelantada por decisión tuya (20-11-2026), con el arte del cliente S19 (datos sin proteger: texturas, modelos, mapas,
+interfaz, efectos, sonido, música y movimientos; el motor está en el ejecutable protegido y no se toca). Orden:
+
+1. GS1: los 68 movimientos nuevos del personaje S19 (mismo esqueleto) y su asignación a cada habilidad.
+2. GS2: la tubería de arte S19: convertir el cliente S19 a lo que el cliente web carga, servirlo desde la VM (nunca del
+   repo público) y la opción "Gráficos S19" en Opciones, apagada por defecto, con la vista clásica igual.
+3. GS3 (G3 con arte S19): tema de ventanas con el arte de interfaz del S19 (marcos, botones, barras, íconos), primero
+   las ventanas que usas más; la ventana del árbol Majestic (2d-4) se hace ya con este tema.
+4. Fase 2d-4 y 2d-5.
+5. GS4 (G5 con arte S19): ítems, monstruos, NPC, personajes y mapas con modelos y texturas S19, por partes, con tabla
+   de equivalencias S19 -> S6 para monstruos y mapas como la de ítems.
+6. G2 (motor): sombras, luz y postproceso; se intercala con lo demás porque no depende del arte.
+
 No se usa el arte ni el cliente de otros juegos de MU para móvil: son de otra empresa y hablan otro protocolo.
 
 ### Decisiones que necesito de ti, con mi recomendación
