@@ -303,13 +303,13 @@ exports[`skill rules golden > cast clip and SwordCount per pose and context 1`] 
     "sword": "70effb7bd5b146d0",
   },
   "282": {
-    "clips": "PLAYER_ATTACK_BOW PLAYER_ATTACK_FIST PLAYER_ATTACK_RIDE_BOW PLAYER_ATTACK_RIDE_HORSE_SWORD PLAYER_ATTACK_RIDE_SWORD PLAYER_ATTACK_SWORD_LEFT1 PLAYER_ATTACK_SWORD_RIGHT1 PLAYER_ATTACK_SWORD_RIGHT2 PLAYER_FENRIR_ATTACK PLAYER_FENRIR_ATTACK_BOW PLAYER_FENRIR_ATTACK_ONE_SWORD PLAYER_FENRIR_ATTACK_TWO_SWORD PLAYER_RAGE_FENRIR_ATTACK_RIGHT PLAYER_RAGE_UNI_ATTACK",
-    "hash": "47d941c3e523c6bb",
-    "sword": "3f0550defa8d53b4",
+    "clips": "PLAYER_SKILL_GIANTSWING",
+    "hash": "1b16a159864954b8",
+    "sword": "70effb7bd5b146d0",
   },
   "288": {
-    "clips": "PLAYER_FENRIR_ATTACK_MAGIC PLAYER_RIDE_SKILL PLAYER_SKILL_ELF1 PLAYER_SKILL_HAND1 PLAYER_SKILL_HAND2",
-    "hash": "dda13c2d308db8f3",
+    "clips": "PLAYER_SKILL_SUMMON PLAYER_SKILL_SUMMON_FENRIR PLAYER_SKILL_SUMMON_UNI",
+    "hash": "dc839ae038e0a9d8",
     "sword": "70effb7bd5b146d0",
   },
   "3": {
@@ -1986,6 +1986,8 @@ exports[`skill rules golden > clips that hold facing or ignore a hit 1`] = `
 exports[`skill rules golden > master aliases 1`] = `
 {
   "base": {
+    "282": 262,
+    "288": 225,
     "479": 22,
     "480": 3,
     "481": 41,
@@ -2015,9 +2017,11 @@ exports[`skill rules golden > master aliases 1`] = `
     "522": 64,
     "523": 238,
   },
-  "count": 235,
+  "count": 253,
   "look": {
     "150": 50,
+    "282": 262,
+    "288": 225,
     "326": 22,
     "327": 23,
     "328": 19,

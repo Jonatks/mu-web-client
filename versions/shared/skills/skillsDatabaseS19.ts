@@ -25,6 +25,6 @@ export const S19_SKILL_DEFINITIONS: readonly SkillDefinition[] = [
   {"num":288,"name":"Death Scythe","classes":"23","damageType":"Wizardry","damage":75,"distance":6,"ag":20,"mana":120,"level":85,"energy":930,"type":"AreaSkillAutomaticHits","target":"Explicit","range":6},
   {"num":729,"name":"Fire Beast","classes":"23","damageType":"Wizardry","damage":100,"distance":7,"ag":10,"mana":95,"level":160,"energy":1220,"type":"AreaSkillAutomaticHits","target":"Explicit","range":2},
   {"num":730,"name":"Aqua Beast","classes":"23","damageType":"Wizardry","damage":100,"distance":7,"ag":10,"mana":95,"level":160,"energy":1220,"type":"AreaSkillAutomaticHits","target":"Explicit","range":2},
-  {"num":282,"name":"Spirit Hook","classes":"25","damageType":"Physical","damage":255,"distance":3,"ag":21,"mana":27,"level":180,"energy":0,"type":"AreaSkillAutomaticHits","target":"Explicit","range":2},
-  {"num":739,"name":"Dark Phoenix Shot","classes":"25","damageType":"Physical","damage":650,"distance":7,"ag":10,"mana":30,"level":160,"energy":0,"type":"AreaSkillAutomaticHits","target":"Explicit","range":2},
+  {"num":282,"name":"Spirit Hook","classes":"25","damageType":"Physical","damage":255,"distance":3,"ag":21,"mana":27,"level":180,"energy":0,"type":"DirectHit","target":"Explicit","range":2},
+  {"num":739,"name":"Dark Phoenix Shot","classes":"25","damageType":"Physical","damage":650,"distance":7,"ag":10,"mana":30,"level":160,"energy":0,"type":"AreaSkillExplicitTarget","target":"Explicit","range":2},
 ];

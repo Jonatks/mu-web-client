@@ -287,6 +287,8 @@ const chainDrive: Step = (at, c) => {
 export default defineSkill({
   id: 262,
   name: "Chain Drive",
+  // Our server's Season 19 skills with this one's mechanics, drawn as it until they have a look of their own (ops/fase2, provisional).
+  masterAliases: [282],
   // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
   lookAliases: [558],
   // A hit does not cut the swing short, and the target is swung round on the facing it started with

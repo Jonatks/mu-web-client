@@ -164,6 +164,8 @@ export default defineSkill({
   effectAliases: [356, 360],
   // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
   lookAliases: [356, 360, 363],
+  // 1503 Strong Blessing: our server's Season 19 party buff (ops/fase2), cast and drawn as this one (provisional).
+  masterAliases: [1503],
   noFlinch: [A.PLAYER_SKILL_VITALITY], // SetPlayerShock leaves the cast alone (ZzzCharacter.cpp:1283-1297)
   // 48 Swell Life: at AttackTime 10 the spirit ring, its orange glows, the rising column and two ground rings; see swellLife.
   visual: { cast: swellLife, enhanced: { cast: swellLifeOf(true) } },

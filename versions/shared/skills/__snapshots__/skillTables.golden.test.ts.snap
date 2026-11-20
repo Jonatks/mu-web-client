@@ -3597,11 +3597,13 @@ exports[`skill tables golden > skill 281 1`] = `
 
 exports[`skill tables golden > skill 282 1`] = `
 {
-  "clip": null,
+  "clip": [
+    249,
+  ],
   "delay": null,
-  "heroSound": null,
+  "heroSound": "Sound/Ragefighter/Rage_Giantswing",
   "light": "0/0 12438107cd988e1a",
-  "sound": null,
+  "sound": "Sound/Ragefighter/Rage_Giantswing",
   "stepIn": null,
   "target": "enemy",
 }
@@ -3669,11 +3671,16 @@ exports[`skill tables golden > skill 287 1`] = `
 
 exports[`skill tables golden > skill 288 1`] = `
 {
-  "clip": null,
+  "clip": [
+    172,
+    173,
+    174,
+    175,
+  ],
   "delay": null,
-  "heroSound": null,
+  "heroSound": "Sound/Rargle",
   "light": "1/1 25dc86de9ab325d7",
-  "sound": null,
+  "sound": "Sound/Rargle",
   "stepIn": null,
   "target": "enemy",
 }

@@ -202,6 +202,8 @@ const sahamuttOf = (graded: boolean): Step => (at, c) => {
 export default defineSkill({
   id: 223,
   name: "Explosion",
+  // Our server's Season 19 skills with this one's mechanics, drawn as it until they have a look of their own (ops/fase2, provisional).
+  masterAliases: [729],
   // 223 Explosion: the casting circle at the caster, then the Sahamutt runs from beside the caster to the
   // point, burning, and blasts it for 32 ticks (summonCast, sahamutt). The graded tiers also scorch the ground.
   visual: {

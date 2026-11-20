@@ -16,8 +16,16 @@ SKILLS = {
     288: 'death_scythe', 729: 'fire_beast', 730: 'aqua_beast',
     282: 'spirit_hook', 739: 'dark_phoenix_shot',
 }
-# Habilidad de S6 de la que se copia la mecanica: golpe directo (Meteorite), area en el objetivo (Cometfall), buff de grupo (Swell Life).
+# Habilidad de S6 de la que se copia la mecanica cuando no hay otra mas parecida: golpe directo (Meteorite), area en el
+# objetivo (Cometfall), buff de grupo (Swell Life).
 REF = {'direct': 2, 'area': 13, 'buff': 48}
+# La habilidad de S6 que mas se le parece: copia su mecanica en el servidor y su tipo en el cliente, que la dibuja como
+# ella mientras no tenga aspecto propio (masterAliases en su carpeta). Las que faltan usan REF.
+LIKE = {723: 41, 1501: 41, 1503: 48, 727: 51, 2023: 235, 2025: 51, 731: 56, 732: 55, 2012: 57, 733: 13, 2013: 57,
+        737: 238, 2095: 78, 288: 225, 729: 223, 730: 224, 282: 262, 739: 270}
+S6 = {int(n): (t, g) for n, t, g in re.findall(r'"num":(\d+),.*?"type":"(\w+)","target":"(\w+)"', open(os.path.join(OUT, '../../versions/shared/skills/skillsDatabase.ts')).read())}
+S6_TYPES = {n: t for n, (t, _) in S6.items()}
+SHAPE_OF = {'DirectHit': 'direct', 'Buff': 'buff'}
 CLASS = {'DW': (0, 2, 3), 'DK': (4, 6, 7), 'ELF': (8, 10, 11), 'MG': (12, 13, 13), 'DL': (16, 17, 17), 'SUM': (20, 22, 23), 'RF': (24, 25, 25)}
 REQ = {'ReqLevel': 'Level', 'ReqEnergy': 'Total Energy', 'ReqStrength': 'Total Strength', 'RegAgility': 'Total Agility',
        'ReqVitality': 'Total Vitality', 'ReqLeaderShip': 'Total Leadership'}
@@ -47,7 +55,9 @@ client = []
 for n, folder in SKILLS.items():
     d = skills[n]
     shape = 'buff' if d['Type'] == '-1' else 'area' if int(d['EffectRadio']) > 0 else 'direct'
-    ref = REF[shape]
+    ref = LIKE.get(n, REF[shape])
+    if n in LIKE:
+        shape = SHAPE_OF.get(S6_TYPES[ref], 'area')
     dmg_type = {'0': 0, '1': 1}.get(d['Type'], -1)
     classes = [c for c, k in CLASS.items() if d.get(f'Allow{c}', '0') != '0']
     numbers = sorted({x for c in classes for x in (CLASS[c][int(d[f'Allow{c}']) - 1:] if d[f'Allow{c}'] in '123' else CLASS[c][2:])})
@@ -82,7 +92,7 @@ for n, folder in SKILLS.items():
     undo.append(f'delete from config."Skill" where "Id"={sid(n)};')
     undo.append(f'delete from config."AreaSkillSettings" where "Id"={aid(n)};')
     rq = require.get(n, {})
-    client.append({'num': n, 'name': d['Name'], 'folder': folder, 'shape': shape, 'damageType': ['Physical', 'Wizardry'][dmg_type] if dmg_type >= 0 else 'None',
+    client.append({'num': n, 'name': d['Name'], 'folder': folder, 'shape': shape, 'like': ref, 'type': S6_TYPES.get(ref), 'damageType': ['Physical', 'Wizardry'][dmg_type] if dmg_type >= 0 else 'None',
                    'damage': int(d['Damage']), 'distance': int(d['Distance']), 'range': int(d['EffectRadio']), 'mana': int(d['ManaCost']),
                    'ag': int(d['StaminaCost']), 'level': int(d['ReqLevel']), 'energy': int(d['ReqEnergy']), 'classes': numbers,
                    'scroll': list(scroll) if scroll else None, 'scrollName': items.get(scroll, {}).get('Name') if scroll else None,
@@ -99,6 +109,8 @@ TYPE = {'direct': ('DirectHit', 'Explicit'), 'area': ('AreaSkillAutomaticHits', 
 rows = []
 for c in client:
     t, target = TYPE[c['shape']]
+    if c['like'] in LIKE.values():
+        t, target = S6[c['like']]
     rows.append('  ' + json.dumps({'num': c['num'], 'name': c['name'], 'classes': ' | '.join(map(str, c['classes'])), 'damageType': c['damageType'],
                                    'damage': c['damage'], 'distance': c['distance'], 'ag': c['ag'], 'mana': c['mana'], 'level': c['level'],
                                    'energy': c['energy'], 'type': t, 'target': target, 'range': c['range']}, separators=(',', ':')) + ',')

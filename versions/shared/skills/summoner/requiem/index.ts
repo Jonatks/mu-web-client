@@ -138,6 +138,8 @@ const requiemOf = (graded: boolean): Step => (at, c) => {
 export default defineSkill({
   id: 224,
   name: "Requiem",
+  // Our server's Season 19 skills with this one's mechanics, drawn as it until they have a look of their own (ops/fase2, provisional).
+  masterAliases: [730],
   // 224 Requiem: the casting circle, Neil before the caster swinging his blade, the knives and ground rings on
   // the point (summonCast, requiem).
   visual: {
