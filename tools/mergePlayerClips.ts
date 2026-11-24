@@ -23,13 +23,15 @@ export function mergeClips(ours: Document, theirs: Document, first: number): num
       const sampler = channel.getSampler();
       const target = channel.getTargetNode();
       const node = target && byName.get(target.getName());
-      if (!sampler || !node) continue;
-      const input = sampler.getInput()!, output = sampler.getOutput()!;
+      const input = sampler?.getInput(), output = sampler?.getOutput();
+      const inArray = input?.getArray(), outArray = output?.getArray();
+      const path = channel.getTargetPath();
+      if (!sampler || !node || !input || !output || !inArray || !outArray || !path) continue;
       const s = ours.createAnimationSampler()
         .setInterpolation(sampler.getInterpolation())
-        .setInput(ours.createAccessor().setType(input.getType()).setArray(input.getArray()!.slice()).setBuffer(buffer))
-        .setOutput(ours.createAccessor().setType(output.getType()).setArray(output.getArray()!.slice()).setNormalized(output.getNormalized()).setBuffer(buffer));
-      copy.addSampler(s).addChannel(ours.createAnimationChannel().setTargetNode(node).setTargetPath(channel.getTargetPath()!).setSampler(s));
+        .setInput(ours.createAccessor().setType(input.getType()).setArray(inArray.slice()).setBuffer(buffer))
+        .setOutput(ours.createAccessor().setType(output.getType()).setArray(outArray.slice()).setNormalized(output.getNormalized()).setBuffer(buffer));
+      copy.addSampler(s).addChannel(ours.createAnimationChannel().setTargetNode(node).setTargetPath(path).setSampler(s));
     }
     added++;
   }

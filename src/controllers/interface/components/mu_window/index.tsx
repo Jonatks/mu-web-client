@@ -1,3 +1,4 @@
+import { isOn } from '@/controllers/fidelity';
 import './style.less';
 import { useCallback, useEffect, type CSSProperties } from 'react';
 import { observable, runInAction } from 'mobx';
@@ -59,6 +60,8 @@ type MuItemWindowProps = {
 export const MuItemWindow = observer(
   ({ id, column = 0, className, style, label, onClose, children }: MuItemWindowProps) => {
     const back = useMuSprite(BACK_SPRITE);
+    // The modern theme (improvement `modernWindows`) draws the frame in CSS; Classic keeps the sprites below.
+    const modern = isOn('modernWindows');
     const chrome = useWindowChrome(id, {
       width: WINDOW_WIDTH,
       height: WINDOW_HEIGHT,
@@ -87,7 +90,7 @@ export const MuItemWindow = observer(
         role="dialog"
         aria-label={label ?? id.replace(/-/g, ' ')}
         tabIndex={-1}
-        className={`mu-item-window${className ? ` ${className}` : ''}`}
+        className={`mu-item-window${modern ? ' mu-modern' : ''}${className ? ` ${className}` : ''}`}
         onPointerDown={chrome.onPointerDown}
         style={{
           right: shown * WINDOW_WIDTH * chrome.scaleX,
@@ -96,13 +99,20 @@ export const MuItemWindow = observer(
           ...(isMobileDevice()
             ? { top: 0, bottom: 'auto' }
             : { bottom: bottomBarScreenHeight() }),
-          backgroundImage: back ? `url(${back.url})` : undefined,
+          backgroundImage: back && !modern ? `url(${back.url})` : undefined,
           backgroundSize: '100% 100%',
           ...chrome.style,
           ...(isMobileDevice() && chrome.anchored ? { transformOrigin: '100% 0' } : {}),
           ...style,
         }}
       >
+      {modern ? (
+        <>
+          <div className="mu-modern-head" style={{ height: TOP_HEIGHT }} aria-hidden />
+          <div className="mu-modern-foot" style={{ height: BOTTOM_HEIGHT }} aria-hidden />
+        </>
+      ) : (
+        <>
       <MuSpriteFrame
         file={TOP_SPRITE}
         width={WINDOW_WIDTH}
@@ -135,6 +145,8 @@ export const MuItemWindow = observer(
           top: WINDOW_HEIGHT - BOTTOM_HEIGHT,
         }}
       />
+        </>
+      )}
         {children}
         <MuResizeGrip id={id} width={WINDOW_WIDTH} />
       </div>
@@ -168,6 +180,9 @@ export const MuTableFrame = ({
   height,
   className,
 }: MuTableFrameProps) => {
+  if (isOn('modernWindows')) {
+    return <div className={`mu-table-frame mu-modern-table${className ? ` ${className}` : ''}`} style={{ left, top, width, height }} />;
+  }
   const runX = Math.max(0, width - TABLE_CORNER * 2);
   const runY = Math.max(0, height - TABLE_CORNER * 2);
 

@@ -1,3 +1,4 @@
+import { isOn } from '@/controllers/fidelity';
 import './style.less';
 import { observer } from 'mobx-react-lite';
 import { memo, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
@@ -167,6 +168,20 @@ export const GridSquares = memo(function GridSquares({
   hovered: string;
   squareClass: string;
 }) {
+  // The modern theme (improvement `modernWindows`): a recessed CSS cell instead of the sprite.
+  if (isOn('modernWindows')) {
+    return (
+      <>
+        {Array.from({ length: columns * rows }, (_, square) => (
+          <div
+            key={square}
+            className={`${squareClass} mu-modern-cell${used[square] === '1' ? ' used' : ''}${hovered[square] === '1' ? ' hovered' : ''}`}
+            style={{ ...squareStyle(columns, square), width: SQUARE, height: SQUARE }}
+          />
+        ))}
+      </>
+    );
+  }
   return (
     <>
       {Array.from({ length: columns * rows }, (_, square) => (

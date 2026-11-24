@@ -67,6 +67,9 @@ export default {
   'fidelity.stallGridPrices': 'Precios bajo los objetos de la tienda',
   'fidelity.stallGridPrices.hint':
     'Una tienda personal muestra el precio de cada objeto bajo sus casillas. Clásico: el precio solo aparece en la descripción del objeto, como en el original.',
+  'fidelity.modernWindows': 'Tema moderno de ventanas',
+  'fidelity.modernWindows.hint':
+    'Las ventanas de ítems se dibujan como paneles oscuros forjados con bordes dorados, nítidos a cualquier tamaño. Clásico: las imágenes originales de las ventanas.',
   'fidelity.menuLabelFit': 'Ajustar textos largos del menú',
   'fidelity.menuLabelFit.hint':
     'Un texto largo del menú de Escape se reduce para caber en su botón. Clásico: cada texto mantiene su tamaño, como en el original.',

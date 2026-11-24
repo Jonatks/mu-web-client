@@ -75,3 +75,95 @@
     }
   }
 }
+
+// ---- The modern theme (improvement `modernWindows`) -------------------------------------------------------
+// Forged panels: dark glass, an aged-gold edge that catches light at the top, cut corners. All in CSS, so it
+// stays sharp at any scale. Classic never gets these classes.
+@modern-cut: 8px;
+@modern-gold-hi: #e2cc94;
+@modern-gold: #a88a52;
+@modern-gold-lo: #4b3d25;
+@modern-panel-top: #1c1e26;
+@modern-panel-mid: #13141a;
+@modern-panel-low: #0b0c10;
+.modern-cut(@c) {
+  clip-path: polygon(@c 0, calc(100% - @c) 0, 100% @c, 100% calc(100% - @c), calc(100% - @c) 100%, @c 100%, 0 calc(100% - @c), 0 @c);
+}
+
+.mu-item-window.mu-modern {
+  image-rendering: auto;
+  background:
+    radial-gradient(120% 45% at 50% 0%, fade(@modern-gold, 16%), transparent 70%),
+    linear-gradient(180deg, @modern-panel-top 0%, @modern-panel-mid 55%, @modern-panel-low 100%);
+  .modern-cut(@modern-cut);
+
+  // The edge: a 1px gold gradient ring, brighter at the top.
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    padding: 1px;
+    pointer-events: none;
+    background: linear-gradient(180deg, @modern-gold-hi 0%, @modern-gold 22%, @modern-gold-lo 70%, @modern-gold 100%);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    .modern-cut(@modern-cut);
+  }
+
+  // A faint inner hairline, 3px in, so the panel reads as a plate set in a frame.
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    pointer-events: none;
+    border: 1px solid fade(@modern-gold-hi, 12%);
+    .modern-cut(@modern-cut - 2);
+  }
+
+  .mu-modern-head,
+  .mu-modern-foot {
+    position: absolute;
+    left: 0;
+    right: 0;
+    pointer-events: none;
+  }
+
+  // Where the window's title sits: a lit band ending in a gold rule that fades at both ends.
+  .mu-modern-head {
+    top: 0;
+    background: linear-gradient(180deg, fade(@modern-gold-hi, 9%), transparent 85%);
+    &::after {
+      content: '';
+      position: absolute;
+      left: 10%;
+      right: 10%;
+      bottom: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, @modern-gold 20%, @modern-gold-hi 50%, @modern-gold 80%, transparent);
+    }
+  }
+
+  .mu-modern-foot {
+    bottom: 0;
+    background: linear-gradient(0deg, fade(@modern-gold-hi, 6%), transparent 85%);
+    &::before {
+      content: '';
+      position: absolute;
+      left: 10%;
+      right: 10%;
+      top: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, fade(@modern-gold, 70%) 25%, fade(@modern-gold, 70%) 75%, transparent);
+    }
+  }
+}
+
+// An inner table: a recessed well with a thin gold line.
+.mu-modern-table {
+  background: fade(#000, 32%);
+  box-shadow:
+    inset 0 0 0 1px fade(@modern-gold, 40%),
+    inset 0 2px 6px fade(#000, 60%);
+  .modern-cut(4px);
+}
