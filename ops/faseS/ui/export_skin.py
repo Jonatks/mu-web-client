@@ -17,6 +17,10 @@ PIECES = {
     'slot_shield': ('InventoryFrame', 14), 'slot_gloves': ('InventoryFrame', 13), 'slot_pants': ('InventoryFrame', 11),
     'slot_boots': ('InventoryFrame', 10), 'slot_ring': ('InventoryFrame', 12), 'slot_earring': ('InventoryFrame', 127),
     'slot_pentagram': ('InventoryFrame', 9),
+    # The bottom bar (main.ozg): orb frames, orb glass (grey, tinted in CSS), the bar's ends and its slot strips.
+    'hud_orb_frame_l': ('main', 295), 'hud_orb_frame_r': ('main', 300), 'hud_orb_glass': ('main', 289),
+    'hud_bar_l': ('main', 301), 'hud_bar_r': ('main', 294), 'hud_slots_qwe': ('main', 299), 'hud_slot_r': ('main', 298),
+    'hud_slots_mid': ('main', 297), 'hud_slots_skill': ('main', 296),
 }
 for name, (frame, cid) in PIECES.items():
     Image.open(f'{src}/{frame}/{cid}.png').save(f'{out}/{name}.png', optimize=True)
@@ -24,4 +28,6 @@ for name, (frame, cid) in PIECES.items():
 row = Image.open(f'{src}/InventoryFrame/22.png')
 step = row.size[0] / 8
 row.crop((0, 0, round(step), row.size[1])).save(f'{out}/cell.png', optimize=True)
-print('ok', len(PIECES) + 1, 'piezas')
+# One skill square: the second of the three in the skill strip.
+Image.open(f'{src}/main/296.png').crop((44, 33, 74, 72)).save(f'{out}/hud_slot.png', optimize=True)
+print('ok', len(PIECES) + 2, 'piezas')

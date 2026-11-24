@@ -2356,3 +2356,60 @@ body:has(.mu-item-window) .mobile-controls .mobile-book {
     inset 0 0 0 3px rgba(214, 170, 96, 0.12),
     0 12px 40px rgba(0, 0, 0, 0.8) !important;
 }
+
+// ---- Season 19 skin (modern theme, `skinS19.ts` sets `.s19-skin` and the --s19-* pieces) ----------------------------------
+// The S19 bottom bar's own art over the touch HUD: the skull orb frames, the glass over the liquid, the stone skill squares.
+.s19-skin {
+  .mobile-orb-wrap {
+    .mu-orb-crest {
+      display: none;
+    }
+
+    &::before {
+      content: '';
+      position: absolute;
+      z-index: 4;
+      pointer-events: none;
+      top: -14%;
+      height: 124%;
+      background: no-repeat center / 100% 100%;
+    }
+
+    &.hp::before {
+      left: -6%;
+      width: 118%;
+      background-image: var(--s19-hud-orb-frame-l);
+    }
+
+    &.mp::before {
+      left: -4%;
+      width: 106%;
+      background-image: var(--s19-hud-orb-frame-r);
+    }
+  }
+
+  .mobile-orb {
+    width: 66px;
+    height: 66px;
+    border-radius: 50% !important;
+
+    &::after {
+      inset: 0;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: var(--s19-hud-orb-glass) center / 100% 100% no-repeat;
+      mix-blend-mode: overlay;
+      opacity: 0.95;
+    }
+  }
+
+  .mobile-slot {
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: var(--s19-hud-slot) center / 100% 100% no-repeat !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.7) !important;
+  }
+}

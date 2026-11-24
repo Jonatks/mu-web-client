@@ -32,6 +32,12 @@ export function s19SpriteFor(file: string): string | null {
   return name && isOn('modernWindows') ? s19Art(name) : null;
 }
 
+/** The pieces the stylesheets read as `--s19-<name>` (underscores become dashes). */
+const VAR_PIECES = [
+  'window_head', 'window_body', 'window_inner', 'cell', 'divider', 'tab',
+  'hud_orb_frame_l', 'hud_orb_frame_r', 'hud_orb_glass', 'hud_slot', 'hud_bar_l', 'hud_bar_r',
+];
+
 let varsSet = false;
 
 /** Puts the window pieces in CSS variables once, for the stylesheets (`mu_window`, `item_grid`). */
@@ -40,7 +46,9 @@ export function applyS19SkinVars(): void {
   varsSet = true;
   const root = document.documentElement.style;
   // Absolute: a url() in a variable resolves against the stylesheet that reads it (`/assets/*.css`), not the page.
-  for (const name of ['window_head', 'window_body', 'window_inner', 'cell', 'divider', 'tab']) {
-    root.setProperty(`--s19-${name.replace('_', '-')}`, `url("${new URL(s19Art(name), document.baseURI).href}")`);
+  for (const name of VAR_PIECES) {
+    root.setProperty(`--s19-${name.replaceAll('_', '-')}`, `url("${new URL(s19Art(name), document.baseURI).href}")`);
   }
+  // The HUD's S19 layer keys on this class; the window frame does not need it (its classes are the modern theme's).
+  if (isOn('modernWindows')) document.documentElement.classList.add('s19-skin');
 }
