@@ -203,11 +203,18 @@ Base pública y legal: MuEmu (github.com/Yomalex/MuEmu, licencia MIT), servidor 
 Season 16 y 17 coreanos (cliente 1.19.75). Las claves de cifrado del S19 (`Enc1.dat`, `Dec2.dat`) están en el
 cliente y no van protegidas. El GameServer del S19 sí está protegido (WinLicense): no se analiza.
 
+Hallazgo (24-11-2026): desde S17 cada versión del cliente oficial baraja sus códigos de mensaje (MuEmu trae la tabla
+de la 1.19.75); la del S19 está en su ejecutable protegido. Decisión tuya: protocolo estilo S17 propio entre nuestro
+cliente y nuestro servidor. Base elegida: el protocolo "Extended" que OpenMU ya trae (cliente de código abierto,
+versión 106.3, bytes de versión `20404`), con ítems de 5 a 15 bytes (excelente, ancient, harmony, guardian, sockets),
+estadísticas, nivel y experiencia en 32/64 bits, lista de personajes, mapa, apariencia y golpes ampliados. Es lo que
+S17 agranda, ya mantenido por OpenMU; lo del S19 que falte se suma encima con las estructuras S17 de MuEmu como guía.
+
 | Paso | Qué |
 |---|---|
 | P1 | Lista de diferencias S6 -> S17 (MuEmu tiene unas 40 estructuras propias de S16/S17: personaje, inventario de 15 bytes por ítem, visión de monstruos y jugadores, tienda, Muun, Gremory, eventos) |
-| P2 | OpenMU: versión de cliente nueva "S19" (definiciones de paquetes y plugins de vista solo para lo que cambia), elegida por la versión que manda el cliente |
-| P3 | Cliente web: juego de paquetes S19 en el borde de versiones (`versions/season19`), con el cifrado y lo que cambia |
+| P2 | OpenMU: la versión 106.3 ya existe; se suman los mensajes S19 que falten como plugins de esa versión |
+| P3 | Cliente web: hablar la versión 106.3 (paquetes `…Extended`, ítems de largo variable) desde el borde de versiones |
 | P4 | Pasar de S6 a S19 en tu servidor, con vuelta atrás; los mensajes propios (Majestic, Ruud, etc.) pasan a los del S19 cuando existan |
 | P5 | Ajuste a S19 exacto: solo comprobable capturando el tráfico de un cliente y un servidor S19 reales (Windows); sin eso queda "S17 coreano más lo del S19" |
 
