@@ -2,7 +2,7 @@ import { Quaternion, Vector3 } from '../../render/babylon/exports';
 import { MathUtils } from '@/core/mathUtils';
 import { decryptMapFile } from '../../terrain/mapFileEncryption';
 import { ArrayCopy } from '../download';
-import { modulusDecrypt } from './modulusCryptor';
+import { modulusDecrypt } from '../../../core/modulusCryptor';
 
 const SIZE_OF_Normal_t = 20;
 // [StructLayout(LayoutKind.Sequential, Pack = 4)]
@@ -429,4 +429,3 @@ export class BMDReader {
     return bmd;
   }
 }
-export { modulusDecrypt } from './modulusCryptor';

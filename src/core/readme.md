@@ -27,6 +27,8 @@ pathfinding. Nothing here knows about a skill, a window or a map.
   ZzzInventory.cpp:11204). Pure, so the guild flag (actors), the guild window and the module share it.
 - `InventoryConstants` (`inventoryConstants.ts`): OpenMU's inventory slot numbers and grid sizes. Pure, so
   the item rules controller, every module and the cash shop server share it.
+- `modulusDecrypt` (`modulusCryptor/`): Webzen's ModulusCryptor (BMD version 14, Season 16+ ATT / MAP / OZD), pure so
+  the terrain worker reads it without the model reader.
 - `devQuery`, `devQueryNumber`, `devVitalPercent` (`devSeams.ts`): URL seams, `null` outside dev.
 - `imageBytes.ts`: `isWebp`, `webpSize`, `imageMimeOf`: what an OZJ / OZT payload holds, a JPEG or TGA
   or the WebP of a lighter copy (`tools/liteAssets.ts`), so the sprite, effect, terrain and sign readers

@@ -1,4 +1,4 @@
-import { modulusDecrypt } from '../assets/bmd';
+import { modulusDecrypt } from '../../core/modulusCryptor';
 import { decryptMapFile } from './mapFileEncryption';
 
 /** The ATT / MAP header newer clients (Season 16+) put before a ModulusCryptor body instead of the map XOR. */

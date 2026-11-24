@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { CIPHERS } from './ciphers';
 import { rc5 } from './ciphers/rc';
-import { modulusDecrypt } from './modulusCryptor';
+import { modulusDecrypt } from '.';
 
 const hex = (s: string) => Uint8Array.from((s.match(/../g) ?? []).map(x => parseInt(x, 16)));
 const toHex = (b: Uint8Array) => Array.from(b, x => x.toString(16).padStart(2, '0')).join('');
