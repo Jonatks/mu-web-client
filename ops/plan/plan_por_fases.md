@@ -196,6 +196,33 @@ interfaz, efectos, sonido, música y movimientos; el motor está en el ejecutabl
    de equivalencias S19 -> S6 para monstruos y mapas como la de ítems.
 6. G2 (motor): sombras, luz y postproceso; se intercala con lo demás porque no depende del arte.
 
+
+#### Reemplazo total por el S19 (decisión tuya 24-11-2026)
+
+Objetivo: al entrar se ve y se juega el S19, cliente y servidor, con sus configuraciones por defecto en tu servidor.
+Dos frentes que avanzan juntos, mapa por mapa, empezando por Lorencia (corte vertical: al terminar Lorencia ya se ve
+y se juega como en el S19):
+
+- GS4, gráficos S19 en el cliente: terreno y objetos de cada mapa, monstruos, NPC, ítems (armas, armaduras, alas),
+  personajes y efectos con los modelos y texturas del cliente S19 (datos sin proteger), servidos desde la VM.
+- Fase S, servidor S19 (datos de `Servidor Season 19 Part 2-3/Data` convertidos a la configuración de OpenMU, con
+  respaldo y reversa, puestos por defecto en tu servidor):
+  - S1 experiencia: `ExpSystem` (tabla normal, master y majestic, tasas, grupo).
+  - S2 monstruos: estadísticas (`Monster/MonsterList.xml`), dónde y cuántos aparecen (`MonsterSpawn.xml`,
+    `MonsterRespawnLocation.xml`) y sus habilidades.
+  - S3 drops: lo que suelta cada monstruo (`Item/Drop`), cajas y bolsas (`ItemBag`, `ItemBagList.xml`), opciones
+    excelentes y de joyas.
+  - S4 tiendas de NPC (`Shops/ShopList.xml`) y precios.
+  - S5 mapas: puertas y movimientos (`World/GateTemplate.xml`, `MoveLevel.xml`) y el terreno caminable de cada mapa
+    S19, igual en cliente y servidor.
+  - S6 mezclas y tasas (`Mix`, `ChaosMix.ini`).
+  - S7 eventos: Blood Castle, Devil Square, Chaos Castle y demás, con horarios y premios.
+  - S8 fórmulas del personaje (`CalcCharacter.ini`, `Character`).
+
+Límites que siguen igual: el protocolo es el de S6 ampliado (lo nuevo va por mensajes propios); lo que el S19 resuelve
+en sus ejecutables (efectos, interfaz cifrada, reglas internas del GameServer) se rehace en OpenMU y en el cliente; las
+clases nuevas siguen en la fase 13.
+
 No se usa el arte ni el cliente de otros juegos de MU para móvil: son de otra empresa y hablan otro protocolo.
 
 ### Decisiones que necesito de ti, con mi recomendación
