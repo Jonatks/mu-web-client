@@ -117,6 +117,15 @@ Para la fase 7 basta con sumar una entrada por generacion y revisar sus exclusio
   `/opt/openmu/web/client/Data/Interface` sin pisar archivos de S6.
 - `pkill -f` con un patron que aparece en el propio comando de ssh mata la sesion: no usarlo asi.
 
+### Interfaz del S19 (24-11-2026)
+- La interfaz moderna del S19 esta en `Data/Interface/GFx`: 175 `.ozg` (Scaleform) y 1.245 `.ozd` (imagenes DDS),
+  cifrados archivo por archivo (los primeros bytes de dos DDS del mismo tamano no coinciden: clave o IV por archivo).
+  La clave esta en el ejecutable protegido con Themida: no se descifra. Decision: no se extrae.
+- El resto de `Data/Interface` (721 archivos sin cifrar) es la interfaz clasica: 637 identicos a S6; solo cambian
+  algunos iconos (`new_master_icon`, `newui_statusicon*`), fondos de carga y lo nuevo de Muun, tienda y macros.
+- Movimientos: `tools/mergePlayerClips.ts` suma los 68 clips del `player.bmd` S19 al `player.glb` de la VM (mismo
+  esqueleto); copia del original en `game-assets/Player/player.glb.bak-s6`. `/anim N` los muestra en el heroe.
+
 ### Fase 2d: habilidades de cuarta clase (20-11-2026)
 - `ops/fase2/gen_skills4.py` lee SkillList/SkillLearn/SkillRequire/ItemList del S19 y escribe el SQL (con reversa), la
   tabla del cliente (`skillsDatabaseS19.ts`), los pergaminos del cliente y la tabla de requisitos del plugin.
