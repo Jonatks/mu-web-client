@@ -24,10 +24,10 @@ import { isSocialAction } from '../actors/weaponClass';
  * per-frame scale, every flag and map. Pinned before the per-action data left the tables for one
  * file per action; update on purpose.
  */
-const ENUM_HASH = 'efca3df993fae228e4d27e410d96f07ea30cfcf4c0bc0f57fc96b5a5a715bcd0';
-const SPEED_HASH = 'c79608416eecf60d6fc5c69cbc05c4fb3098a70a6b4f7a05a50d8506e71e5c90';
-const FRAME_HASH = 'd910837c3501746ffd2eaa923c96de756dc4c3214a658cb46b6370567693680e';
-const FLAGS_HASH = 'aa89d1d4e6d53b5a3d7bbb65791d70add96cc77cc653a3c1ec29d502aa328ce5';
+const ENUM_HASH = 'efd4c41395ecdfeb2339d4d5da7ba10a291f354bf8d280cb24fcb8a8f43d1b2b';
+const SPEED_HASH = '9bf8c4ff17321e96cfd04b9d8d6213761932a82ce543133c570673b23fe09eb9';
+const FRAME_HASH = 'cbf18adb33d5965d6628dd6a316e1e3840e03518bd3a5c53c4c873dbc8c0c6d6';
+const FLAGS_HASH = 'b075605eb46d87c4b932109280f73910d9fa6200b3d441f3f28ab4f80388d78c';
 
 const MAX = PlayerAction.MAX_PLAYER_ACTION;
 const ACTIONS: number[] = Array.from({ length: MAX + 6 }, (_, i) => i - 2);

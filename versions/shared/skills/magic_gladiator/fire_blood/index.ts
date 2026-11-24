@@ -10,5 +10,5 @@ export default defineSkill({
   id: 732,
   name: 'Fire Blood',
   visual: { area: s19Burst({ colour: [1, 0.55, 0.15], end: [0.7, 0.05, 0], tiles: 2, sound: 'Sound/eExplosion' }) },
-  clip: { ground: A.PLAYER_ATTACK_SKILL_WHEEL }, // Fire Slash's
+  clip: { ground: A.PLAYER_S19_325 }, // a Season 19 clip picked by eye (animations/s19_325.ts)
 });

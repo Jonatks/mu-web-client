@@ -1,4 +1,5 @@
 import { defineSkill } from '@/controllers/skills/define';
+import { A } from '@/controllers/combat/recipes';
 import { TEX } from '@/controllers/fx/recipes';
 import { type ParticleRecipe } from '@/controllers/fx/core';
 import { Step, arrow, particles, ring, sprite } from '@/controllers/skills/visuals';
@@ -34,4 +35,5 @@ export default defineSkill({
   checksArrows: true,
   visual: { travel: { ...arrow(), bowArrow: true, release: true }, impact: holyHit },
   light: { impact: effectLight([1, 0.95, 0.75], 1.8, 0.5, { release: 0.35 }) },
+  clip: { ground: A.PLAYER_S19_343 }, // a Season 19 clip picked by eye (animations/s19_343.ts)
 });

@@ -57,6 +57,6 @@ export default defineSkill({
   name: 'Fire Blow',
   warriorGlint: true,
   visual: { area: afterRelease(fireBlow) },
-  clip: { ground: A.PLAYER_ATTACK_ONETOONE }, // Death Stab's thrust
+  clip: { ground: A.PLAYER_S19_328 }, // a Season 19 clip picked by eye (animations/s19_328.ts)
   light: { land: effectLight([1, 0.45, 0.12], 2, 0.7, { heightOffset: 0.8, release: 0.4 }) },
 });

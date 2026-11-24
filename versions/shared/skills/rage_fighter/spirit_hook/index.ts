@@ -11,5 +11,5 @@ export default defineSkill({
   name: 'Spirit Hook',
   sound: 'Sound/Ragefighter/Rage_Giantswing',
   visual: { impact: s19Burst({ colour: [0.5, 0.9, 1], end: [0.1, 0.4, 0.8], tiles: 2 }) },
-  clip: { ground: A.PLAYER_SKILL_GIANTSWING }, // Chain Drive's
+  clip: { ground: A.PLAYER_S19_350 }, // a Season 19 clip picked by eye (animations/s19_350.ts)
 });

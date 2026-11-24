@@ -123,6 +123,13 @@ Para la fase 7 basta con sumar una entrada por generacion y revisar sus exclusio
   La clave esta en el ejecutable protegido con Themida: no se descifra. Decision: no se extrae.
 - El resto de `Data/Interface` (721 archivos sin cifrar) es la interfaz clasica: 637 identicos a S6; solo cambian
   algunos iconos (`new_master_icon`, `newui_statusicon*`), fondos de carga y lo nuevo de Muun, tienda y macros.
+- Movimientos S19 asignados a ojo (24-11-2026), mirando cada clip dibujado como esqueleto (`/anim N` para verlos):
+  284-291 posturas y caidas con arma, 292-323 gestos y emotes, 324-331 y 343-351 golpes y conjuros, 332 una secuencia
+  larga (4,2 s), 334-339 sentado o montado, 340-342 reposos. Habilidades: Meteor Strike y Dark Blast 326, Meteor Storm,
+  Spirit Blast y Aqua Beast 330, Soul Seeker y Death Scythe 324, Fire Blow 328, Sword Blow 349, Focus Shot 344, Holy
+  Bolt 343, Raining Arrow 327, Fire Blood 325, Ice Blood 348, Chaos Blade 346, Havok Spear 329, Wind Soul y Fire Beast
+  347, Spirit Hook 350, Dark Phoenix Shot 351. Cada clip nuevo tiene `fallback` (el de S6 que se juega si el rig no lo
+  trae). Provisional: corregir con un video del S19.
 - Movimientos: `tools/mergePlayerClips.ts` suma los 68 clips del `player.bmd` S19 al `player.glb` de la VM (mismo
   esqueleto); copia del original en `game-assets/Player/player.glb.bak-s6`. `/anim N` los muestra en el heroe.
 

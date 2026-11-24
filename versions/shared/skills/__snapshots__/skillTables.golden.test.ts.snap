@@ -3598,7 +3598,7 @@ exports[`skill tables golden > skill 281 1`] = `
 exports[`skill tables golden > skill 282 1`] = `
 {
   "clip": [
-    249,
+    350,
   ],
   "delay": null,
   "heroSound": "Sound/Ragefighter/Rage_Giantswing",
@@ -3672,10 +3672,7 @@ exports[`skill tables golden > skill 287 1`] = `
 exports[`skill tables golden > skill 288 1`] = `
 {
   "clip": [
-    172,
-    173,
-    174,
-    175,
+    324,
   ],
   "delay": null,
   "heroSound": "Sound/Rargle",

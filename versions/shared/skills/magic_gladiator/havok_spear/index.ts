@@ -11,5 +11,5 @@ export default defineSkill({
   name: 'Havok Spear',
   sound: 'Sound/sKnightSkill2',
   visual: { impact: s19Burst({ colour: [0.45, 0.7, 1], end: [0.1, 0.2, 0.8] }) },
-  clip: { ground: A.PLAYER_ATTACK_ONE_FLASH }, // Spiral Slash's
+  clip: { ground: A.PLAYER_S19_329 }, // a Season 19 clip picked by eye (animations/s19_329.ts)
 });

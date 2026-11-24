@@ -2,6 +2,7 @@ import { assetWorldNum } from '../assets/worldAssets';
 import { Matrix, Quaternion, Vector3, BoundingBox, BoundingInfo, Mesh, type StandardMaterial, TransformNode, type Scene, AbstractMesh, Skeleton, AnimationGroup, type Plane } from './babylon/exports';
 import type { IVector3Like } from './babylon/exports';
 import { PLAY_SPEED_TO_RATIO } from '../anim/playSpeed';
+import { animations } from '../anim';
 import {
   SHADOW_SLOTS,
   createObjectShadow,
@@ -924,6 +925,12 @@ export class ModelObject {
 
   playAction(actionIndex: number, loop: boolean = true) {
     if (!this.gltf) return;
+    // A newer client's clip (our Season 19 ones) on a rig that does not carry it: its fallback.
+    if (!this.gltf.animationGroups[actionIndex]) {
+      const fallback = animations.get(actionIndex)?.fallback;
+      const id = fallback && animations.named(fallback)?.action;
+      if (id !== undefined) actionIndex = id;
+    }
 
     const prevAction = this.CurrentAction;
     if (prevAction === actionIndex) return;

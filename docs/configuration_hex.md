@@ -16,12 +16,12 @@ Format version: **1**
 | 0 | 1 | Format version. Anything else means a different table. |
 | 1 | 1 | Number of flag bytes that follow (currently 9). |
 | 2 | 9 | The on/off settings, one bit each, first in bit 0 of the first byte. |
-| 11 | 1 | Number of value bytes that follow (currently 65). |
-| 12 | 65 | The numeric settings, one byte each, each stored as value + 128. |
-| 77 | 2 | Language, two ASCII letters (`65 73` is `es`). |
-| 79 | 2 | Texture pack digest, `0000` when the original textures are in use. |
+| 11 | 1 | Number of value bytes that follow (currently 67). |
+| 12 | 67 | The numeric settings, one byte each, each stored as value + 128. |
+| 79 | 2 | Language, two ASCII letters (`65 73` is `es`). |
+| 81 | 2 | Texture pack digest, `0000` when the original textures are in use. |
 
-Total: **81 bytes**, 162 hex characters.
+Total: **83 bytes**, 166 hex characters.
 
 ## On/off settings
 
@@ -35,67 +35,68 @@ Bit `n` counts from the first flag byte: byte `n / 8`, bit `n % 8`, lowest bit f
 | 3 | 0.3 | `animeEffects` |
 | 4 | 0.4 | `animeImpacts` |
 | 5 | 0.5 | `autoAttack` |
-| 6 | 0.6 | `autoManaPotion` |
-| 7 | 0.7 | `autoQuiver` |
-| 8 | 1.0 | `autoReconnect` |
-| 9 | 1.1 | `blockBrowserKeys` |
-| 10 | 1.2 | `cameraControl` |
-| 11 | 1.3 | `chatEmojis` |
-| 12 | 1.4 | `chatSystemMessages` |
-| 13 | 1.5 | `chatTimestamps` |
-| 14 | 1.6 | `clouds` |
-| 15 | 1.7 | `confirmValuableItems` |
-| 16 | 2.0 | `dropDrawCap` |
-| 17 | 2.1 | `dropSoundAncient` |
-| 18 | 2.2 | `dropSoundExcellent` |
-| 19 | 2.3 | `dropSoundFilter` |
-| 20 | 2.4 | `dropSoundHighLevel` |
-| 21 | 2.5 | `dropSoundJewels` |
-| 22 | 2.6 | `dropSoundOther` |
-| 23 | 2.7 | `dropSoundZen` |
-| 24 | 3.0 | `dropTooltips` |
-| 25 | 3.1 | `dynamicLights` |
-| 26 | 3.2 | `effectShedding` |
-| 27 | 3.3 | `englishItemNames` |
-| 28 | 3.4 | `eventTimers` |
-| 29 | 3.5 | `firstPersonBob` |
-| 30 | 3.6 | `fxaa` |
-| 31 | 3.7 | `grassOutline` |
-| 32 | 4.0 | `hearInstruments` |
-| 33 | 4.1 | `helperItemFilters` |
-| 34 | 4.2 | `lockWindows` |
-| 35 | 4.3 | `lootAncient` |
-| 36 | 4.4 | `lootExcellent` |
-| 37 | 4.5 | `lootFilter` |
-| 38 | 4.6 | `lootHighLevel` |
-| 39 | 4.7 | `lootJewels` |
-| 40 | 5.0 | `lootOther` |
-| 41 | 5.1 | `lowHealthWarning` |
-| 42 | 5.2 | `lowManaWarning` |
-| 43 | 5.3 | `lowPresetApplied` |
-| 44 | 5.4 | `minimapCorner` |
-| 45 | 5.5 | `monsterEffects` |
-| 46 | 5.6 | `muteInBackground` |
-| 47 | 5.7 | `npcAnimations` |
-| 48 | 6.0 | `otherGearEffects` |
-| 49 | 6.1 | `otherPets` |
-| 50 | 6.2 | `otherPlayerAnimations` |
-| 51 | 6.3 | `otherSkillEffects` |
-| 52 | 6.4 | `performanceReadout` |
-| 53 | 6.5 | `postProcessing` |
-| 54 | 6.6 | `propBatching` |
-| 55 | 6.7 | `questTracker` |
-| 56 | 7.0 | `quickItemActions` |
-| 57 | 7.1 | `shadows` |
-| 58 | 7.2 | `skillVisualBudget` |
-| 59 | 7.3 | `slideHelp` |
-| 60 | 7.4 | `statPointAmounts` |
-| 61 | 7.5 | `stateWarnings` |
-| 62 | 7.6 | `thirdPersonMouseLook` |
-| 63 | 7.7 | `touchStickHidden` |
-| 64 | 8.0 | `weatherEffects` |
-| 65 | 8.1 | `whisperBeep` |
-| 66 | 8.2 | `wsadMovement` |
+| 6 | 0.6 | `autoHealthPotion` |
+| 7 | 0.7 | `autoManaPotion` |
+| 8 | 1.0 | `autoQuiver` |
+| 9 | 1.1 | `autoReconnect` |
+| 10 | 1.2 | `blockBrowserKeys` |
+| 11 | 1.3 | `cameraControl` |
+| 12 | 1.4 | `chatEmojis` |
+| 13 | 1.5 | `chatSystemMessages` |
+| 14 | 1.6 | `chatTimestamps` |
+| 15 | 1.7 | `clouds` |
+| 16 | 2.0 | `confirmValuableItems` |
+| 17 | 2.1 | `dropDrawCap` |
+| 18 | 2.2 | `dropSoundAncient` |
+| 19 | 2.3 | `dropSoundExcellent` |
+| 20 | 2.4 | `dropSoundFilter` |
+| 21 | 2.5 | `dropSoundHighLevel` |
+| 22 | 2.6 | `dropSoundJewels` |
+| 23 | 2.7 | `dropSoundOther` |
+| 24 | 3.0 | `dropSoundZen` |
+| 25 | 3.1 | `dropTooltips` |
+| 26 | 3.2 | `dynamicLights` |
+| 27 | 3.3 | `effectShedding` |
+| 28 | 3.4 | `englishItemNames` |
+| 29 | 3.5 | `eventTimers` |
+| 30 | 3.6 | `firstPersonBob` |
+| 31 | 3.7 | `fxaa` |
+| 32 | 4.0 | `grassOutline` |
+| 33 | 4.1 | `hearInstruments` |
+| 34 | 4.2 | `helperItemFilters` |
+| 35 | 4.3 | `lockWindows` |
+| 36 | 4.4 | `lootAncient` |
+| 37 | 4.5 | `lootExcellent` |
+| 38 | 4.6 | `lootFilter` |
+| 39 | 4.7 | `lootHighLevel` |
+| 40 | 5.0 | `lootJewels` |
+| 41 | 5.1 | `lootOther` |
+| 42 | 5.2 | `lowHealthWarning` |
+| 43 | 5.3 | `lowManaWarning` |
+| 44 | 5.4 | `lowPresetApplied` |
+| 45 | 5.5 | `minimapCorner` |
+| 46 | 5.6 | `monsterEffects` |
+| 47 | 5.7 | `muteInBackground` |
+| 48 | 6.0 | `npcAnimations` |
+| 49 | 6.1 | `otherGearEffects` |
+| 50 | 6.2 | `otherPets` |
+| 51 | 6.3 | `otherPlayerAnimations` |
+| 52 | 6.4 | `otherSkillEffects` |
+| 53 | 6.5 | `performanceReadout` |
+| 54 | 6.6 | `postProcessing` |
+| 55 | 6.7 | `propBatching` |
+| 56 | 7.0 | `questTracker` |
+| 57 | 7.1 | `quickItemActions` |
+| 58 | 7.2 | `shadows` |
+| 59 | 7.3 | `skillVisualBudget` |
+| 60 | 7.4 | `slideHelp` |
+| 61 | 7.5 | `statPointAmounts` |
+| 62 | 7.6 | `stateWarnings` |
+| 63 | 7.7 | `thirdPersonMouseLook` |
+| 64 | 8.0 | `touchStickHidden` |
+| 65 | 8.1 | `weatherEffects` |
+| 66 | 8.2 | `whisperBeep` |
+| 67 | 8.3 | `wsadMovement` |
 
 ## Value settings
 
@@ -115,59 +116,61 @@ Each is one byte; subtract 128 to get the value. Index 0 is the first byte after
 | 9 | `animeShading` |
 | 10 | `animeSpeedLines` |
 | 11 | `anisotropy` |
-| 12 | `bloom` |
-| 13 | `brightness` |
-| 14 | `cameraFov` |
-| 15 | `chatEmojiSize` |
-| 16 | `chromatic` |
-| 17 | `combatVolume` |
-| 18 | `compareTooltips` |
-| 19 | `dropVolume` |
-| 20 | `effectLevel` |
-| 21 | `effectsVolume` |
-| 22 | `fidelity` |
-| 23 | `filmGrain` |
-| 24 | `fpsLimit` |
-| 25 | `glow` |
-| 26 | `grassDensity` |
-| 27 | `instrumentsVolume` |
-| 28 | `itemEffects` |
-| 29 | `lightingQuality` |
-| 30 | `linePlacement` |
-| 31 | `lineStrength` |
-| 32 | `lineWidth` |
-| 33 | `lootZen` |
-| 34 | `lowHealthPercent` |
-| 35 | `lowManaPercent` |
-| 36 | `materialDetail` |
-| 37 | `materialGround` |
-| 38 | `materialMetal` |
-| 39 | `materialPlate` |
-| 40 | `materialQuality` |
-| 41 | `materialRim` |
-| 42 | `materialRoughness` |
-| 43 | `materialSheen` |
-| 44 | `materialSkin` |
-| 45 | `materialSky` |
-| 46 | `monsterVolume` |
-| 47 | `msaa` |
-| 48 | `musicVolume` |
-| 49 | `partyInviteReply` |
-| 50 | `renderDistance` |
-| 51 | `renderScale` |
-| 52 | `renderingStyle` |
-| 53 | `shadeSteps` |
-| 54 | `sharpness` |
-| 55 | `stepsVolume` |
-| 56 | `styleStrength` |
-| 57 | `sunShafts` |
-| 58 | `toneMapper` |
-| 59 | `touchStickSize` |
-| 60 | `uiScale` |
-| 61 | `uiVolume` |
-| 62 | `upscale` |
-| 63 | `vignette` |
-| 64 | `volume` |
+| 12 | `autoPotionPercent` |
+| 13 | `bloom` |
+| 14 | `brightness` |
+| 15 | `cameraFov` |
+| 16 | `chatEmojiSize` |
+| 17 | `chromatic` |
+| 18 | `combatVolume` |
+| 19 | `compareTooltips` |
+| 20 | `dropVolume` |
+| 21 | `effectLevel` |
+| 22 | `effectsVolume` |
+| 23 | `fidelity` |
+| 24 | `filmGrain` |
+| 25 | `fpsLimit` |
+| 26 | `glow` |
+| 27 | `grassDensity` |
+| 28 | `instrumentsVolume` |
+| 29 | `itemEffects` |
+| 30 | `lightingQuality` |
+| 31 | `linePlacement` |
+| 32 | `lineStrength` |
+| 33 | `lineWidth` |
+| 34 | `lootZen` |
+| 35 | `lowHealthPercent` |
+| 36 | `lowManaPercent` |
+| 37 | `materialDetail` |
+| 38 | `materialGround` |
+| 39 | `materialMetal` |
+| 40 | `materialPlate` |
+| 41 | `materialQuality` |
+| 42 | `materialRim` |
+| 43 | `materialRoughness` |
+| 44 | `materialSheen` |
+| 45 | `materialSkin` |
+| 46 | `materialSky` |
+| 47 | `monsterVolume` |
+| 48 | `msaa` |
+| 49 | `musicVolume` |
+| 50 | `partyInviteReply` |
+| 51 | `pixelDensity` |
+| 52 | `renderDistance` |
+| 53 | `renderScale` |
+| 54 | `renderingStyle` |
+| 55 | `shadeSteps` |
+| 56 | `sharpness` |
+| 57 | `stepsVolume` |
+| 58 | `styleStrength` |
+| 59 | `sunShafts` |
+| 60 | `toneMapper` |
+| 61 | `touchStickSize` |
+| 62 | `uiScale` |
+| 63 | `uiVolume` |
+| 64 | `upscale` |
+| 65 | `vignette` |
+| 66 | `volume` |
 
 ## Worked example
 

@@ -1,4 +1,5 @@
 import { defineSkill } from '@/controllers/skills/define';
+import { A } from '@/controllers/combat/recipes';
 import { FIRE_SPARKS, TEX } from '@/controllers/fx/recipes';
 import { Step, arrow, particles, ring, sprite } from '@/controllers/skills/visuals';
 import { effectLight } from '@/controllers/lighting/recipes';
@@ -23,4 +24,5 @@ export default defineSkill({
     impact: focusHit,
   },
   light: { impact: effectLight([1, 0.8, 0.4], 1.6, 0.4, { release: 0.3 }) },
+  clip: { ground: A.PLAYER_S19_344 }, // a Season 19 clip picked by eye (animations/s19_344.ts)
 });

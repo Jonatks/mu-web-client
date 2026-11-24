@@ -11,5 +11,5 @@ export default defineSkill({
   name: 'Wind Soul',
   sound: 'Sound/caotic',
   visual: { area: s19Burst({ colour: [0.6, 1, 0.6], end: [0.1, 0.5, 0.2], tiles: 2, bursts: 5 }) },
-  clip: { ground: A.PLAYER_ATTACK_STRIKE }, // Chaotic Diseier's
+  clip: { ground: A.PLAYER_S19_347 }, // a Season 19 clip picked by eye (animations/s19_347.ts)
 });

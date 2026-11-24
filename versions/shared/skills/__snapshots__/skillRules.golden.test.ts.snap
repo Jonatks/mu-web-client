@@ -303,13 +303,13 @@ exports[`skill rules golden > cast clip and SwordCount per pose and context 1`] 
     "sword": "70effb7bd5b146d0",
   },
   "282": {
-    "clips": "PLAYER_SKILL_GIANTSWING",
-    "hash": "1b16a159864954b8",
+    "clips": "PLAYER_S19_350",
+    "hash": "cc44311f854e0b1d",
     "sword": "70effb7bd5b146d0",
   },
   "288": {
-    "clips": "PLAYER_SKILL_SUMMON PLAYER_SKILL_SUMMON_FENRIR PLAYER_SKILL_SUMMON_UNI",
-    "hash": "dc839ae038e0a9d8",
+    "clips": "PLAYER_S19_324",
+    "hash": "5df3a84e7f118b80",
     "sword": "70effb7bd5b146d0",
   },
   "3": {

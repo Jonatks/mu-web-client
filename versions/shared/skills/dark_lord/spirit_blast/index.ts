@@ -11,5 +11,5 @@ export default defineSkill({
   name: 'Spirit Blast',
   sound: 'Sound/Darklord_firescream',
   visual: { area: s19Burst({ colour: [1, 0.85, 0.4], end: [0.8, 0.3, 0], tiles: 3, bursts: 6 }) },
-  clip: { ground: A.PLAYER_ATTACK_STRIKE }, // Fire Scream's
+  clip: { ground: A.PLAYER_S19_330 }, // a Season 19 clip picked by eye (animations/s19_330.ts)
 });

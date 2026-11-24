@@ -1,4 +1,5 @@
 import { defineSkill } from '@/controllers/skills/define';
+import { A } from '@/controllers/combat/recipes';
 import { TEX } from '@/controllers/fx/recipes';
 import { effects } from '@/controllers/fx';
 import { delay, entityPos, type ParticleRecipe } from '@/controllers/fx/core';
@@ -56,4 +57,5 @@ export default defineSkill({
   sound: 'Sound/sEvil',
   visual: { area: soulSeeker },
   light: { land: effectLight([0.4, 1, 0.6], 1.4, 0.5, { heightOffset: 0.8, release: 0.4 }) },
+  clip: { ground: A.PLAYER_S19_324 }, // a Season 19 clip picked by eye (animations/s19_324.ts)
 });

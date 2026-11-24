@@ -1,4 +1,5 @@
 import { defineSkill } from '@/controllers/skills/define';
+import { A } from '@/controllers/combat/recipes';
 import { s19Burst } from '../../_shared';
 
 /**
@@ -9,4 +10,5 @@ export default defineSkill({
   id: 739,
   name: 'Dark Phoenix Shot',
   visual: { area: s19Burst({ colour: [1, 0.3, 0.2], end: [0.3, 0, 0.1], tiles: 2, bursts: 4, sound: 'Sound/eExplosion' }) },
+  clip: { ground: A.PLAYER_S19_351 }, // a Season 19 clip picked by eye (animations/s19_351.ts)
 });

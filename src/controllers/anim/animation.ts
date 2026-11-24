@@ -47,6 +47,8 @@ export type AnimationDef = {
   wingsFlap?: boolean;
   /** The clip a female character plays instead (`SetActionClass`). */
   female?: PlayerActionName;
+  /** A newer client's clip (our Season 19 ones, 284 on): what plays when the rig does not carry it. */
+  fallback?: PlayerActionName;
   /** The server actions (0x18) that play it. */
   serverActions?: readonly ServerPlayerActionType[];
 };

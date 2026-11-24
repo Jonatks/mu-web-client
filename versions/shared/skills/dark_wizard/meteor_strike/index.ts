@@ -1,4 +1,5 @@
 import { defineSkill } from '@/controllers/skills/define';
+import { A } from '@/controllers/combat/recipes';
 import { Step } from '@/controllers/skills/visuals';
 import { Vector3 } from '@/controllers/render/babylon/exports';
 import { delay } from '@/controllers/fx/core';
@@ -36,4 +37,5 @@ export default defineSkill({
   lookAliases: [734],
   visual: { area: meteorStrike },
   light: METEOR_STRIKE_LIGHT,
+  clip: { ground: A.PLAYER_S19_326 }, // a Season 19 clip picked by eye (animations/s19_326.ts)
 });

@@ -11,5 +11,5 @@ export default defineSkill({
   name: 'Chaos Blade',
   sound: 'Sound/sKnightSkill2',
   visual: { impact: s19Burst({ colour: [0.8, 0.4, 1], end: [0.3, 0, 0.6] }) },
-  clip: { ground: A.PLAYER_ATTACK_ONE_FLASH }, // Spiral Slash's
+  clip: { ground: A.PLAYER_S19_346 }, // a Season 19 clip picked by eye (animations/s19_346.ts)
 });

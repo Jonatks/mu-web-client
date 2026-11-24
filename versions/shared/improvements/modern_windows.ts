@@ -7,7 +7,7 @@ import { defineImprovement } from '@/controllers/fidelity';
  */
 export default defineImprovement({
   id: 'modernWindows',
-  preset: 'ultra',
+  preset: 'enhanced',
   labelKey: 'fidelity.modernWindows',
   hintKey: 'fidelity.modernWindows.hint',
 });

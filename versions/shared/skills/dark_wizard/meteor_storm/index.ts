@@ -1,4 +1,5 @@
 import { defineSkill } from '@/controllers/skills/define';
+import { A } from '@/controllers/combat/recipes';
 import { Step, cm } from '@/controllers/skills/visuals';
 import { Vector3 } from '@/controllers/render/babylon/exports';
 import { delay } from '@/controllers/fx/core';
@@ -32,4 +33,5 @@ export default defineSkill({
       crater: effectLight([1, 0.3, 0.06], 1.1, 1.2, { attack: 0.1, release: 0.7 }),
     },
   },
+  clip: { ground: A.PLAYER_S19_330 }, // a Season 19 clip picked by eye (animations/s19_330.ts)
 });

@@ -41,5 +41,5 @@ export default defineSkill({
   name: 'Raining Arrow',
   checksArrows: true,
   visual: { area: rainingArrow },
-  clip: { ground: A.PLAYER_ATTACK_BOW },
+  clip: { ground: A.PLAYER_S19_327 }, // a Season 19 clip picked by eye (animations/s19_327.ts)
 });

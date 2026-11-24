@@ -208,8 +208,7 @@ export default defineSkill({
   // Master numbers with no row of their own that draw as this skill (SKILL_REPLACEMENTS).
   lookAliases: [330, 332],
   // Master numbers cast, heard, lit and drawn as this skill (the original names them in its `case`).
-  // 1501 Sword Blow: our server's Season 19 skill (ops/fase2), its whirl drawn as this one (provisional).
-  masterAliases: [481, 1501],
+  masterAliases: [481],
   // 41 Twisting Slash: at the release, through AttackStage's default case (any attack clip at key 5, else tick 14,
   // ZzzCharacter.cpp:3044-3063), five copies of the wielded weapon whirl round the knight
   // with sparks, smoke, a glow and a grey light under each; see twistingSlash.
