@@ -1,5 +1,6 @@
 # Fase S2: los monstruos y NPC de un mapa como en el S19 (Monster/MonsterSpawn.xml y MonsterList.xml).
 #   python3 ops/faseS/gen_map.py "<Data del servidor S19>" <numero de mapa> <carpeta de salida>
+# Solo toca las apariciones normales y errantes (SpawnTrigger 0 y 6): las de eventos e invasiones quedan.
 # Escribe s2_mapa<N>.sql y s2_mapa<N>_undo.sql. Lo que no tiene definicion en la base (NPC nuevos del S19) se salta y
 # queda listado al final del .sql.
 import re, sys
@@ -46,10 +47,10 @@ names = '\n'.join(f'--   {n} {mons[n]["Name"]}' for n in nums)
 open(f'{out}/s2_mapa{mapnr}.sql', 'w').write(f"""-- Fase S2, mapa {mapnr}: monstruos y NPC del S19. Hecho por ops/faseS/gen_map.py.
 begin;
 create schema if not exists mu_plugins;
-create table {bak} as select s.* from {area} s where s."GameMapId" = {gm};
+create table {bak} as select s.* from {area} s where s."GameMapId" = {gm} and s."SpawnTrigger" in (0, 6);
 create table {mbak} as select "Id", "RespawnDelay", "MoveRange", "ViewRange", "AttackRange", "AttackDelay", "MoveDelay" from config."MonsterDefinition" where "Number" in ({mlist});
 create table {mbak}_attr as select ma."Id", ma."Value" from config."MonsterAttribute" ma join config."MonsterDefinition" d on d."Id" = ma."MonsterDefinitionId" where d."Number" in ({mlist});
-delete from {area} where "GameMapId" = {gm};
+delete from {area} where "GameMapId" = {gm} and "SpawnTrigger" in (0, 6);
 insert into {area} ("Id", "GameMapId", "MonsterDefinitionId", "X1", "Y1", "X2", "Y2", "Direction", "Quantity", "SpawnTrigger", "WaveNumber")
 select gen_random_uuid(), {gm}, d."Id", v.x1, v.y1, v.x2, v.y2, v.dir, v.q,
   coalesce((select b."SpawnTrigger" from {bak} b where b."MonsterDefinitionId" = d."Id" limit 1), 0), 0
@@ -64,7 +65,7 @@ commit;
 {names}
 """)
 open(f'{out}/s2_mapa{mapnr}_undo.sql', 'w').write(f"""begin;
-delete from {area} where "GameMapId" = {gm};
+delete from {area} where "GameMapId" = {gm} and "SpawnTrigger" in (0, 6);
 insert into {area} select * from {bak};
 update config."MonsterDefinition" d set "RespawnDelay" = b."RespawnDelay", "MoveRange" = b."MoveRange", "ViewRange" = b."ViewRange",
   "AttackRange" = b."AttackRange", "AttackDelay" = b."AttackDelay", "MoveDelay" = b."MoveDelay" from {mbak} b where b."Id" = d."Id";
