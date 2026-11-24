@@ -15,3 +15,10 @@ describe('decodeMapFile', () => {
     expect(() => decodeMapFile(short)).toThrow('ModulusCryptor buffer is too short');
   });
 });
+
+describe('objRecordSize', () => {
+  it('gives the Season 6 record and the larger newer ones', async () => {
+    const { objRecordSize } = await import('./mapFileEncryption');
+    expect([0, 1, 2, 3, 4, 5, 9].map(objRecordSize)).toEqual([30, 32, 33, 45, 46, 54, 30]);
+  });
+});

@@ -21,3 +21,11 @@ export function convertBux(Buffer: Uint8Array, Size: Int): void {
   }
 }
 
+
+/**
+ * Bytes one `EncTerrain<n>.obj` record takes by the file's version byte: 30 in Season 6 (type, position, angle,
+ * scale), more in newer clients (Season 19 Devias, Lost Tower and Tarkan are version 3: three bytes and a light).
+ */
+export function objRecordSize(version: number): number {
+  return [30, 32, 33, 45, 46, 54][version] ?? 30;
+}

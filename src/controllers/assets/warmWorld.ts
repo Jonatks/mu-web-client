@@ -2,13 +2,12 @@ import type { World } from '@/ecs/world';
 import type { ENUM_WORLD } from '@/core/types';
 import { warmGLTF } from './modelLoader';
 import { isEffectOnlyObject } from '../render/effectOnlyObjects';
-import { decryptMapFile } from '../terrain/mapFileEncryption';
+import { decryptMapFile, objRecordSize } from '../terrain/mapFileEncryption';
 import { assetWorldNum } from './worldAssets';
 import { fetchTerrainFile, terrainFilesFor } from './prefetchWorld';
 
-/** Header of `EncTerrain<n>.obj` (version, map, count) and one record's size. */
+/** Header of `EncTerrain<n>.obj` (version, map, count). */
 const OBJ_HEADER = 4;
-const OBJ_RECORD = 30;
 
 /** The object types an `EncTerrain<n>.obj` places, read off its records. */
 function objectTypesIn(encoded: Uint8Array): Set<number> {
@@ -17,10 +16,11 @@ function objectTypesIn(encoded: Uint8Array): Set<number> {
 
   const view = new DataView(decoded.buffer);
   const count = view.getInt16(2, true);
+  const record = objRecordSize(decoded[0]);
   const types = new Set<number>();
 
   for (let i = 0; i < count; i++) {
-    const at = OBJ_HEADER + i * OBJ_RECORD;
+    const at = OBJ_HEADER + i * record;
     if (at + 2 > view.byteLength) break;
     types.add(view.getInt16(at, true));
   }

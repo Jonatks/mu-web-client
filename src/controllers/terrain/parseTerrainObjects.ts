@@ -1,4 +1,4 @@
-import { decryptMapFile } from './mapFileEncryption';
+import { decryptMapFile, objRecordSize } from './mapFileEncryption';
 
 export function parseTerrainObjects(encodedData: Uint8Array) {
   const DataBytes = encodedData.length;
@@ -9,6 +9,7 @@ export function parseTerrainObjects(encodedData: Uint8Array) {
   const dv = new DataView(decodedData.buffer);
 
   let DataPtr = 0;
+  const recordSize = objRecordSize(decodedData[0]);
   DataPtr += 1; // version
   DataPtr += 1; // map number
 
@@ -24,7 +25,7 @@ export function parseTerrainObjects(encodedData: Uint8Array) {
 
   let i = 0;
   for (let j = 0; j < Count; j++) {
-    i = DataPtr + j * 30;
+    i = DataPtr + j * recordSize;
     const id = dv.getInt16(i, true);
     i += 2;
 
