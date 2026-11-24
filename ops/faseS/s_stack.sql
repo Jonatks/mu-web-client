@@ -1,8 +1,12 @@
 -- Pilas del S19 (hecho por ops/faseS/gen_stack.py). Reversa: s_stack_undo.sql.
 begin;
 create schema if not exists mu_plugins;
-create table mu_plugins.stack_bak_s19 as select d."Id", d."Durability" from config."ItemDefinition" d
+create table if not exists mu_plugins.stack_bak_s19 as select d."Id", d."Durability" from config."ItemDefinition" d
   join (values
+  (0, 0, 255),
+  (0, 1, 255),
+  (0, 2, 255),
+  (2, 28, 255),
   (4, 7, 255),
   (4, 15, 255),
   (12, 15, 255),
@@ -39,15 +43,15 @@ create table mu_plugins.stack_bak_s19 as select d."Id", d."Durability" from conf
   (13, 467, 1),
   (13, 468, 50),
   (13, 510, 50),
-  (14, 0, 50),
-  (14, 1, 50),
-  (14, 2, 50),
-  (14, 3, 50),
-  (14, 4, 50),
-  (14, 5, 50),
-  (14, 6, 50),
+  (14, 0, 255),
+  (14, 1, 255),
+  (14, 2, 255),
+  (14, 3, 255),
+  (14, 4, 255),
+  (14, 5, 255),
+  (14, 6, 255),
   (14, 7, 50),
-  (14, 8, 50),
+  (14, 8, 255),
   (14, 13, 255),
   (14, 14, 255),
   (14, 16, 255),
@@ -196,6 +200,7 @@ create table mu_plugins.stack_bak_s19 as select d."Id", d."Durability" from conf
   (20, 238, 255),
   (20, 239, 255),
   (20, 253, 30),
+  (20, 277, 255),
   (20, 500, 255),
   (20, 501, 255),
   (20, 502, 255),
@@ -204,10 +209,13 @@ create table mu_plugins.stack_bak_s19 as select d."Id", d."Durability" from conf
   (20, 505, 255),
   (20, 506, 255),
   (20, 507, 255),
-  (20, 508, 255),
-  (20, 277, 255)
+  (20, 508, 255)
   ) as v(g, n, m) on d."Group" = v.g and d."Number" = v.n and d."Durability" > 1;
 update config."ItemDefinition" d set "Durability" = v.m from (values
+  (0, 0, 255),
+  (0, 1, 255),
+  (0, 2, 255),
+  (2, 28, 255),
   (4, 7, 255),
   (4, 15, 255),
   (12, 15, 255),
@@ -244,15 +252,15 @@ update config."ItemDefinition" d set "Durability" = v.m from (values
   (13, 467, 1),
   (13, 468, 50),
   (13, 510, 50),
-  (14, 0, 50),
-  (14, 1, 50),
-  (14, 2, 50),
-  (14, 3, 50),
-  (14, 4, 50),
-  (14, 5, 50),
-  (14, 6, 50),
+  (14, 0, 255),
+  (14, 1, 255),
+  (14, 2, 255),
+  (14, 3, 255),
+  (14, 4, 255),
+  (14, 5, 255),
+  (14, 6, 255),
   (14, 7, 50),
-  (14, 8, 50),
+  (14, 8, 255),
   (14, 13, 255),
   (14, 14, 255),
   (14, 16, 255),
@@ -401,6 +409,7 @@ update config."ItemDefinition" d set "Durability" = v.m from (values
   (20, 238, 255),
   (20, 239, 255),
   (20, 253, 30),
+  (20, 277, 255),
   (20, 500, 255),
   (20, 501, 255),
   (20, 502, 255),
@@ -409,7 +418,6 @@ update config."ItemDefinition" d set "Durability" = v.m from (values
   (20, 505, 255),
   (20, 506, 255),
   (20, 507, 255),
-  (20, 508, 255),
-  (20, 277, 255)
+  (20, 508, 255)
 ) as v(g, n, m) where d."Group" = v.g and d."Number" = v.n and d."Durability" > 1;
 commit;
