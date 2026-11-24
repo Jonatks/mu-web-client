@@ -245,6 +245,14 @@ Para la fase 7 basta con sumar una entrada por generacion y revisar sus exclusio
   `ops/faseS/apply_client_s19.sh` (respaldo `.bak-s6`, `rollback`).
 - El modo `?offline` no arranca en el build de produccion: la verificacion visual de un mapa va con un personaje.
 
+- S4 tiendas: `S19Shops` llena en memoria las tiendas de la configuracion al primer ingreso desde
+  `mu_plugins.s19_shop` (`gen_shops.py`; .sql en mu-assets). Cada tienda va al NPC cuyo `NpcFunction` en MonsterSpawn
+  es su nombre. Solo la pestana 1 (el S19 tiene hasta 5; OpenMU y el cliente una pagina de 8x15). Precios automaticos
+  (el S19 los deja en 0). NPC sin tienda en la base quedan sin tienda. No se escribe en la base: cambiar items de una
+  tienda desde el panel no se ve hasta apagar el plugin.
+- S2 en mas mapas: Dungeon, Devias, Noria, Lost Tower, Atlans, Tarkan e Icarus. `gen_map.py` ahora solo cambia las
+  apariciones normales y errantes; las de eventos e invasiones quedan. Faltan definiciones: 580, 584, 605-607, 681, 941.
+
 ## 3. Reemplazos provisionales (cerrar antes de dar la meta por cumplida)
 
 | Provisional | Por que | Como se cierra |
@@ -258,3 +266,4 @@ Para la fase 7 basta con sumar una entrada por generacion y revisar sus exclusio
 | Iconos de las habilidades de cuarta clase | el S19 los asigna en su ejecutable | elegidos a ojo en `skillCasting.ts`; confirmar con un cliente S19 |
 | Iconos de guantes y algunas armaduras aproximados | el visor no da el angulo del original | Fase G: render del cliente con su camara de inventario |
 | NPC del S19 sin definicion (584, 764, 891 en Lorencia) | OpenMU no los trae | definirlos con su funcion y su modelo del cliente S19 |
+| Tiendas del S19 solo con su pestana 1 | OpenMU y el cliente tienen una pagina | agregar pestanas al protocolo ampliado y a la ventana de tienda |
