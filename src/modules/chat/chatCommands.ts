@@ -64,6 +64,7 @@ const CHAT_COMMANDS: readonly ChatCommand[] = [
   { name: '/follow', helpKey: 'cmd.follow', local: 'follow' },
   // ---- this client's own (ours) -------------------------------------------
   { name: '/re', usage: '<on|off|auto>', helpKey: 'cmd.re' },
+  { name: '/anim', usage: '<number>', helpKey: 'cmd.anim' },
   // ---- server (OpenMU) ---------------------------------------------------
   { name: '/post', usage: '<message>', helpKey: 'cmd.post' },
   { name: '/help', usage: '[command]', helpKey: 'cmd.help' },
@@ -151,6 +152,12 @@ export function matchChatCommands(text: string, gm: boolean): ChatCommand[] {
 export function partyReplyCommand(text: string): string | null {
   const [name, word = ''] = text.trim().toLowerCase().split(/\s+/);
   return name === '/re' ? word : null;
+}
+
+/** `/anim N` (ours): the player clip to show on the hero, for telling the Season 19 clips apart; null when not `/anim`. */
+export function animCommand(text: string): number | null {
+  const [name, n] = text.trim().toLowerCase().split(/\s+/);
+  return name === '/anim' && /^\d+$/.test(n ?? '') ? Number(n) : null;
 }
 
 /** The client-side command a typed line stands for, if any (`/pt`, `/trade`…). */

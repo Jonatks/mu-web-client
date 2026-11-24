@@ -38,7 +38,7 @@ import {
   matchEmojiBubbleWord,
   type EmojiBubbleId,
 } from '../chat/emojiBubbles';
-import { localCommandOf, partyReplyCommand } from '../chat/chatCommands';
+import { animCommand, localCommandOf, partyReplyCommand } from '../chat/chatCommands';
 import {
   chatEmojiAdvance,
   chatEmojiBubbleOf,
@@ -684,6 +684,19 @@ export const Social = new (class _Social {
     const reply = partyReplyCommand(text);
     if (reply !== null) {
       this.setPartyReply(reply);
+      this.remember(this.chatHistory, text);
+      return true;
+    }
+
+    // `/anim N` (ours): plays player clip N on the hero here only, to tell the Season 19 clips apart; never sent.
+    const clip = animCommand(text);
+    if (clip !== null) {
+      const hero = Ecs.world?.playerEntity?.modelObject;
+      if (hero) {
+        hero.AnimationSpeed = 0.25;
+        hero.playAction(clip, true);
+      }
+      this.addChatLine('', `anim ${clip}`, ChatLineType.System);
       this.remember(this.chatHistory, text);
       return true;
     }

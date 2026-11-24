@@ -40,6 +40,7 @@ const en = {
   'cmd.addfriend': 'Add the player under the cursor to your friend list',
   'cmd.follow': 'Walk after the player under the cursor',
   'cmd.re': 'Party invitations: on asks, off declines, auto accepts',
+  'cmd.anim': 'Plays player movement N on your character (to tell the Season 19 movements apart)',
   'cmd.post': 'Shout to everyone on the server',
   'cmd.help': 'Server help for a command',
   'cmd.list': 'List the server commands',
