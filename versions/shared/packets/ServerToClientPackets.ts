@@ -23533,6 +23533,364 @@ export class MonsterSkillAnimationPacket {
     this.buffer.setUint16(8, value, true);
   }
 }
+export class AddTransformedCharacterToScopeExtendedPacket {
+  buffer!: DataView;
+  static readonly Name = `AddTransformedCharacterToScopeExtended`;
+  static readonly HeaderType = `C2Header`;
+  static readonly HeaderCode = 0xC2;
+  static readonly Direction = 'ServerToClient';
+  static readonly SentWhen = `The player wears a monster transformation ring (extended client).`;
+  static readonly CausedReaction = `The character appears as monster, defined by the Skin property.`;
+  static readonly Length = undefined;
+  static readonly LengthSize = 2;
+  static readonly DataOffset = 3;
+  static readonly Code = 0x45;
+
+  static getRequiredSize(dataSize:number){
+    return AddTransformedCharacterToScopeExtendedPacket.DataOffset + 1 + dataSize;
+  }
+
+  constructor(buffer?: DataView){
+    buffer && (this.buffer = buffer);
+  }
+
+  writeHeader(){
+    const b = this.buffer;
+    b.setUint8(0, AddTransformedCharacterToScopeExtendedPacket.HeaderCode);
+    b.setUint8(AddTransformedCharacterToScopeExtendedPacket.DataOffset, AddTransformedCharacterToScopeExtendedPacket.Code);
+  
+    return this;
+  }
+
+  writeLength(l: number|undefined = AddTransformedCharacterToScopeExtendedPacket.Length){
+    const b = this.buffer;
+    l = l ?? b.byteLength;
+    b.setUint16(1, l);
+    return this;
+  }
+
+  private _readString (from :number, to: number): string {
+    return readWireString(this.buffer, from, to);
+  }
+
+  static createPacket(requiredSize: number): AddTransformedCharacterToScopeExtendedPacket {
+    const p = new AddTransformedCharacterToScopeExtendedPacket();
+    p.buffer = new DataView(new ArrayBuffer(requiredSize));
+    p.writeHeader();
+    p.writeLength();
+    return p;
+  }
+  get CharacterCount() {
+    return GetByteValue(this.buffer.getUint8(4), 8, 0);
+  }
+  set CharacterCount(value: number) {
+    const oldByte = this.buffer.getUint8(4);
+    this.buffer.setUint8(4, SetByteValue(oldByte, value, 8, 0));
+  }
+  get Id(){
+    return this.buffer.getUint16(5, false);
+  }
+  set Id(value: number){
+    this.buffer.setUint16(5, value, false);
+  }
+  get CurrentPositionX() {
+    return GetByteValue(this.buffer.getUint8(7), 8, 0);
+  }
+  set CurrentPositionX(value: number) {
+    const oldByte = this.buffer.getUint8(7);
+    this.buffer.setUint8(7, SetByteValue(oldByte, value, 8, 0));
+  }
+  get CurrentPositionY() {
+    return GetByteValue(this.buffer.getUint8(8), 8, 0);
+  }
+  set CurrentPositionY(value: number) {
+    const oldByte = this.buffer.getUint8(8);
+    this.buffer.setUint8(8, SetByteValue(oldByte, value, 8, 0));
+  }
+  get Skin(){
+    return this.buffer.getUint16(9, false);
+  }
+  set Skin(value: number){
+    this.buffer.setUint16(9, value, false);
+  }
+  get Name(){
+    const to = 21;
+              
+    return this._readString(11, to);
+  }
+  setName(str: string, count = 10){
+    const from = 11;
+    for(let i = 0; i < str.length; i++){
+      const char = str.charCodeAt(i);
+      this.buffer.setUint8(from + i, char);
+    }
+}
+  get TargetPositionX() {
+    return GetByteValue(this.buffer.getUint8(21), 8, 0);
+  }
+  set TargetPositionX(value: number) {
+    const oldByte = this.buffer.getUint8(21);
+    this.buffer.setUint8(21, SetByteValue(oldByte, value, 8, 0));
+  }
+  get TargetPositionY() {
+    return GetByteValue(this.buffer.getUint8(22), 8, 0);
+  }
+  set TargetPositionY(value: number) {
+    const oldByte = this.buffer.getUint8(22);
+    this.buffer.setUint8(22, SetByteValue(oldByte, value, 8, 0));
+  }
+  get Rotation(){
+    return GetByteValue(this.buffer.getUint8(23), 4, 4);
+  }
+  set Rotation(value: number) {
+    const oldByte = this.buffer.getUint8(23);
+    this.buffer.setUint8(23, SetByteValue(oldByte, value, 4, 4));
+  }
+  get HeroState():Byte{
+    return GetByteValue(this.buffer.getUint8(23), 4, 0);
+  }
+  set HeroState(value: Byte){
+    const oldValue = this.HeroState;
+    this.buffer.setUint8(23, SetByteValue(oldValue, value, 4, 0));
+  }
+  get AppearanceAndEffects(){
+    const to = this.buffer.byteLength;
+    const i = 24;
+              
+    return new DataView(this.buffer.buffer.slice(i,to));
+  }
+  setAppearanceAndEffects(data: ArrayLike<number>, count = NaN){
+    if (data.length !== count) throw new Error(`data.length must be ${count}`);
+    const from = 24;
+
+    for (let i = 0; i < data.length; i++) {
+      this.buffer.setUint8(from + i, data[i]);
+    }
+}
+}
+export class ItemCraftingPreviewExtendedPacket {
+  buffer!: DataView;
+  static readonly Name = `ItemCraftingPreviewExtended`;
+  static readonly HeaderType = `C1Header`;
+  static readonly HeaderCode = 0xC1;
+  static readonly Direction = 'ServerToClient';
+  static readonly SentWhen = `After the items of the crafting dialog changed, e.g. at the chaos machine.`;
+  static readonly CausedReaction = `The game client shows the success rate and the price of the crafting which matches the items, as they are calculated by the server, instead of calculating them by itself.`;
+  static readonly Length = 12;
+  static readonly LengthSize = 1;
+  static readonly DataOffset = 2;
+  static readonly Code = 0x88;
+
+  static getRequiredSize(dataSize:number){
+    return ItemCraftingPreviewExtendedPacket.DataOffset + 1 + dataSize;
+  }
+
+  constructor(buffer?: DataView){
+    buffer && (this.buffer = buffer);
+  }
+
+  writeHeader(){
+    const b = this.buffer;
+    b.setUint8(0, ItemCraftingPreviewExtendedPacket.HeaderCode);
+    b.setUint8(ItemCraftingPreviewExtendedPacket.DataOffset, ItemCraftingPreviewExtendedPacket.Code);
+  
+    return this;
+  }
+
+  writeLength(l: number|undefined = ItemCraftingPreviewExtendedPacket.Length){
+    const b = this.buffer;
+    l = l ?? b.byteLength;
+    b.setUint8(1, l);
+    return this;
+  }
+
+  static createPacket(requiredSize: number = 12): ItemCraftingPreviewExtendedPacket {
+    const p = new ItemCraftingPreviewExtendedPacket();
+    p.buffer = new DataView(new ArrayBuffer(requiredSize));
+    p.writeHeader();
+    p.writeLength();
+    return p;
+  }
+  get MixType() {
+    return GetByteValue(this.buffer.getUint8(3), 8, 0);
+  }
+  set MixType(value: number) {
+    const oldByte = this.buffer.getUint8(3);
+    this.buffer.setUint8(3, SetByteValue(oldByte, value, 8, 0));
+  }
+  get SuccessRate() {
+    return GetByteValue(this.buffer.getUint8(4), 8, 0);
+  }
+  set SuccessRate(value: number) {
+    const oldByte = this.buffer.getUint8(4);
+    this.buffer.setUint8(4, SetByteValue(oldByte, value, 8, 0));
+  }
+  get Price(){
+    return this.buffer.getUint32(8, true);
+  }
+  set Price(value: number){
+    this.buffer.setUint32(8, value, true);
+  }
+}
+export class MapChangedExtendedPacket {
+  buffer!: DataView;
+  static readonly Name = `MapChangedExtended`;
+  static readonly HeaderType = `C3HeaderWithSubCode`;
+  static readonly HeaderCode = 0xC3;
+  static readonly Direction = 'ServerToClient';
+  static readonly SentWhen = `The map was changed on the server side.`;
+  static readonly CausedReaction = `The game client changes to the specified map and coordinates, and to the variant of the map with the specified discriminator.`;
+  static readonly Length = 16;
+  static readonly LengthSize = 1;
+  static readonly DataOffset = 2;
+  static readonly Code = 0x1C;
+  static readonly SubCode = 0x0F;
+
+  static getRequiredSize(dataSize:number){
+    return MapChangedExtendedPacket.DataOffset + 1 + 1 + dataSize;
+  }
+
+  constructor(buffer?: DataView){
+    buffer && (this.buffer = buffer);
+  }
+
+  writeHeader(){
+    const b = this.buffer;
+    b.setUint8(0, MapChangedExtendedPacket.HeaderCode);
+    b.setUint8(MapChangedExtendedPacket.DataOffset, MapChangedExtendedPacket.Code);
+  b.setUint8(MapChangedExtendedPacket.DataOffset + 1, MapChangedExtendedPacket.SubCode);
+    return this;
+  }
+
+  writeLength(l: number|undefined = MapChangedExtendedPacket.Length){
+    const b = this.buffer;
+    l = l ?? b.byteLength;
+    b.setUint8(1, l);
+    return this;
+  }
+
+  static createPacket(requiredSize: number = 16): MapChangedExtendedPacket {
+    const p = new MapChangedExtendedPacket();
+    p.buffer = new DataView(new ArrayBuffer(requiredSize));
+    p.writeHeader();
+    p.writeLength();
+    return p;
+  }
+  get IsMapChange(){
+    return GetBoolean(this.buffer.getUint8(4), 0);
+  }
+  set IsMapChange(value: boolean){
+    const oldByte = this.buffer.getUint8(4);
+    this.buffer.setUint8(4, SetBoolean(oldByte, value, 0));
+  }
+  get MapNumber(){
+    return this.buffer.getUint16(5, false);
+  }
+  set MapNumber(value: number){
+    this.buffer.setUint16(5, value, false);
+  }
+  get PositionX() {
+    return GetByteValue(this.buffer.getUint8(7), 8, 0);
+  }
+  set PositionX(value: number) {
+    const oldByte = this.buffer.getUint8(7);
+    this.buffer.setUint8(7, SetByteValue(oldByte, value, 8, 0));
+  }
+  get PositionY() {
+    return GetByteValue(this.buffer.getUint8(8), 8, 0);
+  }
+  set PositionY(value: number) {
+    const oldByte = this.buffer.getUint8(8);
+    this.buffer.setUint8(8, SetByteValue(oldByte, value, 8, 0));
+  }
+  get Rotation() {
+    return GetByteValue(this.buffer.getUint8(9), 8, 0);
+  }
+  set Rotation(value: number) {
+    const oldByte = this.buffer.getUint8(9);
+    this.buffer.setUint8(9, SetByteValue(oldByte, value, 8, 0));
+  }
+  get MapDiscriminator() {
+    return GetByteValue(this.buffer.getUint8(15), 8, 0);
+  }
+  set MapDiscriminator(value: number) {
+    const oldByte = this.buffer.getUint8(15);
+    this.buffer.setUint8(15, SetByteValue(oldByte, value, 8, 0));
+  }
+}
+export class PlayerShopPriceTypesExtendedPacket {
+  buffer!: DataView;
+  static readonly Name = `PlayerShopPriceTypesExtended`;
+  static readonly HeaderType = `C1HeaderWithSubCode`;
+  static readonly HeaderCode = 0xC1;
+  static readonly Direction = 'ServerToClient';
+  static readonly SentWhen = `After entering the game world, and before the player shop of another player is shown, when the server allows prices in player shops which are not paid in zen.`;
+  static readonly CausedReaction = `The client offers the allowed price types, in addition to zen, when the player sets an item price in his player shop. Without this message, only zen prices are possible.`;
+  static readonly Length = undefined;
+  static readonly LengthSize = 1;
+  static readonly DataOffset = 2;
+  static readonly Code = 0x3F;
+  static readonly SubCode = 0x0A;
+
+  static getRequiredSize(dataSize:number){
+    return PlayerShopPriceTypesExtendedPacket.DataOffset + 1 + 1 + dataSize;
+  }
+
+  constructor(buffer?: DataView){
+    buffer && (this.buffer = buffer);
+  }
+
+  writeHeader(){
+    const b = this.buffer;
+    b.setUint8(0, PlayerShopPriceTypesExtendedPacket.HeaderCode);
+    b.setUint8(PlayerShopPriceTypesExtendedPacket.DataOffset, PlayerShopPriceTypesExtendedPacket.Code);
+  b.setUint8(PlayerShopPriceTypesExtendedPacket.DataOffset + 1, PlayerShopPriceTypesExtendedPacket.SubCode);
+    return this;
+  }
+
+  writeLength(l: number|undefined = PlayerShopPriceTypesExtendedPacket.Length){
+    const b = this.buffer;
+    l = l ?? b.byteLength;
+    b.setUint8(1, l);
+    return this;
+  }
+
+  static createPacket(requiredSize: number): PlayerShopPriceTypesExtendedPacket {
+    const p = new PlayerShopPriceTypesExtendedPacket();
+    p.buffer = new DataView(new ArrayBuffer(requiredSize));
+    p.writeHeader();
+    p.writeLength();
+    return p;
+  }
+  get Count() {
+    return GetByteValue(this.buffer.getUint8(4), 8, 0);
+  }
+  set Count(value: number) {
+    const oldByte = this.buffer.getUint8(4);
+    this.buffer.setUint8(4, SetByteValue(oldByte, value, 8, 0));
+  }
+
+  getPriceTypes(count: number = this.Count): {
+  PriceItemType: ShortLittleEndian;
+
+}[]{
+    const b = this.buffer;
+    let bi = 0;
+
+    const PriceTypes_count = count;
+    const PriceTypes: any[] = new Array(PriceTypes_count);
+    
+    let PriceTypes_StartOffset = bi + 5;
+    for (let i = 0; i < PriceTypes_count; i++) {
+      const PriceItemType = b.getUint16(PriceTypes_StartOffset + 0, true);
+      PriceTypes[i] = {
+        PriceItemType
+      };
+      PriceTypes_StartOffset += 2;
+    }
+    
+    return PriceTypes;
+  }}
 
 export const ServerToClientPackets = [
   GameServerEnteredPacket,
@@ -23835,5 +24193,9 @@ export const ServerToClientPackets = [
   RaklionStateInfoPacket,
   RaklionCurrentStatePacket,
   RaklionStateChangePacket,
-  MonsterSkillAnimationPacket
+  MonsterSkillAnimationPacket,
+  AddTransformedCharacterToScopeExtendedPacket,
+  ItemCraftingPreviewExtendedPacket,
+  MapChangedExtendedPacket,
+  PlayerShopPriceTypesExtendedPacket
 ] as const;

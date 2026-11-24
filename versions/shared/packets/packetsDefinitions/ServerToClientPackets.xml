@@ -13465,6 +13465,193 @@
         </Field>
       </Fields>
     </Packet>
+      <Packet>
+      <HeaderType>C2Header</HeaderType>
+      <Code>45</Code>
+      <Name>AddTransformedCharacterToScopeExtended</Name>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>The player wears a monster transformation ring (extended client).</SentWhen>
+      <CausedReaction>The character appears as monster, defined by the Skin property.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Byte</Type>
+          <Name>CharacterCount</Name>
+          <Description>The number of characters in this packet. This packet contains only one character, because the size of the appearance data depends on the used appearance serializer.</Description>
+          <DefaultValue>1</DefaultValue>
+        </Field>
+        <Field>
+          <Index>5</Index>
+          <Type>ShortBigEndian</Type>
+          <Name>Id</Name>
+        </Field>
+        <Field>
+          <Index>7</Index>
+          <Type>Byte</Type>
+          <Name>CurrentPositionX</Name>
+        </Field>
+        <Field>
+          <Index>8</Index>
+          <Type>Byte</Type>
+          <Name>CurrentPositionY</Name>
+        </Field>
+        <Field>
+          <Index>9</Index>
+          <Type>ShortBigEndian</Type>
+          <Name>Skin</Name>
+        </Field>
+        <Field>
+          <Index>11</Index>
+          <Type>String</Type>
+          <Name>Name</Name>
+          <Length>10</Length>
+        </Field>
+        <Field>
+          <Index>21</Index>
+          <Type>Byte</Type>
+          <Name>TargetPositionX</Name>
+        </Field>
+        <Field>
+          <Index>22</Index>
+          <Type>Byte</Type>
+          <Name>TargetPositionY</Name>
+        </Field>
+        <Field>
+          <Index>23</Index>
+          <LeftShifted>4</LeftShifted>
+          <Type>Byte</Type>
+          <Name>Rotation</Name>
+          <Length>4</Length>
+        </Field>
+        <Field>
+          <Index>23</Index>
+          <LeftShifted>0</LeftShifted>
+          <Type>Enum</Type>
+          <TypeName>CharacterHeroState</TypeName>
+          <Name>HeroState</Name>
+          <Length>4</Length>
+        </Field>
+        <Field>
+          <Index>24</Index>
+          <Type>Binary</Type>
+          <Name>AppearanceAndEffects</Name>
+          <Description>The appearance data, followed by the number of effects and the effect ids.</Description>
+        </Field>
+      </Fields>
+    </Packet>
+    <Packet>
+      <HeaderType>C1Header</HeaderType>
+      <Code>88</Code>
+      <Name>ItemCraftingPreviewExtended</Name>
+      <Length>12</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>After the items of the crafting dialog changed, e.g. at the chaos machine.</SentWhen>
+      <CausedReaction>The game client shows the success rate and the price of the crafting which matches the items, as they are calculated by the server, instead of calculating them by itself.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>3</Index>
+          <Type>Byte</Type>
+          <Name>MixType</Name>
+          <Description>The number of the crafting which matches the items, which is also sent by the client to execute it. 0, if the items don't match any crafting.</Description>
+        </Field>
+        <Field>
+          <Index>4</Index>
+          <Type>Byte</Type>
+          <Name>SuccessRate</Name>
+          <Description>The success rate in percent, including the crafting bonus of the character.</Description>
+        </Field>
+        <Field>
+          <Index>8</Index>
+          <Type>IntegerLittleEndian</Type>
+          <Name>Price</Name>
+          <Description>The price in zen, without the tax of the chaos machine.</Description>
+        </Field>
+      </Fields>
+    </Packet>
+    <Packet>
+      <HeaderType>C3HeaderWithSubCode</HeaderType>
+      <Code>1C</Code>
+      <SubCode>0F</SubCode>
+      <Name>MapChangedExtended</Name>
+      <Length>16</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>The map was changed on the server side.</SentWhen>
+      <CausedReaction>The game client changes to the specified map and coordinates, and to the variant of the map with the specified discriminator.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Boolean</Type>
+          <Name>IsMapChange</Name>
+          <Description>If false, it shows the teleport animation (white bubbles), and the client doesn't remove all of the objects in its scope.</Description>
+          <DefaultValue>true</DefaultValue>
+        </Field>
+        <Field>
+          <Index>5</Index>
+          <Type>ShortBigEndian</Type>
+          <Name>MapNumber</Name>
+        </Field>
+        <Field>
+          <Index>7</Index>
+          <Type>Byte</Type>
+          <Name>PositionX</Name>
+        </Field>
+        <Field>
+          <Index>8</Index>
+          <Type>Byte</Type>
+          <Name>PositionY</Name>
+        </Field>
+        <Field>
+          <Index>9</Index>
+          <Type>Byte</Type>
+          <Name>Rotation</Name>
+        </Field>
+        <!-- 5 unused bytes, as in MapChanged, which is 15 bytes long; the game server writes them as 0 -->
+        <Field>
+          <Index>15</Index>
+          <Type>Byte</Type>
+          <Name>MapDiscriminator</Name>
+          <Description>The discriminator of the map, which tells maps with the same number apart, e.g. the stage of Devil Square (1 to 7). It's appended after the 15 bytes of MapChanged, so a client can tell by the packet length whether it was sent.</Description>
+        </Field>
+      </Fields>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>3F</Code>
+      <SubCode>0A</SubCode>
+      <Name>PlayerShopPriceTypesExtended</Name>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>After entering the game world, and before the player shop of another player is shown, when the server allows prices in player shops which are not paid in zen.</SentWhen>
+      <CausedReaction>The client offers the allowed price types, in addition to zen, when the player sets an item price in his player shop. Without this message, only zen prices are possible.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Byte</Type>
+          <Name>Count</Name>
+        </Field>
+        <Field>
+          <Index>5</Index>
+          <Type>Structure[]</Type>
+          <TypeName>PlayerShopPriceType</TypeName>
+          <Name>PriceTypes</Name>
+          <ItemCountField>Count</ItemCountField>
+        </Field>
+      </Fields>
+      <Structures>
+        <Structure>
+          <Name>PlayerShopPriceType</Name>
+          <Description>A price type which is allowed for prices in player shops, in addition to zen.</Description>
+          <Length>2</Length>
+          <Fields>
+            <Field>
+              <Index>0</Index>
+              <Type>ShortLittleEndian</Type>
+              <Name>PriceItemType</Name>
+              <Description>The value of PriceItemType of a price of this type, like in PlayerShopItemExtended: the item (group in the highest 4 bits, number in the remaining ones) with which the price is paid, or 0xFFF0 = WCoin (C), 0xFFF1 = WCoin (P), 0xFFF2 = Goblin Points.</Description>
+            </Field>
+          </Fields>
+        </Structure>
+      </Structures>
+    </Packet>
   </Packets>
   <Enums>
     <Enum>

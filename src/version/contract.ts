@@ -52,6 +52,8 @@ export interface VersionProtocol {
    * this is the value it should read.
    */
   variantRank(packetName: string): number;
+  /** How the server writes items: the classic 12 bytes (default) or OpenMU's extended 5-15 bytes (client 106.3). */
+  readonly itemFormat?: 'classic' | 'extended';
   readonly encryption: VersionEncryption;
 }
 
