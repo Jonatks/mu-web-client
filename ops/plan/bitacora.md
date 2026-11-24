@@ -280,6 +280,19 @@ Para la fase 7 basta con sumar una entrada por generacion y revisar sus exclusio
   estan expuestos para inspeccionar mallas desde la consola.
 - `?offline` si arranca en produccion (tarda ~90 s la primera vez): sirve para mirar mapas y NPC sin cuenta.
 
+- Barra inferior S19: telefono con marcos de orbe, vidrio y casillas del S19 (`mobile_controls/style.less`, bajo
+  `.s19-skin`); escritorio con una placa armada por `ops/faseS/ui/hud_desktop.py` (casillas, pozos y canal en las
+  coordenadas del original) y los cinco botones redondos del S19 como hojas con los mismos cuadros que
+  `newui_menu_Bt0*` (`skinS19.ts` SHEETS).
+- S5 puertas y /move (`gen_gates.py`, `s5_puertas.sql`): 27 puertas y 24 destinos de /move tomaron area, nivel y costo
+  del S19. Las areas mal escritas del S19 (Arena 57-62 x 28-113) se saltan.
+- S6 mezclas (`s6_mezclas.sql`): +10 a +15 con costo y tasa del S19 (Mix.xml, MaxRate1). Alas, Fenrir y pociones SD
+  ya coincidian; las mezclas nuevas del S19 (reliquias, nucleos, cartas) no existen en OpenMU.
+- S8 personajes (`s8_personajes.sql` y plugin `S19NewCharacter`): 500 puntos y 10.000.000 de zen al crear, zen
+  maximo 2.000.000.000, toda clase creable desde nivel 1.
+- Zen S19 (`s3_zen.sql` y `S19Drops`): 100 por muerte, por el nivel del monstruo la mitad de las veces, con la
+  probabilidad de ZenDropRate; el grupo de dinero de OpenMU queda en 0.
+
 ## 3. Reemplazos provisionales (cerrar antes de dar la meta por cumplida)
 
 | Provisional | Por que | Como se cierra |
@@ -293,4 +306,5 @@ Para la fase 7 basta con sumar una entrada por generacion y revisar sus exclusio
 | Iconos de las habilidades de cuarta clase | el S19 los asigna en su ejecutable | elegidos a ojo en `skillCasting.ts`; confirmar con un cliente S19 |
 | Iconos de guantes y algunas armaduras aproximados | el visor no da el angulo del original | Fase G: render del cliente con su camara de inventario |
 | NPC del S19 sin definicion (584, 764, 891 en Lorencia) | OpenMU no los trae | definirlos con su funcion y su modelo del cliente S19 |
+| Objetos iniciales del S19 (CharacterBase.xml, con duracion de 7 dias) | OpenMU no tiene objetos con vencimiento | agregar vencimiento o darlos sin el |
 | Tiendas del S19 solo con su pestana 1 | OpenMU y el cliente tienen una pagina | agregar pestanas al protocolo ampliado y a la ventana de tienda |
