@@ -7,4 +7,5 @@ export default {
   'shop.repairAll': 'Opravit vše',
   'shop.repair': 'Opravit',
   'shop.tax': 'Daň z prodeje: {rate}%',
+  'shop.page': 'Stránka {page}',
 } satisfies Partial<Record<keyof typeof en, string>>;

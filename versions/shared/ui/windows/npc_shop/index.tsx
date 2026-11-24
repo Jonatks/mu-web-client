@@ -68,6 +68,8 @@ import {
 } from './layout';
 
 const WINDOW_ID = 'npc-shop';
+/** The Season 19 tabs share the find strip: up to five 16-px tabs at its right. */
+const PAGE_TABS_WIDTH = 84;
 
 function itemSize(item: Item): { w: number; h: number } {
   const config = ItemsDatabase.getItem(item.group, item.num);
@@ -124,7 +126,7 @@ export const NpcShop = observer(() => {
   const [hover, setHover] = useState<HoverInfo | null>(null);
 
   const picked = Bag.pickedItem;
-  const items = shop?.items ?? null;
+  const items = shop ? Merchant.shownItems : null;
   const stamp = items ? occupancyStamp(items, 0, SQUARES) : '';
   const { squares, placed } = useMemo(
     () => buildOccupancy(items ?? []),
@@ -234,7 +236,26 @@ export const NpcShop = observer(() => {
         onClick={() => Merchant.closeNpcShop()}
       />
 
-      <ItemSearchBox search={search} left={SEARCH_X} top={SEARCH_Y} width={SEARCH_WIDTH} />
+      {Merchant.extraPages.length > 0 ? (
+        <>
+          <ItemSearchBox search={search} left={SEARCH_X} top={SEARCH_Y} width={SEARCH_WIDTH - PAGE_TABS_WIDTH} />
+          <div className="shop-pages" style={{ left: SEARCH_X + SEARCH_WIDTH - PAGE_TABS_WIDTH + 2, top: SEARCH_Y }}>
+            {[0, ...Merchant.extraPages.map((_, i) => i + 1)].map(page => (
+              <div
+                key={page}
+                className={page === Merchant.page ? 'shop-page on' : 'shop-page'}
+                data-no-drag="true"
+                title={t('shop.page', { page: page + 1 })}
+                onClick={() => Merchant.showPage(page)}
+              >
+                {page + 1}
+              </div>
+            ))}
+          </div>
+        </>
+      ) : (
+        <ItemSearchBox search={search} left={SEARCH_X} top={SEARCH_Y} width={SEARCH_WIDTH} />
+      )}
 
       <MuTableFrame
         left={GRID_FRAME_X}

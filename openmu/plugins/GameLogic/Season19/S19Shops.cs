@@ -15,9 +15,10 @@ using MUnique.OpenMU.PlugIns;
 using Npgsql;
 
 /// <summary>
-/// The NPC shops of Season 19 (Data/Shops, first tab): <c>mu_plugins.s19_shop</c> (mu-web ops/faseS/gen_shops.py) is put
-/// into the merchant stores of the loaded configuration once, at the first login. Nothing is written to the database:
-/// without the table, or with the plugin off, the stores stay OpenMU's. NPCs without a store keep none.
+/// The NPC shops of Season 19 (Data/Shops): <c>mu_plugins.s19_shop</c> (mu-web ops/faseS/gen_shops.py) is put into the
+/// merchant stores of the loaded configuration once, at the first login: tab 1 is the store, tabs 2 to 5 are kept in
+/// <see cref="Pages"/> for <see cref="S19ShopPages"/>. Nothing is written to the database: without the table, or with
+/// the plugin off, the stores stay OpenMU's. NPCs without a store keep none.
 /// </summary>
 [PlugIn]
 [Display(Name = "Season 19 Shops", Description = "NPC shops sell what the Season 19 shops sell (mu_plugins.s19_shop).")]
@@ -28,6 +29,9 @@ public class S19Shops : IPlayerStateChangedPlugIn
     private const int Rows = 15;
     private static readonly SemaphoreSlim Once = new(1, 1);
     private static bool done;
+
+    /// <summary>Gets the tabs after the first of each merchant (NPC number): tab 2 first, each laid out like the store.</summary>
+    public static IReadOnlyDictionary<short, List<List<Item>>> Pages { get; private set; } = new Dictionary<short, List<List<Item>>>();
 
     /// <inheritdoc />
     public async ValueTask PlayerStateChangedAsync(Player player, State previousState, State currentState)
@@ -71,19 +75,20 @@ public class S19Shops : IPlayerStateChangedPlugIn
             }
         }
 
-        var rows = new List<(int Npc, int Group, int Number, int Level, int Durability, int Skill, int Luck, int Option, string Exc)>();
-        const string sql = "SELECT npc, item_group, item_number, level, durability, skill, luck, option, exc FROM mu_plugins.s19_shop ORDER BY npc, seq";
+        var rows = new List<(int Npc, int Tab, int Group, int Number, int Level, int Durability, int Skill, int Luck, int Option, string Exc)>();
+        const string sql = "SELECT npc, tab, item_group, item_number, level, durability, skill, luck, option, exc FROM mu_plugins.s19_shop ORDER BY npc, tab, seq";
         await using (var command = new NpgsqlCommand(sql, connection))
         await using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
         {
             while (await reader.ReadAsync().ConfigureAwait(false))
             {
                 rows.Add((reader.GetInt32(0), reader.GetInt32(1), reader.GetInt32(2), reader.GetInt32(3), reader.GetInt32(4),
-                    reader.GetInt32(5), reader.GetInt32(6), reader.GetInt32(7), reader.GetString(8)));
+                    reader.GetInt32(5), reader.GetInt32(6), reader.GetInt32(7), reader.GetInt32(8), reader.GetString(9)));
             }
         }
 
         var filled = 0;
+        var pages = new Dictionary<short, List<List<Item>>>();
         foreach (var shop in rows.GroupBy(r => r.Npc))
         {
             if (config.Monsters.FirstOrDefault(m => m.Number == shop.Key)?.MerchantStore is not { } store)
@@ -91,24 +96,36 @@ public class S19Shops : IPlayerStateChangedPlugIn
                 continue;
             }
 
-            var grid = new bool[Columns, Rows];
-            var items = new List<Item>();
-            foreach (var row in shop)
+            foreach (var tab in shop.GroupBy(r => r.Tab).OrderBy(t => t.Key))
             {
-                if (config.Items.FirstOrDefault(d => d.Group == row.Group && d.Number == row.Number) is not { } definition
-                    || Place(grid, Math.Max((int)definition.Width, 1), Math.Max((int)definition.Height, 1)) is not { } slot)
+                var grid = new bool[Columns, Rows];
+                var items = new List<Item>();
+                foreach (var row in tab)
                 {
-                    continue;
+                    if (config.Items.FirstOrDefault(d => d.Group == row.Group && d.Number == row.Number) is not { } definition
+                        || Place(grid, Math.Max((int)definition.Width, 1), Math.Max((int)definition.Height, 1)) is not { } slot)
+                    {
+                        continue;
+                    }
+
+                    items.Add(Create(definition, row.Level, row.Durability, row.Skill, row.Luck, row.Option, row.Exc, slot));
                 }
 
-                items.Add(Create(definition, row.Level, row.Durability, row.Skill, row.Luck, row.Option, row.Exc, slot));
+                if (tab.Key == 1)
+                {
+                    store.Items.Clear();
+                    items.ForEach(store.Items.Add);
+                }
+                else if (items.Count > 0)
+                {
+                    (pages.TryGetValue((short)shop.Key, out var list) ? list : pages[(short)shop.Key] = []).Add(items);
+                }
             }
 
-            store.Items.Clear();
-            items.ForEach(store.Items.Add);
             filled++;
         }
 
+        Pages = pages;
         return filled;
     }
 

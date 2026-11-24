@@ -7,4 +7,5 @@ export default {
   'shop.repairAll': 'Επισκευή όλων',
   'shop.repair': 'Επισκευή',
   'shop.tax': 'Φόρος πωλήσεων: {rate}%',
+  'shop.page': 'Σελίδα {page}',
 } satisfies Partial<Record<keyof typeof en, string>>;

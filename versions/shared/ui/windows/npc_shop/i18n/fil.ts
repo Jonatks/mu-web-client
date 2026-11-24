@@ -7,4 +7,5 @@ export default {
   'shop.repairAll': 'Ayusin lahat',
   'shop.repair': 'Ayusin',
   'shop.tax': 'Buwis sa benta: {rate}%',
+  'shop.page': 'Pahina {page}',
 } satisfies Partial<Record<keyof typeof en, string>>;

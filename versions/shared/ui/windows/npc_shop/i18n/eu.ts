@@ -7,4 +7,5 @@ export default {
   'shop.repairAll': 'Dena konpondu',
   'shop.repair': 'Konpondu',
   'shop.tax': 'Salmenta-zerga: {rate}%',
+  'shop.page': '{page}. orria',
 } satisfies Partial<Record<keyof typeof en, string>>;

@@ -7,4 +7,5 @@ export default {
   'shop.repairAll': '全部修理',
   'shop.repair': '修理',
   'shop.tax': '销售税：{rate}%',
+  'shop.page': '第{page}页',
 } satisfies Partial<Record<keyof typeof en, string>>;

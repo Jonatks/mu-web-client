@@ -7,4 +7,5 @@ export default {
   'shop.repairAll': 'Поправи всичко',
   'shop.repair': 'Поправи',
   'shop.tax': 'Данък при продажба: {rate}%',
+  'shop.page': 'Страница {page}',
 } satisfies Partial<Record<keyof typeof en, string>>;

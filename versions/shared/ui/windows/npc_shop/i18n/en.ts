@@ -5,6 +5,7 @@ const en = {
   'shop.repairAll': 'Repair all',
   'shop.repair': 'Repair',
   'shop.tax': 'Sales tax: {rate}%',
+  'shop.page': 'Page {page}',
 };
 
 export default en;

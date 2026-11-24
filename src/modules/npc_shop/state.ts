@@ -161,6 +161,41 @@ export const Merchant = new (class {
 
   private shopBuyTimer: ReturnType<typeof setTimeout> | null = null;
 
+  /** The merchant's tabs after the first (the Season 19 shops, `pages.ts`); empty for a one-page merchant. */
+  extraPages: (Item | null)[][] = [];
+
+  /** The tab shown: 0 is the stock the server sent with StoreItemList. */
+  page = 0;
+
+  /** Set by `pages.ts`: asks the server for the open merchant's other tabs, and picks a tab's item for the next buy. */
+  pageLink: { request(): void; pick(page: number, slot: number): void } | null = null;
+
+  /** The stock of the tab shown. */
+  get shownItems(): (Item | null)[] {
+    if (!this.npcShop) return [];
+    return this.page > 0 ? (this.extraPages[this.page - 1] ?? []) : this.npcShop.items;
+  }
+
+  /** The merchant's other tabs arrived: each by slot in its 8x15 grid. */
+  setExtraPages(pages: { slot: number; item: Item }[][]): void {
+    runInAction(() => {
+      this.extraPages = pages.map(entries => {
+        const items = new Array<Item | null>(SHOP_SLOTS).fill(null);
+        for (const entry of entries) if (entry.slot >= 0 && entry.slot < SHOP_SLOTS) items[entry.slot] = entry.item;
+        return items;
+      });
+    });
+    for (const items of this.extraPages) prefetchItemIcons(items);
+  }
+
+  /** Shows tab `page` (0 = the first). */
+  showPage(page: number): void {
+    if (page < 0 || page > this.extraPages.length) return;
+    runInAction(() => {
+      this.page = page;
+    });
+  }
+
   /** The NPC a TalkToNpcRequest went out for, until the server answers. */
   private pendingNpcTalk: NpcTarget | null = null;
 
@@ -232,6 +267,8 @@ export const Merchant = new (class {
         taxRate: this.storeTaxRate,
         items: new Array<Item | null>(SHOP_SLOTS).fill(null),
       };
+      this.extraPages = [];
+      this.page = 0;
       this.repairMode = false;
       MuWindows.setOpen('inventory', true);
     });
@@ -264,6 +301,7 @@ export const Merchant = new (class {
     });
     // The icons start loading now, at high priority, not when the grid mounts.
     prefetchItemIcons(shop.items);
+    if (!Session.isOffline) this.pageLink?.request();
   }
 
   /** `ClosingProcess`: tell the server, drop the stock, leave repair mode. */
@@ -287,8 +325,11 @@ export const Merchant = new (class {
     const shop = this.npcShop;
     if (!shop || this.shopBuyPending || Bag.pickedItem || Bag.pendingItemMove) return;
 
-    const item = shop.items[shopSlot];
+    const item = this.shownItems[shopSlot];
     if (!item) return;
+    // Another tab: the server takes the picked item in place of the one at the slot the buy names (any of tab 1).
+    const buySlot = this.page > 0 ? shop.items.findIndex(Boolean) : shopSlot;
+    if (buySlot < 0) return;
 
     runInAction(() => {
       this.shopBuyRefused = false;
@@ -299,8 +340,9 @@ export const Merchant = new (class {
       return;
     }
 
+    if (this.page > 0) this.pageLink?.pick(this.page - 1, shopSlot);
     const packet = BuyItemFromNpcRequestPacket.createPacket();
-    packet.ItemSlot = shopSlot;
+    packet.ItemSlot = buySlot;
     Session.sendToGS(packet.buffer);
 
     runInAction(() => {
@@ -516,6 +558,9 @@ export const Merchant = new (class {
   constructor() {
     makeObservable(this, {
       npcShop: observable,
+      extraPages: observable.ref,
+      page: observable,
+      shownItems: computed,
       repairMode: observable,
       shopBuyPending: observable,
       shopBuyRefused: observable,

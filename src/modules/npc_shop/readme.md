@@ -51,3 +51,10 @@ talk in flight with the merchant window's state and actions (`Merchant`).
 
 ## Tests
 - `net.test.ts`: what a walk closes, and that the chaos machine stays.
+
+## Season 19 tabs
+- `pagesWire.ts`: the shop tabs packet (`decodePages`, `pageItem`); `pages.ts` wires it to the merchant on this
+  module's own packets (`_api`, id `npc_shop`). The server half is `openmu/plugins/GameLogic/Season19/S19ShopPages.cs`.
+- When the server has more tabs, the window shows them in the find strip (`Merchant.extraPages`, `page`,
+  `shownItems`). A buy from another tab first picks the item (`1, page, slot`) and then sends the usual buy naming
+  any slot of tab 1: the server buys the picked item in its place (OpenMU `INpcItemPurchasePlugIn`).

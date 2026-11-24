@@ -8,4 +8,4 @@ for (const f of readdirSync(src)) {
     const h = String.fromCharCode(...d.subarray(0, 4)); heads[h] = (heads[h] ?? 0) + 1;
     writeFileSync(`${out}/${f.replace(/\.[^.]+$/, ext)}`, d.subarray(h === 'DDS ' ? 0 : 0)); } catch { heads.err = (heads.err ?? 0) + 1; }
 }
-console.log(heads);
+console.info(heads);

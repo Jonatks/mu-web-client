@@ -7,4 +7,5 @@ export default {
   'shop.repairAll': 'Összes javítása',
   'shop.repair': 'Javítás',
   'shop.tax': 'Forgalmi adó: {rate}%',
+  'shop.page': '{page}. oldal',
 } satisfies Partial<Record<keyof typeof en, string>>;
