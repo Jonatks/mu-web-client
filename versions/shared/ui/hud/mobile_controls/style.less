@@ -1249,6 +1249,30 @@ body:has(.mu-item-window) .mobile-controls .mobile-book {
     max-height: 70vh;
   }
 
+  // The quick look switch: three plates, the active one lit.
+  .mobile-set-choices {
+    display: flex;
+    gap: 6px;
+
+    button {
+      min-width: 72px;
+      min-height: 34px;
+      padding: 0 8px;
+      border-radius: 6px;
+      border: 1px solid rgba(217, 180, 90, 0.45);
+      background: rgba(255, 255, 255, 0.06);
+      color: #e8dcc0;
+      font-size: 13px;
+      pointer-events: auto;
+
+      &.is-active {
+        background: rgba(217, 180, 90, 0.28);
+        border-color: #d9b45a;
+        color: #fff;
+      }
+    }
+  }
+
   .mobile-set-row {
     display: flex;
     align-items: center;

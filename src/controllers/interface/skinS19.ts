@@ -39,7 +39,8 @@ export function applyS19SkinVars(): void {
   if (varsSet || typeof document === 'undefined') return;
   varsSet = true;
   const root = document.documentElement.style;
+  // Absolute: a url() in a variable resolves against the stylesheet that reads it (`/assets/*.css`), not the page.
   for (const name of ['window_head', 'window_body', 'window_inner', 'cell', 'divider', 'tab']) {
-    root.setProperty(`--s19-${name.replace('_', '-')}`, `url("${s19Art(name)}")`);
+    root.setProperty(`--s19-${name.replace('_', '-')}`, `url("${new URL(s19Art(name), document.baseURI).href}")`);
   }
 }

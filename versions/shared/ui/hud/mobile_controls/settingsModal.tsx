@@ -6,6 +6,31 @@ import { Drops } from '@/modules/drops';
 import { MobileButton } from './mobileButton';
 import { MobileMenu } from './menuState';
 import { Icon } from './icons';
+import { FIDELITY_MAX } from '@/controllers/fidelity';
+
+const VIEW_KEYS: readonly TextKey[] = ['mobile.set.viewClassic', 'mobile.set.viewEnhanced', 'mobile.set.viewUltra'];
+
+/** The look in one tap (Classic / Enhanced / Ultra), as the Fidelity page's presets: a preset clears the per-improvement choices. */
+const ViewRow = observer(() => (
+  <div className="mobile-set-row mobile-set-view">
+    <span>{t('mobile.set.view')}</span>
+    <div className="mobile-set-choices">
+      {VIEW_KEYS.slice(0, FIDELITY_MAX + 1).map((key, level) => (
+        <button
+          key={key}
+          type="button"
+          className={GameOptions.fidelity === level ? 'is-active' : undefined}
+          onClick={() => {
+            setGameOption('fidelity', level);
+            setGameOption('fidelityOverrides', {});
+          }}
+        >
+          {t(key)}
+        </button>
+      ))}
+    </div>
+  </div>
+));
 
 type NumberKey = { [K in keyof Options]: Options[K] extends number ? K : never }[keyof Options];
 type BoolKey = { [K in keyof Options]: Options[K] extends boolean ? K : never }[keyof Options];
@@ -54,6 +79,7 @@ export const SettingsModal = observer(() => {
           </MobileButton>
         </div>
         <div className="mobile-settings-body">
+          <ViewRow />
           <Slider label={t('mobile.set.uiScale')} option="uiScale" max={UI_SCALE_MAX} show={v => `${Math.round(uiScaleFactor(v) * 100)}%`} />
           <Slider
             label={t('mobile.set.padSize')}
