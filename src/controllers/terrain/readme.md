@@ -73,6 +73,9 @@ water, ground picks, minimap data and the base class for map objects. There is n
   snow bed, water, rest objects, object fixups, grass off, a ground never drawn (Icarus). The modules here read them through
   `maps.layerFor` when they need them, never at module load.
 
+- The `.att` / `.map` readers go through `decodeMapFile` (`decodeMapFile.ts`): the Season 6 map XOR, or for
+  Season 16+ files (an `ATT\x01` / `MAP\x01` header) ModulusCryptor, the same as BMD version 14.
+
 ## Depends on / used by
 - uses: `assets`, `maps` (tiles, cutout, spawn, `create`), `weather` (coverage, trail, melt,
   burn), `lighting`, `render`, `fx`, `loading` (the scene flag), `core`. Reads `settings`.

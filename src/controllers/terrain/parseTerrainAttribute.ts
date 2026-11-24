@@ -1,17 +1,16 @@
 import { ENUM_WORLD } from '../../core/types';
 import { ArrayCopy, castToByte } from '../../core/binaryUtils';
 import { SIZE_OF_WORD, TERRAIN_SIZE } from './consts';
-import { convertBux, decryptMapFile } from './mapFileEncryption';
+import { convertBux } from './mapFileEncryption';
+import { decodeMapFile } from './decodeMapFile';
 
 export async function parseTerrainAttribute(
   file_data: Uint8Array,
   map: ENUM_WORLD
 ) {
-  const iSize = file_data.length;
-
-  // Decrypt file data
-  const decrypted_data = new Uint8Array(iSize);
-  decryptMapFile(decrypted_data, file_data, iSize);
+  // Decrypt file data (the Season 16+ files are ModulusCryptor behind an ATT header).
+  const decrypted_data = decodeMapFile(file_data);
+  const iSize = decrypted_data.length;
 
   // Check file size
   let extAtt = false;

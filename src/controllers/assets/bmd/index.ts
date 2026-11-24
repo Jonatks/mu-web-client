@@ -429,3 +429,4 @@ export class BMDReader {
     return bmd;
   }
 }
+export { modulusDecrypt } from './modulusCryptor';

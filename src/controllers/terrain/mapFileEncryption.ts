@@ -20,3 +20,4 @@ export function convertBux(Buffer: Uint8Array, Size: Int): void {
     Buffer[i] ^= BUX_CODE[i % 3];
   }
 }
+

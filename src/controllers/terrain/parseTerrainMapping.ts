@@ -1,6 +1,6 @@
 import { ArrayCopy } from '../../core/binaryUtils';
 import { TERRAIN_SIZE } from './consts';
-import { decryptMapFile } from './mapFileEncryption';
+import { decodeMapFile } from './decodeMapFile';
 
 function createArrays() {
   const layer1 = new Uint8Array(TERRAIN_SIZE * TERRAIN_SIZE);
@@ -23,9 +23,7 @@ function createArrays() {
 export async function parseTerrainMapping(encodedData: Uint8Array) {
   const result = createArrays();
 
-  const DataBytes = encodedData.length;
-  const decodedData = new Uint8Array(DataBytes);
-  decryptMapFile(decodedData, encodedData, DataBytes);
+  const decodedData = decodeMapFile(encodedData);
 
   let DataPtr = 0;
   DataPtr += 1;
