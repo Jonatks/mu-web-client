@@ -197,6 +197,20 @@ interfaz, efectos, sonido, música y movimientos; el motor está en el ejecutabl
 6. G2 (motor): sombras, luz y postproceso; se intercala con lo demás porque no depende del arte.
 
 
+#### Protocolo S19 (decisión tuya 24-11-2026: opción 3; si resulta imposible, se vuelve al S6 ampliado)
+
+Base pública y legal: MuEmu (github.com/Yomalex/MuEmu, licencia MIT), servidor en C# que ya habla los protocolos
+Season 16 y 17 coreanos (cliente 1.19.75). Las claves de cifrado del S19 (`Enc1.dat`, `Dec2.dat`) están en el
+cliente y no van protegidas. El GameServer del S19 sí está protegido (WinLicense): no se analiza.
+
+| Paso | Qué |
+|---|---|
+| P1 | Lista de diferencias S6 -> S17 (MuEmu tiene unas 40 estructuras propias de S16/S17: personaje, inventario de 15 bytes por ítem, visión de monstruos y jugadores, tienda, Muun, Gremory, eventos) |
+| P2 | OpenMU: versión de cliente nueva "S19" (definiciones de paquetes y plugins de vista solo para lo que cambia), elegida por la versión que manda el cliente |
+| P3 | Cliente web: juego de paquetes S19 en el borde de versiones (`versions/season19`), con el cifrado y lo que cambia |
+| P4 | Pasar de S6 a S19 en tu servidor, con vuelta atrás; los mensajes propios (Majestic, Ruud, etc.) pasan a los del S19 cuando existan |
+| P5 | Ajuste a S19 exacto: solo comprobable capturando el tráfico de un cliente y un servidor S19 reales (Windows); sin eso queda "S17 coreano más lo del S19" |
+
 #### Reemplazo total por el S19 (decisión tuya 24-11-2026)
 
 Objetivo: al entrar se ve y se juega el S19, cliente y servidor, con sus configuraciones por defecto en tu servidor.
