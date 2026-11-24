@@ -15,6 +15,7 @@ for top in Data game-assets; do
   [ -d "$SRC/$top" ] || continue
   (cd "$SRC/$top" && find . -type f) | while read -r f; do
     dst="$WEB/$top/${f#./}"
+    cmp -s "$SRC/$top/${f#./}" "$dst" && continue
     sudo mkdir -p "$(dirname "$dst")"
     if [ -f "$dst" ] && [ ! -f "$dst.bak-s6" ]; then sudo cp -p "$dst" "$dst.bak-s6"; fi
     if [ ! -f "$dst" ]; then sudo touch "$dst.s19-new"; fi
