@@ -273,9 +273,11 @@ Para la fase 7 basta con sumar una entrada por generacion y revisar sus exclusio
 - La piel: `skinS19.ts` cambia sprites enteros del original por piezas S19 (`MuSpriteFrame`) y pone las de ventana en
   variables CSS; el tema moderno (`mu_window/style.less`) dibuja placa de titulo + cuerpo con border-image.
 - Cuerpos base y partes del S19 en `Player`: los vertices usan huesos con el mismo nombre e indice que el player.bmd
-  (69 de 69), las posiciones son locales al hueso como en S6 y las texturas tienen color, pero en el juego el cuerpo
-  no se dibuja (Elf Soldier sin cuerpo en `?offline`). Se volvio a las del S6 en la VM; las del S19 quedan en
-  `~/s19-player-test`. Falta depurarlo en el navegador.
+  (69 de 69), las posiciones son locales al hueso como en S6. Funcionan: `?offline&bare&class=dk` dibuja el cuerpo
+  del S19. El "invisible" que vi antes fue una mezcla de cache (service worker y el `.gz` del S6 que nginx sirve
+  antes que el `.glb`): para probar un cambio de modelos, borrar caches y service worker en la pestana.
+- `?offline` acepta `bare` (sin equipo) y `class=` para mirar cuerpos sin cuenta; `window.__scene` y `__world`
+  estan expuestos para inspeccionar mallas desde la consola.
 - `?offline` si arranca en produccion (tarda ~90 s la primera vez): sirve para mirar mapas y NPC sin cuenta.
 
 ## 3. Reemplazos provisionales (cerrar antes de dar la meta por cumplida)
