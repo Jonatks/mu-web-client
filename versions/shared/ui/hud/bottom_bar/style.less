@@ -252,3 +252,18 @@
 .mu-mobile .bottom-bar {
   display: none;
 }
+
+// The S19 skin (`.s19-skin`, modern windows on): one plate made by ops/faseS/ui/hud_desktop.py, with every well and
+// box at the original's coordinates, drawn in place of the three frame pieces.
+.s19-skin .bottom-bar {
+  .frame-piece {
+    visibility: hidden;
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--s19-hud-desk) 0 0 / 100% 100% no-repeat;
+  }
+}

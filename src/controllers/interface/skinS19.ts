@@ -35,7 +35,7 @@ export function s19SpriteFor(file: string): string | null {
 /** The pieces the stylesheets read as `--s19-<name>` (underscores become dashes). */
 const VAR_PIECES = [
   'window_head', 'window_body', 'window_inner', 'cell', 'divider', 'tab',
-  'hud_orb_frame_l', 'hud_orb_frame_r', 'hud_orb_glass', 'hud_slot', 'hud_bar_l', 'hud_bar_r',
+  'hud_orb_frame_l', 'hud_orb_frame_r', 'hud_orb_glass', 'hud_slot', 'hud_bar_l', 'hud_bar_r', 'hud_desk',
 ];
 
 let varsSet = false;
