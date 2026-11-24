@@ -263,6 +263,18 @@ Para la fase 7 basta con sumar una entrada por generacion y revisar sus exclusio
 - El Adiestrador (226, modelo `NPC/Breeder`) no se ve aunque el servidor lo pone: su BMD es igual en S6 y S19 y el glb
   local tiene geometria; falta ver si ya pasaba antes del S19.
 
+- Interfaz S19 (decision del usuario 24-11-2026: "Autorizo abrir los GFx"): los `.ozd` de `Interface/GFx` son DDS con
+  ModulusCryptor y los `.ozg` son SWF de Scaleform (GFX/CFX). `ops/faseS/ui/`: `decrypt.ts` los abre, `subs.py` lee
+  `DefineSubImage` (1008) y `DefineExternalImage2` (1009: imagen, formato, ?, ancho, alto, nombre, archivo .dds),
+  `render.py` compone el primer cuadro (formas con relleno de mapa de bits por la lista de visualizacion) para ver
+  el layout del S19, `extract.py` recorta cada pieza, `export_skin.py` da los nombres que pide `skinS19.ts`. El arte
+  va solo a mu-assets y a `game-assets/ui-s19` de la VM. Lo que el GFx coloca por ActionScript (fondo del inventario,
+  rejilla) no sale en el render: la pieza se pone a mano.
+- La piel: `skinS19.ts` cambia sprites enteros del original por piezas S19 (`MuSpriteFrame`) y pone las de ventana en
+  variables CSS; el tema moderno (`mu_window/style.less`) dibuja placa de titulo + cuerpo con border-image.
+- Cuerpos base por clase del S19: sus vertices usan huesos con el mismo nombre e indice que el player.bmd (69 de 69):
+  se suben a `game-assets/Player`.
+
 ## 3. Reemplazos provisionales (cerrar antes de dar la meta por cumplida)
 
 | Provisional | Por que | Como se cierra |
