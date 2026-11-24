@@ -20,7 +20,9 @@ using MUnique.OpenMU.PlugIns;
 /// The item drops of Season 19 (Data/Item/Drop): each kill draws one system by ItemDropRateControl.ini (all-monster bag,
 /// the monster's bag on its map, event bag, set bag, zen, nothing), then one item of that bag by its rate out of
 /// 1000000. The tables are <c>mu_plugins.s19_drop</c>; without them OpenMU drops as before. OpenMU's random equipment and
-/// jewels are then not dropped; its boxes, quest items and zen still are.
+/// jewels are then not dropped; its boxes and quest items still are. Zen is ZenDrop.xml: 100 per kill on every map,
+/// times the monster level half of the time (MultiplyByMonsterLevel, MultiplyChanceRate 5000); OpenMU's own money group
+/// is set to 0 by ops/faseS/s3_zen.sql.
 /// </summary>
 [PlugIn]
 [Display(Name = "Season 19 Drops", Description = "Monsters drop what the Season 19 bags say (mu_plugins.s19_drop).")]
@@ -28,6 +30,8 @@ using MUnique.OpenMU.PlugIns;
 public class S19Drops : IAttackableGotKilledPlugIn, IMonsterItemDropPlugIn
 {
     private const int BagBasis = 1000000;
+    private const int ZenPerKill = 100;
+    private const int ZenLevelMultiplyPercent = 50;
 
     /// <inheritdoc />
     public void ItemDropping(AttackableNpcBase monster, Player killer, Item item, CancelEventArgs eventArgs)
@@ -57,7 +61,14 @@ public class S19Drops : IAttackableGotKilledPlugIn, IMonsterItemDropPlugIn
 
             var map = monster.CurrentMap;
             var level = (int)monster.Definition[Stats.Level];
-            var bag = tables.Draw(map.MapId, monster.Definition.Number, level);
+            var bag = tables.Draw(map.MapId, monster.Definition.Number, level, out var zen);
+            if (zen)
+            {
+                var amount = ZenPerKill * (Rand.NextRandomBool(ZenLevelMultiplyPercent) ? Math.Max(level, 1) : 1) * tables.Control("ZenDropMultipler", 1);
+                await map.AddAsync(new DroppedMoney((uint)amount, monster.Position, map)).ConfigureAwait(false);
+                return;
+            }
+
             if (bag is null || Choose(bag) is not { } row
                 || player.GameContext.Configuration.Items.FirstOrDefault(d => d.Group == row.Group && d.Number == row.Number) is not { } definition)
             {

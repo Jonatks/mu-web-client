@@ -55,9 +55,13 @@ public sealed class S19DropTables
     /// <summary>A rate of ItemDropRateControl.ini as a percentage.</summary>
     public int Percent(string key) => (int)this._control.GetValueOrDefault(key, 50);
 
-    /// <summary>Draws the drop system for one kill and gives its bag for this monster, or null for zen or nothing.</summary>
-    public IReadOnlyList<S19DropRow>? Draw(int map, short monster, int level)
+    /// <summary>A setting of ItemDropRateControl.ini.</summary>
+    public double Control(string key, double fallback) => this._control.GetValueOrDefault(key, fallback);
+
+    /// <summary>Draws the drop system for one kill: the bag for this monster, or none (zen when <paramref name="zen"/>).</summary>
+    public IReadOnlyList<S19DropRow>? Draw(int map, short monster, int level, out bool zen)
     {
+        zen = false;
         var roll = Rand.NextInt(0, (int)this._control.GetValueOrDefault("NoItemRate", 1));
         if (roll < this._control.GetValueOrDefault("AllMonsterItemDropRate"))
         {
@@ -80,6 +84,7 @@ public sealed class S19DropTables
             return this._set.GetValueOrDefault(map)?.Where(r => r.Fits(level)).ToList();
         }
 
+        zen = roll < this._control.GetValueOrDefault("ZenDropRate");
         return null;
     }
 
