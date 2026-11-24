@@ -253,6 +253,16 @@ Para la fase 7 basta con sumar una entrada por generacion y revisar sus exclusio
 - S2 en mas mapas: Dungeon, Devias, Noria, Lost Tower, Atlans, Tarkan e Icarus. `gen_map.py` ahora solo cambia las
   apariciones normales y errantes; las de eventos e invasiones quedan. Faltan definiciones: 580, 584, 605-607, 681, 941.
 
+- GS4 mas mapas: Dungeon, Devias, Noria, Lost Tower, Atlans, Tarkan e Icarus con terreno y objetos del S19
+  (`stage_client_s19.py`, 458 modelos). Los `.obj` del S19 de Devias, Lost Tower y Tarkan son version 3 (45 bytes por
+  registro): `objRecordSize` en `mapFileEncryption.ts`. El arbol S6 local no tiene World9, World11 ni Object5/9/11:
+  esos se copian enteros del S19.
+- Monstruos y NPC clasicos del S19 son los mismos BMD del S6 (solo cambian 7 texturas y Silvia): no hay modelo nuevo
+  que poner. Las partes de cuerpo por clase del S19 (71 en Player) tienen 61 nodos contra 59: no se suben hasta probar
+  que encajan con el esqueleto.
+- El Adiestrador (226, modelo `NPC/Breeder`) no se ve aunque el servidor lo pone: su BMD es igual en S6 y S19 y el glb
+  local tiene geometria; falta ver si ya pasaba antes del S19.
+
 ## 3. Reemplazos provisionales (cerrar antes de dar la meta por cumplida)
 
 | Provisional | Por que | Como se cierra |
