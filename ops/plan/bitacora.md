@@ -230,6 +230,21 @@ Para la fase 7 basta con sumar una entrada por generacion y revisar sus exclusio
   584 Sir Lesnar, 764 Cent y 891 Wizard Gillard (definicion y modelo en el cliente).
 - `openmu_probe` no tenia el esquema `mu_plugins`: los scripts lo crean.
 
+- S3 drops: el motor del S19 sortea un sistema por muerte (`ItemDropRateControl.ini`: todos los monstruos 7.5%,
+  bolsa del monstruo en su mapa 83.5%, evento, set, zen, nada) y un item de esa bolsa por su tasa sobre 1000000.
+  OpenMU tiene su generador fijo (`DefaultDropGenerator`), asi que va como plugin `S19Drops` (`IAttackableGotKilledPlugIn`
+  suelta, `IMonsterItemDropPlugIn` cancela el equipo y las joyas al azar de OpenMU). Tablas `mu_plugins.s19_drop` y
+  `s19_drop_control` de `gen_drops.py`; el .sql (datos del S19) vive en mu-assets `s19/server/s3_drops.sql.gz`.
+  Provisional: el zen sigue siendo el de OpenMU; la bolsa de eventos no suelta (depende de que evento corre);
+  la bolsa de sets solo existe en los mapas 31 y 91; el `ItemRate` del monstruo no se usa.
+- GS4 Lorencia: el cliente S19 tiene el mismo vocabulario de objetos (mismos ids) con 115 modelos rehechos y terreno
+  nuevo. Sus `.att`/`.map` llevan cabecera `ATT\x01`/`MAP\x01` y cuerpo ModulusCryptor (como BMD 14): el cliente los lee
+  desde 7aae4d2 (`decodeMapFile`); ModulusCryptor paso a `src/core/modulusCryptor` porque el worker del terreno no puede
+  cargar el lector de modelos (vite no parte workers iife). `TerrainLight` viene como OZB (BMP): se pasa a OZJ y jpg.
+  El terreno se sirve desde `game-assets/World1`, no desde `Data/`. Archivos en mu-assets `s19/client`, en la VM con
+  `ops/faseS/apply_client_s19.sh` (respaldo `.bak-s6`, `rollback`).
+- El modo `?offline` no arranca en el build de produccion: la verificacion visual de un mapa va con un personaje.
+
 ## 3. Reemplazos provisionales (cerrar antes de dar la meta por cumplida)
 
 | Provisional | Por que | Como se cierra |
