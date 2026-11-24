@@ -118,10 +118,8 @@
   }
 }
 
-// The modern theme (improvement `modernWindows`): each square a dark recessed cell with a faint gold rim.
+// The modern theme (improvement `modernWindows`): each square the S19 grid cell (`skinS19.ts`), a dark rimmed one without it.
 .mu-modern-cell {
-  background: linear-gradient(180deg, rgba(255, 240, 210, 0.07), rgba(255, 240, 210, 0.02));
-  box-shadow:
-    inset 0 0 0 1px rgba(168, 138, 82, 0.38),
-    inset 0 1px 2px rgba(0, 0, 0, 0.6);
+  background: var(--s19-cell) center / 100% 100% no-repeat, linear-gradient(180deg, rgba(255, 240, 210, 0.07), rgba(255, 240, 210, 0.02));
+  box-shadow: inset 0 0 0 1px rgba(120, 100, 70, 0.35);
 }

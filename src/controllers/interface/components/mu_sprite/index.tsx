@@ -6,6 +6,7 @@ import {
   peekMuSprite,
   type MuSprite as Sprite,
 } from '@/controllers/assets/mu';
+import { s19SpriteFor } from '../../skinS19';
 
 // A `Data/`-rooted name (`Data/Logo/MU-logo.OZT`) is loaded from Data as-is; anything
 // else (bare or with a subfolder, `partCharge1/newui_menu03.OZJ`) is an Interface sprite.
@@ -136,6 +137,8 @@ export const MuSpriteFrame = memo(function MuSpriteFrame({
   children,
 }: MuSpriteFrameProps) {
   const sprite = useMuSprite(file);
+  // The S19 skin swaps whole sprites only (a crop of a sheet keeps the original).
+  const skin = x === 0 && y === 0 ? s19SpriteFor(file) : null;
 
   return (
     <div
@@ -146,10 +149,11 @@ export const MuSpriteFrame = memo(function MuSpriteFrame({
       style={{
         ...(width !== undefined && { width }),
         ...(height !== undefined && { height }),
-        backgroundImage: sprite ? `url(${sprite.url})` : undefined,
-        backgroundPosition: `-${x}px -${y}px`,
+        backgroundImage: skin ? `url("${skin}")` : sprite ? `url(${sprite.url})` : undefined,
+        backgroundPosition: skin ? 'center' : `-${x}px -${y}px`,
+        backgroundSize: skin ? '100% 100%' : undefined,
         backgroundRepeat: 'no-repeat',
-        imageRendering: 'pixelated',
+        imageRendering: skin ? 'auto' : 'pixelated',
         ...style,
       }}
     >

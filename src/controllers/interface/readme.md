@@ -31,6 +31,9 @@ windows themselves are content in `versions/shared/ui/` (see
   has that key; `src/modules/_api`). Other: `msg_window`, `game_cursor`
   (`setRepairCursor(read)`: the app hands it the merchant's repair mode), `world_label`,
   `ui_stage` (the 640x480 stage scale).
+- `skinS19.ts`: `s19SpriteFor(file)` (the Season 19 piece a whole original sprite becomes while `modernWindows` is on),
+  `s19Art(name)`, `applyS19SkinVars()` (the window pieces as `--s19-*` CSS variables). The pieces are the S19
+  client's own art in `game-assets/ui-s19/` (ops/faseS/ui), not in this repo; missing ones leave the CSS theme.
 - `keyBindings.ts`: `KeyBindings`, `keyFor`, `isKey`, `actionOfKey`, `setKeyBinding`,
   `setKeyProfile`, `WALK_KEYS`; `browserHotkeys.ts`: `installBrowserHotkeyGuard`,
   `toggleFullscreen`, `isBrowserChord`.

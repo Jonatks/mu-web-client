@@ -7,6 +7,9 @@ import { MuSpriteFrame, useMuSprite } from '../mu_sprite';
 import { MuResizeGrip, useWindowChrome } from './useWindowChrome';
 import { isMobileDevice } from '../../mobile';
 import { MuWindows, type WindowCloser } from '../../windowManager';
+import { applyS19SkinVars } from '../../skinS19';
+
+applyS19SkinVars();
 
 const BACK_SPRITE = 'newui_msgbox_back.OZJ';
 const TOP_SPRITE = 'newui_item_back04.OZT';
