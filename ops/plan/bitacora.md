@@ -215,6 +215,21 @@ Para la fase 7 basta con sumar una entrada por generacion y revisar sus exclusio
   el tinte verde azulado del original (46,77,77): fondo negro suave, tambien decision del dueno.
 - Un texto nuevo cambia el golden de textos (`src/i18n/text.golden.test.ts`: cuenta y hash por idioma).
 
+### Fase S: servidor S19 (24-11-2026)
+- El servidor ya habla el protocolo ampliado: la base y `openmu_probe` tienen el cliente 106.3 (`20404`) y ninguno de
+  sus 27 plugins `MinimumClient(106,3)` esta apagado. Falta solo que el cliente lo use.
+- S1 experiencia: la tabla normal 1-400 y la master 1-200 del S19 son las formulas de OpenMU; la Majestic ya estaba en
+  el plugin. La master 201-400 no sigue formula: `S19MasterExperience.cs` la escribe sobre la tabla al autenticarse
+  (la imagen es OpenMU de stock mas plugins, asi que no se toca `GameContext`). Tasas x200 / x2000
+  (`s1_tasa.sql`, reversa `s1_tasa_undo.sql`).
+- S2 mapas: `gen_map.py <Data> <mapa> ops/faseS` da `s2_mapa<N>.sql` y su reversa, con respaldo en `mu_plugins`.
+  Direccion OpenMU = Dir del S19 + 1 (-1 = sin direccion). Los NPC errantes conservan su disparador.
+  Los cambios de configuracion se ven al reiniciar `openmu` (y despues `mu-gate`, `mu-kick`).
+- Lorencia: los monstruos ya eran los del S19 en areas y estadisticas; cambian reaparicion (10 s), las 7 aranas
+  sueltas, el plantel de NPC (sin guardias ni Leo; con Elpis y Thompson) y sus lugares. Faltan en la base los NPC
+  584 Sir Lesnar, 764 Cent y 891 Wizard Gillard (definicion y modelo en el cliente).
+- `openmu_probe` no tenia el esquema `mu_plugins`: los scripts lo crean.
+
 ## 3. Reemplazos provisionales (cerrar antes de dar la meta por cumplida)
 
 | Provisional | Por que | Como se cierra |
@@ -227,3 +242,4 @@ Para la fase 7 basta con sumar una entrada por generacion y revisar sus exclusio
 | Aspecto de las habilidades de cuarta clase | el S19 las dibuja en su ejecutable | hechas a ojo con efectos de S6; revisar con video del S19 |
 | Iconos de las habilidades de cuarta clase | el S19 los asigna en su ejecutable | elegidos a ojo en `skillCasting.ts`; confirmar con un cliente S19 |
 | Iconos de guantes y algunas armaduras aproximados | el visor no da el angulo del original | Fase G: render del cliente con su camara de inventario |
+| NPC del S19 sin definicion (584, 764, 891 en Lorencia) | OpenMU no los trae | definirlos con su funcion y su modelo del cliente S19 |
