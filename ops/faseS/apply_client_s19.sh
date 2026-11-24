@@ -12,6 +12,7 @@ if [ "${1:-}" = rollback ]; then
 fi
 (cd ~/mu-assets && GIT_SSH_COMMAND="ssh -i ~/.ssh/mu_assets -o IdentitiesOnly=yes" git pull -q)
 for top in Data game-assets; do
+  [ -d "$SRC/$top" ] || continue
   (cd "$SRC/$top" && find . -type f) | while read -r f; do
     dst="$WEB/$top/${f#./}"
     sudo mkdir -p "$(dirname "$dst")"
