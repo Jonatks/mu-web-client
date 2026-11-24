@@ -23,6 +23,15 @@ const SPRITES: Readonly<Record<string, string>> = {
   'newui_item_box.ozt': 'cell',
 };
 
+/** Original sheets redrawn frame for frame (same layout, twice the size): file to [piece, sheet width, height]. */
+const SHEETS: Readonly<Record<string, readonly [string, number, number]>> = {
+  'partcharge1/newui_menu_bt05.ozj': ['btn_shop', 30, 164],
+  'partcharge1/newui_menu_bt01.ozj': ['btn_character', 30, 164],
+  'partcharge1/newui_menu_bt02.ozj': ['btn_inventory', 30, 164],
+  'partcharge1/newui_menu_bt03.ozj': ['btn_friends', 30, 164],
+  'partcharge1/newui_menu_bt04.ozj': ['btn_menu', 30, 164],
+};
+
 /** The URL of one S19 piece. */
 export const s19Art = (name: string): string => `${BASE}${name}.png`;
 
@@ -30,6 +39,12 @@ export const s19Art = (name: string): string => `${BASE}${name}.png`;
 export function s19SpriteFor(file: string): string | null {
   const name = SPRITES[file.toLowerCase()];
   return name && isOn('modernWindows') ? s19Art(name) : null;
+}
+
+/** The S19 sheet laid out like the original's (`url`, its size in the original's pixels), or null. */
+export function s19SheetFor(file: string): { url: string; size: string } | null {
+  const sheet = SHEETS[file.toLowerCase()];
+  return sheet && isOn('modernWindows') ? { url: s19Art(sheet[0]), size: `${sheet[1]}px ${sheet[2]}px` } : null;
 }
 
 /** The pieces the stylesheets read as `--s19-<name>` (underscores become dashes). */

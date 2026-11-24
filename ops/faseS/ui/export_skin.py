@@ -30,4 +30,14 @@ step = row.size[0] / 8
 row.crop((0, 0, round(step), row.size[1])).save(f'{out}/cell.png', optimize=True)
 # One skill square: the second of the three in the skill strip.
 Image.open(f'{src}/main/296.png').crop((44, 33, 74, 72)).save(f'{out}/hud_slot.png', optimize=True)
-print('ok', len(PIECES) + 2, 'piezas')
+# The bar's five buttons as sheets with the original's frames (four 30x41 stacked: up, over, down, down+over),
+# drawn at twice the size; the S19 round button states are normal, over, down, disabled.
+BUTTONS = {'btn_shop': 275, 'btn_character': 266, 'btn_inventory': 257, 'btn_friends': 248, 'btn_menu': 239}
+for name, first in BUTTONS.items():
+    sheet = Image.new('RGBA', (60, 4 * 82), (0, 0, 0, 0))
+    for frame, state in enumerate((0, 1, 2, 1)):
+        art = Image.open(f'{src}/main/{first + 2 * state}.png').convert('RGBA')
+        art = art.resize((54, round(54 * art.size[1] / art.size[0])), Image.LANCZOS)
+        sheet.alpha_composite(art, ((60 - art.size[0]) // 2, frame * 82 + (82 - art.size[1]) // 2))
+    sheet.save(f'{out}/{name}.png', optimize=True)
+print('ok', len(PIECES) + 2 + len(BUTTONS), 'piezas')
