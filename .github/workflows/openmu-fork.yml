@@ -17,7 +17,7 @@ jobs:
         run: |
           echo "VERSION=$(cat openmu/fork/VERSION)" >> "$GITHUB_ENV"
           git clone -q --filter=blob:none https://github.com/MUnique/OpenMU openmu-src
-          git -C openmu-src -c advice.detachedHead=false checkout -q "$(cat openmu/fork/BASE)"
+          git -C openmu-src -c advice.detachedHead=false checkout -qf "$(cat openmu/fork/BASE)"
           for p in openmu/fork/*.patch; do git -C openmu-src apply --verbose "$GITHUB_WORKSPACE/$p"; done
       - name: Imagen
         run: docker build -f openmu-src/src/Startup/Dockerfile -t "openmu-mu:$VERSION" openmu-src/src
