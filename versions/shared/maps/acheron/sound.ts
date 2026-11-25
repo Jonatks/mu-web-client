@@ -9,7 +9,7 @@ const A = MonsterActionType;
  * There is no source to say when each plays; this follows Karutan's shape (steps on frames 1-2 and 7-8, attack on
  * both attacks, `skill1` on the second where the monster has one, hit on Shock, death on Die).
  */
-const voice = (name: string, move = true, skill = false): readonly MonsterCue[] => {
+export const voice = (name: string, move = true, skill = false): readonly MonsterCue[] => {
   const s = (k: string) => `Sound/Akeron/${name}_${k}` as Sounds;
   return [
     ...(move ? [{ on: [A.Walk], play: s('move1'), frame: [1, 2] as const }, { on: [A.Walk], play: s('move2'), frame: [7, 8] as const }] : []),

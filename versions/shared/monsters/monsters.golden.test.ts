@@ -9,8 +9,8 @@ import { monsters } from './all';
  * same commit.
  */
 const ROWS_HASH = 'cbc3b18e1d37dae687d72a4ecce02342c2a82173e200340ed727392ead339c7d';
-const HEALTH_HASH = 'cd1a450ed0ff7228cbc4453f9c65d1f04bd54c547f27d49d4727ccf04b82e476';
-const MODELS_HASH = '8c07e3c789b9d7dadf65620f02867fe005c72001f88fe5c358065f075d92b94b';
+const HEALTH_HASH = '8a1ddeff0097882820a1ee2ccfa2b5f830b2cf9861f95e97c9b7897a4debfe99';
+const MODELS_HASH = '39de1e844b82967003f21ac635077ab4deb5552a93c32f2859523121aafa3cae';
 
 const hash = (v: unknown) => createHash('sha256').update(JSON.stringify(v)).digest('hex');
 const sortedKeys = (o: object) => Object.fromEntries(Object.entries(o).sort(([a], [b]) => (a < b ? -1 : 1)));
@@ -24,13 +24,13 @@ describe('monster folders', () => {
 
   it('hold the server health, unchanged', () => {
     const health = Object.fromEntries(monsters.all().filter(d => d.maxHealth !== undefined).map(d => [d.Numb, d.maxHealth]));
-    expect(Object.keys(health)).toHaveLength(446);
+    expect(Object.keys(health)).toHaveLength(454);
     expect(hash(health)).toBe(HEALTH_HASH);
   });
 
   it('hold the model table (Setting_Monster), unchanged', () => {
     const models = monsters.all().flatMap(d => (d.model ? [[d.Numb, d.model.type, d.model.scale]] : []));
-    expect(models).toHaveLength(405);
+    expect(models).toHaveLength(413);
     expect(hash(models)).toBe(MODELS_HASH);
     const hidden = monsters.all().flatMap(d => (d.model?.hiddenMesh !== undefined ? [[d.Numb, d.model.hiddenMesh]] : []));
     expect(hidden).toEqual([[0, 0], [1, 0], [5, 1]]);

@@ -49,6 +49,7 @@ export const GM_MAPS: readonly GmMap[] = [
   { number: 80, name: 'Karutan 1', kind: 'field' },
   { number: 81, name: 'Karutan 2', kind: 'field' },
   { number: 91, name: 'Acheron', kind: 'field' },
+  { number: 95, name: 'Debenter', kind: 'field' },
 
   { number: 6, name: 'Arena', kind: 'event' },
   { number: 64, name: 'Duel Arena', kind: 'event' },

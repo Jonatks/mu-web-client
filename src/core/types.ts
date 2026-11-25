@@ -156,6 +156,8 @@ export enum ENUM_WORLD {
   WD_81KARUTAN2 = 81,
   /** Acheron (Season 12, `World92`). Season 19 art: there is no original source for it (versions/shared/maps/acheron). */
   WD_91ACHERON = 91,
+  /** Debenter (Season 13, `World96`), reached from Acheron. Season 19 art (versions/shared/maps/debenter). */
+  WD_95DEBENTER = 95,
   NUM_WD,
 }
 

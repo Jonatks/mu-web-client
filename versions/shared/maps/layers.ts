@@ -41,6 +41,7 @@ import { lorenmarketLayer } from './lorenmarket';
 import { karutan1Layer } from './karutan1';
 import { karutan2Layer } from './karutan2';
 import { acheronLayer } from './acheron';
+import { debenterLayer } from './debenter';
 
 /**
  * Every map the client can load. The only place maps are enumerated: no
@@ -90,4 +91,5 @@ export const MAP_LAYERS: readonly MapLayer[] = [
   karutan1Layer,
   karutan2Layer,
   acheronLayer,
+  debenterLayer,
 ];
