@@ -50,13 +50,13 @@ function sql(sets: SetS19[]): string {
       + `    ARRAY[${opts.map(o => o.value).join(', ')}]::numeric[],\n`
       + `    ARRAY[${opts.map(o => o.aggregate).join(', ')}]::int[]);\n`;
   }).join('');
-  const mine = (k: string) => `substr("Id"::text, 1, 19) IN (${his.split(',').map(h => `'0000ba5e-${k}-${h.slice(1, -1)}'`).join(',')})`;
+  const mine = (k: string) => `substr("Id"::text, 1, 18) IN (${his.split(',').map(h => `'0000ba5e-${k}-${h.slice(1, -1)}'`).join(',')})`;
   return `-- Fase S10: ${sets.length} sets Mastery (Darkangel a Lightning). Generado por gen_mastery_sets.ts: no se edita a mano.
 -- Aplica con \`psql -v ON_ERROR_STOP=1 -f s10_sets.sql\` despues de s10_mastery.sql; revierte con \`-v undo=1\`.
 \\set ON_ERROR_STOP on
 BEGIN;
 \\if :{?undo}
-DELETE FROM config."ItemDefinitionItemSetGroup" WHERE substr("ItemSetGroupId"::text, 1, 19) IN (${his.split(',').map(h => `'0000ba5e-0001-${h.slice(1, -1)}'`).join(',')});
+DELETE FROM config."ItemDefinitionItemSetGroup" WHERE substr("ItemSetGroupId"::text, 1, 18) IN (${his.split(',').map(h => `'0000ba5e-0001-${h.slice(1, -1)}'`).join(',')});
 DELETE FROM config."ItemOfItemSet" WHERE ${mine('0006')};
 DELETE FROM config."ItemSetGroup" WHERE ${mine('0001')};
 DELETE FROM config."IncreasableItemOption" WHERE ${mine('0005')};
