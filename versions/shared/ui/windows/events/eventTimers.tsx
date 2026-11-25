@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react-lite';
-import { isMobileDevice } from '@/controllers/interface/mobile';
+import { isTouchHud } from '@/controllers/interface/mobile';
 import { Ecs } from '@/ecs/current';
 import { GameOptions, uiScaleFactor } from '@/controllers/settings';
 import { events } from '@/modules/events';
@@ -90,7 +90,7 @@ const Row = observer(({ row }: { row: EventScheduleRow }) => {
 export const EventTimers = observer(() => {
   const rows = eventSchedule();
   // Not on a touch screen: it would sit over the 3D, and the original's panel is a desktop one.
-  if (isMobileDevice() || !GameOptions.eventTimers || !Ecs.world) return null;
+  if (isTouchHud() || !GameOptions.eventTimers || !Ecs.world) return null;
 
   const scale = uiScaleFactor(GameOptions.uiScale);
 

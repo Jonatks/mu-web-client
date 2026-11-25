@@ -2,7 +2,7 @@ import './style.less';
 import { useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { AppState, UIState } from '@/controllers/interface/uiState';
-import { useIsMobile } from '@/controllers/interface/mobile';
+import { isTouchHud, useIsMobile } from '@/controllers/interface/mobile';
 import { StatusPanel } from './statusPanel';
 import { TopButtons } from './topButtons';
 import { Orb, Gauges, ExpLine } from './vitals';
@@ -49,18 +49,28 @@ const Bar = observer(() => {
 export const MobileControls = observer(() => {
   const mobile = useIsMobile();
   const inWorld = AppState.uiState === UIState.World;
+  const full = mobile && isTouchHud();
   useEffect(
-    () => (mobile && inWorld ? installPlayerLongPress() : undefined),
-    [mobile, inWorld]
+    () => (full && inWorld ? installPlayerLongPress() : undefined),
+    [full, inWorld]
   );
   useEffect(
-    () => (mobile && inWorld ? installFireLoop() : undefined),
-    [mobile, inWorld]
+    () => (full && inWorld ? installFireLoop() : undefined),
+    [full, inWorld]
   );
   if (!mobile) return null;
   // Not over the loading screen: `playerEntity` is plain per-frame state and would not re-render this when it arrives,
   // so the observable state is what gates the HUD.
   if (AppState.uiState !== UIState.World) return null;
+  // The classic interface on a phone: only the thumb stick on top of it.
+  if (!full) {
+    return (
+      <div className="mobile-controls">
+        <MuArtDefs />
+        <Joystick />
+      </div>
+    );
+  }
 
   return (
     <>

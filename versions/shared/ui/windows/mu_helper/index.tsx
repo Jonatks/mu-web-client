@@ -19,7 +19,7 @@ import { MuButton } from '@/controllers/interface/components/mu_button';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
 import { MuItemWindow } from '@/controllers/interface/components/mu_window';
 import { SkillIcon } from '../../components/skill_icon';
-import { isMobileDevice } from '@/controllers/interface/mobile';
+import { isTouchHud } from '@/controllers/interface/mobile';
 import { GameOptions, setGameOption } from '@/controllers/settings';
 import { MAX_FILTERED_ITEM_CHARS } from '@/modules/mu_helper/itemFilters';
 import {
@@ -684,7 +684,7 @@ export const MuHelperWindow = observer(() => {
   }, [open]);
 
   // A phone gets the touch panel (`hud/mobile_controls/helperSheet.tsx`) over the same draft.
-  if (!open || isMobileDevice()) return null;
+  if (!open || isTouchHud()) return null;
 
   const close = () => toggleMuHelperWindow(false);
 

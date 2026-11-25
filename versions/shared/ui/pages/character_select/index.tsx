@@ -15,7 +15,7 @@ import { MuButton } from '@/controllers/interface/components/mu_button';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
 import { MsgWindow } from '@/controllers/interface/components/msg_window';
 
-import { isMobileDevice } from '@/controllers/interface/mobile';
+import { isTouchHud } from '@/controllers/interface/mobile';
 import { CharMakeWin } from './CharMakeWin';
 import { MobilePanel } from './MobilePanel';
 import {
@@ -141,7 +141,7 @@ export const CharactersPage = observer(() => {
     <div className="characters-page">
       <CharacterList source={CharSelect} look="lineup" onList={() => setSelecting(false)} />
 
-      {isMobileDevice() && !creating && (
+      {isTouchHud() && !creating && (
         <MobilePanel
           selecting={selecting}
           onConnect={onConnect}
@@ -151,7 +151,7 @@ export const CharactersPage = observer(() => {
         />
       )}
 
-      <div className="char-sel-bar" style={{ height: BTN_HEIGHT, display: isMobileDevice() ? 'none' : undefined }}>
+      <div className="char-sel-bar" style={{ height: BTN_HEIGHT, display: isTouchHud() ? 'none' : undefined }}>
         {}
         <MuSpriteFrame
           file="deco.OZT"

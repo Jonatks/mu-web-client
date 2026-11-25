@@ -13,7 +13,7 @@ import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
 import { MuText, TEXT_COLOR } from '@/controllers/interface/components/mu_text';
 import { MuLogo } from '@/controllers/interface/components/mu_logo';
 import { MuButton } from '@/controllers/interface/components/mu_button';
-import { isMobileDevice } from '@/controllers/interface/mobile';
+import { isTouchHud } from '@/controllers/interface/mobile';
 import { MobileLogin } from './MobileLogin';
 import { RegisterWindow } from './registerWindow';
 
@@ -149,7 +149,7 @@ export const LoginPage = observer(() => {
     );
   }
 
-  if (isMobileDevice()) {
+  if (isTouchHud()) {
     return (
       <div className="login-page">
         <MobileLogin

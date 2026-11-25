@@ -10,7 +10,7 @@ import { MuButton } from '@/controllers/interface/components/mu_button';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
 import { TEXT_COLOR } from '@/controllers/interface/components/mu_text';
 import { gameVersion } from '@/version';
-import { isMobileDevice } from '@/controllers/interface/mobile';
+import { isTouchHud } from '@/controllers/interface/mobile';
 import { MobileCharMake } from './MobileCharMake';
 import { tryCreateCharacter } from './createCharacter';
 import { createClassPreview, type ClassPreview } from './classPreview';
@@ -342,5 +342,5 @@ const DesktopCharMakeWin = observer(({ onClose }: CharMakeWinProps) => {
 
 /** A touch screen has its own card (`MobileCharMake`); the original window is the mouse's. */
 export const CharMakeWin = observer(({ onClose }: CharMakeWinProps) =>
-  isMobileDevice() ? <MobileCharMake onClose={onClose} /> : <DesktopCharMakeWin onClose={onClose} />
+  isTouchHud() ? <MobileCharMake onClose={onClose} /> : <DesktopCharMakeWin onClose={onClose} />
 );

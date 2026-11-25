@@ -8,7 +8,7 @@ import { warpCommandRequest } from '@/modules/warp';
 import { Hero } from '@/modules/hero';
 import { Session } from '@/modules/session';
 import { Ecs } from '@/ecs/current';
-import { isMobileDevice } from '@/controllers/interface/mobile';
+import { isTouchHud } from '@/controllers/interface/mobile';
 import { isKey } from '@/controllers/interface/keyBindings';
 import { BaseClass, getBaseClass } from '@/modules/hero/characterStats';
 import { PVP_MURDERER1 } from '@/controllers/interface/nameTags';
@@ -272,7 +272,7 @@ export const MoveCommandWindow = observer(() => {
   }, [open]);
 
   // A touch screen has its own list (`hud/mobile_controls/teleportModal.tsx`).
-  if (!open || isMobileDevice()) return null;
+  if (!open || isTouchHud()) return null;
 
   const { level, money, charClass } = Hero;
   const cls = getBaseClass(charClass);
