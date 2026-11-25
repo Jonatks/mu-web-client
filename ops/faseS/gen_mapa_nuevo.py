@@ -24,7 +24,9 @@ here = con | {mapnr}
 enters = {n: g for n, g in all_gates.items() if g['Flag'] == '1' and int(g['TargetID']) in all_gates
           and int(all_gates[int(g['TargetID'])]['World']) in here and int(g['World']) in here
           and mapnr in (int(g['World']), int(all_gates[int(g['TargetID'])]['World']))}
-warp = next((t for t in attrs('Teleport', read('World/TeleportTemplate.xml')) if int(t['Gate']) == int(world['SpawnGate'])), None)
+# /move solo si la puerta de aparicion es de este mapa (la 417 de Debenter es la de Acheron: no tiene /move).
+warp = next((t for t in attrs('Teleport', read('World/TeleportTemplate.xml')) if int(t['Gate']) == int(world['SpawnGate'])
+             and int(all_gates[int(t['Gate'])]['World']) == mapnr), None)
 mons = {int(m['ID']): m for m in attrs('Monster', read('Monster/MonsterList.xml'))}
 body = re.search(rf'<Map Number="{mapnr}" [^>]*>(.*?)</Map>', read('Monster/MonsterSpawn.xml'), re.S).group(1)
 spawns = []
@@ -47,7 +49,9 @@ clone = lambda table, where, overrides: (
 sql = [f'-- Fase S12, mapa {mapnr} ({world["Name"]}). Generado por ops/faseS/gen_mapa_nuevo.py.', 'begin;',
        f'select 1/(1 - count(*))::int as "el mapa ya existe" from {C}"GameMapDefinition" where "Number" = {mapnr};']
 sql.append(clone('GameMapDefinition', f'"Number" = {BASE_MAP}', {
-    'Id': MAP, 'Number': mapnr, 'Name': lit(world['Name'].rsplit(' 1', 1)[0]), 'SafezoneMapId': MAP,
+    # Al morir se vuelve al mapa de su puerta de aparicion: Debenter no tiene, vuelve a Acheron (puerta 417).
+    'Id': MAP, 'Number': mapnr, 'Name': lit(world['Name'].rsplit(' 1', 1)[0]),
+    'SafezoneMapId': gid(0x20, int(all_gates[int(world['SpawnGate'])]['World'])),
     'ExpMultiplier': 1, 'BattleZoneId': 'null', 'TerrainData': lit('\\x' + terrain.hex())}) + ';')
 
 # Puertas: la de llegada (Flag 0) es la salida del /move y del respawn; las de entrada (1) llevan a su salida (2).
@@ -88,7 +92,8 @@ for n in new:
                f"jsonb_build_object('Id', ('0000ba5e-0025-{n:04x}-0000-' || lpad(to_hex(row_number() over ()), 12, '0'))::uuid, "
                f"'MonsterDefinitionId', {gid(0x24, n)}))).* "
                f'from {C}"MonsterAttribute" a join {C}"MonsterDefinition" d on d."Id" = a."MonsterDefinitionId" '
-               f'where d."Number" = {BASE_NPC if npc else BASE_MONSTER} and exists (select 1 from {C}"MonsterDefinition" x where x."Id" = {gid(0x24, n)});')
+               f'where d."Number" = {BASE_NPC if npc else BASE_MONSTER} and exists (select 1 from {C}"MonsterDefinition" x where x."Id" = {gid(0x24, n)}) '
+               f'and not exists (select 1 from {C}"MonsterAttribute" y where y."MonsterDefinitionId" = {gid(0x24, n)});')
     if not npc:
         for designation, key in [('Level', 'Level'), ('Maximum Health', 'Life'), ('Minimum Physical Base Damage', 'DamageMin'),
                                  ('Maximum Physical Base Damage', 'DamageMax'), ('Base Defense', 'Defense'),
@@ -111,7 +116,9 @@ undo = [f'-- Deshace s12_mapa{mapnr}.sql', 'begin;',
         f'delete from {C}"EnterGate" where "GameMapDefinitionId" = {MAP} or "TargetGateId" in '
         f'(select "Id" from {C}"ExitGate" where "MapId" = {MAP});',
         f'delete from {C}"ExitGate" where "MapId" = {MAP};',
-        f'delete from {C}"MonsterAttribute" where "MonsterDefinitionId" in ({", ".join(gid(0x24, n) for n in new)});',
+        # Solo los de monstruos que ya no aparecen en otro mapa (Debenter comparte tipos con Acheron si los hubiera).
+        f'delete from {C}"MonsterAttribute" where "MonsterDefinitionId" in ({", ".join(gid(0x24, n) for n in new)}) '
+        f'and not exists (select 1 from {C}"MonsterSpawnArea" s where s."MonsterDefinitionId" = "MonsterAttribute"."MonsterDefinitionId");',
         f'delete from {C}"MonsterDefinition" where "Id" in ({", ".join(gid(0x24, n) for n in new)}) '
         f'and not exists (select 1 from {C}"MonsterSpawnArea" s where s."MonsterDefinitionId" = "MonsterDefinition"."Id");',
         f'delete from {C}"GameMapDefinition" where "Id" = {MAP};', 'commit;']
