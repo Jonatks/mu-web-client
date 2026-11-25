@@ -211,7 +211,7 @@ def run(cmd: list[str] | str, timeout: int = 60, stdin: str | None = None) -> st
 
 def job(name: str, script: str, env: dict[str, str] | None = None) -> str:
     """Corre `script` (bash) en segundo plano: devuelve el id para trabajo()."""
-    jid = time.strftime('%m%d-%H%M%S-') + name
+    jid = time.strftime('%m%d-%H%M%S-') + secrets.token_hex(2) + '-' + name
     log = STATE / 'jobs' / f'{jid}.log'
     wrapped = f'( {script} ) > {shlex.quote(str(log))} 2>&1; echo "[salida $?]" >> {shlex.quote(str(log))}'
     subprocess.Popen(['/bin/bash', '-c', wrapped], env={**os.environ, **(env or {})}, start_new_session=True, cwd=HOME)
@@ -220,6 +220,7 @@ def job(name: str, script: str, env: dict[str, str] | None = None) -> str:
 
 
 SHA = re.compile(r'^[0-9a-f]{7,40}$')
+PULL = 'GIT_SSH_COMMAND="ssh -i ~/.ssh/mu_assets -o IdentitiesOnly=yes" git -C ~/mu-assets pull -q'
 
 
 def need_sha(sha: str) -> str:
@@ -284,7 +285,7 @@ def sql_aplicar(base: str, archivo: str, confirmar_produccion: bool = False) -> 
         return 'archivo invalido'
     path = HOME / 'mu-assets/s19/server' / archivo
     backup = '(/usr/local/bin/mu-db-backup run || true) && ' if base == 'openmu' else ''
-    return job('sql', f'git -C ~/mu-assets pull -q && test -f {shlex.quote(str(path))} && {backup}'
+    return job('sql', f'{PULL} && test -f {shlex.quote(str(path))} && {backup}'
                       f'sudo docker exec -i database psql -U postgres -d {base} -v ON_ERROR_STOP=1 < {shlex.quote(str(path))}')
 
 
@@ -298,6 +299,7 @@ ACCIONES = {
     'reiniciar_openmu': 'Reinicia el contenedor openmu.',
     'respaldar_base': 'Copia de todas las bases (mu-db-backup run).',
     'actualizar_mu_assets': 'git pull de mu-assets.',
+    'actualizar_mcp': 'Este mismo servidor desde ops/mcp/server.py en `sha` (guarda el anterior como server.py.prev).',
 }
 
 
@@ -305,7 +307,7 @@ ACCIONES = {
 def accion(nombre: str, sha: str = '', args: str = '', confirmar_produccion: bool = False) -> str:
     """Una accion de la lista cerrada; corre en segundo plano y devuelve el id para trabajo(). Lista:
     desplegar_plugins, volver_plugins, publicar_cliente, copiar_assets_s19, aplicar_s10, aplicar_s12,
-    reiniciar_openmu, respaldar_base, actualizar_mu_assets. Las que tocan produccion piden confirmar_produccion=true."""
+    reiniciar_openmu, respaldar_base, actualizar_mu_assets, actualizar_mcp. Las que tocan produccion piden confirmar_produccion=true."""
     if nombre not in ACCIONES:
         return 'acciones: ' + '; '.join(f'{k}: {v}' for k, v in ACCIONES.items())
     env = {}
@@ -318,7 +320,6 @@ def accion(nombre: str, sha: str = '', args: str = '', confirmar_produccion: boo
         or env.get('PROD') == '1'
     if prod and not confirmar_produccion:
         return f'{nombre} cambia lo que usan los jugadores: repetir con confirmar_produccion=true'
-    pull = 'GIT_SSH_COMMAND="ssh -i ~/.ssh/mu_assets -o IdentitiesOnly=yes" git -C ~/mu-assets pull -q'
     script = {
         'desplegar_plugins': lambda: f'{fetch(sha, "ops/fase0/deploy.sh")} && sh "$F" {need_sha(sha)}',
         'volver_plugins': lambda: f'{fetch(sha, "ops/fase0/deploy.sh")} && sh "$F" rollback',
@@ -328,7 +329,10 @@ def accion(nombre: str, sha: str = '', args: str = '', confirmar_produccion: boo
         'aplicar_s12': lambda: f'{fetch(sha, "ops/faseS/s12_apply.sh")} && SHA={sha} bash "$F"',
         'reiniciar_openmu': lambda: 'sudo docker restart openmu',
         'respaldar_base': lambda: '/usr/local/bin/mu-db-backup run',
-        'actualizar_mu_assets': lambda: pull,
+        'actualizar_mu_assets': lambda: PULL,
+        'actualizar_mcp': lambda: f'{fetch(sha, "ops/mcp/server.py")} && /opt/mu-mcp/venv/bin/python -m py_compile "$F" '
+                                  f'&& cp /opt/mu-mcp/server.py /opt/mu-mcp/server.py.prev && cp "$F" /opt/mu-mcp/server.py '
+                                  f'&& sudo systemctl restart --no-block mu-mcp',
     }[nombre]
     try:
         return job(nombre, script(), {k: v for k, v in env.items() if k != 'rollback'})
