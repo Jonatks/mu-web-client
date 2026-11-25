@@ -214,7 +214,12 @@ def job(name: str, script: str, env: dict[str, str] | None = None) -> str:
     jid = time.strftime('%m%d-%H%M%S-') + secrets.token_hex(2) + '-' + name
     log = STATE / 'jobs' / f'{jid}.log'
     wrapped = f'( {script} ) > {shlex.quote(str(log))} 2>&1; echo "[salida $?]" >> {shlex.quote(str(log))}'
-    subprocess.Popen(['/bin/bash', '-c', wrapped], env={**os.environ, **(env or {})}, start_new_session=True, cwd=HOME)
+    # Fuera del servicio (su propia unidad de systemd): una tarea pesada no cuenta contra el tope de memoria del MCP,
+    # y si el MCP se reinicia la tarea sigue (un despliegue no pierde su vuelta atras).
+    sets = [f'--setenv={k}={v}' for k, v in {'HOME': str(HOME), 'PATH': os.environ.get('PATH', ''), **(env or {})}.items()]
+    subprocess.Popen(['sudo', 'systemd-run', '--quiet', '--collect', f'--unit=mu-job-{jid}', f'--uid={os.getuid()}',
+                      f'--gid={os.getgid()}', f'--working-directory={HOME}', *sets, '/bin/bash', '-c', wrapped],
+                     start_new_session=True)
     audit('trabajo', id=jid, script=script, env=env)
     return f'trabajo {jid} en marcha. Leer con trabajo("{jid}").'
 
