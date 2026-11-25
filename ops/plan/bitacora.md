@@ -325,5 +325,9 @@ Hecho en los repos, falta subirlo o comprobarlo en la VM cuando vuelva el acceso
    - `apply_client_s19.sh` para copiar los modelos nuevos de mu-assets (NPC e Item);
    - `ops/faseS/s9_npcs.sql` (probe y luego openmu) y reiniciar;
    - `SHA=<commit> bash ops/faseS/s10_apply.sh` (probe), probar, y `PROD=1` para openmu; reiniciar.
-6. Bolsas y baul para todos (decidido por el usuario el 24-11-2026): `ops/faseS/s11_bolsas.sql` en probe y openmu
+6. Horarios de eventos del S19 (`ops/faseS/s7_eventos.sql`): Blood Castle y Devil Square 22 veces al dia, Chaos
+   Castle 6. Probe, reiniciar, mirar que los plugins lean la configuracion, y luego openmu. La bolsa de eventos del S19
+   (EventItemMonsterBag) no se trae: sus eventos estan todos apagados en EventItemDrop.ini, y el unico prendido
+   (simbolos elementales) es del pentagrama, que Season 6 no tiene.
+7. Bolsas y baul para todos (decidido por el usuario el 24-11-2026): `ops/faseS/s11_bolsas.sql` en probe y openmu
    para los que ya existen, y desplegar los plugins (S19NewCharacter los da a los nuevos).
