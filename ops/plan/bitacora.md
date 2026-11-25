@@ -321,8 +321,9 @@ Hecho en los repos, falta subirlo o comprobarlo en la VM cuando vuelva el acceso
    deshacer con `~/s5_puertas_undo.sql` en ambas bases.
 5. Todo lo que se agregue a los repos despues de esta fecha (ver los commits siguientes) tambien esta sin subir:
    - cliente nuevo (publish-client) con: NPC en el centro de su casilla (Trainer visible), Slough, Lesnar, Cent,
-     Gillard y Eunice, inventario ampliado y segunda pagina del baul, items Mastery Darkangel a Lightning;
-   - `apply_client_s19.sh` para copiar los modelos nuevos de mu-assets (NPC e Item);
+     Gillard y Eunice, inventario ampliado y segunda pagina del baul, items Mastery Darkangel a Lightning, piel
+     S19 de los botones de ventana, del + de estadisticas, de las placas y de los pozos de zen;
+   - `apply_client_s19.sh` para copiar los modelos nuevos de mu-assets (NPC, Item y ui-s19);
    - `ops/faseS/s9_npcs.sql` (probe y luego openmu) y reiniciar;
    - `SHA=<commit> bash ops/faseS/s10_apply.sh` (probe), probar, y `PROD=1` para openmu; reiniciar.
 6. Horarios de eventos del S19 (`ops/faseS/s7_eventos.sql`): Blood Castle y Devil Square 22 veces al dia, Chaos
@@ -331,3 +332,9 @@ Hecho en los repos, falta subirlo o comprobarlo en la VM cuando vuelva el acceso
    (simbolos elementales) es del pentagrama, que Season 6 no tiene.
 7. Bolsas y baul para todos (decidido por el usuario el 24-11-2026): `ops/faseS/s11_bolsas.sql` en probe y openmu
    para los que ya existen, y desplegar los plugins (S19NewCharacter los da a los nuevos).
+
+## 5. Monstruos y mapas nuevos del S19 (bloqueado)
+
+Los monstruos nuevos (586 en adelante) y sus mapas (Acheron 91 en adelante) no se pueden armar todavia: el cliente S19
+decide que modelo `Monster/MonsterNNN.bmd` usa cada monstruo dentro de su main.exe (Themida, no se abre), y no hay una
+tabla publica. Los datos del servidor (MonsterList, MonsterSpawn) y los modelos estan, falta la equivalencia.
