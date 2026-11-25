@@ -85,7 +85,8 @@ for n in new:
     sql.append(clone('MonsterDefinition', f'"Number" = {BASE_NPC if npc else BASE_MONSTER} and not exists '
                      f'(select 1 from {C}"MonsterDefinition" x where x."Number" = {n})', over) + ';')
     sql.append(f'insert into {C}"MonsterAttribute" select (jsonb_populate_record(null::{C}"MonsterAttribute", to_jsonb(a) || '
-               f"jsonb_build_object('Id', ('0000ba5e-0025-{n:04x}-' || substr(a.\"Id\"::text, 20))::uuid, 'MonsterDefinitionId', {gid(0x24, n)}))).* "
+               f"jsonb_build_object('Id', ('0000ba5e-0025-{n:04x}-0000-' || lpad(to_hex(row_number() over ()), 12, '0'))::uuid, "
+               f"'MonsterDefinitionId', {gid(0x24, n)}))).* "
                f'from {C}"MonsterAttribute" a join {C}"MonsterDefinition" d on d."Id" = a."MonsterDefinitionId" '
                f'where d."Number" = {BASE_NPC if npc else BASE_MONSTER} and exists (select 1 from {C}"MonsterDefinition" x where x."Id" = {gid(0x24, n)});')
     if not npc:
