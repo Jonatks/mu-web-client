@@ -9,6 +9,7 @@ convert.ts          lee ItemList.xml, ItemSetType.xml, ItemSetOption.xml y Maste
 convert.test.ts     lo de Bloodangel es igual a lo que la fase 3 cargo a mano (necesita S19_DATA; sin ella se salta)
 generaciones.json   que items toma cada generacion: grado Mastery, grupos, exclusiones y numeros de set del S19
 gen_monster_models.py  monstruo nuevo (>= 581) -> modelo del cliente S19; escribe monster_models.tsv
+gen_monster_defs.py   las carpetas versions/shared/monsters de esos monstruos (numeros o rangos), desde la tabla
 equivalencias.json  numeros S19 -> Season 6: items renumerados, primer set del cliente, clases y estadistica de cada una,
                     codigos de opcion de set que S6 no tiene
 ```
@@ -66,3 +67,7 @@ igual al numero del monstruo. `gen_monster_models.py` reconstruye la tabla con t
 
 Los NPC nuevos estan en `Data/NPC` (`Akeron/deruvish`, `adniel`, `monicaNPC`, `NpcElin`, `Lugard`). Los elementales de
 Acheron y Debenter cambian de textura segun su elemento (`DevilFairy_red/_blue/_green/_black/_yellow`).
+
+Pendiente de los monstruos: el S19 cambia la textura de los de elemento 6 (Devil Fairy, Elemental Beast y Knight de
+Acheron) segun el elemento con que aparecen, y el protocolo Season 6 no lo envia: quedan con la textura del modelo
+(`_red`). La escala va en 1 salvo `SCALE` en el generador; Elemental Knight se ve unas tres veces el personaje.
