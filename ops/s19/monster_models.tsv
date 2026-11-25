@@ -1,0 +1,241 @@
+id	modelo	confianza	nota
+581	NPC/Akeron/deruvish.bmd	alta	NPC
+582	NPC/adniel.bmd	alta	NPC
+583	NPC/Akeron/jinn.bmd	alta	NPC
+584	NPC/Akeron/lesnar.bmd	alta	hecho en S9
+586	Monster/Monster218.bmd	alta	Acheron; textura por elemento (_red/_blue/_green/_black/_yellow)
+587	Monster/Monster219.bmd	alta	Acheron; textura por elemento (_red/_blue/_green/_black/_yellow)
+588	Monster/Monster220.bmd	alta	Acheron; textura por elemento (_red/_blue/_green/_black/_yellow)
+589	Monster/Monster221.bmd	alta	Acheron; textura por elemento (_red/_blue/_green/_black/_yellow)
+590	Monster/Monster222.bmd	alta	Acheron; textura por elemento (_red/_blue/_green/_black/_yellow)
+591	Monster/Monster223.bmd	alta	Acheron; textura por elemento (_red/_blue/_green/_black/_yellow)
+592	Monster/Monster224.bmd	alta	Acheron; textura por elemento (_red/_blue/_green/_black/_yellow)
+593	Monster/Monster225.bmd	alta	Acheron; textura por elemento (_red/_blue/_green/_black/_yellow)
+594	Monster/Monster226.bmd	alta	Acheron; textura por elemento (_red/_blue/_green/_black/_yellow)
+595	Monster/Monster227.bmd	alta	Acheron; textura por elemento (_red/_blue/_green/_black/_yellow)
+596	Monster/Monster228.bmd	alta	Acheron; textura por elemento (_red/_blue/_green/_black/_yellow)
+597	s6:353	media	Summoned Satyros: el 229 del bloque es un humano (GM)
+598	Monster/Monster230.bmd	media	torres elementales (obeliscos)
+599	Monster/Monster231.bmd	media	torres elementales (obeliscos)
+600	Monster/Monster232.bmd	media	torres elementales (obeliscos)
+601	Monster/Monster233.bmd	media	torres elementales (obeliscos)
+602	Monster/Monster234.bmd	media	torres elementales (obeliscos)
+605	?	baja	Mining Area: sin modelo (237-239 no existen)
+606	?	baja	Mining Area: sin modelo (237-239 no existen)
+607	?	baja	Mining Area: sin modelo (237-239 no existen)
+608	Monster/Monster240.bmd	alta	Debenter: Sellihoden=salamandra D, Ukanva=undine, Silla=silfide, Normus=gnomo, Muff=hilasha
+609	Monster/Monster241.bmd	alta	Debenter: Sellihoden=salamandra D, Ukanva=undine, Silla=silfide, Normus=gnomo, Muff=hilasha
+610	Monster/Monster242.bmd	alta	Debenter: Sellihoden=salamandra D, Ukanva=undine, Silla=silfide, Normus=gnomo, Muff=hilasha
+611	Monster/Monster243.bmd	alta	Debenter: Sellihoden=salamandra D, Ukanva=undine, Silla=silfide, Normus=gnomo, Muff=hilasha
+612	Monster/Monster244.bmd	alta	Debenter: Sellihoden=salamandra D, Ukanva=undine, Silla=silfide, Normus=gnomo, Muff=hilasha
+613	Monster/Monster245.bmd	alta	Debenter: Sellihoden=salamandra D, Ukanva=undine, Silla=silfide, Normus=gnomo, Muff=hilasha
+614	Monster/Monster246.bmd	alta	Debenter: Sellihoden=salamandra D, Ukanva=undine, Silla=silfide, Normus=gnomo, Muff=hilasha
+615	Monster/Monster247.bmd	alta	Debenter: Sellihoden=salamandra D, Ukanva=undine, Silla=silfide, Normus=gnomo, Muff=hilasha
+632	Monster/Monster224.bmd	media	Cursed: mismo modelo que Acheron
+633	Monster/Monster225.bmd	media	Cursed: mismo modelo que Acheron
+634	Monster/Monster226.bmd	media	Cursed: mismo modelo que Acheron
+635	Monster/Monster227.bmd	media	Cursed: mismo modelo que Acheron
+636	Monster/Monster228.bmd	media	Cursed: mismo modelo que Acheron
+643	?	baja	Mait: sin modelo identificado
+647	Monster/Monster253.bmd	alta	serpientes
+648	Monster/Monster254.bmd	alta	serpientes
+649	Monster/Monster255.bmd	alta	serpientes
+650	Monster/Monster256.bmd	alta	serpientes
+651	NPC/so_pershop.bmd	media	tablero de tiendas personales
+652	s6:78	alta	Golden Goblin
+653	s6:53	alta	dorados: Titan, Tantallos, Erohim, Hell Maine
+654	s6:82	alta	dorados: Titan, Tantallos, Erohim, Hell Maine
+655	s6:295	alta	dorados: Titan, Tantallos, Erohim, Hell Maine
+656	s6:309	alta	dorados: Titan, Tantallos, Erohim, Hell Maine
+657	s6:161	media	Illusion of Golden Kundun
+669	NPC/NpcElin.bmd	alta	NPC
+670	Monster/Monster260.bmd	alta	Uruk y Lord Silvester
+671	Monster/Monster261.bmd	alta	Uruk y Lord Silvester
+672	Monster/Monster262.bmd	alta	Uruk y Lord Silvester
+673	Monster/Monster263.bmd	alta	Uruk y Lord Silvester
+674	s6:413	alta	Moon Rabbit = Lunar Rabbit; Pouch of Blessing
+675	s6:365	alta	Moon Rabbit = Lunar Rabbit; Pouch of Blessing
+676	Monster/Monster127.bmd	baja	Fire Flame Ghost: por confirmar
+677	s6:78	alta	Golden Goblin
+678	Monster/Monster260.bmd	baja	Lord Devil Fairy/Beast/Knight: modelos Uruk?
+679	Monster/Monster261.bmd	baja	Lord Devil Fairy/Beast/Knight: modelos Uruk?
+680	Monster/Monster262.bmd	baja	Lord Devil Fairy/Beast/Knight: modelos Uruk?
+681	?	baja	Evomon y Flame Trap: sin modelo identificado
+682	NPC/monicaNPC.bmd	alta	NPC
+689	?	baja	Evomon y Flame Trap: sin modelo identificado
+691	Monster/Monster266.bmd	alta	caballos: verde, amarillo, marron, azul (visto)
+692	Monster/Monster267.bmd	alta	caballos: verde, amarillo, marron, azul (visto)
+693	Monster/Monster268.bmd	alta	caballos: verde, amarillo, marron, azul (visto)
+694	Monster/Monster269.bmd	alta	caballos: verde, amarillo, marron, azul (visto)
+695	NPC/NPC_LIVAIN.bmd	alta	NPC
+713	Monster/Monster274.bmd	alta	Nars
+714	Monster/Monster275.bmd	alta	Nars
+715	Monster/Monster276.bmd	alta	Nars
+716	Monster/Monster277.bmd	alta	Nars
+719	s6:232	alta	NPC Season 6: Archangel, Charon, Jerint
+720	s6:237	alta	NPC Season 6: Archangel, Charon, Jerint
+721	s6:522	alta	NPC Season 6: Archangel, Charon, Jerint
+722	NPC/mirazu.bmd	alta	NPC
+723	NPC/Lugard.bmd	alta	NPC
+724	Monster/Monster270.bmd	alta	Chaos Goblin (4 colores 270-273)
+725	NPC/james.bmd	alta	hecho en S9
+726	Monster/Monster278.bmd	alta	cabras = sheep (verde, blanco, violeta, naranja)
+727	Monster/Monster279.bmd	alta	cabras = sheep (verde, blanco, violeta, naranja)
+728	Monster/Monster280.bmd	alta	cabras = sheep (verde, blanco, violeta, naranja)
+729	Monster/Monster281.bmd	alta	cabras = sheep (verde, blanco, violeta, naranja)
+730	Monster/Monster286.bmd	alta	Ferea
+731	Monster/Monster287.bmd	alta	Ferea
+732	Monster/Monster288.bmd	alta	Ferea
+735	Monster/Monster291.bmd	media	Ferea Crystal Orb = amoro_balls
+736	Monster/Monster286.bmd	alta	Ferea (segundo grupo)
+737	Monster/Monster287.bmd	alta	Ferea (segundo grupo)
+738	Monster/Monster288.bmd	alta	Ferea (segundo grupo)
+739	Monster/Monster295.bmd	alta	monos
+740	Monster/Monster296.bmd	alta	monos
+741	Monster/Monster297.bmd	alta	monos
+742	Monster/Monster298.bmd	alta	monos
+743	Monster/Monster299.bmd	alta	Nixies Lake: Paraca, Vasuki=baski, Bass
+744	Monster/Monster300.bmd	alta	Nixies Lake: Paraca, Vasuki=baski, Bass
+745	Monster/Monster301.bmd	alta	Nixies Lake: Paraca, Vasuki=baski, Bass
+748	NPC/SpiritNixie.bmd	alta	NPC
+758	NPC/hs_dimensiondoorA.bmd	alta	NPC
+759	Monster/Monster307.bmd	alta	gallos
+760	Monster/Monster308.bmd	alta	gallos
+761	Monster/Monster309.bmd	alta	gallos
+762	Monster/Monster310.bmd	alta	gallos
+764	NPC/scent.bmd	alta	hecho en S9
+765	NPC/scent.bmd	alta	hecho en S9
+767	Monster/DarkSkeletonWarrior.bmd	alta	Deep Dungeon
+768	Monster/DarkSkeletonArcher.bmd	alta	Deep Dungeon
+769	Monster/DarkSkeletonWarriorGeneral.bmd	alta	Deep Dungeon
+770	Monster/Monster315.bmd	alta	Deep Dungeon: Larva..Gorgon
+771	Monster/Monster316.bmd	alta	Deep Dungeon: Larva..Gorgon
+772	Monster/Monster317.bmd	alta	Deep Dungeon: Larva..Gorgon
+773	Monster/Monster318.bmd	alta	Deep Dungeon: Larva..Gorgon
+774	Monster/Monster319.bmd	alta	Deep Dungeon: Larva..Gorgon
+775	Monster/Monster320.bmd	alta	Deep Dungeon: Larva..Gorgon
+776	Monster/Monster321.bmd	alta	Deep Dungeon: Larva..Gorgon
+777	Monster/Monster322.bmd	alta	Deep Dungeon: Larva..Gorgon
+778	Monster/Monster323.bmd	alta	Deep Dungeon: Larva..Gorgon
+786	Monster/Monster324.bmd	alta	Swamp of Darkness
+787	Monster/Monster325.bmd	alta	Swamp of Darkness
+788	Monster/Monster326.bmd	alta	Swamp of Darkness
+789	Monster/Monster327.bmd	alta	Swamp of Darkness
+795	Monster/Monster333.bmd	alta	perros (verde, gris, violeta, naranja)
+796	Monster/Monster334.bmd	alta	perros (verde, gris, violeta, naranja)
+797	Monster/Monster335.bmd	alta	perros (verde, gris, violeta, naranja)
+798	Monster/Monster336.bmd	alta	perros (verde, gris, violeta, naranja)
+808	Monster/Monster337.bmd	media	Power Chicken = chicken_basic
+810	Monster/Monster338.bmd	alta	Kubera Mine
+811	Monster/Monster339.bmd	alta	Kubera Mine
+812	Monster/Monster340.bmd	alta	Kubera Mine
+813	Monster/Monster341.bmd	alta	Kubera Mine
+814	Monster/Monster342.bmd	alta	Kubera Mine
+815	Monster/Monster343.bmd	alta	Kubera Mine
+816	Monster/Monster344.bmd	alta	Kubera Mine
+817	Monster/Monster345.bmd	alta	cerdos
+818	Monster/Monster346.bmd	alta	cerdos
+819	Monster/Monster347.bmd	alta	cerdos
+820	Monster/Monster348.bmd	alta	cerdos
+832	Monster/Monster349.bmd	alta	Abyss of Atlans
+833	Monster/Monster350.bmd	alta	Abyss of Atlans
+834	Monster/Monster351.bmd	alta	Abyss of Atlans
+835	Monster/Monster352.bmd	alta	Abyss of Atlans
+836	Monster/Monster353.bmd	alta	Abyss of Atlans
+837	Monster/Monster354.bmd	alta	Abyss of Atlans
+838	NPC/obj_flag.bmd	media	bandera de zona elite
+839	Monster/Monster353.bmd	alta	Abyss elite
+840	Monster/Monster354.bmd	alta	Abyss elite
+845	Monster/Monster355.bmd	alta	Scorched Canyon
+846	Monster/Monster356.bmd	alta	Scorched Canyon
+847	Monster/Monster357.bmd	alta	Scorched Canyon
+848	Monster/Monster355.bmd	alta	Scorched elite
+849	Monster/Monster356.bmd	alta	Scorched elite
+850	Monster/Monster357.bmd	alta	Scorched elite
+855	Monster/Monster361.bmd	alta	ratas
+856	Monster/Monster362.bmd	alta	ratas
+857	Monster/Monster363.bmd	alta	ratas
+858	Monster/Monster364.bmd	alta	ratas
+859	Monster/Monster365.bmd	alta	Red Smoke Icarus (Phoenix lleva tambien Monster372)
+860	Monster/Monster366.bmd	alta	Red Smoke Icarus (Phoenix lleva tambien Monster372)
+861	Monster/Monster367.bmd	alta	Red Smoke Icarus (Phoenix lleva tambien Monster372)
+862	Monster/Monster368.bmd	alta	Red Smoke Icarus (Phoenix lleva tambien Monster372)
+863	Monster/Monster369.bmd	alta	Red Smoke Icarus (Phoenix lleva tambien Monster372)
+864	Monster/Monster370.bmd	alta	Red Smoke Icarus (Phoenix lleva tambien Monster372)
+865	Monster/Monster371.bmd	alta	Red Smoke Icarus (Phoenix lleva tambien Monster372)
+866	NPC/obj_flag.bmd	media	bandera de zona elite
+867	Monster/Monster373.bmd	alta	Arenil Temple
+868	Monster/Monster374.bmd	alta	Arenil Temple
+869	Monster/Monster375.bmd	alta	Arenil Temple
+870	Monster/Monster373.bmd	alta	Temple elite
+871	Monster/Monster374.bmd	alta	Temple elite
+872	Monster/Monster375.bmd	alta	Temple elite
+875	Monster/Monster385.bmd	alta	Ashen Aida
+876	Monster/Monster386.bmd	alta	Ashen Aida
+877	Monster/Monster387.bmd	alta	Ashen Aida
+878	Monster/Monster388.bmd	alta	Ashen Aida
+879	Monster/Monster389.bmd	alta	Ashen Aida
+880	Monster/Monster390.bmd	alta	Ashen Aida
+884	Monster/Monster376.bmd	alta	vacas
+885	Monster/Monster377.bmd	alta	vacas
+886	Monster/Monster378.bmd	alta	vacas
+887	Monster/Monster379.bmd	alta	vacas
+888	Monster/Monster380.bmd	media	Box of Blessing: cofre treasureUp (visto)
+889	Monster/Monster380.bmd	media	Box of Blessing: cofre treasureUp (visto)
+891	NPC/Gillard.bmd	alta	hecho en S9
+892	Monster/Monster391.bmd	alta	Old y Blaze Kethotum
+893	Monster/Monster392.bmd	alta	Old y Blaze Kethotum
+894	Monster/Monster393.bmd	alta	Old y Blaze Kethotum
+895	Monster/Monster394.bmd	alta	Old y Blaze Kethotum
+896	Monster/Monster395.bmd	alta	Old y Blaze Kethotum
+897	Monster/Monster396.bmd	alta	Old y Blaze Kethotum
+898	Monster/Monster397.bmd	alta	Old y Blaze Kethotum
+899	Monster/Monster398.bmd	alta	Old y Blaze Kethotum
+900	Monster/Monster399.bmd	alta	Old y Blaze Kethotum
+901	Monster/Monster400.bmd	alta	tigres
+902	Monster/Monster401.bmd	alta	tigres
+903	Monster/Monster402.bmd	alta	tigres
+904	Monster/Monster403.bmd	alta	tigres
+905	Monster/Monster404.bmd	alta	Kanturu Undergrounds
+906	Monster/Monster405.bmd	alta	Kanturu Undergrounds
+907	Monster/Monster406.bmd	alta	Kanturu Undergrounds
+908	Monster/Monster407.bmd	alta	Kanturu Undergrounds
+909	Monster/Monster408.bmd	alta	Kanturu Undergrounds
+910	Monster/Monster409.bmd	alta	Kanturu Undergrounds
+911	Monster/Monster418.bmd	alta	Ignis Volcano
+912	Monster/Monster419.bmd	alta	Ignis Volcano
+913	Monster/Monster420.bmd	alta	Ignis Volcano
+914	Monster/Monster418.bmd	alta	Ignis elite
+915	Monster/Monster419.bmd	alta	Ignis elite
+916	Monster/Monster420.bmd	alta	Ignis elite
+925	NPC/obj_flag.bmd	media	bandera de zona elite
+926	Monster/Monster425.bmd	alta	Bloody Tarkan
+927	Monster/Monster426.bmd	alta	Bloody Tarkan
+928	Monster/Monster427.bmd	alta	Bloody Tarkan
+929	Monster/Monster428.bmd	alta	Bloody Tarkan
+930	Monster/Monster426.bmd	alta	Bloody Tarkan elite
+931	Monster/Monster427.bmd	alta	Bloody Tarkan elite
+932	Monster/Monster428.bmd	alta	Bloody Tarkan elite
+933	Monster/Monster421.bmd	alta	conejos negros
+934	Monster/Monster422.bmd	alta	conejos negros
+935	Monster/Monster423.bmd	alta	conejos negros
+936	Monster/Monster424.bmd	alta	conejos negros
+941	NPC/N_eunice.bmd	alta	hecho en S9
+942	Monster/Monster432.bmd	alta	Tormenta Island
+943	Monster/Monster433.bmd	alta	Tormenta Island
+944	Monster/Monster434.bmd	alta	Tormenta Island
+945	Monster/Monster435.bmd	alta	Tormenta Island
+946	Monster/Monster436.bmd	alta	Tormenta Island
+947	Monster/Monster437.bmd	alta	Tormenta Island
+955	Monster/Monster444.bmd	alta	Twisted Karutan
+956	Monster/Monster445.bmd	alta	Twisted Karutan
+957	Monster/Monster446.bmd	alta	Twisted Karutan
+958	Monster/Monster444.bmd	alta	Twisted elite
+959	Monster/Monster445.bmd	alta	Twisted elite
+960	Monster/Monster446.bmd	alta	Twisted elite
+963	Monster/Monster306.bmd	media	Kardamahal: Sword=leviathan (espada), Scythe=mephisto (cuchillas), Sorcerer=belial (baston)
+964	Monster/Monster304.bmd	media	Kardamahal: Sword=leviathan (espada), Scythe=mephisto (cuchillas), Sorcerer=belial (baston)
+965	Monster/Monster305.bmd	media	Kardamahal: Sword=leviathan (espada), Scythe=mephisto (cuchillas), Sorcerer=belial (baston)
+966	Monster/Monster306.bmd	media	Kardamahal: Sword=leviathan (espada), Scythe=mephisto (cuchillas), Sorcerer=belial (baston)
+967	Monster/Monster304.bmd	media	Kardamahal: Sword=leviathan (espada), Scythe=mephisto (cuchillas), Sorcerer=belial (baston)
+968	Monster/Monster305.bmd	media	Kardamahal: Sword=leviathan (espada), Scythe=mephisto (cuchillas), Sorcerer=belial (baston)

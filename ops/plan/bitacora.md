@@ -333,8 +333,11 @@ Hecho en los repos, falta subirlo o comprobarlo en la VM cuando vuelva el acceso
 7. Bolsas y baul para todos (decidido por el usuario el 24-11-2026): `ops/faseS/s11_bolsas.sql` en probe y openmu
    para los que ya existen, y desplegar los plugins (S19NewCharacter los da a los nuevos).
 
-## 5. Monstruos y mapas nuevos del S19 (bloqueado)
+## 5. Monstruos y mapas nuevos del S19
 
-Los monstruos nuevos (586 en adelante) y sus mapas (Acheron 91 en adelante) no se pueden armar todavia: el cliente S19
-decide que modelo `Monster/MonsterNNN.bmd` usa cada monstruo dentro de su main.exe (Themida, no se abre), y no hay una
-tabla publica. Los datos del servidor (MonsterList, MonsterSpawn) y los modelos estan, falta la equivalencia.
+La tabla monstruo -> modelo ya no bloquea (25-11-2026): `ops/s19/monster_models.tsv` (de `gen_monster_models.py`) da
+modelo a los 240 monstruos nuevos que aparecen en MonsterSpawn: 204 con confianza alta, 25 media, 11 baja (eventos del
+Stadium, Mining Area, Mait, Evomon, Flame Trap). Se reconstruyo sin el main.exe: nombre interno y texturas de cada
+.bmd, el monstruo Season 6 que cada modelo "renew" renueva, y los bloques de numeros consecutivos por mapa. Los
+dudosos se dibujaron para elegir. Falta: convertir los modelos, las texturas por elemento (Acheron, Debenter), los
+monstruos del cliente y del servidor, y los mapas nuevos (World/Object 91 en adelante).

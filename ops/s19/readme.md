@@ -8,6 +8,7 @@ convert.ts          lee ItemList.xml, ItemSetType.xml, ItemSetOption.xml y Maste
                     y escribe items_s19.json, sets_s19.json y mixes_s19.json de una generacion
 convert.test.ts     lo de Bloodangel es igual a lo que la fase 3 cargo a mano (necesita S19_DATA; sin ella se salta)
 generaciones.json   que items toma cada generacion: grado Mastery, grupos, exclusiones y numeros de set del S19
+gen_monster_models.py  monstruo nuevo (>= 581) -> modelo del cliente S19; escribe monster_models.tsv
 equivalencias.json  numeros S19 -> Season 6: items renumerados, primer set del cliente, clases y estadistica de cada una,
                     codigos de opcion de set que S6 no tiene
 ```
@@ -51,3 +52,17 @@ S6 no tiene. Lista y fase que lo implementa:
 | ranuras de earring | 2 ranuras nuevas del personaje | 8 |
 | pentagrama y errtel | ranura y sus 5 errtel | 9 |
 | Muun | ranura, invocacion y sus opciones | 10 |
+
+## Modelos de monstruos (fase S12)
+
+El cliente S19 elige el modelo de cada monstruo dentro de su main.exe protegido, y el `Model` de MonsterList.xml es
+igual al numero del monstruo. `gen_monster_models.py` reconstruye la tabla con tres pistas:
+
+- El nombre interno y las texturas de cada .bmd (`devilfairy.SMD`, `undine.smd`, `ferea_king.SMD`).
+- Los modelos "renew": las mismas texturas que un monstruo Season 6 con sufijo (`_renew`, `_2`, `_red`); Ashen Aida
+  385-390 son Death Tree, Forest Orc, Death Rider, Witch Queen, Blue Golem y Bloody Witch Queen.
+- Los bloques: cada mapa nuevo ocupa numeros seguidos, con una diferencia fija entre monstruo y modelo (Acheron y
+  Debenter 368, Ferea y Nixies Lake 444, Deep Dungeon 455, Abyss 483, Ashen Aida 490).
+
+Los NPC nuevos estan en `Data/NPC` (`Akeron/deruvish`, `adniel`, `monicaNPC`, `NpcElin`, `Lugard`). Los elementales de
+Acheron y Debenter cambian de textura segun su elemento (`DevilFairy_red/_blue/_green/_black/_yellow`).
