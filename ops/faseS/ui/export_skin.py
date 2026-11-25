@@ -75,4 +75,11 @@ for name, h in (('zen_bar', 26), ('zen_bar2', 24), ('zen_bar3', 46)):
     bar = panel.resize((340, h * 2), Image.LANCZOS)
     bar.alpha_composite(coin, (8, (min(h, 26) * 2 - 42) // 2))
     bar.save(f'{out}/{name}.png', optimize=True)
+# The empty text buttons (three plates: up, lit, pressed) from the S19 wide plates (62 normal, 64 lit, 63 pressed).
+for name, w, h in (('newui_btn_empty', 108, 29), ('newui_btn_empty_small', 64, 29), ('newui_btn_empty_very_small', 54, 23),
+                   ('newui_btn_empty_big', 180, 29)):
+    sheet = Image.new('RGBA', (w * 2, h * 6), (0, 0, 0, 0))
+    for k, i in enumerate((62, 64, 63)):
+        sheet.alpha_composite(Image.open(f'{src}/CharacterInfoFrame/{i}.png').convert('RGBA').resize((w * 2, h * 2), Image.LANCZOS), (0, k * h * 2))
+    sheet.save(f'{out}/btn_{name}.png', optimize=True)
 print('ok', len(PIECES) + 2 + len(BUTTONS), 'piezas')

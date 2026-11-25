@@ -49,6 +49,10 @@ const SHEETS: Readonly<Record<string, readonly [string, number, number]>> = {
   'newui_expansion_btn.ozt': ['btn_newui_expansion_btn', 36, 58],
   'newui_repair_00.ozt': ['btn_newui_repair_00', 36, 58],
   'newui_chainfo_btn_level.ozt': ['btn_stat_plus', 16, 30],
+  'newui_btn_empty.ozt': ['btn_newui_btn_empty', 108, 87],
+  'newui_btn_empty_small.ozt': ['btn_newui_btn_empty_small', 64, 87],
+  'newui_btn_empty_very_small.ozt': ['btn_newui_btn_empty_very_small', 54, 69],
+  'newui_btn_empty_big.ozt': ['btn_newui_btn_empty_big', 180, 87],
 };
 
 /** The URL of one S19 piece. */
