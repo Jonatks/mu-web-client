@@ -13,6 +13,8 @@ install.sh  se corre en la VM: instala o actualiza, cambia la contrasena, o lo q
 - Inicio de sesion: Claude se registra solo (DCR) y la pagina `/login` pide la contrasena del dueno. En la VM queda solo
   su hash scrypt (`/etc/mu-mcp/password`). Tokens de 1 hora, refresco de 30 dias que rota, 10 intentos fallidos por hora.
   Los tokens se guardan como sha256 en `/var/lib/mu-mcp/state.db`.
+- No se queda caido: systemd lo reintenta siempre (`StartLimitIntervalSec=0`), Linux no lo elige ante falta de
+  memoria (`OOMScoreAdjust=-800`) y el temporizador `mu-mcp-vigia` lo reinicia si `/salud` no responde en un minuto.
 - Ninguna herramienta es una terminal libre. Cada una corre comandos fijos con argumentos validados, y cada llamada queda
   en `/var/lib/mu-mcp/audit.log`.
 

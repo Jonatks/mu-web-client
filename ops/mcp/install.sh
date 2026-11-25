@@ -12,7 +12,8 @@ CADDY=/opt/caddy/Caddyfile
 
 if [ "${1:-}" = quitar ]; then
   sudo systemctl disable --now mu-mcp 2>/dev/null || true
-  sudo rm -f /etc/systemd/system/mu-mcp.service
+  sudo systemctl disable --now mu-mcp-vigia.timer 2>/dev/null || true
+  sudo rm -f /etc/systemd/system/mu-mcp.service /etc/systemd/system/mu-mcp-vigia.service /etc/systemd/system/mu-mcp-vigia.timer
   sudo sed -i "/^# mu-mcp inicio/,/^# mu-mcp fin/d" $CADDY && sudo docker restart caddy >/dev/null
   echo "MCP quitado (quedan /opt/mu-mcp, /var/lib/mu-mcp y /etc/mu-mcp por si se quiere volver)"; exit 0
 fi
@@ -52,6 +53,8 @@ sudo tee /etc/systemd/system/mu-mcp.service >/dev/null <<EOF
 [Unit]
 Description=MCP de la VM de MU (conector de Claude)
 After=network-online.target docker.service
+# Nunca deja de reintentar (por defecto systemd se rinde tras 5 fallas en 10 s).
+StartLimitIntervalSec=0
 
 [Service]
 User=$USER
@@ -60,11 +63,34 @@ ExecStart=/opt/mu-mcp/venv/bin/python /opt/mu-mcp/server.py
 Restart=always
 RestartSec=3
 MemoryMax=256M
+# Usa ~60 MB: ante falta de memoria, Linux elige otros procesos antes que este.
+OOMScoreAdjust=-800
 
 [Install]
 WantedBy=multi-user.target
 EOF
+# Vigilante: cada minuto pide /salud y, si no responde en 10 s, reinicia el servicio.
+sudo tee /etc/systemd/system/mu-mcp-vigia.service >/dev/null <<'UNIT'
+[Unit]
+Description=Reinicia mu-mcp si no responde
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c 'curl -fsS --max-time 10 http://127.0.0.1:8770/salud >/dev/null || { logger -t mu-mcp-vigia "sin respuesta, reinicio"; systemctl restart mu-mcp; }'
+UNIT
+sudo tee /etc/systemd/system/mu-mcp-vigia.timer >/dev/null <<'UNIT'
+[Unit]
+Description=Vigila mu-mcp cada minuto
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=1min
+
+[Install]
+WantedBy=timers.target
+UNIT
 sudo systemctl daemon-reload && sudo systemctl enable -q mu-mcp && sudo systemctl restart mu-mcp
+sudo systemctl enable -q --now mu-mcp-vigia.timer
 
 if ! sudo grep -q '^# mu-mcp inicio' $CADDY; then
   printf '# mu-mcp inicio\n%s {\n  reverse_proxy 127.0.0.1:8770\n}\n# mu-mcp fin\n' "$MCP" | sudo tee -a $CADDY >/dev/null
