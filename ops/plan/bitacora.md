@@ -359,3 +359,16 @@ sonidos, 15 monstruos y NPC, 231 apariciones, puertas y /move (falta la VM, item
 mapas siguen el mismo camino: `stage_client_s19.py` + `bmdToGlb.ts` (cliente), `versions/shared/maps/<mapa>`,
 `ops/s19/gen_monster_defs.py` y `ops/faseS/gen_mapa_nuevo.py <Data> <mapa> <salida> --con <mapas ya puestos>`.
 Pendiente: el elemento de cada aparicion (Acheron Type 3) no llega al cliente; los de elemento 6 quedan rojos.
+
+Debenter (95) en produccion (25-11-2026, 21:25-21:30 UTC): mapa, 68 objetos, 8 monstruos (608-615, modelos 240-247),
+125 apariciones, puertas 435/437 con Acheron. No tiene /move ni puerta de aparicion propia: al morir vuelve a Acheron
+(el generador lo toma de la puerta 417). Sin sonido propio en el S19: usa el de Acheron. Cliente: build mwwmxkib.
+La luz del terreno (TerrainLight.OZB) se decodifica como imagen normal (filas de arriba a abajo): verificado contra
+los mapas Season 6, cuyo OZJ correlaciona con la altura igual.
+
+Errores viejos del arranque, arreglados el mismo dia (mu-assets s19/server/arreglos, cada uno con su _undo):
+- AddClassSkillsOnCreate (7d2c9e41) no leia su configuracion: "$id" iba al final (starter_skills_one.sql). Sin ella
+  daba las habilidades por defecto de OpenMU en vez de una por clase.
+- Tres Elite Yeti de Devias en una casilla no caminable: su area pasa a 5x5.
+- Raklion/Crywolf "PlugInManager must be set first": carrera de OpenMU en maquinas lentas que dejaba a Crywolf sin
+  estatua. Parche 0002 del fork (0.10.1-mu2).
