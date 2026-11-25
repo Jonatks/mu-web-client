@@ -62,6 +62,8 @@ Environment=MU_MCP_HOME=$HOME
 ExecStart=/opt/mu-mcp/venv/bin/python /opt/mu-mcp/server.py
 Restart=always
 RestartSec=3
+# Al reiniciar no espera a que cierren las sesiones abiertas (antes tardaba 90 s en forzarlo).
+TimeoutStopSec=5
 MemoryMax=256M
 # Usa ~60 MB: ante falta de memoria, Linux elige otros procesos antes que este.
 OOMScoreAdjust=-800

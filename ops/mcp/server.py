@@ -306,7 +306,7 @@ ACCIONES = {
     'reiniciar_openmu': 'Reinicia el contenedor openmu.',
     'respaldar_base': 'Copia de todas las bases (mu-db-backup run).',
     'actualizar_mu_assets': 'git pull de mu-assets.',
-    'actualizar_mcp': 'Este mismo servidor desde ops/mcp/server.py en `sha` (guarda el anterior como server.py.prev).',
+    'actualizar_mcp': 'Este mismo servidor y su servicio desde ops/mcp en `sha` (install.sh; guarda server.py.prev).',
 }
 
 
@@ -338,8 +338,9 @@ def accion(nombre: str, sha: str = '', args: str = '', confirmar_produccion: boo
         'respaldar_base': lambda: '/usr/local/bin/mu-db-backup run',
         'actualizar_mu_assets': lambda: PULL,
         'actualizar_mcp': lambda: f'{fetch(sha, "ops/mcp/server.py")} && /opt/mu-mcp/venv/bin/python -m py_compile "$F" '
-                                  f'&& cp /opt/mu-mcp/server.py /opt/mu-mcp/server.py.prev && cp "$F" /opt/mu-mcp/server.py '
-                                  f'&& sudo systemctl restart --no-block mu-mcp',
+                                  f'&& cp /opt/mu-mcp/server.py /opt/mu-mcp/server.py.prev '
+                                  f'&& curl -fsSL {REPO}/{need_sha(sha)}/ops/mcp/install.sh -o ~/mcp-install.sh '
+                                  f'&& bash ~/mcp-install.sh {need_sha(sha)}',
     }[nombre]
     try:
         return job(nombre, script(), {k: v for k, v in env.items() if k != 'rollback'})
@@ -399,4 +400,4 @@ app = mcp.streamable_http_app(transport_security=TransportSecuritySettings(
 if __name__ == '__main__':
     import uvicorn
     uvicorn.run(app, host='127.0.0.1', port=int(os.environ.get('MU_MCP_PORT', '8770')), proxy_headers=True,
-                forwarded_allow_ips='127.0.0.1')
+                forwarded_allow_ips='127.0.0.1', timeout_graceful_shutdown=2)
