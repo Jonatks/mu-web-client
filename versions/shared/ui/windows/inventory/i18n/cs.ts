@@ -8,4 +8,5 @@ export default {
   'inventory.repair': 'Opravit (L)',
   'inventory.personalShop': 'Osobní obchod',
   'inventory.expand': 'Otevřít rozšířený inventář (K)',
+  'inventoryExt.title': 'Rozšířený inventář',
 } satisfies Partial<Record<keyof typeof en, string>>;

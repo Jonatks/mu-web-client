@@ -9,6 +9,7 @@ export default {
   'vault.title': '倉庫',
   'vault.unlocked': 'ロック解除',
   'vault.locked': 'ロック中',
+  'vault.page': '{page}ページ',
   'vault.fee': '手数料',
   'vault.deposit': 'Zen を預ける',
   'vault.withdraw': 'Zen を引き出す',

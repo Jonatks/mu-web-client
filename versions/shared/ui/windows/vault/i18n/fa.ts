@@ -8,6 +8,7 @@ export default {
   'vault.title': 'انبار',
   'vault.unlocked': 'باز',
   'vault.locked': 'قفل',
+  'vault.page': 'صفحه {page}',
   'vault.fee': 'هزینه',
   'vault.deposit': 'سپردن Zen',
   'vault.withdraw': 'برداشت Zen',

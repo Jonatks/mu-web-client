@@ -8,6 +8,7 @@ export default {
   'vault.title': 'Sklad',
   'vault.unlocked': 'Odemčeno',
   'vault.locked': 'Zamčeno',
+  'vault.page': 'Stránka {page}',
   'vault.fee': 'Poplatek',
   'vault.deposit': 'Uložit Zen',
   'vault.withdraw': 'Vybrat Zen',

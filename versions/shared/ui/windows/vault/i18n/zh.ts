@@ -9,6 +9,7 @@ export default {
   'vault.title': '仓库',
   'vault.unlocked': '已解锁',
   'vault.locked': '已锁定',
+  'vault.page': '第{page}页',
   'vault.fee': '费用',
   'vault.deposit': '存入金币',
   'vault.withdraw': '取出金币',

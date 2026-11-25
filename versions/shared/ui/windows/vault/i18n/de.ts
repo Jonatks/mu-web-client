@@ -9,6 +9,7 @@ export default {
   'vault.title': 'Lager',
   'vault.unlocked': 'Entsperrt',
   'vault.locked': 'Gesperrt',
+  'vault.page': 'Seite {page}',
   'vault.fee': 'Gebühr',
   'vault.deposit': 'Zen einlagern',
   'vault.withdraw': 'Zen abheben',

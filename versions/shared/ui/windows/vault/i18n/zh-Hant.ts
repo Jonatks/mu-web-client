@@ -8,6 +8,7 @@ export default {
   'vault.title': '倉庫',
   'vault.unlocked': '已解鎖',
   'vault.locked': '已鎖定',
+  'vault.page': '第{page}頁',
   'vault.fee': '費用',
   'vault.deposit': '存入金幣',
   'vault.withdraw': '取出金幣',

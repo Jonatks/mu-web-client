@@ -8,6 +8,7 @@ export default {
   'vault.title': 'Αποθήκη',
   'vault.unlocked': 'Ξεκλείδωτη',
   'vault.locked': 'Κλειδωμένη',
+  'vault.page': 'Σελίδα {page}',
   'vault.fee': 'Χρέωση',
   'vault.deposit': 'Κατάθεση Zen',
   'vault.withdraw': 'Ανάληψη Zen',

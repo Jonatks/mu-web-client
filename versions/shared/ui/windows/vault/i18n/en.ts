@@ -7,6 +7,7 @@ const en = {
   'vault.title': 'Vault',
   'vault.unlocked': 'Unlocked',
   'vault.locked': 'Locked',
+  'vault.page': 'Page {page}',
   'vault.fee': 'Fee',
   'vault.deposit': 'Store Zen',
   'vault.withdraw': 'Take Zen',

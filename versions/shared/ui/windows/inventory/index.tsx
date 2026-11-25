@@ -744,7 +744,9 @@ export const Inventory = observer(() => {
           width={BUTTON_WIDTH}
           height={BUTTON_HEIGHT}
           frames={BUTTON_FRAMES}
-          disabled
+          disabled={Hero.inventoryExtensions === 0}
+          checked={MuWindows.isOpen('inventory_extension')}
+          onClick={() => MuWindows.setOpen('inventory_extension', !MuWindows.isOpen('inventory_extension'))}
         >
           <span className="button-tooltip">{t(EXPAND_TOOLTIP)}</span>
         </MuButton>

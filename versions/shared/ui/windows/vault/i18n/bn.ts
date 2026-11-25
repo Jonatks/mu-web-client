@@ -8,6 +8,7 @@ export default {
   'vault.title': 'ভান্ডার',
   'vault.unlocked': 'খোলা',
   'vault.locked': 'তালাবদ্ধ',
+  'vault.page': 'পৃষ্ঠা {page}',
   'vault.fee': 'ফি',
   'vault.deposit': 'Zen জমা দিন',
   'vault.withdraw': 'Zen তুলুন',

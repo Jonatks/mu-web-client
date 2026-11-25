@@ -9,6 +9,7 @@ export default {
   'vault.title': 'Трезор',
   'vault.unlocked': 'Отключен',
   'vault.locked': 'Заключен',
+  'vault.page': 'Страница {page}',
   'vault.fee': 'Такса',
   'vault.deposit': 'Внеси Zen',
   'vault.withdraw': 'Изтегли Zen',

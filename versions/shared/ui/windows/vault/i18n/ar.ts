@@ -8,6 +8,7 @@ export default {
   'vault.title': 'الخزنة',
   'vault.unlocked': 'مفتوحة',
   'vault.locked': 'مقفلة',
+  'vault.page': 'الصفحة {page}',
   'vault.fee': 'الرسوم',
   'vault.deposit': 'إيداع Zen',
   'vault.withdraw': 'سحب Zen',

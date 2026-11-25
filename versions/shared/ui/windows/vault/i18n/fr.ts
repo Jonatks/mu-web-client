@@ -9,6 +9,7 @@ export default {
   'vault.title': 'Coffre',
   'vault.unlocked': 'Déverrouillé',
   'vault.locked': 'Verrouillé',
+  'vault.page': 'Page {page}',
   'vault.fee': 'Frais',
   'vault.deposit': 'Déposer du Zen',
   'vault.withdraw': 'Retirer du Zen',

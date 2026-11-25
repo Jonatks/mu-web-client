@@ -8,6 +8,7 @@ export default {
   'vault.title': 'Depo',
   'vault.unlocked': 'Kilidi açık',
   'vault.locked': 'Kilitli',
+  'vault.page': 'Sayfa {page}',
   'vault.fee': 'Ücret',
   'vault.deposit': 'Zen yatır',
   'vault.withdraw': 'Zen çek',

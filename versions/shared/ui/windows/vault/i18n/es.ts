@@ -9,6 +9,7 @@ export default {
   'vault.title': 'Bóveda',
   'vault.unlocked': 'Abierta',
   'vault.locked': 'Bloqueada',
+  'vault.page': 'Página {page}',
   'vault.fee': 'Tarifa',
   'vault.deposit': 'Guardar Zen',
   'vault.withdraw': 'Retirar Zen',

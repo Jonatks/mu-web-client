@@ -8,4 +8,5 @@ export default {
   'inventory.repair': 'تعمیر (L)',
   'inventory.personalShop': 'فروشگاه شخصی',
   'inventory.expand': 'باز کردن کوله‌پشتی گسترده (K)',
+  'inventoryExt.title': 'موجودی گسترش‌یافته',
 } satisfies Partial<Record<keyof typeof en, string>>;

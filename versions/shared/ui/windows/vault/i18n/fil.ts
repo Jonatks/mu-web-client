@@ -8,6 +8,7 @@ export default {
   'vault.title': 'Bodega',
   'vault.unlocked': 'Bukas',
   'vault.locked': 'Naka-lock',
+  'vault.page': 'Pahina {page}',
   'vault.fee': 'Bayad',
   'vault.deposit': 'Itago ang Zen',
   'vault.withdraw': 'Kunin ang Zen',

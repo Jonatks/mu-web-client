@@ -8,4 +8,5 @@ export default {
   'inventory.repair': 'Repara (L)',
   'inventory.personalShop': 'Botiga personal',
   'inventory.expand': 'Obre l\'inventari ampliat (K)',
+  'inventoryExt.title': 'Inventari ampliat',
 } satisfies Partial<Record<keyof typeof en, string>>;

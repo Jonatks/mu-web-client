@@ -8,6 +8,7 @@ export default {
   'vault.title': 'Magazyn',
   'vault.unlocked': 'Odblokowany',
   'vault.locked': 'Zablokowany',
+  'vault.page': 'Strona {page}',
   'vault.fee': 'Opłata',
   'vault.deposit': 'Wpłać Zen',
   'vault.withdraw': 'Wypłać Zen',

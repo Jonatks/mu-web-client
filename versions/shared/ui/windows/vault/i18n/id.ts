@@ -8,6 +8,7 @@ export default {
   'vault.title': 'Gudang',
   'vault.unlocked': 'Tidak terkunci',
   'vault.locked': 'Terkunci',
+  'vault.page': 'Halaman {page}',
   'vault.fee': 'Biaya',
   'vault.deposit': 'Simpan Zen',
   'vault.withdraw': 'Ambil Zen',

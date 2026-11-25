@@ -1,5 +1,6 @@
 import { runInAction } from 'mobx';
 import { observer } from 'mobx-react-lite';
+import { Economy } from '@/modules/economy/economy';
 import { useEffect, useRef } from 'react';
 import { EventBus } from '@/core/eventBus';
 import type { Events } from '@/core/eventBus/events';
@@ -69,6 +70,7 @@ export const CharacterList = observer((props: CharacterListProps) => {
         source.charactersList = characters;
         source.creationUnlockFlags = p.UnlockFlags;
       });
+      Economy.setVaultExtended(p.IsVaultExtended);
     };
     const onFocused = (bytes: Events['CharacterFocused']) => {
       latest.current.source.focusedChar = new CharacterFocusedPacket(bytes).CharacterName;

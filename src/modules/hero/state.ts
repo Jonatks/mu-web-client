@@ -87,10 +87,11 @@ class HeroState {
   sta = 10;
   eng = 10;
 
-  items: (Item | null)[] = new Array(
-    InventoryConstants.InventoryRows * InventoryConstants.RowSize +
-      InventoryConstants.EquippableSlotsCount
-  ).fill(null);
+  /** The worn slots, the 8x8 bag and the four 8x4 extensions OpenMU keeps behind it (up to `FirstStoreItemSlotIndex`). */
+  items: (Item | null)[] = new Array(InventoryConstants.FirstStoreItemSlotIndex).fill(null);
+
+  /** `Character.InventoryExtensions`: how many of the four 8x4 extensions are open (`CharacterInformation`). */
+  inventoryExtensions = 0;
 
   get leftHandSlot() {
     return this.items[InventoryConstants.LeftHandSlot];
@@ -209,6 +210,7 @@ class HeroState {
       points: observable,
       isGameMaster: observable,
       items: observable,
+      inventoryExtensions: observable,
       leftHandSlot: computed,
       rightHandSlot: computed,
       helmetSlot: computed,

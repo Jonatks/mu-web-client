@@ -9,6 +9,7 @@ export default {
   'vault.title': 'Хранилище',
   'vault.unlocked': 'Открыто',
   'vault.locked': 'Заперто',
+  'vault.page': 'Страница {page}',
   'vault.fee': 'Плата',
   'vault.deposit': 'Положить Zen',
   'vault.withdraw': 'Забрать Zen',

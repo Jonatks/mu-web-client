@@ -8,6 +8,7 @@ export default {
   'vault.title': 'Raktár',
   'vault.unlocked': 'Feloldva',
   'vault.locked': 'Zárolva',
+  'vault.page': '{page}. oldal',
   'vault.fee': 'Díj',
   'vault.deposit': 'Zen berakása',
   'vault.withdraw': 'Zen kivétele',

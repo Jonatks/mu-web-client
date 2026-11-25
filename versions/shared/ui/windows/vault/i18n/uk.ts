@@ -8,6 +8,7 @@ export default {
   'vault.title': 'Сховище',
   'vault.unlocked': 'Відімкнено',
   'vault.locked': 'Замкнено',
+  'vault.page': 'Сторінка {page}',
   'vault.fee': 'Плата',
   'vault.deposit': 'Покласти Zen',
   'vault.withdraw': 'Забрати Zen',

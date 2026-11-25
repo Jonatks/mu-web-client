@@ -8,6 +8,7 @@ export default {
   'vault.title': 'Magatzem',
   'vault.unlocked': 'Desbloquejat',
   'vault.locked': 'Bloquejat',
+  'vault.page': 'Pàgina {page}',
   'vault.fee': 'Tarifa',
   'vault.deposit': 'Desa Zen',
   'vault.withdraw': 'Retira Zen',

@@ -8,6 +8,7 @@ export default {
   'vault.title': 'Biltegia',
   'vault.unlocked': 'Desblokeatuta',
   'vault.locked': 'Blokeatuta',
+  'vault.page': '{page}. orria',
   'vault.fee': 'Kuota',
   'vault.deposit': 'Gorde Zen',
   'vault.withdraw': 'Atera Zen',

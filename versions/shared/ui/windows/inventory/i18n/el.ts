@@ -8,4 +8,5 @@ export default {
   'inventory.repair': 'Επισκευή (L)',
   'inventory.personalShop': 'Προσωπικό κατάστημα',
   'inventory.expand': 'Άνοιγμα επέκτασης σακιδίου (K)',
+  'inventoryExt.title': 'Επεκτεταμένο απόθεμα',
 } satisfies Partial<Record<keyof typeof en, string>>;

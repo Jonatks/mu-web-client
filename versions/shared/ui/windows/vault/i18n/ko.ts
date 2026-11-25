@@ -9,6 +9,7 @@ export default {
   'vault.title': '창고',
   'vault.unlocked': '잠금 해제',
   'vault.locked': '잠김',
+  'vault.page': '{page}페이지',
   'vault.fee': '수수료',
   'vault.deposit': '젠 맡기기',
   'vault.withdraw': '젠 찾기',

@@ -43,6 +43,8 @@ export const SEED_WIRE_STORAGES: readonly number[] = [11, 12, 13, 14];
 export const VAULT_COLUMNS = InventoryConstants.RowSize;
 export const VAULT_ROWS = InventoryConstants.WarehouseRows;
 export const VAULT_SLOTS = VAULT_COLUMNS * VAULT_ROWS;
+/** With the extension's second page (`Account.IsVaultExtended`). */
+export const VAULT_ALL_SLOTS = VAULT_SLOTS * 2;
 
 
 export const MIX_COLUMNS = 8;

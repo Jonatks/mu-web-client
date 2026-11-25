@@ -8,6 +8,7 @@ export default {
   'vault.title': 'तिजोरी',
   'vault.unlocked': 'खुली',
   'vault.locked': 'बंद',
+  'vault.page': 'पृष्ठ {page}',
   'vault.fee': 'शुल्क',
   'vault.deposit': 'Zen जमा करें',
   'vault.withdraw': 'Zen निकालें',

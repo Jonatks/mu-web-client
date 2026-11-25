@@ -86,3 +86,38 @@
     }
   }
 }
+
+// The extension's page tabs (`Economy.vaultPages`), in the find strip.
+.vault .vault-pages {
+  position: absolute;
+  display: flex;
+  gap: 2px;
+  height: 14px;
+
+  .vault-page {
+    width: 16px;
+    height: 14px;
+    line-height: 14px;
+    text-align: center;
+    font-size: 10px;
+    color: #c9b98a;
+    background: rgba(40, 30, 20, 0.85);
+    border: 1px solid #5a4a30;
+    cursor: pointer;
+
+    &.on {
+      color: #fff2c0;
+      background: rgba(120, 80, 30, 0.9);
+      border-color: #c9a24a;
+    }
+  }
+}
+
+.s19-skin .vault .vault-page {
+  background: var(--s19-tab) center / 100% 100% no-repeat;
+  border: 0;
+
+  &.on {
+    filter: brightness(1.5);
+  }
+}

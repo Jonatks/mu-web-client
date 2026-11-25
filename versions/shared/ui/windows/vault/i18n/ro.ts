@@ -9,6 +9,7 @@ export default {
   'vault.title': 'Seif',
   'vault.unlocked': 'Deblocat',
   'vault.locked': 'Blocat',
+  'vault.page': 'Pagina {page}',
   'vault.fee': 'Taxă',
   'vault.deposit': 'Depune Zen',
   'vault.withdraw': 'Retrage Zen',

@@ -92,3 +92,11 @@ items themselves are the hero's (`Hero.items`, `Hero.money`).
 - `jewelUpgrade.test.ts`: a ring or pendant takes Bless, Soul and Life only with `jewelryUpgrade` on a world that allows it.
 - `autoMana.test.ts`: low mana drinks the W key's mana potion once a second, and nothing happens
   where the server or the player has not turned it on, for a dead hero or with no potion.
+
+## Extensions and the second vault page
+- OpenMU keeps up to four 8x4 bag extensions behind the 8x8 bag (`Character.InventoryExtensions`, slots 76 to 203)
+  and doubles the warehouse for an extended account (`Account.IsVaultExtended`, slots 120 to 239). `Hero.items`
+  holds every inventory slot up to `FirstStoreItemSlotIndex`; `Economy.vaultItems` holds both vault pages.
+- The extension window (`versions/shared/ui/windows/inventory_extension`) opens from the inventory's expand button
+  when the character has one; the vault shows its page tabs in the find strip when the account is extended.
+  Auto moves and bulk moves still fill only the first vault page and the 8x8 bag.

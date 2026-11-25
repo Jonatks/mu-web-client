@@ -26,6 +26,7 @@ import {
   StorageKind,
   TRADE_SLOTS,
   VAULT_SLOTS,
+  VAULT_ALL_SLOTS,
   isPersonalShopBanned,
   localIndexOf,
   wireSlotOf,
@@ -162,7 +163,12 @@ export const Economy = new (class _Economy {
   // ---- vault (CNewUIStorageInventory) --------------------------------------
 
   vaultOpen = false;
-  vaultItems: (Item | null)[] = emptyGrid(VAULT_SLOTS);
+  /** Both pages: OpenMU doubles the warehouse for an extended account (`MoveItemAction.cs:265`). */
+  vaultItems: (Item | null)[] = emptyGrid(VAULT_ALL_SLOTS);
+  /** `Account.IsVaultExtended`, from the character list. */
+  vaultExtended = false;
+  /** The page shown: 0 is the first 8x15 grid, 1 the extension's. */
+  vaultPage = 0;
   vaultMoney = 0;
   /** `m_bLock`: a pin is set on the vault. */
   vaultLocked = false;
@@ -238,6 +244,9 @@ export const Economy = new (class _Economy {
     makeObservable(this, {
       vaultOpen: observable,
       vaultItems: observable,
+      vaultExtended: observable,
+      vaultPage: observable,
+      vaultPages: computed,
       vaultMoney: observable,
       vaultLocked: observable,
       vaultUnlocked: observable,
@@ -278,7 +287,8 @@ export const Economy = new (class _Economy {
   /** Everything here belongs to the character: cleared on select / relog. */
   reset(): void {
     this.vaultOpen = false;
-    this.vaultItems = emptyGrid(VAULT_SLOTS);
+    this.vaultItems = emptyGrid(VAULT_ALL_SLOTS);
+    this.vaultPage = 0;
     this.vaultMoney = 0;
     this.vaultLocked = false;
     this.vaultUnlocked = false;
@@ -355,11 +365,28 @@ export const Economy = new (class _Economy {
     });
   }
 
+  /** 2 when the account's warehouse is extended, or an item already sits on the second page. */
+  get vaultPages(): number {
+    return this.vaultExtended || this.vaultItems.some((item, slot) => !!item && slot >= VAULT_SLOTS) ? 2 : 1;
+  }
+
+  setVaultExtended(extended: boolean): void {
+    runInAction(() => {
+      this.vaultExtended = extended;
+    });
+  }
+
+  showVaultPage(page: number): void {
+    runInAction(() => {
+      this.vaultPage = Math.max(0, Math.min(page, this.vaultPages - 1));
+    });
+  }
+
   setVaultItems(entries: { slot: number; item: Item }[]): void {
     runInAction(() => {
-      const items = emptyGrid(VAULT_SLOTS);
+      const items = emptyGrid(VAULT_ALL_SLOTS);
       for (const entry of entries) {
-        if (entry.slot >= 0 && entry.slot < VAULT_SLOTS) items[entry.slot] = entry.item;
+        if (entry.slot >= 0 && entry.slot < VAULT_ALL_SLOTS) items[entry.slot] = entry.item;
       }
       this.vaultItems = items;
     });
@@ -413,7 +440,8 @@ export const Economy = new (class _Economy {
 
     runInAction(() => {
       this.vaultOpen = false;
-      this.vaultItems = emptyGrid(VAULT_SLOTS);
+      this.vaultItems = emptyGrid(VAULT_ALL_SLOTS);
+      this.vaultPage = 0;
       this.vaultUnlocked = false;
       if (this.prompt?.kind.startsWith('vault-')) this.prompt = null;
     });

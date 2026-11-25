@@ -45,6 +45,7 @@ type CharacterInformationView = Pick<
   | 'CurrentAbility'
   | 'MaximumAbility'
   | 'Status'
+  | 'InventoryExtensions'
 > & { AttackSpeed?: number; MagicSpeed?: number };
 
 /**
@@ -76,6 +77,7 @@ function applyCharacterInformation(p: CharacterInformationView) {
 
   runInAction(() => {
     playerData.money = p.Money;
+    playerData.inventoryExtensions = p.InventoryExtensions;
 
     playerData.exp = Number(p.CurrentExperience);
     playerData.expToNextLvl = Number(p.ExperienceForNextLevel);

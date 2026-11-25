@@ -8,6 +8,7 @@ export default {
   'vault.title': 'تجوری',
   'vault.unlocked': 'کھلی',
   'vault.locked': 'مقفل',
+  'vault.page': 'صفحہ {page}',
   'vault.fee': 'فیس',
   'vault.deposit': 'Zen جمع کریں',
   'vault.withdraw': 'Zen نکالیں',

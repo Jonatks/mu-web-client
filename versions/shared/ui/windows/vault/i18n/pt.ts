@@ -9,6 +9,7 @@ export default {
   'vault.title': 'Baú',
   'vault.unlocked': 'Destrancado',
   'vault.locked': 'Trancado',
+  'vault.page': 'Página {page}',
   'vault.fee': 'Taxa',
   'vault.deposit': 'Guardar Zen',
   'vault.withdraw': 'Retirar Zen',

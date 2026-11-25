@@ -61,6 +61,8 @@ import {
 } from './layout';
 
 const WINDOW_ID = 'vault';
+/** The extension's two page tabs share the find strip, at its right. */
+const PAGE_TABS_WIDTH = 36;
 
 /**
  * `CNewUIStorageInventory`: the warehouse. Items cross by drag or by the
@@ -122,7 +124,27 @@ export const Vault = observer(() => {
         onClick={() => Economy.closeVault()}
       />
 
-      <ItemSearchBox search={search} left={SEARCH_X} top={SEARCH_Y} width={SEARCH_WIDTH} />
+      <ItemSearchBox
+        search={search}
+        left={SEARCH_X}
+        top={SEARCH_Y}
+        width={SEARCH_WIDTH - (Economy.vaultPages > 1 ? PAGE_TABS_WIDTH : 0)}
+      />
+      {Economy.vaultPages > 1 && (
+        <div className="vault-pages" style={{ left: SEARCH_X + SEARCH_WIDTH - PAGE_TABS_WIDTH + 2, top: SEARCH_Y }}>
+          {[0, 1].map(page => (
+            <div
+              key={page}
+              className={page === Economy.vaultPage ? 'vault-page on' : 'vault-page'}
+              data-no-drag="true"
+              title={t('vault.page', { page: page + 1 })}
+              onClick={() => Economy.showVaultPage(page)}
+            >
+              {page + 1}
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Everything the chaos machine eats, out of the way in one click. */}
       <div
@@ -148,6 +170,7 @@ export const Vault = observer(() => {
         rows={ROWS}
         left={GRID_X}
         top={GRID_Y}
+        offset={Economy.vaultPage * COLUMNS * ROWS}
         disabled={!!Bag.pendingItemMove}
         dropTint={picked ? (banned ? 'ban' : 'ok') : 'none'}
         dimmed={search.active ? item => !search.matches(item) : undefined}

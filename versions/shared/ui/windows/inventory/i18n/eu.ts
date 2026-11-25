@@ -8,4 +8,5 @@ export default {
   'inventory.repair': 'Konpondu (L)',
   'inventory.personalShop': 'Denda pertsonala',
   'inventory.expand': 'Ireki inbentario hedatua (K)',
+  'inventoryExt.title': 'Inbentario zabaldua',
 } satisfies Partial<Record<keyof typeof en, string>>;

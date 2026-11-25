@@ -9,6 +9,7 @@ export default {
   'vault.title': 'Deposito',
   'vault.unlocked': 'Sbloccato',
   'vault.locked': 'Bloccato',
+  'vault.page': 'Pagina {page}',
   'vault.fee': 'Tassa',
   'vault.deposit': 'Deposita Zen',
   'vault.withdraw': 'Preleva Zen',

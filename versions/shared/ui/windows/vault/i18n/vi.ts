@@ -8,6 +8,7 @@ export default {
   'vault.title': 'Nhà kho',
   'vault.unlocked': 'Đã mở khóa',
   'vault.locked': 'Đã khóa',
+  'vault.page': 'Trang {page}',
   'vault.fee': 'Phí',
   'vault.deposit': 'Gửi Zen',
   'vault.withdraw': 'Rút Zen',
