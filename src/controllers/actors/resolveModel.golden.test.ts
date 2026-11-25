@@ -7,8 +7,8 @@ import { createHash } from 'node:crypto';
  * `isKnownObjectType` knows it, and the NPC tables the generic factories read (file and scale).
  * Moving NPC content must leave these hashes alone; update them on purpose.
  */
-const RESOLVE_HASH = '0182484853a171ceaa3005b628d78d8618ba7b8b70d494a589a3b75e2f8a789e';
-const TABLES_HASH = 'fd8962b6ddb0073063245f9f3e98a85363649ad87d4d53ee0e813ded81aa91d7';
+const RESOLVE_HASH = '1a79a4becdc8a122ab053f2221d1b9ce159aa5be5300f999daeaac24de8d90db';
+const TABLES_HASH = '67e7afe4e1ed6d78b9408857c218be689e267558a185a24d9a118cf5f58a3d00';
 
 const hash = (v: unknown) => createHash('sha256').update(JSON.stringify(v)).digest('hex');
 
@@ -36,7 +36,7 @@ describe('model resolution', () => {
       return [type, m.isKnownObjectType(type), f.name, f.OverrideScale, base, f.NpcClass ?? null, f.NpcAlwaysFly ?? false, firstOf.get(f)];
     });
 
-    expect(rows.filter(r => r[1]).length).toBe(530);
+    expect(rows.filter(r => r[1]).length).toBe(532);
     expect(hash(rows)).toBe(RESOLVE_HASH);
   }, 120_000);
 
@@ -44,7 +44,7 @@ describe('model resolution', () => {
     const m = await load();
     const tables = [m.NPC_MODEL_TABLE, m.GEARED_NPC_TABLE, m.TRANSFORMED_NPC_TABLE, m.TRAP_MODEL_TABLE, m.CHARACTER_SKIN_PARTS];
 
-    expect(tables.map(t => Object.keys(t).length)).toEqual([92, 13, 8, 6, 9]);
+    expect(tables.map(t => Object.keys(t).length)).toEqual([97, 13, 8, 6, 9]);
     expect(hash(tables)).toBe(TABLES_HASH);
   }, 120_000);
 });

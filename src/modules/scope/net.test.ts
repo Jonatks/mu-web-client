@@ -101,6 +101,9 @@ describe('buff looks on an object in view', () => {
     EventBus.emit('AddNpcsToScope', p.buffer);
     expect(Ecs.world?.getByNetId(21)?.npcType).toBe(3);
     expect([...(Ecs.world?.getByNetId(20)?.buffs ?? [])]).toEqual([1, 2]);
+    // On its tile's centre, like the hero (ZzzCharacter.cpp:12662-12663).
+    const t = Ecs.world?.getByNetId(21)?.transform;
+    expect([t?.pos.x, t?.posOffset?.x, t?.posOffset?.z]).toEqual([100, 0.5, 0.5]);
   });
 
   // OpenMU numbers seven master buffs on its own; the original knows each by its base (SkillsInitializer.cs:84-90).

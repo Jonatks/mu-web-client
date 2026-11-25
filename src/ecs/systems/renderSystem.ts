@@ -127,7 +127,9 @@ export const RenderSystem: ISystemFactory = world => {
         if (debuffLight) {
           modelObject.Light.set(debuffLight[0], debuffLight[1], debuffLight[2]);
         } else if (!modelObject.FixedLight) {
-          const light = world.getTerrainLight(transform.pos.x, transform.pos.z);
+          // Where the body is drawn (`RequestModelTerrainLight(o->Position)`, ZzzCharacter.cpp:9908).
+          const off = transform.posOffset;
+          const light = world.getTerrainLight(transform.pos.x + (off?.x ?? 0), transform.pos.z + (off?.z ?? 0));
           const self = modelObject.SelfLight;
 
           modelObject.Light.set(

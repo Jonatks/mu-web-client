@@ -8,8 +8,8 @@ import { monsters } from './all';
  * are those tables', so any change to a monster's data shows here: update them on purpose, in the
  * same commit.
  */
-const ROWS_HASH = '94c49a3986fdaebb0433db6afdb94065f2896e7bb1578424f84522c20a6d8efa';
-const HEALTH_HASH = '6cf63ee549380461ac7d0004ce680e48cb5fc805f72b8bc04c5e48250279c119';
+const ROWS_HASH = 'cbc3b18e1d37dae687d72a4ecce02342c2a82173e200340ed727392ead339c7d';
+const HEALTH_HASH = 'e16634180eb3632d4d3097c67aed2a4a01c28b609b1b22de97e73a55a5fabc36';
 const MODELS_HASH = 'd4dbddb3da1eb89d834162b963a9598fc8191ddb79f49e52d2f2e13cd1e6c811';
 
 const hash = (v: unknown) => createHash('sha256').update(JSON.stringify(v)).digest('hex');
@@ -18,13 +18,13 @@ const sortedKeys = (o: object) => Object.fromEntries(Object.entries(o).sort(([a]
 describe('monster folders', () => {
   it('hold the original table, unchanged', () => {
     const rows = monsters.all().flatMap(d => (monsters.get(d.Numb) ? [sortedKeys(monsters.get(d.Numb)!)] : []));
-    expect(rows).toHaveLength(323);
+    expect(rows).toHaveLength(328);
     expect(hash(rows)).toBe(ROWS_HASH);
   });
 
   it('hold the server health, unchanged', () => {
     const health = Object.fromEntries(monsters.all().filter(d => d.maxHealth !== undefined).map(d => [d.Numb, d.maxHealth]));
-    expect(Object.keys(health)).toHaveLength(426);
+    expect(Object.keys(health)).toHaveLength(431);
     expect(hash(health)).toBe(HEALTH_HASH);
   });
 

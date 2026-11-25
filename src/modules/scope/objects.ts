@@ -90,6 +90,9 @@ export function addNpcToScope(world: World, npc: ScopeNpc) {
       ),
       rot: new Vector3(0, convertDirectionToAngle(npc.Rotation), 0),
       scale: npcSpawnScale(modelFactory, npc.TypeNumber, world.mapIndex),
+      // Drawn on the tile's centre like the hero: `Position = x * TERRAIN_SCALE + 0.5 * TERRAIN_SCALE`
+      // (ZzzCharacter.cpp:12662-12663). On the corner it took the lightmap's corner texel for its body.
+      posOffset: new Vector3(0.5, 0, 0.5),
     },
     modelFactory,
     pathfinding: {

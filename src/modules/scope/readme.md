@@ -68,3 +68,9 @@ players, plus their moves and equipment changes. The entities live in the ECS wo
   the NPCs after one with buffs read right, its buffs registered; OpenMU's own master buff numbers are
   listed as their base effect.
 - `heroOnJoin.test.ts`: the hero created on join at the character information position, and left alone when it exists.
+
+## Where an NPC stands
+- A monster or NPC is drawn on its tile's centre (`transform.posOffset` 0.5, 0.5), like the hero:
+  the original puts every character at `x * TERRAIN_SCALE + 0.5 * TERRAIN_SCALE` (ZzzCharacter.cpp:12662).
+  On the tile corner it took its body light from the lightmap's corner texel: the Trainer in
+  Lorencia (122, 110) stands on a fence shadow there (21 of 255) and was drawn black.
