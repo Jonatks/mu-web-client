@@ -30,8 +30,14 @@ const TWO_HAND_SWORD_TWO_INDICES = new Set([21, 23, 25, 31]);
 const MISTERY_STICK = 14;
 const ETERNAL_WING_STICK = 20;
 const BOOK_OF_SAHAMUTT = 21;
-/** The later Book of Bloodangel (S19 ItemList 5/57). */
-const BOOK_OF_BLOODANGEL = 57;
+/** The later Mastery books (S19 ItemList): Bloodangel 5/57, then Darkangel to Temple Guard. */
+/** The later Mastery sticks (S19 ItemList): Bloodangel 5/43, then Darkangel to Temple Guard, held as wands. */
+const LATER_STICKS = new Set([43, 52, 54, 56, 62, 65, 96, 100, 105, 145]);
+/** A Summoner stick: Mistery to Eternal Wing (14-20) or a later Mastery one. */
+function isStick(item: Item): boolean {
+  return (item.num >= MISTERY_STICK && item.num <= ETERNAL_WING_STICK) || LATER_STICKS.has(item.num);
+}
+const LATER_BOOKS = new Set([57, 58, 59, 60, 63, 66, 97, 101, 106, 146]);
 
 export type Hands = { leftHand: Item | null; rightHand: Item | null };
 
@@ -60,7 +66,7 @@ export function isBook(item: Item | null): boolean {
   return (
     !!item &&
     item.group === GROUP_STAFF &&
-    ((item.num >= BOOK_OF_SAHAMUTT && item.num <= 29) || item.num === BOOK_OF_BLOODANGEL)
+    ((item.num >= BOOK_OF_SAHAMUTT && item.num <= 29) || LATER_BOOKS.has(item.num))
   );
 }
 
@@ -71,13 +77,22 @@ export function isBook(item: Item | null): boolean {
 // a pair of phoenix wings (`RenderPhoenixGloves`, :241).
 export const PHOENIX_SOUL_STAR = 35;
 
-/** `Item/` model stems by sword index: [worn right, worn left]. 46 is the later Bloodangel Claws (S19 ItemList). */
+/** `Item/` model stems by sword index: [worn right, worn left]. 46 on are the later Mastery claws (S19 ItemList). */
 const SWORDFORM_GLOVE_MODELS: Readonly<Record<number, readonly [string, string]>> = {
   32: ['SwordR33', 'SwordL33'], // Sacred Glove
   33: ['SwordR34', 'SwordL34'], // Storm Hard Glove
   34: ['SwordR35', 'SwordL35'], // Piercing Blade Glove
   35: ['Sword36R', 'Sword36L'], // Phoenix Soul Star
   46: ['BloodangelClo_R', 'BloodangelClo_L'], // Bloodangel Claws
+  56: ['Sword39_R', 'Sword39_L'], // Darkangel Claws
+  59: ['Sword40_R', 'Sword40_L'], // Holyangel Claws
+  64: ['Sword43_R', 'Sword43_L'], // Soul Claws
+  80: ['sword44_R', 'sword44_L'], // Blue Eye Claw
+  83: ['sword45_R', 'sword45_L'], // Silver Heart Claw
+  87: ['sword46_R', 'sword46_L'], // Manticore Claw
+  98: ['sword47_R', 'sword47_L'], // Brilliant Claw
+  118: ['sword48_R', 'sword48_L'], // Apocalypse Claw
+  124: ['sword49_R', 'sword49_L'], // Lightning Claws
 };
 
 export function isPhoenixSoulStar(item: Item | null | undefined): boolean {
@@ -106,14 +121,14 @@ export function swordformGlovesModel(
   return `${SWORDFORM_GLOVE_MODELS[item.num][slot]}.glb`;
 }
 
-/** The later Bloodangel Bow (S19 ItemList 4/28), drawn as a bow. */
-const BLOODANGEL_BOW = 28;
+/** The later Mastery bows (S19 ItemList): Bloodangel 4/28, then Darkangel to Temple Guard, drawn as bows. */
+const LATER_BOWS = new Set([28, 31, 36, 38, 40, 56, 58, 61, 64, 67]);
 
 /** `IsBowModel` (CharacterManager.cpp:68): 0-6, Celestial 17, Viper…Stinger 20-23, Air Lyn 24. */
 export function isBow(item: Item | null): boolean {
   if (!item || item.group !== GROUP_BOW) return false;
   const n = item.num;
-  return n <= 6 || n === 17 || (n >= 20 && n <= 24) || n === BLOODANGEL_BOW;
+  return n <= 6 || n === 17 || (n >= 20 && n <= 24) || LATER_BOWS.has(n);
 }
 
 /** `IsCrossbowModel` (CharacterManager.cpp:76): 8-14, Saint 16, Divine CB…Great Reign 18-19. */
@@ -232,10 +247,11 @@ export function chooseIdleAction(pose: CharacterPose): PlayerAction {
           ? PlayerAction.PLAYER_STOP_SPEAR
           : PlayerAction.PLAYER_STOP_SCYTHE;
       case GROUP_STAFF:
-        if (main.num >= MISTERY_STICK && main.num <= ETERNAL_WING_STICK) {
+        if (isStick(main)) {
           return PlayerAction.PLAYER_STOP_WAND;
         }
-        if (main.num >= BOOK_OF_SAHAMUTT) break;
+        // The later Mastery staffs (41 on) are staffs again, not books.
+        if (isBook(main)) break;
         return isTwoHanded(main)
           ? PlayerAction.PLAYER_STOP_SCYTHE
           : PlayerAction.PLAYER_STOP_SWORD;
@@ -267,10 +283,11 @@ export function chooseWalkAction(pose: CharacterPose): PlayerAction {
           ? PlayerAction.PLAYER_WALK_TWO_HAND_SWORD_TWO
           : PlayerAction.PLAYER_WALK_TWO_HAND_SWORD;
       case GROUP_STAFF:
-        if (main.num >= MISTERY_STICK && main.num <= ETERNAL_WING_STICK) {
+        if (isStick(main)) {
           return PlayerAction.PLAYER_WALK_WAND;
         }
-        if (main.num >= BOOK_OF_SAHAMUTT) break;
+        // The later Mastery staffs (41 on) are staffs again, not books.
+        if (isBook(main)) break;
         return isTwoHanded(main)
           ? PlayerAction.PLAYER_WALK_SCYTHE
           : PlayerAction.PLAYER_WALK_SWORD;
@@ -319,10 +336,11 @@ export function chooseRunAction(pose: CharacterPose): PlayerAction {
           ? PlayerAction.PLAYER_RUN_TWO_HAND_SWORD_TWO
           : PlayerAction.PLAYER_RUN_TWO_HAND_SWORD;
       case GROUP_STAFF:
-        if (main.num >= MISTERY_STICK && main.num <= ETERNAL_WING_STICK) {
+        if (isStick(main)) {
           return PlayerAction.PLAYER_RUN_WAND;
         }
-        if (main.num >= BOOK_OF_SAHAMUTT) break;
+        // The later Mastery staffs (41 on) are staffs again, not books.
+        if (isBook(main)) break;
         return isTwoHanded(main)
           ? PlayerAction.PLAYER_RUN_SPEAR
           : PlayerAction.PLAYER_RUN_SWORD;

@@ -6,12 +6,12 @@ import { items } from './all';
  * The item files are the old items.json split one per item. This hash is that table's, in (group, index)
  * order, so any change to an item's data shows here: update it on purpose, in the same commit.
  */
-const ITEMS_HASH = '575d091609e19d6d21ed862ab328c24c858b4e2ad7178211759d8705b39e57cf';
+const ITEMS_HASH = '302c30d086d9bafdc0b1c7b398c322ca3b2d4c2b4a64cf340f733d37c7aab016';
 
 describe('item files', () => {
   it('hold every item, unchanged', () => {
     const list = items.all();
-    expect(list).toHaveLength(773);
+    expect(list).toHaveLength(1178);
     expect(createHash('sha256').update(JSON.stringify(list)).digest('hex')).toBe(ITEMS_HASH);
   });
 

@@ -16,6 +16,14 @@ Uso: `bun ops/s19/convert.ts "<Data del servidor S19>" bloodangel <salida>`. La 
 de `ops/bloodangel/` (`gen_items.py`, `gen_sets.ts`, `client_sets.ts`, `craft.sql`), que siguen igual. Los XML del
 S19 no entran al repositorio.
 
+## Generaciones 2 a 11 (fase S10)
+
+`generaciones.json` tiene tambien Darkangel a Temple Guard, con las mismas reglas: fuera el carcaj, las "(Belief)" y
+la segunda variante de un mismo nombre (la de numero mas alto). `ops/faseS/gen_mastery.py` clona cada item del item
+Bloodangel de su tipo y escribe el SQL del servidor y los archivos del cliente; `ops/faseS/gen_mastery_sets.ts` los
+sets. Temple Guard queda fuera: el cliente S19 Part 2-3 no trae sus modelos. Los JSON y el SQL van a mu-assets
+(`s19/server/s10`), los modelos a `s19/client/game-assets/Item`; `ops/faseS/s10_apply.sh` lo aplica en la VM.
+
 ## Reglas de seleccion (Bloodangel, igual a la fase 3)
 
 - `MasteryGrade` de la generacion, grupos 0 a 11, y al menos una clase de Season 6 con valor distinto de 0.

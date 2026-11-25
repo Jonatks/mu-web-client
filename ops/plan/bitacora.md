@@ -319,4 +319,11 @@ Hecho en los repos, falta subirlo o comprobarlo en la VM cuando vuelva el acceso
 3. Probar un personaje nuevo (500 puntos, 10.000.000 de zen) y el zen al matar.
 4. Revisar los errores de los eventos Raklion y Crywolf vistos al reiniciar (22:20 UTC). Si vienen de las puertas,
    deshacer con `~/s5_puertas_undo.sql` en ambas bases.
-5. Todo lo que se agregue a los repos despues de esta fecha (ver los commits siguientes) tambien esta sin subir.
+5. Todo lo que se agregue a los repos despues de esta fecha (ver los commits siguientes) tambien esta sin subir:
+   - cliente nuevo (publish-client) con: NPC en el centro de su casilla (Trainer visible), Slough, Lesnar, Cent,
+     Gillard y Eunice, inventario ampliado y segunda pagina del baul, items Mastery Darkangel a Lightning;
+   - `apply_client_s19.sh` para copiar los modelos nuevos de mu-assets (NPC e Item);
+   - `ops/faseS/s9_npcs.sql` (probe y luego openmu) y reiniciar;
+   - `SHA=<commit> bash ops/faseS/s10_apply.sh` (probe), probar, y `PROD=1` para openmu; reiniciar.
+6. Decidir con el usuario si todos los personajes reciben las 4 bolsas del inventario y la cuenta el baul ampliado
+   (en el S19 se compran en la tienda de cash).
