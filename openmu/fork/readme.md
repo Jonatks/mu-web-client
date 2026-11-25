@@ -5,8 +5,9 @@ imagen oficial; aqui solo hay parches chicos sobre la version exacta que corre l
 
 ```
 BASE                    commit de MUnique/OpenMU de la imagen de la VM (0.10.1, 766da9a, publicada el 01-11-2026)
-VERSION                 nombre de nuestra version (0.10.1-mu1); subirlo al cambiar un parche
+VERSION                 nombre de nuestra version (0.10.1-mu2); subirlo al cambiar un parche
 0001-droplevel-short.patch   ItemDefinition.DropLevel y MaximumDropLevel de byte a short
+0002-mapinitializer-antes-de-tareas.patch   GameContext da PlugInManager al MapInitializer antes de sus tareas
 apply-vm.sh             en la VM: baja el release, lo pone como base (mu-openmu-admin:pre-fase0) y guarda la anterior
                         como :pre-fork; `rollback` vuelve a ella
 ```
@@ -20,3 +21,9 @@ El S19 tiene items con nivel de aparicion de hasta 1500 (178 pasan de 255; los M
 guardaba como byte: con mas de 255 no arranca, y con el valor recortado cambian el precio de venta y reparacion y los
 bonos excelentes y ancient (`ItemPowerUpFactory` divide por ese nivel). La columna ya es `smallint` en la base, asi que no
 hay migracion: cambian el modelo, su modelo compilado de EF y la instantanea. OpenMU ignora `PendingModelChangesWarning`.
+
+## 0002: el MapInitializer listo antes de las tareas periodicas
+GameContext arranca su temporizador de tareas (Crywolf, Raklion) a 1 s, pero GameServer le pasa el PlugInManager al
+MapInitializer recien al terminar su constructor. En la VM lenta la primera tarea llega antes: "PlugInManager must be
+set first", y Crywolf deja el mapa 34 sin estatua ni altares, asi que el evento no corre nunca. Ahora GameContext los
+asigna en su constructor, antes del temporizador.

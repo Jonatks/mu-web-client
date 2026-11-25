@@ -1,0 +1,20 @@
+diff --git a/src/GameLogic/GameContext.cs b/src/GameLogic/GameContext.cs
+index b3309df5c..93b38683c 100644
+--- a/src/GameLogic/GameContext.cs
++++ b/src/GameLogic/GameContext.cs
+@@ -78,6 +78,15 @@ public class GameContext : AsyncDisposable, IGameContext
+             this.LoggerFactory = loggerFactory;
+             this.DropGenerator = dropGenerator;
+             this.ConfigurationChangeMediator = changeMediator;
++
++            // The periodic tasks below can create maps (Crywolf, Raklion) before the hosting server finished its
++            // constructor and set these, which left Crywolf's map without its statue on slow machines.
++            if (mapInitializer is MapInitializer initializer)
++            {
++                initializer.PlugInManager ??= plugInManager;
++                initializer.PathFinderPool ??= PathFinderPoolInstance;
++            }
++
+             this.ItemPowerUpFactory = new ItemPowerUpFactory(loggerFactory.CreateLogger<ItemPowerUpFactory>(), configuration);
+             this.PartyManager = new PartyManager(configuration.MaximumPartySize, loggerFactory.CreateLogger<Party>());
+             this._recoverTimer = new Timer(this.RecoverTimerElapsed, null, this.Configuration.RecoveryInterval, this.Configuration.RecoveryInterval);
