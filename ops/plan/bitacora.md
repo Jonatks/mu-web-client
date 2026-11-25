@@ -326,7 +326,14 @@ lee como byte ("JSON value could not be converted to System.Byte"), asi que no a
 (copia en mu_plugins.droplevel_bak_s10) y gen_mastery.py lo limita. A la vez el despliegue reescribio el Caddyfile
 (install-admin.sh) y borro la entrada del MCP: reinstalarlo la repone. El MCP ahora corre cada trabajo en su propia
 unidad de systemd, reintenta sin limite, tiene OOMScoreAdjust=-800 y un vigilante por minuto (mu-mcp-vigia).
-Pendiente: que install-admin.sh conserve el bloque "# mu-mcp" del Caddyfile.
+Resuelto despues: el vigilante del MCP repone su ruta en el Caddyfile cada minuto (6f2197f).
+
+Fork de OpenMU (25-11-2026, 17:18-17:35 UTC): `openmu/fork`, OpenMU 0.10.1 (766da9a) con DropLevel y
+MaximumDropLevel en short; GitHub Actions compila la imagen y la publica en el release openmu-0.10.1-mu1. En la VM la
+accion `base_openmu` la deja como mu-openmu-admin:pre-fase0 (la anterior queda en :pre-fork; `base_openmu` con
+`rollback` vuelve) y luego `desplegar_plugins`. Los 48 Mastery volvieron a 260-320 en ambas bases
+(mu-assets s19/server/fork/droplevel_s19.sql; deshacer: droplevel_s19_undo.sql) y OpenMU arranco con ellos sin errores
+nuevos. Para volver al OpenMU oficial: primero droplevel_s19_undo.sql, despues `base_openmu rollback` y desplegar.
 
 Avisos que ya existian, no de este despliegue: la configuracion de AddClassSkillsOnCreate (7d2c9e41) trae dos "$id" y
 no se lee; Raklion y Crywolf fallan una vez al arrancar ("PlugInManager must be set first") y luego inician bien; tres
