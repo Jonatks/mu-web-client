@@ -321,6 +321,17 @@ eventos, s11 bolsas y baul (4 personajes, 4 cuentas), s10 items y 63 sets Master
 cliente), s12 Acheron (mapa, 231 apariciones, puertas, /move 91, fila de Move y gate.bmd del cliente) y los plugins en
 36109c4. Copias en /var/backups/mu-db/openmu-20261125-*.
 
+Incidente al desplegar (16:24-16:39 UTC, OpenMU caido ~15 min): 48 items Mastery traian DropLevel 260-320 y OpenMU lo
+lee como byte ("JSON value could not be converted to System.Byte"), asi que no arrancaba. Se bajo a 255 en ambas bases
+(copia en mu_plugins.droplevel_bak_s10) y gen_mastery.py lo limita. A la vez el despliegue reescribio el Caddyfile
+(install-admin.sh) y borro la entrada del MCP: reinstalarlo la repone. El MCP ahora corre cada trabajo en su propia
+unidad de systemd, reintenta sin limite, tiene OOMScoreAdjust=-800 y un vigilante por minuto (mu-mcp-vigia).
+Pendiente: que install-admin.sh conserve el bloque "# mu-mcp" del Caddyfile.
+
+Avisos que ya existian, no de este despliegue: la configuracion de AddClassSkillsOnCreate (7d2c9e41) trae dos "$id" y
+no se lee; Raklion y Crywolf fallan una vez al arrancar ("PlugInManager must be set first") y luego inician bien; tres
+Elite Yeti de Devias no se pueden colocar.
+
 Errores encontrados al subir y ya corregidos: el conteo y la reversa de s10_sets usaban 19 caracteres para un prefijo
 de 18 (la reversa no habria borrado nada); los atributos copiados en s12 repetian ids (los de OpenMU terminan igual).
 
