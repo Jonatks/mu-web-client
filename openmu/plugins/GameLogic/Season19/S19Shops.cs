@@ -10,6 +10,7 @@ using MUnique.OpenMU.DataModel.Configuration;
 using MUnique.OpenMU.DataModel.Configuration.Items;
 using MUnique.OpenMU.DataModel.Entities;
 using MUnique.OpenMU.GameLogic.PlugIns;
+using MUnique.OpenMU.Persistence;
 using MUnique.OpenMU.Persistence.EntityFramework;
 using MUnique.OpenMU.PlugIns;
 using Npgsql;
@@ -28,6 +29,9 @@ public class S19Shops : IPlayerStateChangedPlugIn
     private const int Columns = 8;
     private const int Rows = 15;
     private static readonly SemaphoreSlim Once = new(1, 1);
+
+    // The stores of the loaded configuration only take the persistence's own item type (not TemporaryItem).
+    private static readonly System.Reflection.Assembly Model = typeof(EntityDataContext).Assembly;
     private static bool done;
 
     /// <summary>Gets the tabs after the first of each merchant (NPC number): tab 2 first, each laid out like the store.</summary>
@@ -111,7 +115,7 @@ public class S19Shops : IPlayerStateChangedPlugIn
                     items.Add(Create(definition, row.Level, row.Durability, row.Skill, row.Luck, row.Option, row.Exc, slot));
                 }
 
-                if (tab.Key == 1)
+                if (tab.Key == 1 && items.Count > 0)
                 {
                     store.Items.Clear();
                     items.ForEach(store.Items.Add);
@@ -167,17 +171,20 @@ public class S19Shops : IPlayerStateChangedPlugIn
 
     private static Item Create(ItemDefinition definition, int level, int durability, int skill, int luck, int option, string exc, byte slot)
     {
-        var item = new TemporaryItem { Definition = definition, ItemSlot = slot, Level = (byte)Math.Min(level, definition.MaximumItemLevel) };
+        var item = Model.CreateNew<Item>();
+        item.Definition = definition;
+        item.ItemSlot = slot;
+        item.Level = (byte)Math.Min(level, definition.MaximumItemLevel);
         item.HasSkill = skill == 1 && definition.Skill is not null;
         var options = definition.PossibleItemOptions.SelectMany(o => o.PossibleOptions).ToList();
         if (luck == 1 && options.FirstOrDefault(o => o.OptionType == ItemOptionTypes.Luck) is { } luckOption)
         {
-            item.ItemOptions.Add(new ItemOptionLink { ItemOption = luckOption });
+            item.ItemOptions.Add(Link(luckOption, 0));
         }
 
         if (option > 0 && options.FirstOrDefault(o => o.OptionType == ItemOptionTypes.Option) is { } normal)
         {
-            item.ItemOptions.Add(new ItemOptionLink { ItemOption = normal, Level = option });
+            item.ItemOptions.Add(Link(normal, option));
         }
 
         if (exc != "-1")
@@ -185,11 +192,19 @@ public class S19Shops : IPlayerStateChangedPlugIn
             var ids = exc.Split(';').Select(int.Parse).ToHashSet();
             foreach (var excellent in options.Where(o => o.OptionType == ItemOptionTypes.Excellent && ids.Contains(o.Number - 1)))
             {
-                item.ItemOptions.Add(new ItemOptionLink { ItemOption = excellent });
+                item.ItemOptions.Add(Link(excellent, 0));
             }
         }
 
         item.Durability = durability > 0 ? durability : item.GetMaximumDurabilityOfOnePiece();
         return item;
+    }
+
+    private static ItemOptionLink Link(IncreasableItemOption option, int level)
+    {
+        var link = Model.CreateNew<ItemOptionLink>();
+        link.ItemOption = option;
+        link.Level = level;
+        return link;
     }
 }
