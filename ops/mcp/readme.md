@@ -14,7 +14,8 @@ install.sh  se corre en la VM: instala o actualiza, cambia la contrasena, o lo q
   su hash scrypt (`/etc/mu-mcp/password`). Tokens de 1 hora, refresco de 30 dias que rota, 10 intentos fallidos por hora.
   Los tokens se guardan como sha256 en `/var/lib/mu-mcp/state.db`.
 - No se queda caido: systemd lo reintenta siempre (`StartLimitIntervalSec=0`), Linux no lo elige ante falta de
-  memoria (`OOMScoreAdjust=-800`) y el temporizador `mu-mcp-vigia` lo reinicia si `/salud` no responde en un minuto.
+  memoria (`OOMScoreAdjust=-800`) y el temporizador `mu-mcp-vigia` lo reinicia si `/salud` no responde en un minuto
+  y repone su ruta en Caddy si un despliegue reescribio el Caddyfile (`install-admin.sh` lo hace).
 - Ninguna herramienta es una terminal libre. Cada una corre comandos fijos con argumentos validados, y cada llamada queda
   en `/var/lib/mu-mcp/audit.log`.
 

@@ -71,14 +71,25 @@ OOMScoreAdjust=-800
 [Install]
 WantedBy=multi-user.target
 EOF
-# Vigilante: cada minuto pide /salud y, si no responde en 10 s, reinicia el servicio.
+# Vigilante, cada minuto: si /salud no responde en 10 s reinicia el servicio, y si otro script reescribio el Caddyfile
+# sin la ruta del MCP (install-admin.sh lo hace en cada despliegue de plugins) la vuelve a poner.
+sudo tee /opt/mu-mcp/vigia.sh >/dev/null <<VIGIA
+#!/bin/sh
+curl -fsS --max-time 10 http://127.0.0.1:8770/salud >/dev/null || { logger -t mu-mcp-vigia "sin respuesta, reinicio"; systemctl restart mu-mcp; }
+if ! grep -q '^# mu-mcp inicio' $CADDY; then
+  logger -t mu-mcp-vigia "el Caddyfile perdio la ruta del MCP, la vuelvo a poner"
+  printf '# mu-mcp inicio\n%s {\n  reverse_proxy 127.0.0.1:8770\n}\n# mu-mcp fin\n' "$MCP" >> $CADDY
+  docker exec caddy caddy reload --config /etc/caddy/Caddyfile >/dev/null
+fi
+VIGIA
+sudo chmod 755 /opt/mu-mcp/vigia.sh
 sudo tee /etc/systemd/system/mu-mcp-vigia.service >/dev/null <<'UNIT'
 [Unit]
-Description=Reinicia mu-mcp si no responde
+Description=Reinicia mu-mcp si no responde y repone su ruta en Caddy
 
 [Service]
 Type=oneshot
-ExecStart=/bin/sh -c 'curl -fsS --max-time 10 http://127.0.0.1:8770/salud >/dev/null || { logger -t mu-mcp-vigia "sin respuesta, reinicio"; systemctl restart mu-mcp; }'
+ExecStart=/opt/mu-mcp/vigia.sh
 UNIT
 sudo tee /etc/systemd/system/mu-mcp-vigia.timer >/dev/null <<'UNIT'
 [Unit]
