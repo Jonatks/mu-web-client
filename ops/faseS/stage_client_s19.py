@@ -31,10 +31,11 @@ for n in worlds:
                 models.append(f'{kind}{n}/{name}')
                 continue
             os.makedirs(dst, exist_ok=True)
-            if key == 'terrainlight.ozb' and 'terrainlight.ozj' in old:
+            # A world Season 6 lacks (Acheron on) has no OZJ to keep the spelling of: TerrainLight.OZJ.
+            if key == 'terrainlight.ozb' and ('terrainlight.ozj' in old or not old):
                 im = Image.open(io.BytesIO(open(src, 'rb').read()[4:])).convert('RGB')
                 buf = io.BytesIO(); im.save(buf, 'JPEG', quality=95); jpg = buf.getvalue()
-                target = f'{dst}/{old["terrainlight.ozj"]}'
+                target = f'{dst}/{old.get("terrainlight.ozj", "TerrainLight.OZJ")}'
                 open(target, 'wb').write(jpg[:24] + jpg)
                 derived(target)
                 continue

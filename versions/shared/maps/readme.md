@@ -63,6 +63,7 @@ Some maps have no `spec.ts` (balgasrefuge, gmarea, karutan2, raklionboss) or no 
 | empireguardian, empireguardian4 | 69-71, 72 |
 | loginscene | 73, 74, 77, 78 |
 | lorenmarket, karutan1, karutan2 | 79, 80, 81 |
+| acheron | 91 (Season 19 art) |
 
 ## Depends on / used by
 - uses: `@/controllers/maps` (contract, rooms), `@/controllers/terrain`, `@/controllers/render`,
@@ -220,3 +221,9 @@ Some maps have no `spec.ts` (balgasrefuge, gmarea, karutan2, raklionboss) or no 
   up at 2.5 on any scale, turning against each other on one luminosity roll a frame.
 - `devilsquare/storm.test.ts`: the storm keeps at most two flashes alight and drops the spent ones
   in place, making no array a tick.
+
+## Season 19 maps
+Acheron (91) on are maps the Season 6 client never had. Their files come from the Season 19 client
+(`ops/faseS/stage_client_s19.py` stages them, the private mu-assets repository keeps them) and there is no
+original source to port, so each entry is data only: tiles, spawn gate, sky, the client's own bed and music.
+Objects draw as loaded; per-type behaviour is added only where a screenshot shows it is missing.

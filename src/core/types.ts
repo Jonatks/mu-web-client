@@ -154,6 +154,8 @@ export enum ENUM_WORLD {
   WD_79UNITEDMARKETPLACE = 79,
   WD_80KARUTAN1 = 80,
   WD_81KARUTAN2 = 81,
+  /** Acheron (Season 12, `World92`). Season 19 art: there is no original source for it (versions/shared/maps/acheron). */
+  WD_91ACHERON = 91,
   NUM_WD,
 }
 

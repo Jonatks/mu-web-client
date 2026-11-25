@@ -45,7 +45,7 @@ import type { ENUM_WORLD } from '@/core/types';
  */
 const HASHES = {
   beds: 'ae3d764ba4e50dfe0e228f5f055a3a4d9d18da4f0376c722c5c2ce721376c062',
-  music: '54f0021bf17d47f2872ad4103ddaf310d57cb5c1e3923d8854886de4c4eaa39d',
+  music: 'a2cc1f41b77996bee0a207e56beba4947eab8bb11ca24042b6ddb9fc24d91e9b',
   objectLoops: 'e215aeac385d6ba683d233c6c7d62b1c2d64f32f7f291781a537967fcf40559a',
   monsterCues: '4e7ba9bf7341271206e455f17cc01cfcbe27c0645e04dcf06994d0dfacf30e7f',
   looks: 'd4e3c56bf2f7146ac60959ed4f343128aac020c5bcf799c89dc70526b4866c8d',
