@@ -1,0 +1,36 @@
+# OpenMU con nuestros cambios (openmu/fork): compila la imagen sobre la version que corre la VM (BASE) con los parches
+# aplicados y la publica como archivo del release openmu-<VERSION>. La VM la baja con openmu/fork/apply-vm.sh.
+name: OpenMU con cambios
+on:
+  push:
+    branches: [main]
+    paths: ['openmu/fork/**', '.github/workflows/openmu-fork.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: OpenMU en BASE con los parches
+        run: |
+          echo "VERSION=$(cat openmu/fork/VERSION)" >> "$GITHUB_ENV"
+          git clone -q --filter=blob:none https://github.com/MUnique/OpenMU openmu-src
+          git -C openmu-src -c advice.detachedHead=false checkout -q "$(cat openmu/fork/BASE)"
+          for p in openmu/fork/*.patch; do git -C openmu-src apply --verbose "$GITHUB_WORKSPACE/$p"; done
+      - name: Imagen
+        run: docker build -f openmu-src/src/Startup/Dockerfile -t "openmu-mu:$VERSION" openmu-src/src
+      - name: Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          docker save "openmu-mu:$VERSION" | gzip -1 > "openmu-$VERSION.tar.gz"
+          sha256sum "openmu-$VERSION.tar.gz" > "openmu-$VERSION.tar.gz.sha256"
+          ls -la openmu-$VERSION.tar.gz*
+          if gh release view "openmu-$VERSION" >/dev/null 2>&1; then
+            gh release upload "openmu-$VERSION" openmu-$VERSION.tar.gz openmu-$VERSION.tar.gz.sha256 --clobber
+          else
+            gh release create "openmu-$VERSION" openmu-$VERSION.tar.gz openmu-$VERSION.tar.gz.sha256 \
+              --title "OpenMU $VERSION" --notes "OpenMU $(cat openmu/fork/BASE | cut -c1-7) con openmu/fork/*.patch"
+          fi

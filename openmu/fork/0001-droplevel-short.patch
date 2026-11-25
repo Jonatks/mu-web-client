@@ -1,0 +1,68 @@
+diff --git a/src/DataModel/Configuration/Items/ItemDefinition.cs b/src/DataModel/Configuration/Items/ItemDefinition.cs
+index 0aa6a5223..1d026a952 100644
+--- a/src/DataModel/Configuration/Items/ItemDefinition.cs
++++ b/src/DataModel/Configuration/Items/ItemDefinition.cs
+@@ -147,13 +147,13 @@ public partial class ItemDefinition
+     /// <summary>
+     /// Gets or sets the item drop level, which indicates the minimum monster lvl of which this item can be dropped.
+     /// </summary>
+-    public byte DropLevel { get; set; }
++    public short DropLevel { get; set; }
+ 
+     /// <summary>
+     /// Gets or sets the maximum monster level at which this item can be dropped.
+     /// If no value is set, there is no upper limit.
+     /// </summary>
+-    public byte? MaximumDropLevel { get; set; }
++    public short? MaximumDropLevel { get; set; }
+ 
+     /// <summary>
+     /// Gets or sets the maximum item level.
+diff --git a/src/Persistence/EntityFramework/CompiledModels/EntityDataContext/ItemDefinitionEntityType.cs b/src/Persistence/EntityFramework/CompiledModels/EntityDataContext/ItemDefinitionEntityType.cs
+index 921b0dddd..dab7d3775 100644
+--- a/src/Persistence/EntityFramework/CompiledModels/EntityDataContext/ItemDefinitionEntityType.cs
++++ b/src/Persistence/EntityFramework/CompiledModels/EntityDataContext/ItemDefinitionEntityType.cs
+@@ -53,10 +53,10 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.CompiledModels.ForEntityDat
+ 
+             var dropLevel = runtimeEntityType.AddProperty(
+                 "DropLevel",
+-                typeof(byte),
++                typeof(short),
+                 propertyInfo: typeof(MUnique.OpenMU.DataModel.Configuration.Items.ItemDefinition).GetProperty("DropLevel", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
+                 fieldInfo: typeof(MUnique.OpenMU.DataModel.Configuration.Items.ItemDefinition).GetField("<DropLevel>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
+-                sentinel: (byte)0);
++                sentinel: (short)0);
+             dropLevel.AddAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.None);
+ 
+             var dropsFromMonsters = runtimeEntityType.AddProperty(
+@@ -211,7 +211,7 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.CompiledModels.ForEntityDat
+ 
+             var maximumDropLevel = runtimeEntityType.AddProperty(
+                 "MaximumDropLevel",
+-                typeof(byte?),
++                typeof(short?),
+                 propertyInfo: typeof(MUnique.OpenMU.DataModel.Configuration.Items.ItemDefinition).GetProperty("MaximumDropLevel", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
+                 fieldInfo: typeof(MUnique.OpenMU.DataModel.Configuration.Items.ItemDefinition).GetField("<MaximumDropLevel>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
+                 nullable: true);
+diff --git a/src/Persistence/EntityFramework/Migrations/EntityDataContextModelSnapshot.cs b/src/Persistence/EntityFramework/Migrations/EntityDataContextModelSnapshot.cs
+index 1e843dc96..031e6865c 100644
+--- a/src/Persistence/EntityFramework/Migrations/EntityDataContextModelSnapshot.cs
++++ b/src/Persistence/EntityFramework/Migrations/EntityDataContextModelSnapshot.cs
+@@ -2539,7 +2539,7 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.Migrations
+                     b.Property<Guid?>("ConsumeEffectId")
+                         .HasColumnType("uuid");
+ 
+-                    b.Property<byte>("DropLevel")
++                    b.Property<short>("DropLevel")
+                         .HasColumnType("smallint");
+ 
+                     b.Property<bool>("DropsFromMonsters")
+@@ -2599,7 +2599,7 @@ namespace MUnique.OpenMU.Persistence.EntityFramework.Migrations
+                     b.Property<Guid?>("ItemSlotId")
+                         .HasColumnType("uuid");
+ 
+-                    b.Property<byte?>("MaximumDropLevel")
++                    b.Property<short?>("MaximumDropLevel")
+                         .HasColumnType("smallint");
+ 
+                     b.Property<byte>("MaximumItemLevel")

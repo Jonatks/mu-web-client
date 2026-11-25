@@ -25,7 +25,7 @@ install.sh  se corre en la VM: instala o actualiza, cambia la contrasena, o lo q
 | `logs` | registro de un contenedor, con filtro y `desde` |
 | `sql_consulta` | solo lectura en `openmu_probe` u `openmu`, con el rol `mu_mcp_ro` (sin permisos de escritura) |
 | `sql_aplicar` | un `.sql` de mu-assets (`s19/server/...`); en `openmu` pide `confirmar_produccion` y respalda antes |
-| `accion` | desplegar o volver plugins, publicar el cliente, copiar assets S19, s10 y s12, reiniciar OpenMU, respaldar, actualizar mu-assets |
+| `accion` | desplegar o volver plugins, cambiar la base de OpenMU (fork), publicar el cliente, copiar assets S19, s10 y s12, reiniciar OpenMU, respaldar, actualizar mu-assets |
 | `trabajo` | avance de una accion larga (corren en segundo plano) |
 | `leer_archivo`, `listar` | `/opt/openmu`, `~/mu-assets` y `/var/log`, nunca archivos de claves o `.env` |
 

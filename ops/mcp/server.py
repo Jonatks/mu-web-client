@@ -306,6 +306,8 @@ ACCIONES = {
     'reiniciar_openmu': 'Reinicia el contenedor openmu.',
     'respaldar_base': 'Copia de todas las bases (mu-db-backup run).',
     'actualizar_mu_assets': 'git pull de mu-assets.',
+    'base_openmu': 'Pone como base el OpenMU con nuestros cambios (openmu/fork, release de GitHub) y guarda la anterior; '
+                   'luego desplegar_plugins. `args`: rollback vuelve a la anterior.',
     'actualizar_mcp': 'Este mismo servidor y su servicio desde ops/mcp en `sha` (install.sh; guarda server.py.prev).',
 }
 
@@ -314,7 +316,7 @@ ACCIONES = {
 def accion(nombre: str, sha: str = '', args: str = '', confirmar_produccion: bool = False) -> str:
     """Una accion de la lista cerrada; corre en segundo plano y devuelve el id para trabajo(). Lista:
     desplegar_plugins, volver_plugins, publicar_cliente, copiar_assets_s19, aplicar_s10, aplicar_s12,
-    reiniciar_openmu, respaldar_base, actualizar_mu_assets, actualizar_mcp. Las que tocan produccion piden confirmar_produccion=true."""
+    reiniciar_openmu, respaldar_base, actualizar_mu_assets, base_openmu, actualizar_mcp. Las que tocan produccion piden confirmar_produccion=true."""
     if nombre not in ACCIONES:
         return 'acciones: ' + '; '.join(f'{k}: {v}' for k, v in ACCIONES.items())
     env = {}
@@ -323,7 +325,7 @@ def accion(nombre: str, sha: str = '', args: str = '', confirmar_produccion: boo
         if k not in ('PROD', 'UNDO', 'RESTORE', 'MAPA', 'rollback') or not re.match(r'^\w*$', v):
             return f'argumento no permitido: {kv}'
         env[k] = v
-    prod = nombre in ('desplegar_plugins', 'volver_plugins', 'publicar_cliente', 'copiar_assets_s19', 'reiniciar_openmu') \
+    prod = nombre in ('desplegar_plugins', 'volver_plugins', 'base_openmu', 'publicar_cliente', 'copiar_assets_s19', 'reiniciar_openmu') \
         or env.get('PROD') == '1'
     if prod and not confirmar_produccion:
         return f'{nombre} cambia lo que usan los jugadores: repetir con confirmar_produccion=true'
@@ -337,6 +339,8 @@ def accion(nombre: str, sha: str = '', args: str = '', confirmar_produccion: boo
         'reiniciar_openmu': lambda: 'sudo docker restart openmu',
         'respaldar_base': lambda: '/usr/local/bin/mu-db-backup run',
         'actualizar_mu_assets': lambda: PULL,
+        'base_openmu': lambda: f'{fetch(sha, "openmu/fork/apply-vm.sh")} && bash "$F" '
+                               + ('rollback' if 'rollback' in env else f'$(curl -fsSL {REPO}/{need_sha(sha)}/openmu/fork/VERSION)'),
         'actualizar_mcp': lambda: f'{fetch(sha, "ops/mcp/server.py")} && /opt/mu-mcp/venv/bin/python -m py_compile "$F" '
                                   f'&& cp /opt/mu-mcp/server.py /opt/mu-mcp/server.py.prev '
                                   f'&& curl -fsSL {REPO}/{need_sha(sha)}/ops/mcp/install.sh -o ~/mcp-install.sh '
