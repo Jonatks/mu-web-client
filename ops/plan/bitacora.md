@@ -315,32 +315,18 @@ Desde el 25-11-2026 hay acceso directo: el conector MCP "MU VM" (`ops/mcp`, http
 instalado con a28a5bc). Lo de abajo se hace con sus herramientas, sin Cloud Shell. Al instalarlo: cliente publicado
 `mwv9ne2x` (ya no mwv8dnsy), OpenMU arriba hace 15 h, mu-assets de la VM en 93fbed9 (atrasado).
 
-Hecho en los repos, falta subirlo o comprobarlo en la VM cuando vuelva el acceso:
+Puesto en produccion el 25-11-2026 con el MCP (cada SQL primero en openmu_probe y con copia de la base antes):
+cliente c48c44d (build mww6yc1w), assets S19 (1878 archivos: NPC, Item, ui-s19, Acheron), s9 NPC, s7 horarios de
+eventos, s11 bolsas y baul (4 personajes, 4 cuentas), s10 items y 63 sets Mastery (y sus archivos de sets del
+cliente), s12 Acheron (mapa, 231 apariciones, puertas, /move 91, fila de Move y gate.bmd del cliente) y los plugins en
+36109c4. Copias en /var/backups/mu-db/openmu-20261125-*.
 
-1. Confirmar que terminaron `deploy.sh 9bc4013` (plugins S19ShopPages, S19Shops con pestanas, S19NewCharacter,
-   zen) y el autodeploy del cliente 2fa4b47 (`build.json` distinto de mwv8dnsy). Si no, relanzarlos.
-2. Probar las pestanas de tienda con Hanzo y Elf Lala, y una compra desde la pestana 2.
-3. Probar un personaje nuevo (500 puntos, 10.000.000 de zen) y el zen al matar.
-4. Revisar los errores de los eventos Raklion y Crywolf vistos al reiniciar (22:20 UTC). Si vienen de las puertas,
-   deshacer con `~/s5_puertas_undo.sql` en ambas bases.
-5. Todo lo que se agregue a los repos despues de esta fecha (ver los commits siguientes) tambien esta sin subir:
-   - cliente nuevo (publish-client) con: NPC en el centro de su casilla (Trainer visible), Slough, Lesnar, Cent,
-     Gillard y Eunice, inventario ampliado y segunda pagina del baul, items Mastery Darkangel a Lightning, piel
-     S19 de los botones de ventana, del + de estadisticas, de las placas y de los pozos de zen;
-   - `apply_client_s19.sh` para copiar los modelos nuevos de mu-assets (NPC, Item y ui-s19);
-   - `ops/faseS/s9_npcs.sql` (probe y luego openmu) y reiniciar;
-   - `SHA=<commit> bash ops/faseS/s10_apply.sh` (probe), probar, y `PROD=1` para openmu; reiniciar.
-6. Horarios de eventos del S19 (`ops/faseS/s7_eventos.sql`): Blood Castle y Devil Square 22 veces al dia, Chaos
-   Castle 6. Probe, reiniciar, mirar que los plugins lean la configuracion, y luego openmu. La bolsa de eventos del S19
-   (EventItemMonsterBag) no se trae: sus eventos estan todos apagados en EventItemDrop.ini, y el unico prendido
-   (simbolos elementales) es del pentagrama, que Season 6 no tiene.
-7. Bolsas y baul para todos (decidido por el usuario el 24-11-2026): `ops/faseS/s11_bolsas.sql` en probe y openmu
-   para los que ya existen, y desplegar los plugins (S19NewCharacter los da a los nuevos).
-8. Acheron (mapa 91, fase S12): publicar el cliente y luego `SHA=<commit> MAPA=91 bash ops/faseS/s12_apply.sh` (probe;
-   copia World92, Object92, monstruos, NPC y sonidos con apply_client_s19.sh y agrega la fila de Move y las puertas
-   417-425 al cliente), reiniciar, entrar con /move Acheron (nivel 300, 50.000 zen) o la ventana Move, y mirar
-   monstruos, NPC y los pasajes internos. Luego `PROD=1`. Reversa: `UNDO=1` y `RESTORE=1`. Mirar tambien la escala de
-   Elemental Knight y Jin.
+Errores encontrados al subir y ya corregidos: el conteo y la reversa de s10_sets usaban 19 caracteres para un prefijo
+de 18 (la reversa no habria borrado nada); los atributos copiados en s12 repetian ids (los de OpenMU terminan igual).
+
+Queda por probar jugando: pestanas de tienda (Hanzo, Elf Lala), personaje nuevo (500 puntos, 10kk, bolsas), zen al
+matar, items y sets Mastery, Acheron (/move, monstruos, NPC, pasajes; escala de Elemental Knight y Jin), y los errores
+de Raklion y Crywolf (si vienen de las puertas: s5_puertas_undo.sql).
 
 ## 5. Monstruos y mapas nuevos del S19
 
