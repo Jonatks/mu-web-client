@@ -54,6 +54,10 @@ sql.append(clone('GameMapDefinition', f'"Number" = {BASE_MAP}', {
     'SafezoneMapId': gid(0x20, int(all_gates[int(world['SpawnGate'])]['World'])),
     'ExpMultiplier': 1, 'BattleZoneId': 'null', 'TerrainData': lit('\\x' + terrain.hex())}) + ';')
 
+# Sin esta fila ningun servidor de juego aloja el mapa y OpenMU devuelve al jugador a Lorencia.
+sql.append(f'insert into {C}"GameServerConfigurationGameMapDefinition" ("GameServerConfigurationId","GameMapDefinitionId") '
+           f'select "Id", {MAP} from {C}"GameServerConfiguration";')
+
 # Puertas: la de llegada (Flag 0) es la salida del /move y del respawn; las de entrada (1) llevan a su salida (2).
 for n, g in sorted(gates.items()):
     x1, x2 = sorted((int(g['X1']), int(g['X2']))); y1, y2 = sorted((int(g['Y1']), int(g['Y2'])))
@@ -121,6 +125,7 @@ undo = [f'-- Deshace s12_mapa{mapnr}.sql', 'begin;',
         f'and not exists (select 1 from {C}"MonsterSpawnArea" s where s."MonsterDefinitionId" = "MonsterAttribute"."MonsterDefinitionId");',
         f'delete from {C}"MonsterDefinition" where "Id" in ({", ".join(gid(0x24, n) for n in new)}) '
         f'and not exists (select 1 from {C}"MonsterSpawnArea" s where s."MonsterDefinitionId" = "MonsterDefinition"."Id");',
+        f'delete from {C}"GameServerConfigurationGameMapDefinition" where "GameMapDefinitionId" = {MAP};',
         f'delete from {C}"GameMapDefinition" where "Id" = {MAP};', 'commit;']
 open(f'{out}/s12_mapa{mapnr}_undo.sql', 'w').write('\n'.join(undo) + '\n')
 # Lo que el cliente lee de Data (ops/faseS/cliente_mapa.ts): la fila de Move y las puertas del mapa en gate.bmd.
