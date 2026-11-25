@@ -247,7 +247,9 @@ def estado() -> str:
     audit('estado')
     return run('uptime; free -m; df -h / | tail -1; sudo docker ps --format "{{.Names}}\\t{{.Status}}\\t{{.Image}}"; '
                'echo; cat /opt/openmu/web/client/build.json 2>/dev/null; echo; '
-               'git -C ~/mu-assets log --oneline -1 2>/dev/null')
+               'git -C ~/mu-assets log --oneline -1 2>/dev/null; '
+               'sudo docker image inspect munique/openmu --format "openmu oficial: {{.Created}} {{index .RepoDigests 0}}" 2>/dev/null; '
+               'sudo docker exec openmu sh -c "grep -ao \'InformationalVersion[^,]*\' /app/MUnique.OpenMU.GameLogic.dll | head -1" 2>/dev/null')
 
 
 @mcp.tool()
@@ -365,12 +367,21 @@ ROOTS = ('/opt/openmu', str(HOME / 'mu-assets'), '/var/log')
 
 @mcp.tool()
 def leer_archivo(ruta: str, desde: int = 1, lineas: int = 200) -> str:
-    """Lee un archivo de texto de /opt/openmu, ~/mu-assets o /var/log (nunca claves, contrasenas ni .env)."""
+    """Lee un archivo de texto de /opt/openmu, ~/mu-assets o /var/log (nunca claves ni .env; los valores de
+    contrasenas, tokens y claves dentro de un archivo salen como [oculto])."""
     p = os.path.realpath(os.path.expanduser(ruta))
     if not any(p == r or p.startswith(r + '/') for r in ROOTS) or SECRET.search(p):
         return f'ruta no permitida (solo {", ".join(ROOTS)}, sin secretos)'
     audit('leer_archivo', ruta=p)
-    return run(['sudo', 'sed', '-n', f'{max(desde, 1)},{max(desde, 1) + min(max(lineas, 1), 2000) - 1}p', p])
+    return redact(run(['sudo', 'sed', '-n', f'{max(desde, 1)},{max(desde, 1) + min(max(lineas, 1), 2000) - 1}p', p]))
+
+
+# El valor de toda clave cuyo nombre suena a secreto (PASSWORD, _PW, SECRET, TOKEN, KEY...) en YAML, .ini, JSON o env.
+SECRET_VALUE = re.compile(r'''(?im)^(\s*["']?[\w.-]*(?:pass(?:word)?|_pw|pw_|secret|token|api[_-]?key|private[_-]?key|credential)[\w.-]*["']?\s*[:=]\s*)(\S.*)$''')
+
+
+def redact(text: str) -> str:
+    return SECRET_VALUE.sub(lambda m: m.group(1) + '[oculto]', text)
 
 
 @mcp.tool()
