@@ -307,4 +307,16 @@ Para la fase 7 basta con sumar una entrada por generacion y revisar sus exclusio
 | Iconos de guantes y algunas armaduras aproximados | el visor no da el angulo del original | Fase G: render del cliente con su camara de inventario |
 | NPC del S19 sin definicion (584, 764, 891 en Lorencia) | OpenMU no los trae | definirlos con su funcion y su modelo del cliente S19 |
 | Objetos iniciales del S19 (CharacterBase.xml, con duracion de 7 dias) | OpenMU no tiene objetos con vencimiento | agregar vencimiento o darlos sin el |
-| Tiendas del S19 solo con su pestana 1 | OpenMU y el cliente tienen una pagina | agregar pestanas al protocolo ampliado y a la ventana de tienda |
+| Tiendas del S19: pestanas 2 a 5 hechas (S19ShopPages + ventana) pero sin confirmar en la VM | se perdio Chrome durante el despliegue 9bc4013 / cliente 2fa4b47 | ver la seccion 4 |
+
+## 4. Pendiente en la VM (sin acceso desde el 24-11-2026, 19:50)
+
+Hecho en los repos, falta subirlo o comprobarlo en la VM cuando vuelva el acceso:
+
+1. Confirmar que terminaron `deploy.sh 9bc4013` (plugins S19ShopPages, S19Shops con pestanas, S19NewCharacter,
+   zen) y el autodeploy del cliente 2fa4b47 (`build.json` distinto de mwv8dnsy). Si no, relanzarlos.
+2. Probar las pestanas de tienda con Hanzo y Elf Lala, y una compra desde la pestana 2.
+3. Probar un personaje nuevo (500 puntos, 10.000.000 de zen) y el zen al matar.
+4. Revisar los errores de los eventos Raklion y Crywolf vistos al reiniciar (22:20 UTC). Si vienen de las puertas,
+   deshacer con `~/s5_puertas_undo.sql` en ambas bases.
+5. Todo lo que se agregue a los repos despues de esta fecha (ver los commits siguientes) tambien esta sin subir.
