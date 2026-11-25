@@ -248,7 +248,8 @@ def estado() -> str:
     return run('uptime; free -m; df -h / | tail -1; sudo docker ps --format "{{.Names}}\\t{{.Status}}\\t{{.Image}}"; '
                'echo; cat /opt/openmu/web/client/build.json 2>/dev/null; echo; '
                'git -C ~/mu-assets log --oneline -1 2>/dev/null; '
-               'sudo docker image inspect munique/openmu --format "openmu oficial: {{.Created}} {{index .RepoDigests 0}}" 2>/dev/null; '
+               'echo "base de OpenMU: $(sudo docker images --format "{{.Repository}}:{{.Tag}} {{.ID}}" | grep -E "^openmu-mu:" | head -1)'
+               ' (pre-fase0 $(sudo docker image inspect mu-openmu-admin:pre-fase0 --format "{{.Id}}" | cut -c8-19))"; '
                'sudo docker exec openmu sh -c "grep -ao \'InformationalVersion[^,]*\' /app/MUnique.OpenMU.GameLogic.dll | head -1" 2>/dev/null')
 
 
@@ -262,11 +263,13 @@ def logs(contenedor: str = 'openmu', lineas: int = 200, filtro: str = '', desde:
     if desde and not re.match(r'^\d+[smh]$', desde):
         return 'desde debe ser como 30m o 2h'
     audit('logs', contenedor=contenedor, filtro=filtro)
-    cmd = ['sudo', 'docker', 'logs', '--tail', str(min(max(lineas, 1), 5000))] + (['--since', desde] if desde else []) + [contenedor]
+    n = min(max(lineas, 1), 5000)
+    # Con filtro busca en las ultimas 20000 lineas y devuelve las n ultimas que coinciden (antes filtraba solo las n ultimas).
+    cmd = ['sudo', 'docker', 'logs', '--tail', str(20000 if filtro else n)] + (['--since', desde] if desde else []) + [contenedor]
     p = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
     text = (p.stdout + p.stderr).splitlines()
     if filtro:
-        text = [l for l in text if filtro.lower() in l.lower()]
+        text = [l for l in text if filtro.lower() in l.lower()][-n:]
     return '\n'.join(text)[-30000:] or '(sin lineas)'
 
 
