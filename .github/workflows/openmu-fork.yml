@@ -3,7 +3,7 @@
 name: OpenMU con cambios
 on:
   push:
-    branches: [main]
+    branches: [main, contenido-temporadas]
     paths: ['openmu/fork/**', '.github/workflows/openmu-fork.yml']
   workflow_dispatch:
 permissions:
