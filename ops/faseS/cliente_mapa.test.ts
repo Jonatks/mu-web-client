@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { parseGates } from '../../src/controllers/assets/mu/gates';
 import { convertBux } from '../../src/controllers/terrain/mapFileEncryption';
-import { addMoveRow, setGates } from './cliente_mapa';
+import { addMoveRow, setGates, writeMoveList } from './cliente_mapa';
 
 const moveRow = (file: Uint8Array, i: number) => {
   const r = file.slice(4 + i * 84, 4 + (i + 1) * 84);
@@ -19,6 +19,17 @@ describe('cliente_mapa', () => {
     expect(out.length).toBe(file.length + 84);
     expect(moveRow(out, 1)).toEqual({ index: 91, name: 'Acheron', zen: 50000, gate: 417 });
     expect(addMoveRow(out, { index: 91, name: 'Acheron', level: 300, zen: 50000, gate: 417 })).toBeNull();
+  });
+
+  it('writes a whole Move list in the given order, without repeats', () => {
+    const out = writeMoveList([
+      { index: 26, name: 'Crywolf', level: 380, zen: 50000, gate: 118 },
+      { index: 91, name: 'Acheron', level: 300, zen: 50000, gate: 417 },
+      { index: 26, name: 'Crywolf', level: 380, zen: 50000, gate: 118 },
+    ]);
+    expect(new DataView(out.buffer).getInt32(0, true)).toBe(2);
+    expect(moveRow(out, 0)).toEqual({ index: 26, name: 'Crywolf', zen: 50000, gate: 118 });
+    expect(moveRow(out, 1)).toEqual({ index: 91, name: 'Acheron', zen: 50000, gate: 417 });
   });
 
   it('writes gates the client reads back', () => {

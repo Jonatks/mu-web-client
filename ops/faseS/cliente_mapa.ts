@@ -42,6 +42,13 @@ export function addMoveRow(file: Uint8Array, m: Move): Uint8Array | null {
   return out;
 }
 
+/** A whole Move list with exactly these rows, in this order (the window shows file order). */
+export function writeMoveList(moves: readonly Move[]): Uint8Array {
+  let file = new Uint8Array(4);
+  for (const m of moves) file = addMoveRow(file, m) ?? file;
+  return file;
+}
+
 /** gate.bmd with these records written in (the Season 6 layout, `SEASON6_GATES`). */
 export function setGates(file: Uint8Array, gates: readonly GateRow[]): Uint8Array {
   const out = file.slice();
@@ -68,18 +75,19 @@ function save(p: string, bytes: Uint8Array): void {
 
 if (import.meta.main) {
   const [data, json] = process.argv.slice(2);
-  const { move, gates } = JSON.parse(readFileSync(json, 'utf8')) as { move?: Move; gates: GateRow[] };
+  // `moves`: the whole list (ops/faseS/movereq_servidor.py writes it from WarpInfo); `move`: one more row.
+  const { move, moves, gates = [] } = JSON.parse(readFileSync(json, 'utf8')) as { move?: Move; moves?: Move[]; gates?: GateRow[] };
   const walk = (d: string, out: string[] = []): string[] => {
     for (const f of readdirSync(d)) { const p = join(d, f); if (statSync(p).isDirectory()) walk(p, out); else out.push(p); }
     return out;
   };
-  if (move) {
+  if (move || moves) {
     for (const p of walk(join(data, 'Local')).filter(p => /^movereq(_[a-z]+)?\.bmd$/i.test(p.split('/').pop() ?? ''))) {
-      const bytes = addMoveRow(new Uint8Array(readFileSync(p)), move);
+      const bytes = moves ? writeMoveList(moves) : addMoveRow(new Uint8Array(readFileSync(p)), move!);
       if (bytes) save(p, bytes);
       else process.stdout.write(`ya esta ${p}\n`);
     }
   }
   const gate = readdirSync(data).find(f => f.toLowerCase() === 'gate.bmd');
-  if (gate) save(join(data, gate), setGates(new Uint8Array(readFileSync(join(data, gate))), gates));
+  if (gate && gates.length) save(join(data, gate), setGates(new Uint8Array(readFileSync(join(data, gate))), gates));
 }
