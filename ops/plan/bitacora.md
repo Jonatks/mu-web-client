@@ -309,7 +309,11 @@ Para la fase 7 basta con sumar una entrada por generacion y revisar sus exclusio
 | Objetos iniciales del S19 (CharacterBase.xml, con duracion de 7 dias) | OpenMU no tiene objetos con vencimiento | agregar vencimiento o darlos sin el |
 | Tiendas del S19: pestanas 2 a 5 hechas (S19ShopPages + ventana) pero sin confirmar en la VM | se perdio Chrome durante el despliegue 9bc4013 / cliente 2fa4b47 | ver la seccion 4 |
 
-## 4. Pendiente en la VM (sin acceso desde el 24-11-2026, 19:50)
+## 4. Pendiente en la VM
+
+Desde el 25-11-2026 hay acceso directo: el conector MCP "MU VM" (`ops/mcp`, https://mcp.155-181-133-84.sslip.io/mcp,
+instalado con a28a5bc). Lo de abajo se hace con sus herramientas, sin Cloud Shell. Al instalarlo: cliente publicado
+`mwv9ne2x` (ya no mwv8dnsy), OpenMU arriba hace 15 h, mu-assets de la VM en 93fbed9 (atrasado).
 
 Hecho en los repos, falta subirlo o comprobarlo en la VM cuando vuelva el acceso:
 
