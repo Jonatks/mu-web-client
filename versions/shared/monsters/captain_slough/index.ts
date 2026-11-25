@@ -4,7 +4,7 @@ export default defineMonster({
   Numb: 580,
   Name: 'Captain Slough',
   // Later-season NPC (S19 MonsterList 580, Data/NPC/Akeron/slope.bmd).
-  npcModel: { file: 'Akeron/slope' },
+  npcModel: { file: 'Akeron/slope', scale: 0.45 },
   maxHealth: 50,
   stats: {
     Rate: 1,
