@@ -10,6 +10,10 @@ const BASE = './game-assets/ui-s19/';
 /** The original's sprite file (lower case) to the S19 piece drawn instead. */
 const SPRITES: Readonly<Record<string, string>> = {
   'newui_item_fairy.ozt': 'slot_pet',
+  'newui_cha_textbox02.ozt': 'stat_plate',
+  'newui_item_money.ozt': 'zen_bar',
+  'newui_item_money2.ozt': 'zen_bar2',
+  'newui_item_money3.ozt': 'zen_bar3',
   'newui_item_cap.ozt': 'slot_helm',
   'newui_item_wing.ozt': 'slot_wings',
   'newui_item_weapon(l).ozt': 'slot_weapon',
@@ -30,6 +34,21 @@ const SHEETS: Readonly<Record<string, readonly [string, number, number]>> = {
   'partcharge1/newui_menu_bt02.ozj': ['btn_inventory', 30, 164],
   'partcharge1/newui_menu_bt03.ozj': ['btn_friends', 30, 164],
   'partcharge1/newui_menu_bt04.ozj': ['btn_menu', 30, 164],
+  // The windows' square buttons: the S6 icon on the S19 plate (ops/faseS/ui/export_skin.py).
+  'newui_bt_accept.ozt': ['btn_newui_bt_accept', 36, 58],
+  'newui_bt_closeshop.ozt': ['btn_newui_bt_closeshop', 36, 58],
+  'newui_bt_lock.ozt': ['btn_newui_bt_lock', 36, 58],
+  'newui_bt_lock02.ozt': ['btn_newui_bt_lock02', 36, 58],
+  'newui_bt_money01.ozt': ['btn_newui_bt_money01', 36, 58],
+  'newui_bt_money02.ozt': ['btn_newui_bt_money02', 36, 58],
+  'newui_bt_openshop.ozt': ['btn_newui_bt_openshop', 36, 58],
+  'newui_chainfo_btn_master.ozt': ['btn_newui_chainfo_btn_master', 36, 58],
+  'newui_chainfo_btn_pet.ozt': ['btn_newui_chainfo_btn_pet', 36, 58],
+  'newui_chainfo_btn_quest.ozt': ['btn_newui_chainfo_btn_quest', 36, 58],
+  'newui_exit_00.ozt': ['btn_newui_exit_00', 36, 58],
+  'newui_expansion_btn.ozt': ['btn_newui_expansion_btn', 36, 58],
+  'newui_repair_00.ozt': ['btn_newui_repair_00', 36, 58],
+  'newui_chainfo_btn_level.ozt': ['btn_stat_plus', 16, 30],
 };
 
 /** The URL of one S19 piece. */
