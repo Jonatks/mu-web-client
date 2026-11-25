@@ -332,6 +332,11 @@ Hecho en los repos, falta subirlo o comprobarlo en la VM cuando vuelva el acceso
    (simbolos elementales) es del pentagrama, que Season 6 no tiene.
 7. Bolsas y baul para todos (decidido por el usuario el 24-11-2026): `ops/faseS/s11_bolsas.sql` en probe y openmu
    para los que ya existen, y desplegar los plugins (S19NewCharacter los da a los nuevos).
+8. Acheron (mapa 91, fase S12): publicar el cliente y luego `SHA=<commit> MAPA=91 bash ops/faseS/s12_apply.sh` (probe;
+   copia World92, Object92, monstruos, NPC y sonidos con apply_client_s19.sh y agrega la fila de Move y las puertas
+   417-425 al cliente), reiniciar, entrar con /move Acheron (nivel 300, 50.000 zen) o la ventana Move, y mirar
+   monstruos, NPC y los pasajes internos. Luego `PROD=1`. Reversa: `UNDO=1` y `RESTORE=1`. Mirar tambien la escala de
+   Elemental Knight y Jin.
 
 ## 5. Monstruos y mapas nuevos del S19
 
@@ -339,5 +344,10 @@ La tabla monstruo -> modelo ya no bloquea (25-11-2026): `ops/s19/monster_models.
 modelo a los 240 monstruos nuevos que aparecen en MonsterSpawn: 204 con confianza alta, 25 media, 11 baja (eventos del
 Stadium, Mining Area, Mait, Evomon, Flame Trap). Se reconstruyo sin el main.exe: nombre interno y texturas de cada
 .bmd, el monstruo Season 6 que cada modelo "renew" renueva, y los bloques de numeros consecutivos por mapa. Los
-dudosos se dibujaron para elegir. Falta: convertir los modelos, las texturas por elemento (Acheron, Debenter), los
-monstruos del cliente y del servidor, y los mapas nuevos (World/Object 91 en adelante).
+dudosos se dibujaron para elegir.
+
+Acheron (91) esta hecho en los repos y probado en local (cliente) y en una base de prueba (SQL): mapa, objetos,
+sonidos, 15 monstruos y NPC, 231 apariciones, puertas y /move (falta la VM, item 8 de la seccion 4). Los siguientes
+mapas siguen el mismo camino: `stage_client_s19.py` + `bmdToGlb.ts` (cliente), `versions/shared/maps/<mapa>`,
+`ops/s19/gen_monster_defs.py` y `ops/faseS/gen_mapa_nuevo.py <Data> <mapa> <salida> --con <mapas ya puestos>`.
+Pendiente: el elemento de cada aparicion (Acheron Type 3) no llega al cliente; los de elemento 6 quedan rojos.
