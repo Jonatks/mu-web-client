@@ -27,7 +27,7 @@ POWER = {
 REQ = {'Total Strength Requirement Value': 'ReqStrength', 'Total Agility Requirement Value': 'ReqAgility', 'Total Energy Requirement Value': 'ReqEnergy',
        'Total Vitality Requirement Value': 'ReqVitality', 'Total Leadership': 'ReqCommand', 'Level': 'ReqLevel'}
 # Campo del cliente <- columna del S19 (armas y armaduras usan nombres distintos para lo mismo).
-# DropLevel: OpenMU lo lee como byte; mas de 255 (Mastery 260-320) no deja arrancar al servidor.
+# DropLevel hasta 1500: requiere OpenMU 0.10.1-mu1 (openmu/fork), el oficial lo lee como byte.
 CLIENT_FIELDS = {'X': 'Width', 'Y': 'Height', 'Skill': 'SkillIndex', 'ItemLvl': 'DropLevel', 'DmgMin': 'MinDamage', 'DmgMax': 'MaxDamage',
                  'Speed': 'AttackSpeed', 'Durability': 'Durability', 'Dur': 'Durability', 'MagicDur': 'MagicDurability', 'MagicPwr': 'MagicPower',
                  'RequiredLvl': 'ReqLevel', 'ReqLvl': 'ReqLevel', 'Strength': 'ReqStrength', 'Str': 'ReqStrength', 'Agi': 'ReqAgility',
@@ -100,7 +100,7 @@ for gen in sorted(os.listdir(GENS)):
         new, R = uid(g, n), uid(rg, rn)
         do.append(f'-- {g}/{n} {it["Name"]} from {rg}/{rn}')
         do.append(f'''insert into config."ItemDefinition" ("Id","ItemSlotId","ConsumeEffectId","SkillId","GameConfigurationId","Number","Width","Height","DropsFromMonsters","IsAmmunition","IsBoundToCharacter","Name","DropLevel","MaximumItemLevel","Durability","Group","Value","MaximumSockets","PetExperienceFormula","StorageLimitPerCharacter","MaximumDropLevel","IsQuestItem","IsDroppable","IsPersonalStoreSellable","IsRepairable","IsSellableToNpc","IsStorable","IsTradable","IntroducedIn","IsActive","PriceDefinitionId","ExcellentBonus","ExcellentRaisesLevel","StatProfileId")
-  select {new},"ItemSlotId","ConsumeEffectId","SkillId","GameConfigurationId",{n},{int(it['Width'])},{int(it['Height'])},false,"IsAmmunition","IsBoundToCharacter",{q(it['Name'])},{min(int(it['DropLevel']), 255)},"MaximumItemLevel",{int(it.get('Durability') or 0) or 'i."Durability"'},{g},"Value","MaximumSockets","PetExperienceFormula","StorageLimitPerCharacter","MaximumDropLevel","IsQuestItem","IsDroppable","IsPersonalStoreSellable","IsRepairable","IsSellableToNpc","IsStorable","IsTradable","IntroducedIn","IsActive","PriceDefinitionId","ExcellentBonus","ExcellentRaisesLevel","StatProfileId"
+  select {new},"ItemSlotId","ConsumeEffectId","SkillId","GameConfigurationId",{n},{int(it['Width'])},{int(it['Height'])},false,"IsAmmunition","IsBoundToCharacter",{q(it['Name'])},{int(it['DropLevel'])},"MaximumItemLevel",{int(it.get('Durability') or 0) or 'i."Durability"'},{g},"Value","MaximumSockets","PetExperienceFormula","StorageLimitPerCharacter","MaximumDropLevel","IsQuestItem","IsDroppable","IsPersonalStoreSellable","IsRepairable","IsSellableToNpc","IsStorable","IsTradable","IntroducedIn","IsActive","PriceDefinitionId","ExcellentBonus","ExcellentRaisesLevel","StatProfileId"
   from config."ItemDefinition" i where i."Id"={R} on conflict do nothing;''')
         do.append(f'insert into config."ItemDefinitionCharacterClass" select {new}, "Id" from config."CharacterClass" where "Number" in ({",".join(str(THIRD[c]) for c in sorted(classes(it)))}) on conflict do nothing;')
         do.append(f'insert into config."ItemDefinitionItemOptionDefinition" select {new}, "ItemOptionDefinitionId" from config."ItemDefinitionItemOptionDefinition" where "ItemDefinitionId"={R} on conflict do nothing;')
