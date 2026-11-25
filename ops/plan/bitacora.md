@@ -325,5 +325,5 @@ Hecho en los repos, falta subirlo o comprobarlo en la VM cuando vuelva el acceso
    - `apply_client_s19.sh` para copiar los modelos nuevos de mu-assets (NPC e Item);
    - `ops/faseS/s9_npcs.sql` (probe y luego openmu) y reiniciar;
    - `SHA=<commit> bash ops/faseS/s10_apply.sh` (probe), probar, y `PROD=1` para openmu; reiniciar.
-6. Decidir con el usuario si todos los personajes reciben las 4 bolsas del inventario y la cuenta el baul ampliado
-   (en el S19 se compran en la tienda de cash).
+6. Bolsas y baul para todos (decidido por el usuario el 24-11-2026): `ops/faseS/s11_bolsas.sql` en probe y openmu
+   para los que ya existen, y desplegar los plugins (S19NewCharacter los da a los nuevos).
