@@ -1,0 +1,15 @@
+diff --git a/src/GameServer/GameServer.cs b/src/GameServer/GameServer.cs
+index c7b7acc0f..54dbd5dcb 100644
+--- a/src/GameServer/GameServer.cs
++++ b/src/GameServer/GameServer.cs
+@@ -398,7 +398,10 @@ public sealed partial class GameServer : IGameServer, IDisposable, IAsyncDisposa
+ 
+         if (affectedPlayer is not null)
+         {
++            // A new login of the same account takes over: the old session is usually a phone that went to the
++            // background and stopped answering, which would otherwise hold the account for minutes.
+             await affectedPlayer.ShowLocalizedBlueMessageAsync(nameof(PlayerMessage.LoginAttemptWarning)).ConfigureAwait(false);
++            await affectedPlayer.DisconnectAsync().ConfigureAwait(false);
+         }
+     }
+ 

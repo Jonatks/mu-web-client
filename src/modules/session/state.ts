@@ -35,7 +35,7 @@ import { addNotification } from '../chat';
 const GS_ANSWER_TIMEOUT = 4000;
 
 /** Logins sent again after "account already connected", and the gap before each (`retryLogin`). */
-const LOGIN_RETRIES = 3;
+const LOGIN_RETRIES = 4;
 const LOGIN_RETRY_MS = 2500;
 
 /**
@@ -512,7 +512,7 @@ export const Session = new (class {
 
   /**
    * "Account already connected" where the world asks for it (`retryLoginWhenConnected`): the same
-   * login again in 2.5 s, up to 3 times, as a server that drops the old session then lets it in.
+   * login again in 2.5 s, up to 4 times, as a server that drops the old session then lets it in.
    * False when the retries are spent.
    */
   retryLogin(): boolean {

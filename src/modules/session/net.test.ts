@@ -76,7 +76,7 @@ describe('LoginResponse: account already connected', () => {
     const send = vi.spyOn(Session, 'sendToGS').mockImplementation(() => undefined);
 
     Session.loginRequest('hero', 'secret');
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 4; i++) {
       EventBus.emit('LoginResponse', refused());
       expect(Session.loginProcessing).toBe(true);
       vi.advanceTimersByTime(2500);

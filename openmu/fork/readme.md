@@ -5,9 +5,10 @@ imagen oficial; aqui solo hay parches chicos sobre la version exacta que corre l
 
 ```
 BASE                    commit de MUnique/OpenMU de la imagen de la VM (0.10.1, 766da9a, publicada el 01-11-2026)
-VERSION                 nombre de nuestra version (0.10.1-mu2); subirlo al cambiar un parche
+VERSION                 nombre de nuestra version (0.10.1-mu3); subirlo al cambiar un parche
 0001-droplevel-short.patch   ItemDefinition.DropLevel y MaximumDropLevel de byte a short
 0002-mapinitializer-antes-de-tareas.patch   GameContext da PlugInManager al MapInitializer antes de sus tareas
+0003-login-nuevo-cierra-el-anterior.patch   un login nuevo de la misma cuenta desconecta la sesion vieja
 apply-vm.sh             en la VM: baja el release, lo pone como base (mu-openmu-admin:pre-fase0) y guarda la anterior
                         como :pre-fork; `rollback` vuelve a ella
 ```
@@ -27,3 +28,8 @@ GameContext arranca su temporizador de tareas (Crywolf, Raklion) a 1 s, pero Gam
 MapInitializer recien al terminar su constructor. En la VM lenta la primera tarea llega antes: "PlugInManager must be
 set first", y Crywolf deja el mapa 34 sin estatua ni altares, asi que el evento no corre nunca. Ahora GameContext los
 asigna en su constructor, antes del temporizador.
+
+## 0003: un login nuevo cierra la sesion vieja
+OpenMU solo avisaba a la sesion abierta ("alguien intento entrar con tu cuenta"). En el celular, al minimizar Chrome la
+pagina se congela y el servidor tarda unos 2 minutos en soltar la sesion; el cliente reintenta el login y recibia
+"AccountAlreadyConnected". Ahora el aviso va seguido de la desconexion (que guarda el personaje) y el reintento entra.
