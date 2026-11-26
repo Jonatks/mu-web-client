@@ -81,12 +81,12 @@ describe('LoginResponse: account already connected', () => {
       expect(Session.loginProcessing).toBe(true);
       vi.advanceTimersByTime(2500);
     }
-    expect(send).toHaveBeenCalledTimes(4);
+    expect(send).toHaveBeenCalledTimes(5);
 
     // Out of retries: the refusal stands.
     EventBus.emit('LoginResponse', refused());
     vi.advanceTimersByTime(30_000);
-    expect(send).toHaveBeenCalledTimes(4);
+    expect(send).toHaveBeenCalledTimes(5);
     expect(Session.loginProcessing).toBe(false);
     expect(Session.loginError).toContain('AccountAlreadyConnected');
   });
