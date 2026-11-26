@@ -54,6 +54,8 @@ const MAX_LINES = 31;
  * 463 keeps the close bar on screen.
  */
 const ROW_HEIGHT = 13;
+/** Window pixels a finger moves before the list scrolls instead of picking a row. */
+const SWIPE_SLOP = 6;
 /** `m_MapNameUISize.x` at 640 (220) + 10. */
 const WIDTH = 230;
 /** `m_MapNameUISize.y`. */
@@ -116,16 +118,10 @@ function effectiveMoveLevel(reqLevel: number, cls: BaseClass): number {
 }
 
 /**
- * `MoveReq_eng.bmd` index → OpenMU `WarpInfo.Index` where the two disagree.
- * The Season 6 `Gates.cs` warp list numbers every row the same as the file
- * (1 Arena, 2 Lorencia, 3 Noria, 4 Devias, 31 Elveland, 23 Icarus, …)
- * except Vulcanus, which the file calls 42 (the original's gens `anStrifeIndex`)
- * and OpenMU seeds as 37. OpenMU's 44 LorenMarket / 48 LaCleon have no row in
- * the Eng file (34 LaCleon maps to OpenMU's 34 "Raklion", the same gate).
+ * The rows are the server's `WarpInfo` (the world writes `MoveReq` from it, ops/faseS/movereq_servidor), so a row's
+ * index is the one the server knows. The old map of the Season 6 file (42 Vulcanus -> OpenMU's 37) sent 37 to a
+ * server that has Vulcanus at 42: "unknown warp index 37".
  */
-const SERVER_INDEX: Readonly<Record<number, number>> = {
-  42: 37,
-};
 
 /** The staged maps an offline click can still land on, by the file's `index`. */
 const OFFLINE_MAPS: Readonly<Record<number, ENUM_WORLD>> = {
@@ -175,7 +171,7 @@ export function warpToEntry(entry: MoveReqEntry): void {
     if (map !== undefined) EventBus.emit('requestWarp', { map });
     return;
   }
-  warpCommandRequest(SERVER_INDEX[entry.index] ?? entry.index);
+  warpCommandRequest(entry.index);
 }
 
 const Row = observer(({
@@ -232,6 +228,9 @@ export const MoveCommandWindow = observer(() => {
   const [entries, setEntries] = useState<readonly MoveReqEntry[]>([]);
   const [first, setFirst] = useState(0);
   const dragging = useRef<{ pointerId: number; startY: number; startFirst: number } | null>(null);
+  // A finger dragged over the rows scrolls them (a touch screen has no wheel); past the slop it is a drag, not a pick.
+  const suppressClick = useRef(false);
+  const swipe = useRef<{ pointerId: number; startY: number; startFirst: number; moved: boolean } | null>(null);
   const open = MuWindows.isOpen('move_command');
   const chrome = useWindowChrome(WINDOW_ID, {
     width: WIDTH,
@@ -317,6 +316,32 @@ export const MoveCommandWindow = observer(() => {
     if (dragging.current?.pointerId === e.pointerId) dragging.current = null;
   };
 
+  const onListDown = (e: React.PointerEvent) => {
+    if (e.pointerType !== 'touch' || !scrollable) return;
+    swipe.current = { pointerId: e.pointerId, startY: e.clientY, startFirst: start, moved: false };
+  };
+  const onListMove = (e: React.PointerEvent) => {
+    const s = swipe.current;
+    if (!s || s.pointerId !== e.pointerId) return;
+    const dy = (e.clientY - s.startY) / scale;
+    if (!s.moved && Math.abs(dy) < SWIPE_SLOP) return;
+    s.moved = true;
+    setFirst(Math.max(0, Math.min(maxFirst, s.startFirst - Math.round(dy / ROW_HEIGHT))));
+  };
+  const onListUp = (e: React.PointerEvent) => {
+    if (swipe.current?.pointerId !== e.pointerId) return;
+    const moved = swipe.current.moved;
+    swipe.current = null;
+    // The click that follows the lifted finger would warp to the row it ended on.
+    if (moved) suppressClick.current = true;
+  };
+  const suppressClickCapture = (e: React.MouseEvent) => {
+    if (!suppressClick.current) return;
+    suppressClick.current = false;
+    e.stopPropagation();
+    e.preventDefault();
+  };
+
   const warpTo = warpToEntry;
 
   return (
@@ -326,7 +351,14 @@ export const MoveCommandWindow = observer(() => {
       aria-label={t('moveList.title')}
       tabIndex={-1}
       className="move-window"
-      onPointerDown={chrome.onPointerDown}
+      onPointerDown={e => {
+        onListDown(e);
+        chrome.onPointerDown(e);
+      }}
+      onPointerMove={onListMove}
+      onPointerUp={onListUp}
+      onPointerCancel={onListUp}
+      onClickCapture={suppressClickCapture}
       onWheel={onWheel}
       style={{
         width: WIDTH,

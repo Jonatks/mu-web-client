@@ -2413,3 +2413,9 @@ body:has(.mu-item-window) .mobile-controls .mobile-book {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.7) !important;
   }
 }
+
+// The classic interface on a phone (no touch HUD): the thumb stick lies under the windows (WINDOW_Z_BASE is 100), so a
+// window opened over its corner (the Move list, on the left) takes the taps instead of the stick.
+html:not(.mu-touch-hud) .mobile-controls {
+  z-index: 90;
+}

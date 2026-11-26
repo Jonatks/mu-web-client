@@ -9,6 +9,8 @@
   transform-origin: top left;
   pointer-events: auto;
   user-select: none;
+  // A finger dragged over the rows scrolls the list (index.tsx), not the page: the browser must not take the pan.
+  touch-action: none;
   overflow: hidden;
   background: rgba(0, 0, 0, 0.8);
   font-size: 11px;

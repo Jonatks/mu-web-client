@@ -1,3 +1,4 @@
+import { runInAction } from 'mobx';
 import './style.less';
 import { Component, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { observer } from 'mobx-react-lite';
@@ -447,7 +448,13 @@ export const MasterSkillsWindow = observer(() => {
             x={MASTER_LEVEL_X}
             y={HEADER_Y + MAJESTIC_LINE_DY}
             color={MAJESTIC_LINK_COLOR}
-            onClick={() => MuWindows.setOpen('majestic_stats', !MuWindows.isOpen('majestic_stats'))}
+            onClick={() =>
+              runInAction(() => {
+                // The tree is a full-screen sheet above every window: it steps aside so the Majestic window shows.
+                MuWindows.setOpen('master_skills', false);
+                MuWindows.setOpen('majestic_stats', true);
+              })
+            }
           >
             {t('master.majestic', { level: skills.majesticLevel, points: skills.majesticPoints })}
           </Text>
