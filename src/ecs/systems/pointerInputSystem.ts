@@ -32,6 +32,9 @@ const PICK_MIN_HEIGHT = 1.6;
 
 /** Hover re-sample interval (s); the click itself always re-samples. */
 const HOVER_INTERVAL = 0.05;
+// A press held this long (ms) without sliding past the slop (px) casts, like the right button.
+const LONG_PRESS_MS = 450;
+const LONG_PRESS_SLOP = 12;
 
 export const PointerInputSystem: ISystemFactory = world => {
   const scene = world.scene;
@@ -162,6 +165,7 @@ export const PointerInputSystem: ISystemFactory = world => {
     }
   }
 
+  const longPress: { timer: number; at: { x: number; y: number } | null } = { timer: 0, at: null };
   scene.onPointerObservable.add(ev => {
     // Only the ray is wanted here - the hovered object is resolved by
     // testing it against each candidate's own box. `scene.pick` would
@@ -198,6 +202,32 @@ export const PointerInputSystem: ISystemFactory = world => {
         if (ground) requestPing(ground.x, ground.z);
       }
       return;
+    }
+
+    // Touch has no right button: a long press stands in for the right click (the selected skill on what is under
+    // the finger). Only on a phone; the classic mouse keeps its two buttons.
+    if (isMobileDevice() && (ev.event as PointerEvent).pointerType === 'touch') {
+      if (ev.type === PointerEventTypes.POINTERDOWN) {
+        const x = ev.event.clientX;
+        const y = ev.event.clientY;
+        clearTimeout(longPress.timer);
+        longPress.at = { x, y };
+        longPress.timer = window.setTimeout(() => {
+          longPress.at = null;
+          world.pointerPressed = false;
+          if (isSliding(world.playerEntity)) return;
+          Commands.stopFollowing();
+          const hovered = world.currentPointerTarget ?? null;
+          const pvp = !!hovered && canAttackPlayer(world, hovered, false);
+          const ground = pickGround(world, aimX(x), aimY(y));
+          world.castRequest = { target: hovered, point: ground ? { x: ground.x, y: ground.z } : null, forced: false, pvp };
+        }, LONG_PRESS_MS);
+      } else if (ev.type === PointerEventTypes.POINTERUP ||
+        (ev.type === PointerEventTypes.POINTERMOVE && longPress.at &&
+          Math.hypot(ev.event.clientX - longPress.at.x, ev.event.clientY - longPress.at.y) > LONG_PRESS_SLOP)) {
+        clearTimeout(longPress.timer);
+        longPress.at = null;
+      }
     }
 
     if (ev.event.button === 2 || rightDrag) {

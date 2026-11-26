@@ -44,7 +44,7 @@ export function addMoveRow(file: Uint8Array, m: Move): Uint8Array | null {
 
 /** A whole Move list with exactly these rows, in this order (the window shows file order). */
 export function writeMoveList(moves: readonly Move[]): Uint8Array {
-  let file = new Uint8Array(4);
+  let file: Uint8Array = new Uint8Array(4);
   for (const m of moves) file = addMoveRow(file, m) ?? file;
   return file;
 }
